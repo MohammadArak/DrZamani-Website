@@ -1,0 +1,291 @@
+@import "./assets/styles/app.css";
+@import "./assets/styles/global.scss";
+
+@media (min-width: 768px) {
+    .footer-gr-border::after {
+        content: "";
+        position: absolute;
+        width: 1.5px;
+        height: 100%;
+        background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        left: -4%;
+        top: 0%;
+    }
+}
+
+.instagram-btn {
+    background: linear-gradient(115deg, #f9ce34, #ee2a7b, #6228d7);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.loader {
+    width: 150px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid;
+    border-color: #d5ab64 #0000;
+    animation: l1 0.8s infinite;
+}
+
+.word-reveal {
+    display: inline-block;
+    opacity: 0;
+    filter: var(--word-filter, blur(10px));
+    animation: word-reveal var(--word-duration, 0.5s) ease-out
+        var(--word-delay, 0s) forwards;
+}
+
+@keyframes word-reveal {
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translate3d(-12px, -8px, 0) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes sheet-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes panel-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes dropdown-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -8px, 0) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes step-in {
+    from {
+        opacity: 0;
+        transform: translate3d(18px, 0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+.app-panel-enter {
+    will-change: transform, opacity;
+    animation: panel-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-dropdown-enter {
+    transform-origin: top center;
+    animation: dropdown-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-step-enter {
+    animation: step-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-card-enter {
+    position: relative;
+    opacity: 0;
+    animation: card-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-card-enter:focus-within {
+    z-index: 40;
+}
+
+.app-details-content {
+    animation: panel-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.staff-shell button:not(:disabled),
+.staff-shell a {
+    transition-duration: 180ms;
+}
+
+.staff-shell button:not(:disabled):active {
+    transform: scale(0.98);
+}
+
+.staff-shell {
+    --panel-shadow: 0 18px 55px rgba(24, 48, 79, 0.06);
+    overflow-x: clip;
+}
+
+.staff-shell :is(section, article) {
+    min-width: 0;
+}
+
+.staff-shell :is(input, textarea, button, summary):focus-visible {
+    outline: 2px solid rgba(217, 173, 95, 0.75);
+    outline-offset: 2px;
+}
+
+.staff-shell aside nav {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+.chat-workspace {
+    background-image:
+        radial-gradient(circle at 12% 8%, rgba(217, 173, 95, 0.08), transparent 24%),
+        linear-gradient(180deg, #f7f9fb 0%, #f3f5f8 100%);
+}
+
+.chat-workspace textarea {
+    field-sizing: content;
+}
+
+.app-date-picker.rmdp-wrapper {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
+    animation: dropdown-in 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-date-picker .rmdp-header-values,
+.app-date-picker .rmdp-week-day {
+    color: #355a86;
+}
+
+.app-date-picker .rmdp-day.rmdp-selected span,
+.app-date-picker .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover {
+    background-color: #d9ad5f;
+    color: #15324f;
+}
+
+.app-date-picker .rmdp-arrow {
+    border-color: #355a86;
+}
+
+.app-select {
+    appearance: none;
+    cursor: pointer;
+    padding-left: 2.8rem;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%230f766e' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+    background-repeat: no-repeat, no-repeat;
+    background-position: left 0.9rem center, center;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.app-select:hover:not(:disabled) {
+    border-color: rgba(16, 185, 129, 0.7);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08);
+}
+
+.app-select:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.app-select option {
+    background: #ffffff;
+    color: #1e293b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .word-reveal {
+        opacity: 1;
+        filter: none;
+    }
+}
+
+/* Landing sections contain many decorative motion nodes. Shorter, non-bouncy
+   transitions keep their entrance animation polished without blocking scroll.
+   The article preview intentionally keeps its existing animation profile. */
+:is(#hero, #about-us, #services, #comments, #samples, #faq, #footer)
+    [style*="transition-property"] {
+    transition-duration: 0.65s !important;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+:is(#about-us, #services, #comments, #samples, #faq, #footer) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
+}
+@keyframes l1 {
+    to {
+        transform: rotate(0.5turn);
+    }
+}
+
+/* Date pickers render in a body portal and can flip above inputs close to
+   the viewport edge without stretching an overflow-hidden panel. */
+.app-date-picker.rmdp-wrapper {
+    max-height: calc(100dvh - 24px);
+    max-width: calc(100vw - 24px);
+    background: #ffffff;
+}
+
+.app-date-picker .rmdp-calendar {
+    background: #ffffff;
+}
+
+@media (max-width: 640px) {
+    .app-date-picker.rmdp-wrapper {
+        border-radius: 18px;
+    }
+}

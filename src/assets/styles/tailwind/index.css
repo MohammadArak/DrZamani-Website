@@ -1,0 +1,182 @@
+@import "tailwindcss";
+@config "../../../../tailwind.config.ts";
+
+/* ===========================
+   Theme Tokens
+=========================== */
+
+@theme {
+    --font-sans: "Vazir", sans-serif;
+
+    --breakpoint-xs: 576px;
+
+    --color-primary: var(--primary);
+    --color-primary-deep: var(--primary-deep);
+    --color-primary-mild: var(--primary-mild);
+    --color-primary-subtle: var(--primary-subtle);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-deep: var(--secondary-deep);
+    --color-secondary-mild: var(--secondary-mild);
+    --color-secondary-subtle: var(--secondary-subtle);
+
+    --color-error: var(--error);
+    --color-error-subtle: var(--error-subtle);
+
+    --color-success: var(--success);
+    --color-success-subtle: var(--success-subtle);
+
+    --color-info: var(--info);
+    --color-info-subtle: var(--info-subtle);
+
+    --color-warning: var(--warning);
+    --color-warning-subtle: var(--warning-subtle);
+
+    --color-neutral: var(--neutral);
+
+    --color-duskblue: var(--duskblue);
+    --color-powderblue: var(--powderblue);
+    --color-lightcyan: var(--lightcyan);
+    --color-jetblack: var(--jetblack);
+}
+
+/* ===========================
+   Light Theme
+=========================== */
+
+:root {
+    --neutral: #ffffff;
+
+    --primary: #3d5a80;
+    --primary-deep: #213f65;
+    --primary-mild: #607a9a;
+    --primary-subtle: #91a4bd;
+
+    --secondary: #d5ab64;
+    --secondary-deep: #af8337;
+    --secondary-mild: #fddba1;
+    --secondary-subtle: #ffeac7;
+
+    --error: #ff6a55;
+    --error-subtle: #ff6a551a;
+
+    --success: #10b981;
+    --success-subtle: #05eb7624;
+
+    --info: #2a85ff;
+    --info-subtle: #2a85ff1a;
+
+    --warning: #f59e0b;
+    --warning-subtle: #ffd40045;
+
+    --duskblue: #3d5a80;
+    --powderblue: #98c1d9;
+    --lightcyan: #e0fbfc;
+    --jetblack: #293241;
+}
+
+/* ===========================
+   Dark Theme
+=========================== */
+
+.dark {
+    --neutral: #ffffff;
+
+    --primary: #3d5a80;
+    --primary-deep: #213f65;
+    --primary-mild: #607a9a;
+    --primary-subtle: #91a4bd;
+
+    --secondary: #d5ab64;
+    --secondary-deep: #af8337;
+    --secondary-mild: #fddba1;
+    --secondary-subtle: #ffeac7;
+
+    --error: #ff6a55;
+    --error-subtle: #ff6a551a;
+
+    --success: #10b981;
+    --success-subtle: #05eb7624;
+
+    --info: #2a85ff;
+    --info-subtle: #2a85ff1a;
+
+    --warning: #f59e0b;
+    --warning-subtle: #ffd40045;
+
+    --duskblue: #3d5a80;
+    --powderblue: #98c1d9;
+    --lightcyan: #e0fbfc;
+    --jetblack: #293241;
+}
+
+/* ===========================
+   Base
+=========================== */
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    *,
+    ::before,
+    ::after,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+
+    button,
+    [role="button"] {
+        cursor: pointer;
+    }
+
+    body {
+        @apply bg-gray-100 text-sm leading-normal font-medium text-gray-500 antialiased dark:bg-gray-950 dark:text-gray-400;
+    }
+
+    h1,
+    .h1 {
+        @apply text-4xl font-bold text-gray-900 dark:text-gray-100;
+    }
+
+    h2,
+    .h2 {
+        @apply text-3xl font-bold text-gray-900 dark:text-gray-100;
+    }
+
+    h3,
+    .h3 {
+        @apply text-2xl font-bold text-gray-900 dark:text-gray-100;
+    }
+
+    h4,
+    .h4 {
+        @apply text-xl font-bold text-gray-900 dark:text-gray-100;
+    }
+
+    h5,
+    .h5 {
+        @apply text-lg font-bold text-gray-900 dark:text-gray-100;
+    }
+
+    h6,
+    .h6 {
+        @apply text-base font-semibold text-gray-900 dark:text-gray-100;
+    }
+
+    hr {
+        @apply border-gray-200 dark:border-gray-600;
+    }
+}
+
+/* ===========================
+   Components
+=========================== */
+
+@layer components {
+    .heading-text {
+        @apply text-gray-900 dark:text-gray-100;
+    }
+}

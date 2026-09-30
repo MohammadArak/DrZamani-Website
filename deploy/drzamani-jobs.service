@@ -1,0 +1,25 @@
+[Unit]
+Description=Dr Zamani appointment background jobs
+Wants=network-online.target
+After=network-online.target drzamani-api.service
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/drzamani/current/api
+EnvironmentFile=/etc/drzamani/drzamani.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/var/www/drzamani/current/api/.venv/bin/python -m app.jobs
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/drzamani
+UMask=0077

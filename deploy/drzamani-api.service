@@ -1,0 +1,30 @@
+[Unit]
+Description=Dr Zamani FastAPI appointment service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/drzamani/current/api
+EnvironmentFile=/etc/drzamani/drzamani.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/var/www/drzamani/current/api/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips=127.0.0.1
+Restart=always
+RestartSec=5
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/drzamani
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
