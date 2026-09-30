@@ -15,6 +15,9 @@
 | PATIENT_SESSION_DAYS, STAFF_SESSION_HOURS | پنل امنیت | محدودیت بازه و سیاست نشست‌های فعلی |
 | OTP_LENGTH, OTP_TTL_SECONDS, OTP_RESEND_SECONDS | پنل امنیت | سازگاری SMS pattern/frontend و جلوگیری از مقدار ضعیف |
 | OTP_MAX_ATTEMPTS, OTP_MAX_PER_PHONE_HOUR, OTP_MAX_PER_IP_HOUR | پنل امنیت | bounds، rate limit پایدار و هم‌زمانی |
+| OTP_VERIFY_MAX_PER_IP_MINUTE, OTP_VERIFY_MAX_PER_PHONE_HOUR | پنل امنیت | از مرحله ۱: پیش‌فرض ۳۰؛ محدودیت مستقل تأیید کد و کنترل بازه |
+| STAFF_LOGIN_MAX_ATTEMPTS, STAFF_LOGIN_LOCK_SECONDS | پنل امنیت | از مرحله ۱: ۵ تلاش در ۹۰۰ ثانیه؛ گرفتن کپچای جدید محدودیت حساب را پاک نمی‌کند |
+| STAFF_LOGIN_MAX_PER_IP_WINDOW, CAPTCHA_MAX_PER_IP_HOUR | پنل امنیت | از مرحله ۱: ۳۰ ورود در بازه قفل و ۶۰ ساخت کپچا در ساعت؛ کلیدهای DB با HMAC و بدون IP/نام خام |
 | SMS_PROVIDER | پنل پیامک | console فقط توسعه صریح؛ انتخاب provider معتبر |
 | SMS_WEBHOOK_URL | پنل پیامک | کنترل SSRF و فقط مقصد مجاز |
 | SMS_WEBHOOK_TOKEN | پنل secret | ذخیره رمزگذاری‌شده و mask |

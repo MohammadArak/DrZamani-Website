@@ -1036,6 +1036,7 @@ async def upload_consultation_image(
         db.commit()
     except IntegrityError as exc:
         db.rollback()
+        (get_settings().upload_dir / stored_name).unlink(missing_ok=True)
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"تصویر «{requirement.title}» قبلاً ارسال شده است",

@@ -99,6 +99,9 @@ def build_appointments_workbook(
         fill = PatternFill("solid", fgColor="F7F9FB" if row_index % 2 == 0 else "FFFFFF")
         for column_index, value in enumerate(values, start=1):
             cell = sheet.cell(row=row_index, column=column_index, value=value)
+            if isinstance(value, str):
+                # User-authored text must never become an executable Excel formula.
+                cell.data_type = "s"
             cell.font = Font(name="Tahoma", size=9, color="293241")
             cell.fill = fill
             cell.border = Border(bottom=Side(style="hair", color="E5EAF0"))

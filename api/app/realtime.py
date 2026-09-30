@@ -10,6 +10,12 @@ from sqlalchemy import select
 from .database import SessionLocal
 from .models import AuthSession, Patient, StaffUser
 from .security import hash_session_token, utcnow
+from .browser_sessions import (
+    allowed_origin,
+    cookie_name,
+    session_is_active,
+    staff_state_hash,
+)
 
 
 router = APIRouter(tags=["realtime"])
@@ -20,6 +26,7 @@ class RealtimeConnection:
     websocket: WebSocket
     audience: str
     user_id: int
+    token_hash: str
 
 
 class ConsultationRealtimeManager:
@@ -35,6 +42,18 @@ class ConsultationRealtimeManager:
     async def publish(self, event: dict[str, Any], patient_id: int) -> None:
         stale: list[WebSocket] = []
         for connection in list(self._connections.values()):
+            if _authenticate_hash(connection.token_hash) != (
+                connection.audience,
+                connection.user_id,
+            ):
+                try:
+                    await connection.websocket.close(
+                        code=4401, reason="Session expired or revoked"
+                    )
+                except (RuntimeError, WebSocketDisconnect):
+                    pass
+                stale.append(connection.websocket)
+                continue
             if connection.audience != "staff" and not (
                 connection.audience == "patient" and connection.user_id == patient_id
             ):
@@ -53,24 +72,34 @@ manager = ConsultationRealtimeManager()
 def _authenticate(token: str) -> tuple[str, int] | None:
     if not token:
         return None
+    return _authenticate_hash(hash_session_token(token))
+
+
+def _authenticate_hash(token_hash: str) -> tuple[str, int] | None:
     with SessionLocal() as db:
         auth_session = db.scalar(
             select(AuthSession).where(
-                AuthSession.token_hash == hash_session_token(token),
+                AuthSession.token_hash == token_hash,
                 AuthSession.revoked_at.is_(None),
                 AuthSession.expires_at > utcnow(),
             )
         )
-        if not auth_session:
+        if not auth_session or not session_is_active(auth_session):
             return None
         if auth_session.staff_id:
             staff = db.get(StaffUser, auth_session.staff_id)
-            if staff and staff.is_active:
+            if (
+                staff
+                and staff.is_active
+                and auth_session.staff_state_hash == staff_state_hash(staff)
+            ):
                 return "staff", staff.id
         if auth_session.patient_id:
             patient = db.get(Patient, auth_session.patient_id)
             if patient and patient.is_active:
                 return "patient", patient.id
+        auth_session.revoked_at = utcnow()
+        db.commit()
     return None
 
 
@@ -94,10 +123,23 @@ async def publish_consultation_event(
 
 @router.websocket("/realtime")
 async def consultation_realtime(websocket: WebSocket) -> None:
+    origin = websocket.headers.get("origin")
+    if origin and not allowed_origin(origin):
+        await websocket.close(code=4403)
+        return
     await websocket.accept()
     try:
         payload = await asyncio.wait_for(websocket.receive_json(), timeout=10)
-        identity = _authenticate(str(payload.get("token", "")))
+        if not isinstance(payload, dict):
+            await websocket.close(code=4401)
+            return
+        token = str(payload.get("token", ""))
+        audience_requested = payload.get("audience")
+        if not token and origin and audience_requested in {"staff", "patient"}:
+            token = websocket.cookies.get(cookie_name(audience_requested), "")
+        identity = _authenticate(token)
+        if audience_requested and identity and identity[0] != audience_requested:
+            identity = None
         if not identity:
             await websocket.close(code=4401, reason="Authentication required")
             return
@@ -107,6 +149,7 @@ async def consultation_realtime(websocket: WebSocket) -> None:
                 websocket=websocket,
                 audience=audience,
                 user_id=user_id,
+                token_hash=hash_session_token(token),
             )
         )
         await websocket.send_json({"type": "realtime.ready", "audience": audience})
@@ -115,6 +158,9 @@ async def consultation_realtime(websocket: WebSocket) -> None:
                 await asyncio.wait_for(websocket.receive_text(), timeout=25)
             except TimeoutError:
                 await websocket.send_json({"type": "realtime.ping"})
+            if _authenticate_hash(hash_session_token(token)) != identity:
+                await websocket.close(code=4401, reason="Session expired or revoked")
+                return
     except (TimeoutError, ValueError, WebSocketDisconnect):
         pass
     finally:

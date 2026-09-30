@@ -12,3 +12,19 @@
 - هیچ تغییر کد اجرایی، ENV، دیتابیس، فعال‌سازی رزرو یا انتشار production انجام نشده است.
 
 قدم بعدی: مرحله 1؛ اجرای امن محلی و ممیزی کامل قبل از اصلاح امنیت. وضعیت مراحل فقط بر اساس شواهد آزمون به‌روزرسانی شود.
+
+## 2026-09-30 — مرحله ۱، نسخه 1.8.0
+
+- مالک با «ادامه بده» شروع مرحله بعد را خواست؛ شاخه phase-01-security از main با مبنای 9b3ba8be0fc76538a92c5a7790369a1ff8f0d6fb ایجاد شد.
+- نصب و اجرای frontend/backend با DB و اطلاعات ساختگی؛ مبنا ۱۰ تست پاس و lint دارای ۳ خطا/۱ هشدار بود.
+- اصلاح config امن، عدم افشای OTP، PNG CAPTCHA و قفل مستقل حساب/IP، مصرف اتمی OTP و rate limit پایدار؛ IP از proxy مورد اعتماد.
+- انتقال مرورگر به cookie HttpOnly + CSRF، خروج واقعی، کاهش نشست بیمار به ۷ روز و ابطال پس از تغییر وضعیت کارکنان؛ WebSocket با کنترل Origin و بررسی مجدد نشست.
+- Nginx/snippet و اسکریپت‌های نصب هماهنگ شدند؛ 404 و هدرهای فایل/API/خطا، محدودیت edge و Upgrade مختص realtime با Nginx محلی تأیید شدند.
+- ارتقای dependencyهای دارای هشدار؛ اسکن دوباره backend و اسکن dependencyهای اجرایی frontend صفر مورد شناخته‌شده؛ جزئیات گزارش در docs/DEPENDENCY_AUDIT_PHASE01.json.
+- upload: محدودیت pixel/decoder و orphan cleanup؛ Excel متن امن و خروجی calendar بدون property injection؛ نسخه واحد و build guard.
+- ۴۴ تست پاس، lint/build، Ruff بحرانی و fresh/upgrade/downgrade migration موفق؛ مرورگر موبایل/دسکتاپ و login/profile/reload/logout بیمار با داده ساختگی تأیید شدند.
+- هنگام جمع‌کردن preview، warning قدیمی nesting عنوان h2 داخل h3 بخش نظرات از لاگ Vite پیدا شد؛ wrapper به div تبدیل و lint/build دوباره بررسی شد.
+- گزارش دقیق، راهنمای ادامه و وضعیت roadmap همراه کد به‌روز شد؛ هیچ deploy، پیامک/پرداخت واقعی یا روشن‌کردن رزرو انجام نشد.
+- سه warning تست و warning syntax قدیمی http2 باقی‌اند؛ callback پرداخت/outbox مرحله ۵، نقش‌ها مرحله ۲ و CAPTCHA خارجی/MFA مرحله ۴ هستند.
+
+قدم بعدی: مرحله ۲، مدیرکل و نقش/مجوز سفارشی، پس از دریافت همین شاخه/PR یا merge آن؛ از main قدیمی مرحله ۱ را دوباره انجام نده.

@@ -188,15 +188,12 @@ const ConsultationDialog = ({
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, imageUrls]);
 
-    useEffect(() => {
-        if (!file) {
-            setPreviewUrl("");
-            return;
-        }
-        const url = URL.createObjectURL(file);
-        setPreviewUrl(url);
-        return () => URL.revokeObjectURL(url);
-    }, [file]);
+    const updateFile = (next: File | null) => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(next ? URL.createObjectURL(next) : "");
+        setFile(next);
+    };
+    useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
     useEffect(
         () => () => {
@@ -206,7 +203,7 @@ const ConsultationDialog = ({
     );
 
     const resetAttachment = () => {
-        setFile(null);
+        updateFile(null);
         setUploadProgress({ loaded: 0, total: 0, percent: 0 });
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
@@ -231,11 +228,11 @@ const ConsultationDialog = ({
 
     const chooseFile = (next: File | null) => {
         if (!next) {
-            setFile(null);
+            updateFile(null);
             return;
         }
         if (!ACCEPTED_IMAGE_TYPES.has(next.type) || next.size > MAX_IMAGE_SIZE) {
-            setFile(null);
+            updateFile(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
             setToast({
                 message: "فقط عکس JPG، PNG یا WebP تا حجم ۱۰ مگابایت مجاز است",
@@ -243,7 +240,7 @@ const ConsultationDialog = ({
             });
             return;
         }
-        setFile(next);
+        updateFile(next);
         setUploadProgress({ loaded: 0, total: next.size, percent: 0 });
     };
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { PATIENT_COOKIE_SESSION, STAFF_COOKIE_SESSION } from "@/services/appointmentApi";
 
 const API_BASE = (import.meta.env.VITE_APPOINTMENT_API_URL ?? "/api/v1").replace(
     /\/$/,
@@ -46,7 +47,10 @@ const useConsultationRealtime = (
             setStatus("connecting");
             socket = new WebSocket(realtimeUrl());
             socket.addEventListener("open", () => {
-                socket?.send(JSON.stringify({ token }));
+                const audience = token === STAFF_COOKIE_SESSION ? "staff" : "patient";
+                socket?.send(JSON.stringify(
+                    token === STAFF_COOKIE_SESSION || token === PATIENT_COOKIE_SESSION ? { audience } : { token },
+                ));
             });
             socket.addEventListener("message", (message) => {
                 try {

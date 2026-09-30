@@ -107,6 +107,9 @@ if ! "$(dirname -- "$0")/health-check.sh"; then
 fi
 
 systemctl start drzamani-jobs.timer
+install -d -o root -g root -m 0755 /etc/nginx/snippets
+install -o root -g root -m 0644 "$release_dir/deploy/drzamani-security-headers.conf" /etc/nginx/snippets/drzamani-security-headers.conf
+install -o root -g root -m 0644 "$release_dir/deploy/drzamani-proxy-headers.conf" /etc/nginx/snippets/drzamani-proxy-headers.conf
 nginx -t
 systemctl reload nginx
 rm -f /var/www/drzamani/maintenance.flag

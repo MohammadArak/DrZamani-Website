@@ -33,9 +33,9 @@ class SmsProvider:
 class ConsoleSmsProvider(SmsProvider):
     def send_otp(self, phone: str, code: str) -> None:
         settings = get_settings()
-        if settings.app_env == "production":
+        if not settings.development_debug:
             raise SmsDeliveryError("ارسال آزمایشی پیامک در محیط اصلی غیرفعال است")
-        logger.warning("Development OTP for %s: %s", phone, code)
+        logger.info("Development OTP delivery simulated (recipient and code omitted)")
 
     def send_event(
         self,
@@ -45,9 +45,9 @@ class ConsoleSmsProvider(SmsProvider):
         variables: dict[str, str],
     ) -> None:
         settings = get_settings()
-        if settings.app_env == "production":
+        if not settings.development_debug:
             raise SmsDeliveryError("ارسال آزمایشی پیامک در محیط اصلی غیرفعال است")
-        logger.warning("Development SMS for %s [%s]: %s", phone, pattern_code, message)
+        logger.info("Development SMS delivery simulated (recipient and message omitted)")
 
 
 @dataclass
