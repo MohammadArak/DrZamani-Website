@@ -27,7 +27,14 @@ type ClinicInfoContextValue = {
 const ClinicInfoContext = createContext<ClinicInfoContextValue | null>(null);
 
 export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
-    const [clinicInfo, setClinicInfo] = useState<ClinicInfo>(fallbackClinicInfo);
+    const [clinicInfo, setClinicInfo] = useState<ClinicInfo>(() => {
+        try {
+            const data = document.getElementById("clinic-bootstrap")?.textContent;
+            return data ? buildClinicInfo(JSON.parse(data) as ClinicSettings) : fallbackClinicInfo;
+        } catch {
+            return fallbackClinicInfo;
+        }
+    });
     const [loading, setLoading] = useState(true);
 
     const applyClinicSettings = useCallback((settings: ClinicSettings) => {
@@ -66,6 +73,19 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
         }),
         [applyClinicSettings, clinicInfo, loading, refreshClinicInfo],
     );
+
+    useEffect(() => {
+        const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel("drz-clinic-settings");
+        if (channel) channel.onmessage = () => { void refreshClinicInfo(); };
+        const refreshOnFocus = () => { if (document.visibilityState === "visible") void refreshClinicInfo(); };
+        window.addEventListener("focus", refreshOnFocus);
+        document.addEventListener("visibilitychange", refreshOnFocus);
+        return () => {
+            channel?.close();
+            window.removeEventListener("focus", refreshOnFocus);
+            document.removeEventListener("visibilitychange", refreshOnFocus);
+        };
+    }, [refreshClinicInfo]);
 
     return (
         <ClinicInfoContext.Provider value={value}>

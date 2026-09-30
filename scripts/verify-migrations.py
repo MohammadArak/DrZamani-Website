@@ -27,6 +27,7 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
     with closing(sqlite3.connect(database)) as db:
         db.execute("INSERT INTO staff_users (username,full_name,password_hash,role,is_active,created_at,updated_at) VALUES ('migration-fixture','Fixture','test-hash','admin',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)")
         db.execute("INSERT INTO auth_sessions (token_hash,staff_id,expires_at,created_at) VALUES ('test-hash',1,'2099-01-01',CURRENT_TIMESTAMP)")
+        db.execute("INSERT INTO clinic_settings (id,doctor_name,specialty,office_phone,updated_at) VALUES (1,'Migration doctor','Fixture','08633333333',CURRENT_TIMESTAMP)")
         db.commit()
     migrate("head")
     with closing(sqlite3.connect(database)) as db:
@@ -38,15 +39,22 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
         assert db.execute("SELECT COUNT(*) FROM staff_roles sr JOIN roles r ON r.id=sr.role_id WHERE r.slug='superadmin'").fetchone()[0] == 0
         assert db.execute("SELECT COUNT(*) FROM roles WHERE is_system=1").fetchone()[0] == 5
         assert db.execute("SELECT COUNT(*) FROM role_permissions rp JOIN roles r ON r.id=rp.role_id WHERE r.slug='admin' AND rp.permission_code IN ('roles.manage','staff.manage','secrets.manage')").fetchone()[0] == 0
+        assert db.execute("SELECT revision,overrides_json FROM system_settings WHERE id=1").fetchone() == (1, '{}')
+        assert db.execute("SELECT revision,seo_title,office_phone FROM clinic_settings WHERE id=1").fetchone() == (1, '', '08633333333')
+        assert db.execute("SELECT COUNT(*) FROM setting_revisions").fetchone()[0] == 0
     migrate("20260828_0012", "downgrade")
     with closing(sqlite3.connect(database)) as db:
         assert "staff_state_hash" not in {row[1] for row in db.execute("PRAGMA table_info(auth_sessions)")}
         assert db.execute("SELECT COUNT(*) FROM staff_users").fetchone()[0] == 1
+        assert db.execute("SELECT office_phone FROM clinic_settings WHERE id=1").fetchone()[0] == '08633333333'
+        assert 'seo_title' not in {row[1] for row in db.execute('PRAGMA table_info(clinic_settings)')}
+        assert db.execute("SELECT name FROM sqlite_master WHERE name IN ('system_settings','setting_revisions')").fetchall() == []
     migrate("head")
     with closing(sqlite3.connect(database)) as db:
         assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
         assert db.execute("PRAGMA foreign_key_check").fetchall() == []
         schema = db.execute("SELECT sql FROM sqlite_master WHERE name='appointments'").fetchone()[0]
         assert "uq_appointments_payment_id" in schema
+        assert db.execute("SELECT revision,seo_description,seo_image_url,office_phone FROM clinic_settings WHERE id=1").fetchone() == (1, '', '', '08633333333')
 
-print("PASS: fresh migration, existing staff session, downgrade/re-upgrade, integrity, foreign keys and payment uniqueness.")
+print("PASS: fresh migration, existing staff/clinic data, settings defaults, downgrade/re-upgrade, integrity, foreign keys and payment uniqueness.")

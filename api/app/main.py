@@ -22,7 +22,9 @@ from .models import (
     StaffUser,
     WeeklySchedule,
 )
-from .routers import access, auth, patient, staff
+from .routers import access, auth, patient, staff, settings as settings_router
+from .runtime_settings import SettingsUnavailable
+from .public_pages import router as public_pages_router
 from .realtime import router as realtime_router
 from .security import hash_password
 from .sms_automation import seed_sms_rules
@@ -135,6 +137,9 @@ def seed_defaults() -> None:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     seed_defaults()
+    from .runtime_settings import get_settings as runtime_settings
+    _app.title = runtime_settings().app_name
+    _app.openapi_schema = None
     yield
 
 
@@ -169,6 +174,10 @@ if settings.allowed_origins:
 
 @app.middleware("http")
 async def private_response_headers(request, call_next):
+    if request.url.path in {app.docs_url, app.openapi_url}:
+        from .runtime_settings import get_settings as runtime_settings
+        app.title = runtime_settings().app_name
+        app.openapi_schema = None
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -180,7 +189,8 @@ async def private_response_headers(request, call_next):
 
 @app.get("/api/health", tags=["system"])
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "appointment-api", "version": VERSION}
+    from .runtime_settings import get_settings as runtime_settings
+    return {"status": "ok", "service": runtime_settings().app_name, "version": VERSION}
 
 
 app.include_router(auth.router, prefix=settings.api_prefix)
@@ -189,3 +199,11 @@ app.include_router(patient.router, prefix=settings.api_prefix)
 app.include_router(staff.router, prefix=settings.api_prefix)
 app.include_router(access.router, prefix=settings.api_prefix)
 app.include_router(realtime_router, prefix=settings.api_prefix)
+
+
+@app.exception_handler(SettingsUnavailable)
+async def unavailable_settings(_request, exc):
+    return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+app.include_router(settings_router.router, prefix=settings.api_prefix)
+app.include_router(public_pages_router)

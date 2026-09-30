@@ -153,6 +153,10 @@ class ClinicSetting(Base):
     __tablename__ = "clinic_settings"
 
     id: Mapped[int] = mapped_column(primary_key=True, default=1)
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+    seo_title: Mapped[str] = mapped_column(String(160), default="")
+    seo_description: Mapped[str] = mapped_column(String(320), default="")
+    seo_image_url: Mapped[str] = mapped_column(String(500), default="")
     doctor_name: Mapped[str] = mapped_column(String(120), default="دکتر فرزاد زمانی")
     specialty: Mapped[str] = mapped_column(String(160), default="متخصص گوش، حلق و بینی")
     medical_council_number: Mapped[str] = mapped_column(String(40), default="")
@@ -196,6 +200,24 @@ class ClinicSetting(Base):
     final_reminder_hours: Mapped[int] = mapped_column(Integer, default=2)
     timezone_name: Mapped[str] = mapped_column(String(64), default="Asia/Tehran")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+
+class SystemSetting(Base):
+    """One versioned runtime overlay. Secret values are authenticated ciphertext."""
+    __tablename__ = "system_settings"
+    id: Mapped[int] = mapped_column(primary_key=True, default=1)
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+    overrides_json: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class SettingRevision(Base):
+    __tablename__ = "setting_revisions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, unique=True)
+    snapshot_json: Mapped[str] = mapped_column(Text)
+    changed_keys_json: Mapped[str] = mapped_column(Text, default="[]")
+    actor_staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
 class WeeklySchedule(Base):

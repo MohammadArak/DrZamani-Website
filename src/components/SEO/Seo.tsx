@@ -34,7 +34,7 @@ const Seo = ({
     const clinicId = `${siteRoot}#clinic`;
     const websiteId = `${siteRoot}#website`;
     const resolvedImage =
-        image ?? `${siteRoot}img/zamani/dr-zamani-hero.webp`;
+        image ?? (clinicInfo.seoImageUrl || `${siteRoot}og-cover.jpg`);
     const resolvedImageAlt =
         imageAlt ?? `${clinicInfo.doctorName}، ${clinicInfo.specialty}`;
     const resolvedKeywords =

@@ -6,7 +6,7 @@ import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from .config import get_settings
+from .runtime_settings import get_settings
 
 
 PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")

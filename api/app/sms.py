@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import logging
+import http.client
 from dataclasses import dataclass
 
 import httpx
 
-from .config import get_settings
+from .runtime_settings import get_settings
+from .outbound import webhook_request
 
 
 logger = logging.getLogger(__name__)
@@ -67,9 +69,8 @@ class WebhookSmsProvider(SmsProvider):
             "template": "appointment_otp",
         }
         try:
-            response = httpx.post(self.url, json=payload, headers=headers, timeout=10)
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
+            webhook_request(self.url, payload=payload, token=self.token)
+        except (ValueError, OSError, http.client.HTTPException) as exc:
             raise SmsDeliveryError("ارسال پیامک از سرویس واسط ناموفق بود") from exc
 
     def send_event(
@@ -90,9 +91,8 @@ class WebhookSmsProvider(SmsProvider):
             "sender": self.sender,
         }
         try:
-            response = httpx.post(self.url, json=payload, headers=headers, timeout=12)
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
+            webhook_request(self.url, payload=payload, token=self.token)
+        except (ValueError, OSError, http.client.HTTPException) as exc:
             raise SmsDeliveryError("ارسال پیامک رویداد از سرویس واسط ناموفق بود") from exc
 
 

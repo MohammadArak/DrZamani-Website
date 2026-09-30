@@ -9,6 +9,7 @@ import Toast from "@/components/Toast";
 import StaffChatWorkspace from "./StaffChatWorkspace";
 import StaffPatientsPanel from "./StaffPatientsPanel";
 import StaffAccessPanel from "./StaffAccessPanel";
+import StaffSettingsPanel from "./StaffSettingsPanel";
 import { StaffPermissionsContext, staffTabPermissions, useStaffAccess } from "./staffAccess";
 import {
     StaffAuditPanel,
@@ -1128,6 +1129,15 @@ const ClinicInfoPanel = ({
                     </div>
                 </div>
 
+                <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                    <h3 className="font-dana text-xl text-primary">سئوی صفحه اصلی</h3>
+                    <p className="mt-2 text-sm leading-7 text-slate-500">فیلد خالی از مشخصات پزشک ساخته می‌شود. پس از ذخیره، HTML اولیه، متادیتا و داده‌های ساختاریافته تازه خوانده می‌شوند.</p>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        <label><span className="text-sm">عنوان سئو (حداکثر ۱۶۰ حرف)</span><input disabled={!canEdit} maxLength={160} value={draft.seo_title ?? ""} onChange={event => update("seo_title", event.target.value)} className={inputClass} /></label>
+                        <label><span className="text-sm">تصویر اشتراک‌گذاری (HTTPS)</span><input disabled={!canEdit} type="url" dir="ltr" maxLength={500} value={draft.seo_image_url ?? ""} onChange={event => update("seo_image_url", event.target.value)} className={inputClass} /></label>
+                        <label className="md:col-span-2"><span className="text-sm">توضیح سئو (حداکثر ۳۲۰ حرف)</span><textarea disabled={!canEdit} maxLength={320} value={draft.seo_description ?? ""} onChange={event => update("seo_description", event.target.value)} className={`${inputClass} h-24 py-3`} /></label>
+                    </div>
+                </div>
                 {canEdit && (
                     <div className="sticky bottom-3 z-10 flex justify-end rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur">
                         <button
@@ -3361,7 +3371,7 @@ export const StaffDashboard = ({
         { id: "waitlist", label: "لیست انتظار", icon: <IoListOutline />, badge: stats.waitlist_total },
         {
             id: "clinic-info",
-            label: "اطلاعات مطب",
+            label: "مرکز تنظیمات",
             icon: <IoBusinessOutline />,
         },
         {
@@ -3721,11 +3731,11 @@ export const StaffDashboard = ({
                         />
                     )}
                     {tab === "clinic-info" && can("settings.view") && settings && (
-                        <ClinicInfoPanel
+                        <StaffSettingsPanel token={token} clinicRevision={settings.revision} onReload={loadAll} clinicPanel={<ClinicInfoPanel
                             token={token}
                             settings={settings}
                             onReload={loadAll}
-                        />
+                        />} />
                     )}
                     {tab === "schedule" && can("schedule.view") && settings && (
                         <SchedulePanel

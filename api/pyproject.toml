@@ -1,6 +1,6 @@
 [project]
 name = "drzamani-api"
-version = "1.9.0"
+version = "1.10.0"
 description = "Backend API for the Dr Zamani appointment platform"
 requires-python = ">=3.12,<3.14"
 dependencies = [
@@ -17,6 +17,7 @@ dependencies = [
     "sqlalchemy==2.0.43",
     "tzdata>=2025.2",
     "uvicorn[standard]==0.35.0",
+    "cryptography==50.0.0",
 ]
 
 [dependency-groups]

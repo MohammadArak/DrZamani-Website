@@ -495,8 +495,9 @@ const prepareDocument = ({
     return setRootContent(html, body);
 };
 
-const homeTitle = `${clinic.doctorName} | ${clinic.specialty}`;
-const homeDescription = `وب‌سایت رسمی ${clinic.doctorName}، ${clinic.specialty} در ${clinic.addressCity}؛ معرفی خدمات، نمونه‌کارها و نوبت مشاوره.`;
+const homeTitle = textOrFallback(rawClinicSettings.seo_title, `${clinic.doctorName} | ${clinic.specialty}`);
+const homeDescription = textOrFallback(rawClinicSettings.seo_description, `وب‌سایت رسمی ${clinic.doctorName}، ${clinic.specialty} در ${clinic.addressCity}؛ معرفی خدمات و راه‌های ارتباطی.`);
+const homeImage = textOrFallback(rawClinicSettings.seo_image_url, `${siteUrl}/og-cover.jpg`);
 const clinicSameAs = [clinic.instagramUrl, clinic.eitaaUrl].filter(Boolean);
 
 const homeBody = `
@@ -527,7 +528,7 @@ const homeDocument = prepareDocument({
     title: homeTitle,
     description: homeDescription,
     canonical: `${siteUrl}/`,
-    image: `${siteUrl}/og-cover.jpg`,
+    image: homeImage,
     type: "website",
     body: homeBody,
     preloadImages: [
@@ -546,7 +547,7 @@ const homeDocument = prepareDocument({
             "@type": ["Physician", "MedicalClinic"],
             name: clinic.doctorName,
             url: `${siteUrl}/`,
-            image: `${siteUrl}/og-cover.jpg`,
+            image: homeImage,
             telephone: [
                 clinic.officePhone.international,
                 clinic.consultationPhone.international,

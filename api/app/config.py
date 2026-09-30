@@ -91,6 +91,9 @@ class Settings:
     captcha_max_per_ip_hour: int
     otp_verify_max_per_ip_minute: int
     otp_verify_max_per_phone_hour: int
+    settings_encryption_keys: tuple[str, ...] = ()
+    sms_webhook_allowed_hosts: tuple[str, ...] = ()
+    public_html_dir: Path = BACKEND_DIR.parent / "public_html"
 
     @property
     def development_debug(self) -> bool:
@@ -167,7 +170,7 @@ def get_settings() -> Settings:
         faraz_line_number=os.getenv("FARAZ_LINE_NUMBER", "").strip(),
         faraz_otp_variable=os.getenv("FARAZ_OTP_VARIABLE", "code").strip() or "code",
         upload_dir=Path(os.getenv("UPLOAD_DIR", str(BACKEND_DIR / "data" / "uploads"))).resolve(),
-        max_upload_bytes=int(os.getenv("MAX_UPLOAD_BYTES", str(10 * 1024 * 1024))),
+        max_upload_bytes=_bounded_int("MAX_UPLOAD_BYTES", 10 * 1024 * 1024, 1024, 10 * 1024 * 1024),
         frontend_url=frontend_url,
         booking_hold_minutes=_bounded_int("BOOKING_HOLD_MINUTES", 12, 5, 60),
         zarinpal_merchant_id=os.getenv("ZARINPAL_MERCHANT_ID", "").strip(),
@@ -180,4 +183,7 @@ def get_settings() -> Settings:
         captcha_max_per_ip_hour=_bounded_int("CAPTCHA_MAX_PER_IP_HOUR", 60, 1, 300),
         otp_verify_max_per_ip_minute=_bounded_int("OTP_VERIFY_MAX_PER_IP_MINUTE", 30, 1, 120),
         otp_verify_max_per_phone_hour=_bounded_int("OTP_VERIFY_MAX_PER_PHONE_HOUR", 30, 1, 120),
+        settings_encryption_keys=_as_list(os.getenv("SETTINGS_ENCRYPTION_KEYS")),
+        sms_webhook_allowed_hosts=_as_list(os.getenv("SMS_WEBHOOK_ALLOWED_HOSTS")),
+        public_html_dir=Path(os.getenv("PUBLIC_HTML_DIR") or str(BACKEND_DIR.parent / "public_html")).resolve(),
     )

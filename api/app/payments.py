@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import httpx
 
-from .config import get_settings
+from .runtime_settings import get_settings
 
 
 class PaymentGatewayError(RuntimeError):
