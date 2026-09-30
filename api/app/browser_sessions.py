@@ -82,8 +82,10 @@ def request_token(request: Request, audience: str, credentials) -> str:
 
 
 def staff_state_hash(staff: StaffUser) -> str:
+    roles = sorted((role.id, role.slug, role.is_system, role.is_active, role.revision,
+                    sorted(p.code for p in role.permissions)) for role in staff.roles)
     return hashlib.sha256(
-        f"{staff.password_hash}:{staff.role}:{staff.is_active}".encode()
+        f"{staff.password_hash}:{staff.role}:{staff.is_active}:{roles}".encode()
     ).hexdigest()
 
 

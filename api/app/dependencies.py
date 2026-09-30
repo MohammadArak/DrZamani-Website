@@ -9,6 +9,7 @@ from .database import get_db
 from .models import AuthSession, Patient, StaffUser
 from .security import hash_session_token, utcnow
 from .browser_sessions import request_token, staff_state_hash, session_is_active
+from .access import can
 
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -81,9 +82,9 @@ def get_current_staff(
     return staff
 
 
-def require_admin(staff: StaffUser = Depends(get_current_staff)) -> StaffUser:
-    if staff.role != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مدیر لازم است"
-        )
-    return staff
+def require_permission(code: str):
+    def dependency(staff: StaffUser = Depends(get_current_staff)) -> StaffUser:
+        if not can(staff, code):
+            raise HTTPException(status_code=403, detail="دسترسی لازم برای این عملیات را ندارید")
+        return staff
+    return dependency

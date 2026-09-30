@@ -4,6 +4,15 @@ export const PATIENT_TOKEN_KEY = "drz_patient_token";
 export const STAFF_TOKEN_KEY = "drz_staff_token";
 export const STAFF_PROFILE_KEY = "drz_staff_profile";
 
+export type StaffIdentity = {
+    id: number; username: string; full_name: string; role: string;
+    role_ids: number[]; role_titles: string[]; permissions: string[]; is_superadmin: boolean; is_active: boolean;
+};
+export type AccessRole = { id: number; slug: string; name: string; description: string; is_active: boolean; is_system: boolean; is_superadmin: boolean; permissions: string[]; member_count: number };
+export type AccessRoleWrite = Pick<AccessRole, "name" | "description" | "is_active" | "permissions">;
+export type AccessPermission = { code: string; title: string; group: string; requires: string[]; future: boolean; owner_only: boolean };
+export type AccessStaffWrite = { full_name: string; role_ids: number[]; is_active: boolean; password?: string; username?: string };
+
 export type PatientProfile = {
     id: number;
     phone: string;
@@ -539,6 +548,7 @@ async function apiRequest<T>(
     }
 
     if (!response.ok) {
+        if (response.status === 401 && token === STAFF_COOKIE_SESSION) window.dispatchEvent(new Event("drz:staff-expired"));
         const payload = (await response.json().catch(() => ({}))) as ApiErrorPayload;
         const retryAfter =
             payload.detail && !Array.isArray(payload.detail) && typeof payload.detail === "object"
@@ -769,12 +779,7 @@ export const appointmentApi = {
         captchaId: string,
         captchaAnswer: string,
     ) =>
-        apiRequest<{
-            access_token: string;
-            expires_at: string;
-            full_name: string;
-            role: string;
-        }>("/staff/auth/login", {
+        apiRequest<StaffIdentity & { access_token: string; expires_at: string }>("/staff/auth/login", {
             method: "POST",
             headers: { "X-Session-Transport": "cookie" },
             body: JSON.stringify({
@@ -784,7 +789,13 @@ export const appointmentApi = {
                 captcha_answer: captchaAnswer,
             }),
         }),
-    staffMe: () => apiRequest<{ full_name: string; role: string }>("/staff/me", {}, STAFF_COOKIE_SESSION),
+    staffMe: () => apiRequest<StaffIdentity>("/staff/me", {}, STAFF_COOKIE_SESSION),
+    accessRoles: (token: string) => apiRequest<AccessRole[]>("/staff/access/roles", {}, token),
+    accessPermissions: (token: string) => apiRequest<AccessPermission[]>("/staff/access/permissions", {}, token),
+    accessStaff: (token: string) => apiRequest<StaffIdentity[]>("/staff/access/staff", {}, token),
+    saveAccessRole: (token: string, id: number | null, payload: AccessRoleWrite) => apiRequest<AccessRole>(`/staff/access/roles${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", body: JSON.stringify(payload) }, token),
+    deleteAccessRole: (token: string, id: number) => apiRequest<{ message: string }>(`/staff/access/roles/${id}`, { method: "DELETE" }, token),
+    saveAccessStaff: (token: string, id: number | null, payload: AccessStaffWrite) => apiRequest<StaffIdentity>(`/staff/access/staff${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", body: JSON.stringify(payload) }, token),
     staffStats: (token: string) => apiRequest<DashboardStats>("/staff/dashboard", {}, token),
     staffSettings: (token: string) => apiRequest<ClinicSettings>("/staff/settings", {}, token),
     updateStaffSettings: (token: string, payload: ClinicSettings) =>

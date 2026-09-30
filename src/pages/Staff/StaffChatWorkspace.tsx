@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import Toast from "@/components/Toast";
 import AutoGrowTextarea from "@/components/AutoGrowTextarea";
+import { useStaffAccess } from "./staffAccess";
 import useConsultationRealtime from "@/hooks/useConsultationRealtime";
 import {
     appointmentApi,
@@ -40,6 +41,7 @@ const StaffChatWorkspace = ({
     initialAppointmentId?: number | null;
     onRefresh: () => Promise<void>;
 }) => {
+    const can = useStaffAccess();
     const [selectedId, setSelectedId] = useState<number | null>(initialAppointmentId ?? threads[0]?.appointment_id ?? null);
     const [messages, setMessages] = useState<ConsultationMessage[]>([]);
     const [body, setBody] = useState("");
@@ -264,7 +266,7 @@ const StaffChatWorkspace = ({
                                 <div ref={bottomRef} />
                             </div>
                         </div>
-                        <form onSubmit={send} className="shrink-0 border-t border-slate-200 bg-white p-3 md:p-4">
+                        {can("consultations.send") && <form onSubmit={send} className="shrink-0 border-t border-slate-200 bg-white p-3 md:p-4">
                             <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 focus-within:border-secondary focus-within:ring-4 focus-within:ring-secondary/10">
                                 <button disabled={!body.trim() || sending} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-lg text-white disabled:opacity-40" aria-label="ارسال پیام">
                                     {sending ? (
@@ -275,7 +277,7 @@ const StaffChatWorkspace = ({
                                 </button>
                                 <AutoGrowTextarea value={body} onChange={(event) => setBody(event.target.value)} maxHeight={144} maxLength={2000} placeholder="پاسخ به بیمار…" className="min-h-10 min-w-0 flex-1 bg-transparent px-2 py-2 text-sm leading-6 outline-none" />
                             </div>
-                        </form>
+                        </form>}
                     </>
                 ) : (
                     <div className="flex flex-1 items-center justify-center text-center"><div><IoChatbubbleEllipsesOutline className="mx-auto text-6xl text-secondary" /><h3 className="mt-4 font-dana text-2xl text-primary">یک گفتگو را انتخاب کنید</h3></div></div>

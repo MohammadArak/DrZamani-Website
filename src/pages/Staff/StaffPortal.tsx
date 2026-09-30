@@ -8,6 +8,8 @@ import ServiceIcon from "@/components/ServiceIcon";
 import Toast from "@/components/Toast";
 import StaffChatWorkspace from "./StaffChatWorkspace";
 import StaffPatientsPanel from "./StaffPatientsPanel";
+import StaffAccessPanel from "./StaffAccessPanel";
+import { StaffPermissionsContext, staffTabPermissions, useStaffAccess } from "./staffAccess";
 import {
     StaffAuditPanel,
     StaffCalendarPanel,
@@ -25,6 +27,7 @@ import {
     formatPersianDate,
     formatTime,
     toPersianDigits,
+    type StaffIdentity,
     type Appointment,
     type AppointmentPage,
     type CaptchaChallenge,
@@ -86,7 +89,7 @@ const DetailsChevron = () => (
     </span>
 );
 
-type StaffProfile = { full_name: string; role: string };
+type StaffProfile = StaffIdentity;
 type StaffTab =
     | "dashboard"
     | "clinic-info"
@@ -99,7 +102,8 @@ type StaffTab =
     | "services"
     | "sms"
     | "finance"
-    | "audit";
+    | "audit"
+    | "access";
 
 const statusLabels: Record<Appointment["status"], string> = {
     pending: "در انتظار",
@@ -188,7 +192,7 @@ const StaffLogin = ({
                 captcha.captcha_id,
                 captchaAnswer,
             );
-            const profile = { full_name: result.full_name, role: result.role };
+            const profile: StaffIdentity = result;
             localStorage.removeItem(STAFF_TOKEN_KEY);
             localStorage.removeItem(STAFF_PROFILE_KEY);
             onLogin(STAFF_COOKIE_SESSION, profile);
@@ -222,7 +226,7 @@ const StaffLogin = ({
                     پنل مدیریت نوبت‌ها
                 </h1>
                 <p className="mt-3 text-sm leading-7 text-slate-500">
-                    این بخش فقط برای منشی و مدیر سامانه در دسترس است.
+                    ورود کارکنان مجاز مطب
                 </p>
                 {error && (
                     <div
@@ -344,6 +348,7 @@ export const LegacyAppointmentsPanel = ({
         search?: string;
     }) => Promise<void>;
 }) => {
+    const can = useStaffAccess();
     const [date, setDate] = useState("");
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
@@ -368,7 +373,6 @@ export const LegacyAppointmentsPanel = ({
         try {
             await appointmentApi.updateStaffAppointment(token, item.id, {
                 status: nextStatus,
-                staff_note: item.staff_note,
             });
             setMessage("وضعیت نوبت ذخیره شد.");
             await onReload({
@@ -475,7 +479,7 @@ export const LegacyAppointmentsPanel = ({
                                 </p>
                             </div>
                             <AppSelect
-                                disabled={busyId === item.id}
+                                disabled={busyId === item.id || !can("appointments.edit")}
                                 value={item.status}
                                 onChange={(value) =>
                                     void updateStatus(
@@ -483,7 +487,7 @@ export const LegacyAppointmentsPanel = ({
                                         value as Appointment["status"],
                                     )
                                 }
-                                options={appointmentStatusOptions}
+                                options={appointmentStatusOptions.filter(o => o.value !== "cancelled" || can("appointments.cancel"))}
                                 ariaLabel="وضعیت نوبت"
                                 buttonClassName="h-10 bg-slate-50 text-sm"
                             />
@@ -553,6 +557,7 @@ const AppointmentsPanel = ({
     onReload: (filters?: AppointmentFilters) => Promise<void>;
     onOpenConsultation: (item: Appointment) => void;
 }) => {
+    const can = useStaffAccess();
     const [date, setDate] = useState("");
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
@@ -589,7 +594,6 @@ const AppointmentsPanel = ({
         try {
             await appointmentApi.updateStaffAppointment(token, item.id, {
                 status: nextStatus,
-                staff_note: item.staff_note,
             });
             setToast({ message: "وضعیت نوبت ذخیره شد", kind: "success" });
             await onReload(filtersFor(pageData.page));
@@ -637,7 +641,7 @@ const AppointmentsPanel = ({
                     </span>
                     <button
                         type="button"
-                        disabled={exporting}
+                        disabled={exporting || !can("appointments.export")}
                         onClick={() => void exportExcel()}
                         className="inline-flex h-11 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-bold text-emerald-700 transition hover:-translate-y-0.5 hover:shadow-sm disabled:opacity-50"
                     >
@@ -751,7 +755,7 @@ const AppointmentsPanel = ({
                                 </p>
                             </div>
                             <AppSelect
-                                disabled={busyId === item.id}
+                                disabled={busyId === item.id || !can("appointments.edit")}
                                 value={item.status}
                                 onChange={(value) =>
                                     void updateStatus(
@@ -759,7 +763,7 @@ const AppointmentsPanel = ({
                                         value as Appointment["status"],
                                     )
                                 }
-                                options={appointmentStatusOptions}
+                                options={appointmentStatusOptions.filter(o => o.value !== "cancelled" || can("appointments.cancel"))}
                                 ariaLabel="وضعیت نوبت"
                                 buttonClassName="h-10 bg-slate-50 text-sm"
                             />
@@ -807,12 +811,10 @@ const AppointmentsPanel = ({
 
 const ClinicInfoPanel = ({
     token,
-    role,
     settings,
     onReload,
 }: {
     token: string;
-    role: string;
     settings: ClinicSettings;
     onReload: () => Promise<void>;
 }) => {
@@ -823,7 +825,8 @@ const ClinicInfoPanel = ({
         "success",
     );
     const { applyClinicSettings } = useClinicInfo();
-    const canEdit = role === "admin";
+    const can = useStaffAccess();
+    const canEdit = can("settings.edit");
 
     useEffect(() => setDraft(settings), [settings]);
 
@@ -874,7 +877,7 @@ const ClinicInfoPanel = ({
 
             {!canEdit && (
                 <div className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">
-                    فقط مدیر سامانه می‌تواند این اطلاعات را ویرایش کند.
+                    این حساب دسترسی ویرایش اطلاعات مطب را ندارد.
                 </div>
             )}
 
@@ -1142,13 +1145,11 @@ const ClinicInfoPanel = ({
 
 const SchedulePanel = ({
     token,
-    role,
     settings,
     exceptions,
     onReload,
 }: {
     token: string;
-    role: string;
     settings: ClinicSettings;
     exceptions: ScheduleException[];
     onReload: () => Promise<void>;
@@ -1161,7 +1162,8 @@ const SchedulePanel = ({
     const [messageKind, setMessageKind] = useState<"success" | "error">(
         "success",
     );
-    const canEdit = role === "admin";
+    const can = useStaffAccess();
+    const canEdit = can("settings.edit");
 
     useEffect(() => setSettingsDraft(settings), [settings]);
 
@@ -1246,7 +1248,7 @@ const SchedulePanel = ({
             </div>
             {!canEdit && (
                 <div className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">
-                    فقط مدیر سامانه می‌تواند این تنظیمات را تغییر دهد.
+                    این حساب دسترسی ویرایش تنظیمات نوبت‌دهی را ندارد.
                 </div>
             )}
             <form
@@ -1446,7 +1448,7 @@ const SchedulePanel = ({
                         <button disabled={busy} className="h-11 rounded-xl bg-primary px-5 text-white disabled:opacity-50">ذخیره تنظیمات</button>
                         <button
                             type="button"
-                            disabled={busy || !settingsDraft.reminder_enabled}
+                            disabled={busy || !settingsDraft.reminder_enabled || !can("operations.run")}
                             onClick={() => void runOperations()}
                             className="h-11 rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-primary transition hover:border-secondary disabled:opacity-50"
                         >
@@ -1463,7 +1465,7 @@ const SchedulePanel = ({
                     تعطیلی ثبت‌شده روی همه خدمت‌ها اعمال می‌شود. روزها و ساعت‌های
                     عادی هر خدمت از بخش «خدمات» تنظیم می‌شوند.
                 </p>
-                {canEdit && (
+                {can("schedule.create") && (
                     <form
                         onSubmit={addException}
                         noValidate
@@ -1503,7 +1505,7 @@ const SchedulePanel = ({
                                         {item.note || "مطب تعطیل است"}
                                     </p>
                                 </div>
-                                {canEdit && (
+                                {can("schedule.delete") && (
                                     <button
                                         onClick={async () => {
                                             try {
@@ -1542,12 +1544,11 @@ const SchedulePanel = ({
 const ServiceExceptionsEditor = ({
     token,
     service,
-    canEdit,
 }: {
     token: string;
     service: Service;
-    canEdit: boolean;
 }) => {
+    const can = useStaffAccess();
     const [items, setItems] = useState<ServiceScheduleException[]>([]);
     const [exceptionDate, setExceptionDate] = useState("");
     const [closed, setClosed] = useState(true);
@@ -1608,7 +1609,7 @@ const ServiceExceptionsEditor = ({
                 </span>
             </summary>
             <div className="app-details-content border-t border-slate-100 p-4">
-                {canEdit && (
+                {can("schedule.create") && (
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                         <JalaliDatePicker
                             value={exceptionDate}
@@ -1671,7 +1672,7 @@ const ServiceExceptionsEditor = ({
                                     ? "تعطیل"
                                     : `${formatTime(item.start_time ?? "")} تا ${formatTime(item.end_time ?? "")}`}
                             </span>
-                            {canEdit && (
+                            {can("schedule.delete") && (
                                 <button
                                     type="button"
                                     className="text-rose-500"
@@ -1946,12 +1947,10 @@ const ServiceIntakeEditor = ({
 
 const ServicesPanel = ({
     token,
-    role,
     services,
     onReload,
 }: {
     token: string;
-    role: string;
     services: Service[];
     onReload: () => Promise<void>;
 }) => {
@@ -1973,7 +1972,8 @@ const ServicesPanel = ({
     const [messageKind, setMessageKind] = useState<"success" | "error">(
         "success",
     );
-    const canEdit = role === "admin";
+    const can = useStaffAccess();
+    const canEdit = can("services.edit");
     const intakeDraftFor = (item: Service): IntakeDraft =>
         intakeDrafts[item.id] ?? {
             questions: item.intake_questions.map((entry) => ({ ...entry, options: [...entry.options] })),
@@ -2182,7 +2182,7 @@ const ServicesPanel = ({
                         خدمات مطب
                     </h2>
                 </div>
-                {canEdit && (
+                {can("services.create") && (
                     <button
                         type="button"
                         onClick={() => setShowAddForm((value) => !value)}
@@ -2192,7 +2192,7 @@ const ServicesPanel = ({
                     </button>
                 )}
             </div>
-            {canEdit && showAddForm && (
+            {can("services.create") && showAddForm && (
                 <form
                     onSubmit={add}
                     className="app-panel-enter mt-6 grid gap-3 rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm md:grid-cols-2 xl:grid-cols-[1fr_1.4fr_130px_170px_auto]"
@@ -2442,11 +2442,10 @@ const ServicesPanel = ({
                                     })}
                                 </div>
                             </details>
-                            {expandedServiceId === item.id && (
+                            {expandedServiceId === item.id && can("schedule.view") && (
                                 <ServiceExceptionsEditor
                                     token={token}
                                     service={item}
-                                    canEdit={canEdit}
                                 />
                             )}
                             <label className="flex items-center gap-2 text-xs text-slate-600 sm:col-span-2">
@@ -2717,7 +2716,6 @@ const ServicesPanel = ({
 
 const SmsCenterPanel = ({
     token,
-    role,
     services,
     rules,
     campaigns,
@@ -2725,7 +2723,6 @@ const SmsCenterPanel = ({
     onReload,
 }: {
     token: string;
-    role: string;
     services: Service[];
     rules: SmsAutomationRule[];
     campaigns: SmsCampaign[];
@@ -2745,7 +2742,8 @@ const SmsCenterPanel = ({
         min_age: "",
         max_age: "",
     });
-    const canEdit = role === "admin";
+    const can = useStaffAccess();
+    const canEdit = can("sms.rules.edit");
 
     const campaignFilters = (): SmsCampaignFilters => ({
         service_ids: campaignDraft.service_ids,
@@ -2852,7 +2850,7 @@ const SmsCenterPanel = ({
                     <span className="text-sm text-secondary-deep">پیامک‌های خودکار</span>
                     <h2 className="mt-1 font-dana text-3xl text-primary">مرکز پیامکی</h2>
                 </div>
-                {canEdit && (
+                {can("sms.dispatch") && (
                     <button
                         type="button"
                         disabled={busy === "dispatch"}
@@ -2863,7 +2861,7 @@ const SmsCenterPanel = ({
                     </button>
                 )}
             </div>
-            {canEdit && (
+            {can("sms.campaigns.create") && (
                 <div className="mt-6 rounded-2xl border border-secondary/30 bg-white p-5 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
@@ -3174,7 +3172,7 @@ const MiniBarChart = ({
     );
 };
 
-const StaffDashboard = ({
+export const StaffDashboard = ({
     token,
     profile,
     onLogout,
@@ -3184,7 +3182,8 @@ const StaffDashboard = ({
     onLogout: () => void;
 }) => {
     const { clinicInfo } = useClinicInfo();
-    const [tab, setTab] = useState<StaffTab>("dashboard");
+    const can = useCallback((code: string) => profile.permissions.includes(code), [profile.permissions]);
+    const [tab, setTab] = useState<StaffTab>(() => (Object.keys(staffTabPermissions).find(t => can(staffTabPermissions[t])) ?? "dashboard") as StaffTab);
     const [mobileMenu, setMobileMenu] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -3232,13 +3231,13 @@ const StaffDashboard = ({
     const loadAppointments = useCallback(
         async (filters = {}) => {
             setAppointmentPage(
-                await appointmentApi.staffAppointments(token, filters),
+                can("appointments.view") ? await appointmentApi.staffAppointments(token, filters) : { items: [], total: 0, page: 1, page_size: 20, total_pages: 1 },
             );
         },
-        [token],
+        [can, token],
     );
     const loadConsultations = useCallback(async () => {
-        const nextConsultations = await appointmentApi.staffConsultations(token);
+        const nextConsultations = can("consultations.view") ? await appointmentApi.staffConsultations(token) : [];
         setConsultations(nextConsultations);
         setStats((current) => ({
             ...current,
@@ -3247,32 +3246,27 @@ const StaffDashboard = ({
                 0,
             ),
         }));
-    }, [token]);
+    }, [can, token]);
     useConsultationRealtime(token, () => {
         window.clearTimeout(realtimeRefreshTimer.current);
         realtimeRefreshTimer.current = window.setTimeout(
             () => void loadConsultations(),
             150,
         );
-    });
+    }, can("consultations.view"));
     useEffect(
         () => () => window.clearTimeout(realtimeRefreshTimer.current),
         [],
     );
     const loadOperations = useCallback(async () => {
-        const nextWaitlist = await appointmentApi.staffWaitlist(token);
-        setWaitlist(nextWaitlist);
-        if (profile.role === "admin") {
-            const [nextSummary, nextPayments, nextAudit] = await Promise.all([
-                appointmentApi.staffFinanceSummary(token),
-                appointmentApi.staffPayments(token),
-                appointmentApi.staffAuditLogs(token),
-            ]);
-            setFinanceSummary(nextSummary);
-            setPayments(nextPayments);
-            setAuditLogs(nextAudit);
-        }
-    }, [profile.role, token]);
+        const [nextWaitlist, nextSummary, nextPayments, nextAudit] = await Promise.all([
+            can("waitlist.view") ? appointmentApi.staffWaitlist(token) : Promise.resolve([]),
+            can("finance.view") ? appointmentApi.staffFinanceSummary(token) : Promise.resolve(null),
+            can("finance.view") ? appointmentApi.staffPayments(token) : Promise.resolve([]),
+            can("audit.view") ? appointmentApi.staffAuditLogs(token) : Promise.resolve([]),
+        ]);
+        setWaitlist(nextWaitlist); if (nextSummary) setFinanceSummary(nextSummary); setPayments(nextPayments); setAuditLogs(nextAudit);
+    }, [can, token]);
     const loadAll = useCallback(async () => {
         setLoading(true);
         setError("");
@@ -3292,17 +3286,17 @@ const StaffDashboard = ({
                 nextPayments,
                 nextAuditLogs,
             ] = await Promise.all([
-                appointmentApi.staffStats(token),
-                appointmentApi.staffSettings(token),
-                appointmentApi.staffExceptions(token),
-                appointmentApi.staffServices(token),
-                appointmentApi.staffAppointments(token),
-                appointmentApi.staffConsultations(token),
-                appointmentApi.staffSmsRules(token),
-                appointmentApi.staffSmsCampaigns(token),
-                appointmentApi.staffSmsOutbox(token),
-                appointmentApi.staffWaitlist(token),
-                profile.role === "admin"
+                can("dashboard.view") ? appointmentApi.staffStats(token) : Promise.resolve({ today_total: 0, pending_total: 0, confirmed_total: 0, patients_total: 0, unread_conversations: 0, waitlist_total: 0, refund_attention_total: 0, daily_appointments: [] }),
+                can("settings.view") ? appointmentApi.staffSettings(token) : Promise.resolve(null),
+                can("schedule.view") ? appointmentApi.staffExceptions(token) : Promise.resolve([] as ScheduleException[]),
+                can("services.view") ? appointmentApi.staffServices(token) : Promise.resolve([] as Service[]),
+                can("appointments.view") ? appointmentApi.staffAppointments(token) : Promise.resolve({ items: [], total: 0, page: 1, page_size: 20, total_pages: 1 }),
+                can("consultations.view") ? appointmentApi.staffConsultations(token) : Promise.resolve([] as ConsultationThread[]),
+                can("sms.view") ? appointmentApi.staffSmsRules(token) : Promise.resolve([] as SmsAutomationRule[]),
+                can("sms.view") ? appointmentApi.staffSmsCampaigns(token) : Promise.resolve([] as SmsCampaign[]),
+                can("sms.view") ? appointmentApi.staffSmsOutbox(token) : Promise.resolve([] as SmsOutboxItem[]),
+                can("waitlist.view") ? appointmentApi.staffWaitlist(token) : Promise.resolve([] as WaitlistEntry[]),
+                can("finance.view")
                     ? appointmentApi.staffFinanceSummary(token)
                     : Promise.resolve({
                           verified_count: 0,
@@ -3313,10 +3307,10 @@ const StaffDashboard = ({
                           refunded_toman: 0,
                           failed_count: 0,
                       }),
-                profile.role === "admin"
+                can("finance.view")
                     ? appointmentApi.staffPayments(token)
                     : Promise.resolve([] as PaymentItem[]),
-                profile.role === "admin"
+                can("audit.view")
                     ? appointmentApi.staffAuditLogs(token)
                     : Promise.resolve([] as AuditLogItem[]),
             ]);
@@ -3343,7 +3337,7 @@ const StaffDashboard = ({
         } finally {
             setLoading(false);
         }
-    }, [onLogout, profile.role, token]);
+    }, [can, onLogout, token]);
     useEffect(() => {
         void loadAll();
     }, [loadAll]);
@@ -3376,18 +3370,19 @@ const StaffDashboard = ({
             icon: <IoSettingsOutline />,
         },
         { id: "services", label: "خدمات", icon: <IoCheckmarkCircleOutline /> },
-        ...(profile.role === "admin"
+        ...(can("finance.view")
             ? [
                   { id: "finance" as const, label: "مالی و تسویه", icon: <IoCardOutline />, badge: stats.refund_attention_total },
               ]
             : []),
         { id: "sms", label: "مرکز پیامکی", icon: <IoChatbubblesOutline /> },
-        ...(profile.role === "admin"
+        ...(can("audit.view")
             ? [
                   { id: "audit" as const, label: "تاریخچه عملیات", icon: <IoShieldCheckmarkOutline /> },
               ]
             : []),
-    ];
+        { id: "access", label: "نقش‌ها و کارکنان", icon: <IoShieldCheckmarkOutline /> },
+    ].filter(item => can(staffTabPermissions[item.id])) as typeof navItems;
     const sidebar = (
         <>
             <div className="border-b border-white/8 px-5 py-6">
@@ -3428,7 +3423,7 @@ const StaffDashboard = ({
                         {profile.full_name}
                     </b>
                     <span className="text-xs text-slate-400">
-                        {profile.role === "admin" ? "مدیر سامانه" : "منشی مطب"}
+                        {profile.role_titles.join("، ") || "بدون نقش فعال"}
                     </span>
                 </div>
                 <button
@@ -3527,6 +3522,7 @@ const StaffDashboard = ({
             <div className="min-w-0 overflow-x-clip lg:mr-62">
                 <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/88 px-4 backdrop-blur-xl md:px-7">
                     <button
+                        aria-label="نمایش منوی پنل"
                         onClick={() => setMobileMenu(true)}
                         className="text-2xl text-primary lg:hidden"
                     >
@@ -3549,7 +3545,7 @@ const StaffDashboard = ({
                             {error}
                         </div>
                     )}
-                    {tab === "dashboard" && (
+                    {tab === "dashboard" && can("dashboard.view") && (
                         <section className="app-panel-enter min-w-0">
                             <div>
                                 <span className="text-sm text-secondary-deep">
@@ -3560,45 +3556,47 @@ const StaffDashboard = ({
                                 </h1>
                             </div>
                             <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                                <StatCard
+                                {can("appointments.view") && (<StatCard
                                     label="نوبت‌های امروز"
                                     value={stats.today_total}
                                     icon={<IoCalendarOutline />}
-                                />
-                                <StatCard
+                                />)}
+                                {can("appointments.view") && (<StatCard
                                     label="در انتظار تأیید"
                                     value={stats.pending_total}
                                     icon={<IoTimeOutline />}
-                                />
-                                <StatCard
+                                />)}
+                                {can("appointments.view") && (<StatCard
                                     label="تأیید شده"
                                     value={stats.confirmed_total}
                                     icon={<IoCheckmarkCircleOutline />}
-                                />
-                                <StatCard
+                                />)}
+                                {can("patients.view") && (<StatCard
                                     label="بیماران ثبت‌شده"
                                     value={stats.patients_total}
                                     icon={<IoPeopleOutline />}
-                                />
+                                />)}
                             </div>
                             <div className="mt-5 grid gap-3 md:grid-cols-3">
-                                <button
+                                {can("consultations.view") && (<button
                                     type="button"
+                                    disabled={!can(staffTabPermissions["consultations"])}
                                     onClick={() => setTab("consultations")}
                                     className="flex items-center justify-between rounded-2xl border border-sky-100 bg-sky-50/70 p-4 text-right transition hover:bg-sky-50"
                                 >
                                     <span><b className="block text-sm text-sky-900">پیام‌های خوانده‌نشده</b><span className="mt-1 block text-xs text-sky-600">پاسخ سریع به بیماران</span></span>
                                     <strong className="text-2xl text-sky-700">{toPersianDigits(stats.unread_conversations)}</strong>
-                                </button>
-                                <button
+                                </button>)}
+                                {can("waitlist.view") && (<button
                                     type="button"
+                                    disabled={!can(staffTabPermissions["waitlist"])}
                                     onClick={() => setTab("waitlist")}
                                     className="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50/70 p-4 text-right transition hover:bg-amber-50"
                                 >
                                     <span><b className="block text-sm text-amber-900">لیست انتظار فعال</b><span className="mt-1 block text-xs text-amber-600">جایگزینی ظرفیت لغوشده</span></span>
                                     <strong className="text-2xl text-amber-700">{toPersianDigits(stats.waitlist_total)}</strong>
-                                </button>
-                                {profile.role === "admin" ? (
+                                </button>)}
+                                {can("finance.view") ? (
                                     <button
                                         type="button"
                                         onClick={() => setTab("finance")}
@@ -3607,18 +3605,19 @@ const StaffDashboard = ({
                                         <span><b className="block text-sm text-rose-900">بازپرداخت نیازمند پیگیری</b><span className="mt-1 block text-xs text-rose-600">تسویه و ثبت شماره پیگیری</span></span>
                                         <strong className="text-2xl text-rose-700">{toPersianDigits(stats.refund_attention_total)}</strong>
                                     </button>
-                                ) : (
+                                ) : can("appointments.view") ? (
                                     <button
                                         type="button"
-                                        onClick={() => setTab("calendar")}
+                                        disabled={!can(staffTabPermissions["calendar"])}
+                                    onClick={() => setTab("calendar")}
                                         className="flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-right transition hover:bg-emerald-50"
                                     >
                                         <span><b className="block text-sm text-emerald-900">تقویم کاری</b><span className="mt-1 block text-xs text-emerald-600">مدیریت سریع نوبت‌ها</span></span>
                                         <IoCalendarOutline className="text-2xl text-emerald-700" />
                                     </button>
-                                )}
+                                ) : null}
                             </div>
-                            <div className="mt-6 grid gap-5 xl:grid-cols-2">
+                            {can("appointments.view") && <div className="mt-6 grid gap-5 xl:grid-cols-2">
                                 <MiniBarChart
                                     title="نوبت‌های ۱۴ روز اخیر"
                                     points={dailyChart}
@@ -3627,14 +3626,15 @@ const StaffDashboard = ({
                                     title="نوبت‌ها به تفکیک ماه"
                                     points={monthlyChart}
                                 />
-                            </div>
-                            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+                            </div>}
+                            {can("appointments.view") && <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
                                 <div className="flex items-center justify-between">
                                     <h2 className="font-dana text-xl text-primary">
                                         نوبت‌های امروز
                                     </h2>
                                     <button
-                                        onClick={() => setTab("appointments")}
+                                        disabled={!can(staffTabPermissions["appointments"])}
+                                    onClick={() => setTab("appointments")}
                                         className="text-sm text-secondary-deep"
                                     >
                                         مشاهده همه
@@ -3673,10 +3673,10 @@ const StaffDashboard = ({
                                         </p>
                                     )}
                                 </div>
-                            </div>
+                            </div>}
                         </section>
                     )}
-                    {tab === "appointments" && (
+                    {tab === "appointments" && can("appointments.view") && (
                         <AppointmentsPanel
                             token={token}
                             pageData={appointmentPage}
@@ -3689,24 +3689,23 @@ const StaffDashboard = ({
                             }
                         />
                     )}
-                    {tab === "calendar" && (
+                    {tab === "calendar" && can("appointments.view") && (
                         <StaffCalendarPanel
                             token={token}
                             services={services}
                             onChanged={loadAll}
                         />
                     )}
-                    {tab === "patients" && (
+                    {tab === "patients" && can("patients.view") && (
                         <StaffPatientsPanel
                             token={token}
-                            role={profile.role}
                             onOpenConversation={(appointmentId) => {
                                 setChatAppointmentId(appointmentId);
                                 setTab("consultations");
                             }}
                         />
                     )}
-                    {tab === "consultations" && (
+                    {tab === "consultations" && can("consultations.view") && (
                         <StaffChatWorkspace
                             token={token}
                             threads={consultations}
@@ -3714,42 +3713,38 @@ const StaffDashboard = ({
                             onRefresh={loadConsultations}
                         />
                     )}
-                    {tab === "waitlist" && (
+                    {tab === "waitlist" && can("waitlist.view") && (
                         <StaffWaitlistPanel
                             token={token}
                             entries={waitlist}
                             onReload={loadOperations}
                         />
                     )}
-                    {tab === "clinic-info" && settings && (
+                    {tab === "clinic-info" && can("settings.view") && settings && (
                         <ClinicInfoPanel
                             token={token}
-                            role={profile.role}
                             settings={settings}
                             onReload={loadAll}
                         />
                     )}
-                    {tab === "schedule" && settings && (
+                    {tab === "schedule" && can("schedule.view") && settings && (
                         <SchedulePanel
                             token={token}
-                            role={profile.role}
                             settings={settings}
                             exceptions={exceptions}
                             onReload={loadAll}
                         />
                     )}
-                    {tab === "services" && (
+                    {tab === "services" && can("services.view") && (
                         <ServicesPanel
                             token={token}
-                            role={profile.role}
                             services={services}
                             onReload={loadAll}
                         />
                     )}
-                    {tab === "sms" && (
+                    {tab === "sms" && can("sms.view") && (
                         <SmsCenterPanel
                             token={token}
-                            role={profile.role}
                             services={services}
                             rules={smsRules}
                             campaigns={smsCampaigns}
@@ -3757,7 +3752,7 @@ const StaffDashboard = ({
                             onReload={loadAll}
                         />
                     )}
-                    {tab === "finance" && profile.role === "admin" && (
+                    {tab === "finance" && can("finance.view") && (
                         <StaffFinancePanel
                             token={token}
                             summary={financeSummary}
@@ -3765,7 +3760,9 @@ const StaffDashboard = ({
                             onReload={loadOperations}
                         />
                     )}
-                    {tab === "audit" && profile.role === "admin" && (
+                    {tab === "access" && can("roles.manage") && <StaffAccessPanel token={token} currentId={profile.id} />}
+                    {!navItems.length && <p className="rounded-2xl border bg-white p-6">دسترسی به بخش‌های فعلی پنل برای این حساب تعریف نشده است. مجوزهای مقاله و محتوا در مراحل بعد فعال می‌شوند.</p>}
+                    {tab === "audit" && can("audit.view") && (
                         <StaffAuditPanel items={auditLogs} />
                     )}
                 </div>
@@ -3782,6 +3779,11 @@ const StaffPortal = () => {
     const [profile, setProfile] = useState<StaffProfile | null>(null);
     const [restoring, setRestoring] = useState(Boolean(token));
     const [logoutError, setLogoutError] = useState("");
+    useEffect(() => {
+        const expired = () => { setToken(""); setProfile(null); setRestoring(false); };
+        window.addEventListener("drz:staff-expired", expired);
+        return () => window.removeEventListener("drz:staff-expired", expired);
+    }, []);
     useEffect(() => {
         // Remove legacy bearer tokens; browser authentication now stays in HttpOnly cookies.
         localStorage.removeItem(STAFF_TOKEN_KEY);
@@ -3828,11 +3830,9 @@ const StaffPortal = () => {
                     }}
                 />
             ) : (
-                <StaffDashboard
-                    token={token}
-                    profile={profile}
-                    onLogout={logout}
-                />
+                <StaffPermissionsContext.Provider value={profile.permissions}>
+                    <StaffDashboard token={token} profile={profile} onLogout={logout} />
+                </StaffPermissionsContext.Provider>
             )}
         </>
     );

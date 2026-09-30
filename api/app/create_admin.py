@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from .database import SessionLocal
 from .models import StaffUser
+from .access import seed_access, assign_legacy_role
 from .security import hash_password
 
 
@@ -20,6 +21,7 @@ def main() -> None:
         raise SystemExit("Password must contain at least 12 characters")
     username = args.username.strip().lower()
     with SessionLocal.begin() as db:
+        seed_access(db)
         if db.scalar(select(StaffUser).where(StaffUser.username == username)):
             raise SystemExit("Username already exists")
         db.add(
@@ -30,7 +32,9 @@ def main() -> None:
                 role="admin",
             )
         )
-    print("Administrator created")
+        db.flush()
+        assign_legacy_role(db, db.scalar(select(StaffUser).where(StaffUser.username == username)))
+    print("Administrator created (not a superadmin; use app.setup_owner for explicit owner setup)")
 
 
 if __name__ == "__main__":

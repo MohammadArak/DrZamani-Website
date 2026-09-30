@@ -8,6 +8,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 
 from .database import SessionLocal
+from .access import can
 from .models import AuthSession, Patient, StaffUser
 from .security import hash_session_token, utcnow
 from .browser_sessions import (
@@ -93,7 +94,7 @@ def _authenticate_hash(token_hash: str) -> tuple[str, int] | None:
                 and staff.is_active
                 and auth_session.staff_state_hash == staff_state_hash(staff)
             ):
-                return "staff", staff.id
+                return ("staff", staff.id) if can(staff, "consultations.view") else None
         if auth_session.patient_id:
             patient = db.get(Patient, auth_session.patient_id)
             if patient and patient.is_active:

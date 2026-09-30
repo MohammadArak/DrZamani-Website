@@ -34,6 +34,10 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
         assert db.execute("SELECT revoked_at FROM auth_sessions").fetchone()[0] is not None
         assert "staff_state_hash" in {row[1] for row in db.execute("PRAGMA table_info(auth_sessions)")}
         assert db.execute("SELECT COUNT(*) FROM auth_rate_limits").fetchone()[0] == 0
+        assert db.execute("SELECT r.slug FROM staff_roles sr JOIN roles r ON r.id=sr.role_id WHERE sr.staff_id=1").fetchone()[0] == "admin"
+        assert db.execute("SELECT COUNT(*) FROM staff_roles sr JOIN roles r ON r.id=sr.role_id WHERE r.slug='superadmin'").fetchone()[0] == 0
+        assert db.execute("SELECT COUNT(*) FROM roles WHERE is_system=1").fetchone()[0] == 5
+        assert db.execute("SELECT COUNT(*) FROM role_permissions rp JOIN roles r ON r.id=rp.role_id WHERE r.slug='admin' AND rp.permission_code IN ('roles.manage','staff.manage','secrets.manage')").fetchone()[0] == 0
     migrate("20260828_0012", "downgrade")
     with closing(sqlite3.connect(database)) as db:
         assert "staff_state_hash" not in {row[1] for row in db.execute("PRAGMA table_info(auth_sessions)")}

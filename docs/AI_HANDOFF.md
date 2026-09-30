@@ -1,51 +1,50 @@
 # راهنمای ادامه کار برای AI بعدی
 
-آخرین به‌روزرسانی: 2026-09-30، Asia/Tehran. نسخه 1.8.0؛ شاخه phase-01-security؛ ریپو https://github.com/MohammadArak/DrZamani-Website . مبنای مرحله ۱: 9b3ba8be0fc76538a92c5a7790369a1ff8f0d6fb. شناسه نهایی commit/PR در گزارش خروجی کنار این فایل و تاریخچه گیت‌هاب ثبت می‌شود.
+آخرین به‌روزرسانی: 2026-09-30، Asia/Tehran. نسخه 1.9.0؛ پروژه MohammadArak/DrZamani-Website. مرحله صفر اسناد، مرحله ۱ امنیت و مرحله ۲ نقش/دسترسی انجام شده‌اند. این تحویل با PR و ادغام مرحله ۲ در main منتشر می‌شود؛ SHA دقیق commit/merge/ZIP در DELIVERY_REPORT-PHASE02 کنار خروجی‌ها و GitHub است؛ شناسه دوری داخل کامیت خودش نوشته نمی‌شود.
 
-## از اینجا شروع کن
+## شروع ادامه
 
-1. AGENTS.md، ROADMAP.md، docs/PROGRESS_LOG.md، docs/PHASE_01_SECURITY.md و docs/SETTINGS_INVENTORY.md را بخوان. BASELINE_REVIEW گزارش تاریخی مرحله صفر است و اصلاحات بعدی در گزارش مرحله ۱ هستند.
-2. شاخه phase-01-security/PR مربوطه را دریافت و git status/log را بررسی کن؛ تا قبل از merge، main فقط اسناد مرحله صفر دارد. فقط بر اساس عنوان فایل یا نسخه سایت زنده، آخرین کد را فرض نکن.
-3. مالک خواسته تغییرات مرحله‌ای در همین ریپو کامیت شوند و هر خروجی فایل ادامه AI داشته باشد. زبان ارتباط فارسی است. رزرو و پرداخت live عمداً خاموش‌اند؛ deploy یا روشن‌کردن آن‌ها نیاز به درخواست صریح جداگانه دارد.
+1. main را دریافت و git status/log، VERSION، AGENTS.md، ROADMAP.md، PROGRESS_LOG، PHASE_01_SECURITY، PHASE_02_ACCESS و SETTINGS_INVENTORY را بخوان. مرحله ۱ در PR شماره ۱ با merge 08e929675777682701b9adb411759bb31cd69b2f وارد main شد؛ مرحله ۲ از همین مبنا شروع شد.
+2. درخواست مالک: هر مرحله پس از تست و تازه‌کردن اسناد در همین ریپو کامیت و با main ادغام شود. خروجی کنار فایل راهنمای ادامه شامل کار انجام‌شده/باقی‌مانده/خطا/محدودیت باشد. برای ادغام مجاز دوباره اجازه نخواه؛ deploy یا فعال‌سازی سایت زنده مجاز نشده است.
+3. مالک برای مدیرکل «نصب جدید» را انتخاب کرده است. هیچ username/password واقعی برای مالک دریافت یا ساخته نشده؛ هنگام استقرار مجاز از app.setup_owner استفاده کن. هیچ admin قدیمی خودکار مدیرکل نشود.
+4. مرحله بعدی ۳ است: مرکز تنظیمات، اسرار و یکپارچه‌کردن اطلاعات مطب و سئو. هنوز مرحله ۳/۴/۵/۶/۷/۸ شروع نشده‌اند؛ مجوز رزروشده را با قابلیت پیاده‌شده اشتباه نگیر.
 
-## کار انجام‌شده
+## محیط و اجرا
 
-- مرحله ۰: دریافت سورس و تاریخچه 339 فایل اولیه، تأیید مالکیت MohammadArak، ثبت نقشه‌راه و اسناد در main؛ آخرین main پیش از مرحله ۱، 9b3ba8... است.
-- مرحله ۱: config امن production، محدودیت پایدار حساب/IP/OTP و کنترل race، CAPTCHA PNG، cookieهای جدا HttpOnly/CSRF، خروج DB، انقضای بیمار ۷ روز و ابطال نشست کارکنان پس از تغییر password/role/active؛ WebSocket نیز نشست را مجدداً بررسی می‌کند.
-- اصلاح Nginx و نصب snippetها، هدر تمام مسیرهای مربوط، CSP و Upgrade فقط realtime؛ تقویت upload/Excel/calendar؛ نسخه واحد VERSION=1.8.0 و guard build؛ اصلاح lint مبنا.
-- FastAPI/Starlette/Pillow/multipart/dotenv/pytest دارای هشدار به نسخه‌های اصلاح‌شده ارتقا یافتند؛ uv.lock بازتولید و sync frozen شد.
-- ۴۴ تست پاس، lint/build و Ruff بحرانی موفق، migration خالی/داده موجود/downgrade/re-upgrade موفق، smoke واقعی Nginx localhost و آزمون مرورگر login/profile/reload/logout بیمار روی نمای موبایل و فرم کارکنان/صفحه اصلی موفق.
-- npm audit --omit=dev و pip-audit روی backend نصب‌شده صفر مورد شناخته‌شده؛ اسکن dependencyهای توسعه frontend و آزمون واقعی سرویس‌های خارجی انجام نشده‌اند.
+- workspace: C:/Users/Mahdi/Documents/Codex/2026-09-30/drfarzadzamani-ir-http-drfarzadzamani-ir؛ checkout در work/DrZamani-Website و خروجی تحویل در outputs.
+- Windows PowerShell؛ Node 24.15، npm 11.12.1، uv 0.11.24 و Python 3.13.14 در api/.venv. از npm.cmd استفاده کن؛ npm.ps1 ممکن است execution policy خطا بدهد.
+- cacheها و runtime در work هستند: UV_CACHE_DIR=work/uv-cache، UV_PYTHON_INSTALL_DIR=work/python-runtime، UV_TOOL_DIR=work/uv-tools، UV_TOOL_BIN_DIR=work/uv-tool-bin. uv sync --frozen آخرین‌بار 42 بسته را بررسی کرد.
+- git شبکه در این میزبان با schannel خطای SEC_E_NO_CREDENTIALS داشت؛ git -c http.sslBackend=openssl استفاده شد، TLS verification خاموش نشد. push بومی به علت credential manager ویندوز ناموفق است؛ تغییرات با GitHub connector Git tree/commit/ref منتشر، سپس fetch و tree دقیق مقایسه می‌شود. commit metadata connector ممکن است SHA محلی اولیه را عوض کند؛ تنها با تطبیق tree، local soft reset به commit منتشرشده انجام شود. force push لازم نیست.
+- داده تست/DB/آپلود مستقل؛ برای تست APP_ENV=test/development صریح، APP_DEBUG فقط در آزمایش، SMS console/disabled، پرداخت ساختگی. production پیش‌فرض fail closed است و SECRET_KEY ضعیف، debug، console SMS، sandbox یا URL غیرHTTPS رد می‌شوند.
+- pytest: از پوشه api، .venv/Scripts/python.exe -m pytest -o addopts='' -q. Migration: از ریشه، api/.venv/Scripts/python.exe scripts/verify-migrations.py. lint/build از ریشه. critical Ruff: E9,F63,F7,F82. فقط آزمون‌های واقعاً اجراشده PASS گزارش شوند.
+- previewها پایان این مرحله بسته شدند. fixture مرورگر ساختگی و فایل‌های موقت phase02-preview از سورس پاک شدند. ZIP با git archive ساخته می‌شود؛ هیچ DB/ENV/credential/node_modules/.venv/build/log نباید وارد آن شود.
 
-## قراردادهای مهم نسخه جدید
+## آنچه انجام شده
 
-- توسعه فقط APP_ENV=development و APP_DEBUG=true صریح؛ console شماره/OTP را لاگ نمی‌کند. پیش‌فرض محیط production است و secret نمونه/ضعیف، debug، console، sandbox و URL غیر HTTPS رد می‌شوند.
-- frontend/API مرورگر یک origin داشته باشند؛ Vite proxy برای توسعه. login با X-Session-Transport: cookie و Origin مجاز؛ تغییرات با X-CSRF-Token. Cookie در production __Host- و Secure/HttpOnly/SameSite Strict است؛ cookie CSRF خواندنی است. tokenهای localStorage سابق پاک می‌شوند؛ Bearer برای API باقی است.
-- auth/logout بیمار و staff/auth/logout کارکنان؛ logout نشست DB و WebSocket را باطل می‌کند. staff_state_hash باید در مرحله نقش‌ها با عضویت/مجوزهای جدید هماهنگ شود.
-- access log API در Nginx/Uvicorn production خاموش است تا query جست‌وجوی بیمار لاگ نشود؛ proxy error فقط crit و HTTPX production فقط warning. برای پایش مرحله ۱۰ از telemetry پاک‌سازی‌شده استفاده کن و query/body/cookie/credential را دوباره لاگ نکن.
-- migration 20260930_0013 نشست‌های کارکنان قدیمی را خارج می‌کند؛ داده بیمار حفظ می‌شود. downgrade ابطال قبلی را برنمی‌گرداند. backup و maintenance واقعی هنوز روی staging باید آزموده شوند.
-- SQLite تنها DB تأییدشده است؛ BEGIN IMMEDIATE و upsert/RETURNING در مسیرهای فعلی SQLite-specific هستند. systemd تک worker و localhost است؛ forwarded headers فقط از 127.0.0.1 معتبرند. Cloudflare هنوز راه‌اندازی نشده؛ real_ip باید محدود به رنج رسمی باشد.
-- دو deploy/drzamani-*-headers.conf باید همراه Nginx نصب شوند. CSP مرحله ۴ با domainهای دقیق providerها و مرحله ۵ با انتقال درگاه تست شود. تنظیم API_PREFIX سفارشی نیازمند هماهنگی Nginx است.
+- نسخه واحد VERSION/manifestها/health در مرحله ۱ به 1.8.0 و اکنون 1.9.0 رسید؛ script check-version build را کنترل می‌کند. dependency جدید مرحله ۲ اضافه نشد؛ گزارش audit مرحله ۱ تاریخی است و اسکن در مرحله ۲ تکرار نشده است.
+- امنیت ورود: APP_ENV production و debug خاموش به‌صورت پیش‌فرض؛ OTP مصرف اتمی و بدون افشای log، PNG CAPTCHA، محدودیت حساب/IP پایدار SQLite، قفل حساب با کپچای تازه دور نمی‌خورد. اعتماد proxy فقط localhost؛ Nginx XFF ورودی را جایگزین می‌کند.
+- cookie میزبان HttpOnly/Secure/SameSite Strict با CSRF و Origin کنترل‌شده؛ actual bearer در localStorage نیست. نشست بیمار ۷ روز و کارکنان ۱۲ ساعت پیش‌فرض؛ logout واقعی DB، session fingerprint و کنترل Origin و ابطال WebSocket حفظ شدند. Bearer برای API مستقل پشتیبانی می‌شود.
+- Nginx header inheritance/CSP/rate limit/404/Upgrade فقط realtime؛ حریم log production، محدودیت decoder/pixel تصویر، orphan cleanup، اکسل بدون formula و calendar بدون CRLF injection؛ جزئیات در PHASE_01_SECURITY.
+- جداول Role/Permission/RolePermission/StaffRole؛ چند نقش با جمع مجوزهای فعال. legacy role فقط برچسب سازگاری است؛ هر endpoint کارکنان require_permission دارد و root-only codes به custom role داده نمی‌شوند. هویت API شامل permissions،role_ids،role_titles و is_superadmin است.
+- بخش AccessPanel مستقل، CRUD نقش و حساب، حساب‌های غیرفعال، چند نقش، تغییر رمز بدون افشا، انتخاب وابستگی مجوز در UI/API؛ همه مسیرهای کارکنان با مجوز کنترل و بارگیری پنل محدود شد. حسابدار به پرونده/تصویر/گفتگو/SMS دسترسی خودکار ندارد.
+- داده‌های حساس پرونده/شرح‌حال/چت/تصویر/مالی و export کنترل مستقل دارند؛ تغییر وضعیت نوبت بدون staff_note یادداشت قدیمی را پاک نمی‌کند. لغو مجوز جدا می‌خواهد. خواندن نوبت برای منشی شامل اطلاعات حسابداری همان نوبت است؛ مجموعه مالی مجوز finance.view می‌خواهد.
+- مالک محافظت‌شده، بررسی آخرین مدیرکل در تراکنش BEGIN IMMEDIATE، رد دو غیرفعال‌سازی هم‌زمان، audit و ابطال نشست/WS با تغییر نقش/حساب. نشست بدون consultations.view نمی‌تواند به WS کارکنان متصل شود، ولی رد WS نشست مالی مجاز را لغو نمی‌کند.
+- migration 0014 admin/secretary قدیمی را عضو نقش متناظر و staff sessions را باطل می‌کند؛ مدیرکل فقط انتخاب صریح. seed نقش ویرایش‌شده را بازنشانی نمی‌کند. downgrade همه کارکنان را غیرفعال می‌کند تا کد قدیمی مجوز گسترده ندهد؛ قبل از فعال‌سازی مجدد بازبینی حساب/backup لازم است.
+- ابزار app.setup_owner برای نصب جدید، رمز مخفی دو بار؛ --promote-existing برای ارتقای صریح حساب فعال انتخابی. ENV bootstrap و create_admin فقط مدیر عادی هستند؛ اطلاعات bootstrap بعد از استفاده از ENV واقعی حذف شوند.
+- مجوزهای articles/media/comments/secrets رزرو و در پنل «مرحله آینده» دارند؛ هیچ endpoint نوشتن/انتشار مقاله یا مدیریت نظر/اسرار هنوز پیاده نشده است.
 
-## باقی‌مانده و قدم بعد
+## شواهد و محدودیت
 
-مرحله ۲: Role/Permission/عضویت، API و UI مدیرکل، enforcement سمت backend، آزمون منشی/حسابدار/نویسنده و منع افزایش دسترسی. owner اولیه را با داده تأییدشده تعیین کن و همه adminها را خودکار superadmin نکن. رویدادها و APIهای staff موجود برای نقش‌های محدود نیز باید کنترل شوند.
+104 pytest PASS (60 جدید+44 قبلی)، npm lint/build PASS، Ruff بحرانی PASS، نسخه‌ها و uv frozen PASS. Migration تازه/upgrade/downgrade/re-upgrade، legacy admin بدون owner، integrity/FK/payment UNIQUE PASS. API نقش خالی 403، حسابدار، ارتقای نقش، آخرین مالک هم‌زمان، CSRF، داده حساس/اکسل، چند نقش و ابطال WS و CLI نصب آزموده شدند.
 
-مرحله ۳: تکمیل ClinicSetting موجود و مرکز تنظیمات/secret رمزگذاری‌شده؛ مرحله ۴: Google Fraud Defense/reCAPTCHA و Turnstile با کلیدهای روشن/خاموش، fallback و MFA طبق طرح PHASE_01_SECURITY. PNG فعلی ضد OCR تضمینی نیست. مرحله ۵: booking_enabled پیش‌فرض خاموش، متن غیر فعال، callback idempotent و outbox غیرمسدودکننده. مرحله ۶ تا ۹: HTML editor امن و SEO feedback مقاله، نظرهای واقعی، اطلاعات مطب/SEO تازه، طراحی/خدمات/سرعت و CI. مرحله ۱۰: staging و نشر با درخواست مالک.
+UI واقعی با API ساختگی مستقل در مرورگر desktop و 390px آزموده شد؛ پیش‌نیاز خودکار، نقش محافظت‌شده، منوی حسابدار و فراخوانی فقط APIهای مالی و نبود اسکرول افقی تأیید شدند. این آزمون bypass فرم امنیتی ورود یا اثبات authenticated browser end-to-end نیست. آن پذیرش در staging باقی است؛ API واقعی از TestClient با نشست bearer/cookie و CSRF آزموده شد.
 
-اشتباهات گزارش اولیه را تکرار نکن: Appointment.payment_id از قبل UNIQUE است؛ دو appointment موفق برای یک payment اثبات نشده ولی callback race/state هنوز بررسی/اصلاح مرحله ۵ است. SMS outbox و پنل اطلاعات مطب موجودند؛ ساخت موازی نکن. مقالات قدیمی عمداً 410 هستند و نباید خودکار برگردند. noindex در prerender موجود است و robots Disallow به‌تنهایی راه‌حل ایندکس نیست. ادعای تطبیق live/source یا تأیید SMS/درگاه واقعی نداریم. اعداد جراحی/تجربه و نظرهای فعلی قبل از انتشار محتوای جدید تأیید پزشک می‌خواهند.
+سه warning قدیمی pytest (httpx/TestClient، نام 422 در patient/staff) باقی‌اند. build آخر API محلی نداشت و fallback prerender استفاده کرد؛ تازه‌سازی HTML عمومی بعد از تغییر DB در مرحله ۳ لازم است. نمایش خارجی Neshan و خدمات SMS/payment/CAPTCHA واقعی هنوز در staging باید بررسی شوند. خطاهای گذرای fixture/ویرایش JSX حل و تست نهایی دوباره اجرا شدند؛ خطای حل‌نشده‌ای در checks نهایی نیست.
 
-## اجرای دوباره و خطاها
+## باقی‌مانده و مرز مجوز
 
-- Node 24.15.0، npm 11.12.1، uv 0.11.24، Python 3.13.14. frontend: npm.cmd ci سپس npm.cmd run lint و npm.cmd run build. backend داخل api: uv sync --frozen، uv run python -m pytest -q؛ migration: uv run python ../scripts/verify-migrations.py.
-- conftest DB موقت تعیین می‌کند؛ test_api دارای drop_all/create_all است، پس به DB بیماران وصل نکن. اسکریپت migration مستقل است و هیچ DB موجودی را باز نمی‌کند.
-- runtime محلی زیر work/ خارج ریپو بود، با DB ساختگی، console و bootstrap آزمایشی؛ این فایل‌ها، ENV/DB/uploads/log/cache/public_html/node_modules/.venv هرگز commit نشوند. نشست synthetic preview بعد از restart با secret تصادفی قبلی نامعتبر می‌شود.
-- Git schannel خطای SEC_E_NO_CREDENTIALS داشت؛ git -c http.sslBackend=openssl با TLS verification فعال استفاده کن. gh روی PATH نیست، GitHub connector در دسترس بود. credential در چت درخواست نکن.
-- cacheهای uv/tools/pip-audit باید در مسیر قابل‌نوشتن workspace باشند؛ WinError 5 مربوط cache حل شد. DB lock هنگام migration با توقف preview حل شد. SQLite context manager به‌تنهایی close نمی‌کند؛ اسکریپت جدید از closing استفاده می‌کند تا cleanup Windows موفق شود.
-- اجرای مستقل یک تست جدید ابتدا به schema ساخته‌شده هنگام import تست قدیمی وابسته بود؛ fixture ساخت schema در test_auth_hardening اضافه شد و اجرای مستقل تست production logging نیز پاس شد.
-- warning توسعه درباره h2 داخل h3 بخش نظرات با تغییر wrapper انیمیشن PatientsComments به div حل شد؛ lint/build پس از آن نیز بررسی شدند.
-- سه warning تست غیرمسدودکننده درباره httpx2 TestClient و نام قدیمی HTTP 422 و warning Nginx برای listen http2 باقی‌اند؛ همه بررسی‌های ذکرشده موفق بوده‌اند.
-- site live و HTTPS/browser production و سرویس‌های خارجی هنوز تأیید نشده‌اند. خطای ابزار شبکه را خرابی سایت گزارش نکن.
-- iframe نقشه نشان در محیط محلی بارگذاری نشد، fallback موجود نمایش داده شد و خطای CSP دیده نشد؛ نمایش واقعی نقشه خارجی هنوز باید در staging بررسی شود.
+مرحله ۳: انتقال تنظیمات ممکن ENV به DB نسخه‌دار با cache/job یکسان، رمزگذاری اسرار و API ماسک‌شده مدیرکل، اطلاعات مطب موجود را reuse کن و SEO/HTML اولیه بعد ذخیره تازه شود. مرحله ۴: Google Fraud Defense/reCAPTCHA و Turnstile با اعتبارسنجی سرور، سیاست fallback و MFA مالک. مرحله ۵: booking_enabled اولیه خاموش، پیام غیرفعال، callback پرداخت پس از قفل دوباره خوانده شود و idempotent باشد؛ SMS outbox موجود را استفاده و dispatch از redirect جدا کن. مراحل ۶/۷: مقالات امن، SEO feedback و نظرات. سپس طراحی، صفحات خدمات/سئوی فنی، سبک‌سازی و پذیرش/استقرار.
 
-بعد از هر مرحله ROADMAP، PROGRESS_LOG و این فایل را به‌روز کن؛ فقط بررسی واقعاً اجراشده را PASS بنویس و commit/PR دقیق را کنار خروجی تحویل ثبت کن.
+گزارش اولیه همه‌اش درست نبود: UNIQUE payment_id و SMS outbox و clinic settings وجود دارند؛ meta noindex/410 مقاله هم موجود است. callback هنوز نیازمند اصلاح مرحله ۵ است، ولی «دو نوبت قطعاً ثبت می‌شود» ادعای تأییدشده نیست. backend و booking سایت زنده طبق گفته مالک عمداً فعال نشده‌اند؛ خطای استقرار فرض نکن و بدون درخواست روشن نکن.
+
+هیچ deploy، پیامک/پرداخت واقعی، اتصال به DB بیماران یا فعال‌سازی رزرو انجام نشده است. بعد از هر مرحله نقشه راه، پیشرفت و همین handoff را همراه کد به‌روز، PR را ایجاد/attach و پس از checks با main ادغام و fetch/tree را تأیید کن.
