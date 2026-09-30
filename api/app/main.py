@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
 from .config import get_settings
+from .version import VERSION
 from .database import SessionLocal
 from .models import (
     ClinicSetting,
@@ -29,6 +30,10 @@ from .sms_automation import seed_sms_rules
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
 settings = get_settings()
+if settings.app_env == "production":
+    # Uvicorn's default access log contains query strings (including patient searches).
+    logging.getLogger("uvicorn.access").disabled = True
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def _default_service_days() -> list[ServiceWeeklySchedule]:
@@ -131,7 +136,7 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
-    version="1.7.0",
+    version=VERSION,
     docs_url="/api/docs" if settings.debug else None,
     redoc_url=None,
     openapi_url="/api/openapi.json" if settings.debug else None,
@@ -152,15 +157,26 @@ if settings.allowed_origins:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.allowed_origins),
-        allow_credentials=False,
+        allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_headers=["Authorization", "Content-Type", "X-CSRF-Token", "X-Session-Transport"],
     )
+
+
+@app.middleware("http")
+async def private_response_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    if request.url.path.startswith(settings.api_prefix):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
 
 
 @app.get("/api/health", tags=["system"])
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "appointment-api"}
+    return {"status": "ok", "service": "appointment-api", "version": VERSION}
 
 
 app.include_router(auth.router, prefix=settings.api_prefix)

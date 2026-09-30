@@ -1,11 +1,12 @@
 {
   "name": "drzamani",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.8.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/prerender.mjs",
+    "build": "node scripts/check-version.mjs && tsc -b && vite build && node scripts/prerender.mjs",
+    "check:version": "node scripts/check-version.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

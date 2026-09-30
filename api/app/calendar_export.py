@@ -10,6 +10,7 @@ from .models import Appointment, ClinicSetting
 def _escape(value: str) -> str:
     return (
         value.replace("\\", "\\\\")
+        .replace("\r", "")
         .replace("\n", "\\n")
         .replace(",", "\\,")
         .replace(";", "\\;")
@@ -48,15 +49,19 @@ def appointment_ics(item: Appointment, settings: ClinicSetting) -> bytes:
         item.end_time,
         tzinfo=local_zone,
     ).astimezone(timezone.utc)
-    updated_at = (item.updated_at or item.created_at).replace(
-        tzinfo=timezone.utc
-        if (item.updated_at or item.created_at).tzinfo is None
-        else (item.updated_at or item.created_at).tzinfo
-    ).astimezone(timezone.utc)
+    updated_at = (
+        (item.updated_at or item.created_at)
+        .replace(
+            tzinfo=timezone.utc
+            if (item.updated_at or item.created_at).tzinfo is None
+            else (item.updated_at or item.created_at).tzinfo
+        )
+        .astimezone(timezone.utc)
+    )
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        f"PRODID:-//{settings.doctor_name}//Appointment Portal//FA",
+        f"PRODID:-//{_escape(settings.doctor_name)}//Appointment Portal//FA",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
         "BEGIN:VEVENT",

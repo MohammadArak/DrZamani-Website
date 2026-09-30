@@ -46,8 +46,16 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
     }, [applyClinicSettings]);
 
     useEffect(() => {
-        void refreshClinicInfo();
-    }, [refreshClinicInfo]);
+        let cancelled = false;
+        void appointmentApi.getClinic().then((settings) => {
+            if (!cancelled) applyClinicSettings(settings);
+        }).catch(() => {
+            // Keep the public fallback while the API is unavailable.
+        }).finally(() => {
+            if (!cancelled) setLoading(false);
+        });
+        return () => { cancelled = true; };
+    }, [applyClinicSettings]);
 
     const value = useMemo<ClinicInfoContextValue>(
         () => ({
@@ -66,6 +74,8 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
+// The public hook and provider deliberately share this context module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useClinicInfo = () => {
     const value = useContext(ClinicInfoContext);
     if (!value) {

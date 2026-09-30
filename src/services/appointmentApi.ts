@@ -463,6 +463,29 @@ export class AppointmentApiError extends Error {
     }
 }
 
+// These values select a cookie audience; they contain no authentication secret.
+export const PATIENT_COOKIE_SESSION = "patient-cookie";
+export const STAFF_COOKIE_SESSION = "staff-cookie";
+export const browserCsrf = (audience: "patient" | "staff") => {
+    const names = [`__Host-drz_${audience}_csrf`, `drz_${audience}_csrf`];
+    for (const item of document.cookie.split(";")) {
+        const separator = item.indexOf("=");
+        if (names.includes(item.slice(0, separator).trim())) return item.slice(separator + 1);
+    }
+    return "";
+};
+
+const sessionHeaders = (token?: string | null) => {
+    const headers = new Headers();
+    if (token === PATIENT_COOKIE_SESSION || token === STAFF_COOKIE_SESSION) {
+        const audience = token === STAFF_COOKIE_SESSION ? "staff" : "patient";
+        headers.set("X-CSRF-Token", browserCsrf(audience));
+    } else if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+    }
+    return headers;
+};
+
 const translateServerMessage = (message: string) => {
     const normalized = message.trim();
     const rules: Array<[RegExp, string]> = [
@@ -506,11 +529,11 @@ async function apiRequest<T>(
     headers.set("Accept", "application/json");
     if (options.body && !(options.body instanceof FormData))
         headers.set("Content-Type", "application/json");
-    if (token) headers.set("Authorization", `Bearer ${token}`);
+    sessionHeaders(token).forEach((value, key) => headers.set(key, value));
 
     let response: Response;
     try {
-        response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+        response = await fetch(`${API_BASE}${path}`, { ...options, headers, credentials: "include" });
     } catch {
         throw new AppointmentApiError("ارتباط با سامانه نوبت‌دهی برقرار نشد", 0);
     }
@@ -541,8 +564,9 @@ function apiUpload<T>(
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `${API_BASE}${path}`);
+        xhr.withCredentials = true;
         xhr.setRequestHeader("Accept", "application/json");
-        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        sessionHeaders(token).forEach((value, key) => xhr.setRequestHeader(key, value));
 
         xhr.upload.onprogress = (event) => {
             const requestTotal = event.lengthComputable ? event.total : contentSize;
@@ -585,7 +609,8 @@ async function apiBlob(path: string, token: string): Promise<Blob> {
     let response: Response;
     try {
         response = await fetch(`${API_BASE}${path}`, {
-            headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
+            headers: { ...Object.fromEntries(sessionHeaders(token)), Accept: "*/*" },
+            credentials: "include",
         });
     } catch {
         throw new AppointmentApiError("ارتباط با سامانه برقرار نشد", 0);
@@ -613,10 +638,11 @@ export const appointmentApi = {
             profile_completed: boolean;
         }>("/auth/otp/verify", {
             method: "POST",
+            headers: { "X-Session-Transport": "cookie" },
             body: JSON.stringify({ phone, code }),
         }),
     logout: (token: string) =>
-        apiRequest<{ message: string }>("/auth/logout", { method: "POST" }, token),
+        apiRequest<{ message: string }>(token === STAFF_COOKIE_SESSION ? "/staff/auth/logout" : "/auth/logout", { method: "POST" }, token),
     getMe: (token: string) => apiRequest<PatientProfile>("/me", {}, token),
     updateMe: (token: string, payload: PatientProfilePayload) =>
         apiRequest<PatientProfile>("/me", { method: "PUT", body: JSON.stringify(payload) }, token),
@@ -750,6 +776,7 @@ export const appointmentApi = {
             role: string;
         }>("/staff/auth/login", {
             method: "POST",
+            headers: { "X-Session-Transport": "cookie" },
             body: JSON.stringify({
                 username,
                 password,
@@ -757,6 +784,7 @@ export const appointmentApi = {
                 captcha_answer: captchaAnswer,
             }),
         }),
+    staffMe: () => apiRequest<{ full_name: string; role: string }>("/staff/me", {}, STAFF_COOKIE_SESSION),
     staffStats: (token: string) => apiRequest<DashboardStats>("/staff/dashboard", {}, token),
     staffSettings: (token: string) => apiRequest<ClinicSettings>("/staff/settings", {}, token),
     updateStaffSettings: (token: string, payload: ClinicSettings) =>

@@ -13,12 +13,21 @@ dist-ssr
 *.local
 
 # FastAPI runtime files
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
 api/.env
 api/.venv/
 api/data/
 api/__pycache__/
 api/**/__pycache__/
 api/.pytest_cache/
+.ruff_cache/
 
 # Production frontend output
 public_html/

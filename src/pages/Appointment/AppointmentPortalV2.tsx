@@ -12,6 +12,8 @@ import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import {
     AppointmentApiError,
     PATIENT_TOKEN_KEY,
+    PATIENT_COOKIE_SESSION,
+    browserCsrf,
     appointmentApi,
     formatPersianDate,
     formatTime,
@@ -245,12 +247,12 @@ const Login = ({
         setBusy(true);
         setError("");
         try {
-            const result = await appointmentApi.verifyOtp(
+            await appointmentApi.verifyOtp(
                 phone,
                 code.replace(/\D/g, ""),
             );
-            localStorage.setItem(PATIENT_TOKEN_KEY, result.access_token);
-            onAuthenticated(result.access_token);
+            localStorage.removeItem(PATIENT_TOKEN_KEY);
+            onAuthenticated(PATIENT_COOKIE_SESSION);
         } catch (verifyError) {
             setError(errorMessage(verifyError));
         } finally {
@@ -380,7 +382,7 @@ const ProfileForm = ({
     });
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
-    const token = localStorage.getItem(PATIENT_TOKEN_KEY) ?? "";
+    const token = PATIENT_COOKIE_SESSION;
     const setField = <K extends keyof PatientProfilePayload>(
         field: K,
         value: PatientProfilePayload[K],
@@ -1989,7 +1991,7 @@ const Portal = ({
 const AppointmentPortal = () => {
     const { clinicInfo: publicClinicInfo } = useClinicInfo();
     const [token, setToken] = useState(
-        () => localStorage.getItem(PATIENT_TOKEN_KEY) ?? "",
+        () => browserCsrf("patient") ? PATIENT_COOKIE_SESSION : "",
     );
     const [loading, setLoading] = useState(Boolean(token));
     const [profile, setProfile] = useState<PatientProfile | null>(null);
@@ -1997,10 +1999,12 @@ const AppointmentPortal = () => {
     const [services, setServices] = useState<Service[]>([]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
+    const [sessionError, setSessionError] = useState("");
 
     const load = async (activeToken = token) => {
         if (!activeToken) return;
         setLoading(true);
+        setSessionError("");
         try {
             const [
                 currentProfile,
@@ -2027,6 +2031,8 @@ const AppointmentPortal = () => {
             ) {
                 localStorage.removeItem(PATIENT_TOKEN_KEY);
                 setToken("");
+            } else {
+                setSessionError(errorMessage(loadError));
             }
         } finally {
             setLoading(false);
@@ -2034,6 +2040,7 @@ const AppointmentPortal = () => {
     };
 
     useEffect(() => {
+        localStorage.removeItem(PATIENT_TOKEN_KEY);
         if (token) void load(token);
         // Token changes define a new session; load intentionally runs once per session.
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2042,8 +2049,9 @@ const AppointmentPortal = () => {
     const logout = async () => {
         try {
             await appointmentApi.logout(token);
-        } catch {
-            /* local logout still proceeds */
+        } catch (error) {
+            setSessionError(`خروج انجام نشد: ${errorMessage(error)}`);
+            return;
         }
         localStorage.removeItem(PATIENT_TOKEN_KEY);
         setToken("");
@@ -2058,6 +2066,9 @@ const AppointmentPortal = () => {
                 canonical={`${publicClinicInfo.siteUrl}/appointment/`}
                 noIndex
             />
+            {sessionError && <div role="alert" className="p-4 text-center text-red-700">
+                {sessionError} <button onClick={() => void load(token)} className="underline">تلاش مجدد</button>
+            </div>}
             {!token ? (
                 <Login onAuthenticated={setToken} />
             ) : loading || !profile || !clinic ? (

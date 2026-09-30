@@ -54,6 +54,9 @@ install -o root -g root -m 0644 "$deploy_dir/drzamani-jobs.service" /etc/systemd
 install -o root -g root -m 0644 "$deploy_dir/drzamani-jobs.timer" /etc/systemd/system/drzamani-jobs.timer
 
 nginx_temp="$(mktemp /tmp/drzamani-nginx-XXXXXX)"
+install -d -o root -g root -m 0755 /etc/nginx/snippets
+install -o root -g root -m 0644 "$deploy_dir/drzamani-security-headers.conf" /etc/nginx/snippets/drzamani-security-headers.conf
+install -o root -g root -m 0644 "$deploy_dir/drzamani-proxy-headers.conf" /etc/nginx/snippets/drzamani-proxy-headers.conf
 sed "s/__DOMAIN__/${domain//\//\\/}/g" "$deploy_dir/nginx-drzamani-http.conf.template" > "$nginx_temp"
 install -o root -g root -m 0644 "$nginx_temp" /etc/nginx/sites-available/drzamani
 rm -f "$nginx_temp"

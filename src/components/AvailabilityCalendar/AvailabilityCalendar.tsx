@@ -116,9 +116,9 @@ const AvailabilityCalendar = ({
         [dates],
     );
 
-    const firstAvailableMonth = entries[0]
+    const firstAvailableMonth = useMemo(() => entries[0]
         ? { year: entries[0].year, month: entries[0].month }
-        : null;
+        : null, [entries]);
     const lastAvailableMonth = entries.at(-1)
         ? {
               year: entries.at(-1)!.year,

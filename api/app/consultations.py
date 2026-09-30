@@ -13,10 +13,15 @@ from .schemas import ConsultationMessageRead
 
 
 ALLOWED_IMAGE_FORMATS = {"JPEG", "PNG", "WEBP"}
+MAX_IMAGE_PIXELS = 20_000_000
+
+
 def consultation_message_read(item: ConsultationMessage) -> ConsultationMessageRead:
     sender_name = "بیمار"
     if item.sender_type == "staff":
-        sender_name = item.sender_staff.full_name if item.sender_staff else "پشتیبانی مطب"
+        sender_name = (
+            item.sender_staff.full_name if item.sender_staff else "پشتیبانی مطب"
+        )
     return ConsultationMessageRead(
         id=item.id,
         appointment_id=item.appointment_id,
@@ -43,7 +48,13 @@ def optimize_consultation_image(contents: bytes) -> tuple[str, int]:
             detail="حجم هر تصویر باید کمتر از ۱۰ مگابایت باشد",
         )
     try:
-        with Image.open(BytesIO(contents)) as source:
+        with Image.open(
+            BytesIO(contents), formats=sorted(ALLOWED_IMAGE_FORMATS)
+        ) as source:
+            if source.width * source.height > MAX_IMAGE_PIXELS:
+                raise HTTPException(
+                    status_code=413, detail="ابعاد تصویر بیش از حد مجاز است"
+                )
             if source.format not in ALLOWED_IMAGE_FORMATS:
                 raise HTTPException(
                     status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
@@ -55,7 +66,12 @@ def optimize_consultation_image(contents: bytes) -> tuple[str, int]:
             image.save(output, format="WEBP", quality=82, method=6)
     except HTTPException:
         raise
-    except (UnidentifiedImageError, OSError, ValueError) as exc:
+    except (
+        UnidentifiedImageError,
+        OSError,
+        ValueError,
+        Image.DecompressionBombError,
+    ) as exc:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail="فایل انتخاب‌شده یک تصویر معتبر نیست",
@@ -69,9 +85,13 @@ def optimize_consultation_image(contents: bytes) -> tuple[str, int]:
 
 def attachment_path(item: ConsultationMessage) -> Path:
     if not item.stored_file_name:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="تصویر پیدا نشد")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="تصویر پیدا نشد"
+        )
     settings = get_settings()
     path = (settings.upload_dir / item.stored_file_name).resolve()
     if path.parent != settings.upload_dir.resolve() or not path.is_file():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="تصویر پیدا نشد")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="تصویر پیدا نشد"
+        )
     return path

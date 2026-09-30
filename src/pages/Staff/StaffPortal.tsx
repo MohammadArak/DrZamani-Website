@@ -18,6 +18,8 @@ import {
     AppointmentApiError,
     STAFF_PROFILE_KEY,
     STAFF_TOKEN_KEY,
+    STAFF_COOKIE_SESSION,
+    browserCsrf,
     appointmentApi,
     formatLocalPhone,
     formatPersianDate,
@@ -187,9 +189,9 @@ const StaffLogin = ({
                 captchaAnswer,
             );
             const profile = { full_name: result.full_name, role: result.role };
-            localStorage.setItem(STAFF_TOKEN_KEY, result.access_token);
-            localStorage.setItem(STAFF_PROFILE_KEY, JSON.stringify(profile));
-            onLogin(result.access_token, profile);
+            localStorage.removeItem(STAFF_TOKEN_KEY);
+            localStorage.removeItem(STAFF_PROFILE_KEY);
+            onLogin(STAFF_COOKIE_SESSION, profile);
         } catch (loginError) {
             setError(errorMessage(loginError));
             await loadCaptcha();
@@ -3775,18 +3777,35 @@ const StaffDashboard = ({
 const StaffPortal = () => {
     const { clinicInfo } = useClinicInfo();
     const [token, setToken] = useState(
-        () => localStorage.getItem(STAFF_TOKEN_KEY) ?? "",
+        () => browserCsrf("staff") ? STAFF_COOKIE_SESSION : "",
     );
-    const [profile, setProfile] = useState<StaffProfile | null>(() => {
+    const [profile, setProfile] = useState<StaffProfile | null>(null);
+    const [restoring, setRestoring] = useState(Boolean(token));
+    const [logoutError, setLogoutError] = useState("");
+    useEffect(() => {
+        // Remove legacy bearer tokens; browser authentication now stays in HttpOnly cookies.
+        localStorage.removeItem(STAFF_TOKEN_KEY);
+        localStorage.removeItem(STAFF_PROFILE_KEY);
+        if (!token) return;
+        let cancelled = false;
+        void appointmentApi.staffMe().then((nextProfile) => {
+            if (!cancelled) setProfile(nextProfile);
+        }).catch(() => {
+            if (!cancelled) setToken("");
+        }).finally(() => {
+            if (!cancelled) setRestoring(false);
+        });
+        return () => { cancelled = true; };
+    }, [token]);
+    const logout = useCallback(async () => {
+        // Do not report a successful logout while a network failure leaves the server session active.
         try {
-            return JSON.parse(
-                localStorage.getItem(STAFF_PROFILE_KEY) ?? "null",
-            ) as StaffProfile | null;
-        } catch {
-            return null;
+            await appointmentApi.logout(STAFF_COOKIE_SESSION);
+        } catch (error) {
+            setLogoutError(errorMessage(error));
+            return;
         }
-    });
-    const logout = useCallback(() => {
+        setLogoutError("");
         localStorage.removeItem(STAFF_TOKEN_KEY);
         localStorage.removeItem(STAFF_PROFILE_KEY);
         setToken("");
@@ -3800,7 +3819,8 @@ const StaffPortal = () => {
                 canonical={`${clinicInfo.siteUrl}/staff/`}
                 noIndex
             />
-            {!token || !profile ? (
+            {logoutError && <p role="alert" className="p-4 text-center text-red-700">خروج انجام نشد: {logoutError}</p>}
+            {restoring ? <p role="status" className="p-8 text-center">در حال بررسی نشست…</p> : !token || !profile ? (
                 <StaffLogin
                     onLogin={(nextToken, nextProfile) => {
                         setToken(nextToken);
