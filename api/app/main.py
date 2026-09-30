@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
 from .config import get_settings
+from .access import seed_access, assign_legacy_role
 from .version import VERSION
 from .database import SessionLocal
 from .models import (
@@ -21,7 +22,7 @@ from .models import (
     StaffUser,
     WeeklySchedule,
 )
-from .routers import auth, patient, staff
+from .routers import access, auth, patient, staff
 from .realtime import router as realtime_router
 from .security import hash_password
 from .sms_automation import seed_sms_rules
@@ -50,6 +51,7 @@ def _default_service_days() -> list[ServiceWeeklySchedule]:
 
 def seed_defaults() -> None:
     with SessionLocal.begin() as db:
+        seed_access(db)
         if not db.get(ClinicSetting, 1):
             db.add(ClinicSetting(id=1))
         existing_days = set(db.scalars(select(WeeklySchedule.weekday)).all())
@@ -125,6 +127,8 @@ def seed_defaults() -> None:
                         role="admin",
                     )
                 )
+                db.flush()
+                assign_legacy_role(db, db.scalar(select(StaffUser).where(StaffUser.username == username)))
                 logger.warning("مدیر اولیه ساخته شد؛ اطلاعات راه‌اندازی مدیر را از فایل .env حذف کنید")
 
 
@@ -183,4 +187,5 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(auth.staff_router, prefix=settings.api_prefix)
 app.include_router(patient.router, prefix=settings.api_prefix)
 app.include_router(staff.router, prefix=settings.api_prefix)
+app.include_router(access.router, prefix=settings.api_prefix)
 app.include_router(realtime_router, prefix=settings.api_prefix)

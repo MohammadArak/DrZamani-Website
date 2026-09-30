@@ -31,6 +31,7 @@ def build_appointments_workbook(
     items: list[Appointment],
     *,
     doctor_name: str,
+    include_sensitive_notes: bool = True,
 ) -> bytes:
     workbook = Workbook()
     sheet = workbook.active
@@ -92,9 +93,9 @@ def build_appointments_workbook(
             item.end_time.strftime("%H:%M"),
             item.service.duration_minutes,
             STATUS_LABELS.get(item.status, item.status),
-            "بله" if item.has_previous_visit else "خیر",
-            item.patient_note or "",
-            item.staff_note or "",
+            ("بله" if item.has_previous_visit else "خیر") if include_sensitive_notes else "",
+            (item.patient_note or "") if include_sensitive_notes else "",
+            (item.staff_note or "") if include_sensitive_notes else "",
         ]
         fill = PatternFill("solid", fgColor="F7F9FB" if row_index % 2 == 0 else "FFFFFF")
         for column_index, value in enumerate(values, start=1):

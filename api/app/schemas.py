@@ -710,7 +710,19 @@ class StaffLoginRequest(BaseModel):
         return normalize_digits(value).strip()
 
 
-class StaffSessionResponse(BaseModel):
+class StaffIdentity(BaseModel):
+    id: int
+    username: str
+    full_name: str
+    role: str
+    role_ids: list[int]
+    role_titles: list[str]
+    permissions: list[str]
+    is_superadmin: bool
+    is_active: bool
+
+
+class StaffSessionResponse(StaffIdentity):
     access_token: str
     token_type: str = "bearer"
     expires_at: str
@@ -718,7 +730,7 @@ class StaffSessionResponse(BaseModel):
     role: str
 
 
-class StaffProfile(BaseModel):
+class StaffProfile(StaffIdentity):
     model_config = ConfigDict(from_attributes=True)
 
     id: int

@@ -20,7 +20,8 @@ from ..activity import record_audit
 from ..appointment_operations import queue_scheduled_reminders
 from ..consultations import attachment_path, consultation_message_read
 from ..database import get_db
-from ..dependencies import get_current_staff, require_admin
+from ..dependencies import get_current_staff, require_permission
+from ..access import can, identity
 from ..models import (
     Appointment,
     AuditLog,
@@ -105,6 +106,61 @@ from .patient import _appointment_read, _waitlist_read
 router = APIRouter(prefix="/staff", tags=["staff portal"])
 
 
+def _staff_appointment(item: Appointment, staff: StaffUser) -> AppointmentRead:
+    result = _appointment_read(item, include_patient=True)
+    if not can(staff, "patients.records.view"):
+        result.patient_note = result.staff_note = None
+        result.has_previous_visit = False
+    if not can(staff, "intake.view"):
+        result.intake_form = result.intake_form.model_copy(update={"questions": [], "consents": []})
+        result.intake_submission = result.intake_submitted_at = None
+        result.intake_required = result.intake_completed = False
+    if not can(staff, "images.view"):
+        result.image_requirements = []
+    result.consultation_enabled = result.consultation_enabled and can(staff, "consultations.view")
+    return result
+
+
+def _staff_patient_item(db: Session, patient: Patient, staff: StaffUser) -> PatientListItem:
+    result = _patient_list_item(db, patient)
+    if not can(staff, "patients.records.view"):
+        result.tags, result.needs_follow_up = [], False
+        result.gender = result.birth_date_jalali = None
+    if not can(staff, "appointments.view"):
+        result.appointment_count = result.completed_count = 0
+        result.last_appointment_date = result.next_appointment_date = None
+    return result
+
+
+def _staff_record(db: Session, patient: Patient, staff: StaffUser) -> PatientRecordRead:
+    result = _patient_record(db, patient, include_payments=can(staff, "finance.view"))
+    result.appointments = [_staff_appointment(a, staff) for a in sorted(patient.appointments, key=lambda a: (a.appointment_date, a.start_time), reverse=True)] if can(staff, "appointments.view") else []
+    if not can(staff, "appointments.view"):
+        result.appointment_count = result.completed_count = 0
+    if not can(staff, "consultations.view"):
+        result.conversations = []
+    elif not can(staff, "images.view"):
+        for conversation in result.conversations:
+            conversation.image_count = 0
+    allowed_kinds = {"payment"} if can(staff, "finance.view") else set()
+    if can(staff, "appointments.view"):
+        allowed_kinds.add("appointment")
+    if can(staff, "consultations.view"):
+        allowed_kinds.add("conversation")
+    result.timeline = [t for t in result.timeline if t.kind in allowed_kinds and (t.kind != "conversation" or can(staff, "images.view"))]
+    result.duplicate_candidates = [_staff_patient_item(db, p, staff) for p in db.scalars(select(Patient).where(Patient.id.in_([x.id for x in result.duplicate_candidates])))]
+    return result
+
+
+def _staff_message(message: ConsultationMessage, staff: StaffUser) -> ConsultationMessageRead:
+    result = consultation_message_read(message)
+    if not can(staff, "images.view"):
+        result.has_image = False
+        result.original_file_name = result.view_label = result.image_requirement_title = None
+        result.image_requirement_id = None
+    return result
+
+
 def _patient_list_item(db: Session, patient: Patient) -> PatientListItem:
     appointments = list(
         db.scalars(
@@ -154,12 +210,12 @@ def _template_variables(template_text: str) -> set[str]:
 
 @router.get("/me", response_model=StaffProfile)
 def me(staff: StaffUser = Depends(get_current_staff)) -> StaffUser:
-    return staff
+    return identity(staff)
 
 
 @router.get("/dashboard", response_model=DashboardStats)
 def dashboard(
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("dashboard.view")),
     db: Session = Depends(get_db),
 ) -> DashboardStats:
     clinic = db.get(ClinicSetting, 1)
@@ -199,16 +255,16 @@ def dashboard(
         .order_by(Appointment.appointment_date)
     ).all()
     return DashboardStats(
-        today_total=today_total,
-        pending_total=pending_total,
-        confirmed_total=confirmed_total,
-        patients_total=patients_total,
-        unread_conversations=unread_conversations,
-        waitlist_total=waitlist_total,
-        refund_attention_total=refund_attention_total,
+        today_total=today_total if can(_staff, "appointments.view") else 0,
+        pending_total=pending_total if can(_staff, "appointments.view") else 0,
+        confirmed_total=confirmed_total if can(_staff, "appointments.view") else 0,
+        patients_total=patients_total if can(_staff, "patients.view") else 0,
+        unread_conversations=unread_conversations if can(_staff, "consultations.view") else 0,
+        waitlist_total=waitlist_total if can(_staff, "waitlist.view") else 0,
+        refund_attention_total=refund_attention_total if can(_staff, "finance.view") else 0,
         daily_appointments=[
             AppointmentChartPoint(date=appointment_date, total=total)
-            for appointment_date, total in daily_rows
+            for appointment_date, total in daily_rows if can(_staff, "appointments.view")
         ],
     )
 
@@ -220,9 +276,11 @@ def patients(
     needs_follow_up: bool = False,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=5, le=100),
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("patients.view")),
     db: Session = Depends(get_db),
 ) -> PatientPage:
+    if (tag or needs_follow_up) and not can(_staff, "patients.records.view"):
+        raise HTTPException(403, "جست‌وجوی بالینی نیازمند مجوز پرونده است")
     query = select(Patient)
     if search:
         normalized = normalize_digits(search).strip()
@@ -237,6 +295,8 @@ def patients(
             predicates.append(Patient.phone == normalize_phone(normalized))
         except ValueError:
             pass
+        if not can(_staff, "patients.records.view"):
+            predicates = predicates[:3]
         query = query.where(or_(*predicates))
     if tag:
         query = query.where(Patient.tags_json.contains(json.dumps(tag, ensure_ascii=False)))
@@ -247,7 +307,7 @@ def patients(
     actual_page = min(page, total_pages)
     items = list(
         db.scalars(
-            query.order_by(Patient.needs_follow_up.desc(), Patient.updated_at.desc())
+            query.order_by(Patient.created_at.desc())
             .offset((actual_page - 1) * page_size)
             .limit(page_size)
         ).all()
@@ -265,8 +325,8 @@ def patients(
         }
     )
     return PatientPage(
-        items=[_patient_list_item(db, item) for item in items],
-        available_tags=all_tags,
+        items=[_staff_patient_item(db, item, _staff) for item in items],
+        available_tags=all_tags if can(_staff, "patients.records.view") else [],
         total=total,
         page=actual_page,
         page_size=page_size,
@@ -428,20 +488,20 @@ def _patient_record(db: Session, patient: Patient, include_payments: bool) -> Pa
 @router.get("/patients/{patient_id}", response_model=PatientRecordRead)
 def patient_record(
     patient_id: int,
-    staff: StaffUser = Depends(get_current_staff),
+    staff: StaffUser = Depends(require_permission("patients.records.view")),
     db: Session = Depends(get_db),
 ) -> PatientRecordRead:
     patient = db.get(Patient, patient_id)
     if not patient:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="بیمار پیدا نشد")
-    return _patient_record(db, patient, include_payments=staff.role == "admin")
+    return _staff_record(db, patient, staff)
 
 
 @router.patch("/patients/{patient_id}", response_model=PatientRecordRead)
 def update_patient_record(
     patient_id: int,
     payload: PatientRecordUpdate,
-    staff: StaffUser = Depends(get_current_staff),
+    staff: StaffUser = Depends(require_permission("patients.records.edit")),
     db: Session = Depends(get_db),
 ) -> PatientRecordRead:
     patient = db.get(Patient, patient_id)
@@ -466,12 +526,12 @@ def update_patient_record(
     )
     db.commit()
     db.refresh(patient)
-    return _patient_record(db, patient, include_payments=staff.role == "admin")
+    return _staff_record(db, patient, staff)
 
 
 @router.get("/settings", response_model=ClinicSettingRead)
 def settings(
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("settings.view")),
     db: Session = Depends(get_db),
 ) -> ClinicSetting:
     item = db.get(ClinicSetting, 1)
@@ -483,7 +543,7 @@ def settings(
 @router.put("/settings", response_model=ClinicSettingRead)
 def update_settings(
     payload: ClinicSettingUpdate,
-    staff: StaffUser = Depends(require_admin),
+    staff: StaffUser = Depends(require_permission("settings.edit")),
     db: Session = Depends(get_db),
 ) -> ClinicSetting:
     item = db.get(ClinicSetting, 1)
@@ -512,7 +572,7 @@ def update_settings(
 
 @router.post("/operations/run", response_model=OperationsRunResult)
 def run_scheduled_operations(
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("operations.run")),
     db: Session = Depends(get_db),
 ) -> OperationsRunResult:
     queued_reminders = queue_scheduled_reminders(db)
@@ -525,7 +585,7 @@ def run_scheduled_operations(
 
 @router.get("/schedule", response_model=list[WeeklyScheduleRead])
 def weekly_schedule(
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("schedule.view")),
     db: Session = Depends(get_db),
 ) -> list[WeeklySchedule]:
     return list(db.scalars(select(WeeklySchedule).order_by(WeeklySchedule.weekday)))
@@ -534,7 +594,7 @@ def weekly_schedule(
 @router.put("/schedule", response_model=list[WeeklyScheduleRead])
 def update_weekly_schedule(
     payload: list[WeeklyScheduleWrite],
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("schedule.edit")),
     db: Session = Depends(get_db),
 ) -> list[WeeklySchedule]:
     if {item.weekday for item in payload} != set(range(7)):
@@ -556,7 +616,7 @@ def update_weekly_schedule(
 def exceptions(
     start: date | None = None,
     end: date | None = None,
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("schedule.view")),
     db: Session = Depends(get_db),
 ) -> list[ScheduleException]:
     query = select(ScheduleException)
@@ -570,7 +630,7 @@ def exceptions(
 @router.post("/exceptions", response_model=ScheduleExceptionRead, status_code=status.HTTP_201_CREATED)
 def create_exception(
     payload: ScheduleExceptionWrite,
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("schedule.create")),
     db: Session = Depends(get_db),
 ) -> ScheduleException:
     item = ScheduleException(**payload.model_dump())
@@ -587,7 +647,7 @@ def create_exception(
 @router.delete("/exceptions/{exception_id}", response_model=ApiMessage)
 def delete_exception(
     exception_id: int,
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("schedule.delete")),
     db: Session = Depends(get_db),
 ) -> ApiMessage:
     item = db.get(ScheduleException, exception_id)
@@ -604,7 +664,7 @@ def delete_exception(
 )
 def service_exceptions(
     service_id: int,
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("schedule.view")),
     db: Session = Depends(get_db),
 ) -> list[ServiceScheduleException]:
     if not db.get(Service, service_id):
@@ -626,7 +686,7 @@ def service_exceptions(
 def create_service_exception(
     service_id: int,
     payload: ServiceScheduleExceptionWrite,
-    staff: StaffUser = Depends(require_admin),
+    staff: StaffUser = Depends(require_permission("schedule.create")),
     db: Session = Depends(get_db),
 ) -> ServiceScheduleException:
     service = db.get(Service, service_id)
@@ -660,7 +720,7 @@ def create_service_exception(
 def delete_service_exception(
     service_id: int,
     exception_id: int,
-    staff: StaffUser = Depends(require_admin),
+    staff: StaffUser = Depends(require_permission("schedule.delete")),
     db: Session = Depends(get_db),
 ) -> ApiMessage:
     item = db.scalar(
@@ -687,7 +747,7 @@ def delete_service_exception(
 
 @router.get("/services", response_model=list[ServiceRead])
 def all_services(
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("services.view")),
     db: Session = Depends(get_db),
 ) -> list[Service]:
     return list(db.scalars(select(Service).order_by(Service.sort_order, Service.id)))
@@ -720,7 +780,7 @@ def _default_service_schedule(db: Session) -> list[ServiceWeeklySchedule]:
 @router.post("/services", response_model=ServiceRead, status_code=status.HTTP_201_CREATED)
 def create_service(
     payload: ServiceWrite,
-    staff: StaffUser = Depends(require_admin),
+    staff: StaffUser = Depends(require_permission("services.create")),
     db: Session = Depends(get_db),
 ) -> Service:
     values = payload.model_dump(
@@ -771,7 +831,7 @@ def create_service(
 def update_service(
     service_id: int,
     payload: ServiceWrite,
-    staff: StaffUser = Depends(require_admin),
+    staff: StaffUser = Depends(require_permission("services.edit")),
     db: Session = Depends(get_db),
 ) -> Service:
     item = db.get(Service, service_id)
@@ -950,7 +1010,7 @@ def appointments(
     this_month: bool = False,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=5, le=100),
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("appointments.view")),
     db: Session = Depends(get_db),
 ) -> AppointmentPage:
     query = _appointments_query(
@@ -968,7 +1028,7 @@ def appointments(
         .limit(page_size)
     ).unique().all()
     return AppointmentPage(
-        items=[_appointment_read(item, include_patient=True) for item in items],
+        items=[_staff_appointment(item, _staff) for item in items],
         total=total,
         page=actual_page,
         page_size=page_size,
@@ -982,7 +1042,7 @@ def export_appointments(
     status_filter: str | None = Query(default=None, alias="status"),
     search: str | None = None,
     this_month: bool = False,
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("appointments.export")),
     db: Session = Depends(get_db),
 ) -> StreamingResponse:
     query = _appointments_query(
@@ -998,6 +1058,7 @@ def export_appointments(
     content = build_appointments_workbook(
         list(items),
         doctor_name=clinic.doctor_name if clinic else "پزشک مطب",
+        include_sensitive_notes=can(_staff, "patients.records.view"),
     )
     filename = f"appointments-{datetime.now().strftime('%Y%m%d')}.xlsx"
     return StreamingResponse(
@@ -1011,7 +1072,7 @@ def export_appointments(
 def update_appointment(
     appointment_id: int,
     payload: AppointmentStatusUpdate,
-    staff: StaffUser = Depends(get_current_staff),
+    staff: StaffUser = Depends(require_permission("appointments.edit")),
     db: Session = Depends(get_db),
 ) -> AppointmentRead:
     item = db.get(Appointment, appointment_id)
@@ -1028,9 +1089,14 @@ def update_appointment(
             status_code=status.HTTP_409_CONFLICT,
             detail="این تغییر وضعیت مجاز نیست؛ نوبت نهایی‌شده قابل بازگردانی نیست",
         )
+    if payload.status == "cancelled" and not can(staff, "appointments.cancel"):
+        raise HTTPException(403, "مجوز لغو نوبت ندارید")
+    if "staff_note" in payload.model_fields_set and not can(staff, "patients.records.edit"):
+        raise HTTPException(403, "مجوز ویرایش یادداشت پرونده ندارید")
     previous_status = item.status
     item.status = payload.status
-    item.staff_note = payload.staff_note
+    if "staff_note" in payload.model_fields_set:
+        item.staff_note = payload.staff_note
     if payload.status == "cancelled":
         item.slot_key = None
         item.cancelled_at = utcnow()
@@ -1057,14 +1123,14 @@ def update_appointment(
     db.commit()
     db.refresh(item)
     dispatch_pending_sms(db)
-    return _appointment_read(item, include_patient=True)
+    return _staff_appointment(item, staff)
 
 
 @router.patch("/appointments/{appointment_id}/reschedule", response_model=AppointmentRead)
 def reschedule_appointment(
     appointment_id: int,
     payload: AppointmentReschedule,
-    staff: StaffUser = Depends(get_current_staff),
+    staff: StaffUser = Depends(require_permission("appointments.reschedule")),
     db: Session = Depends(get_db),
 ) -> AppointmentRead:
     item = db.get(Appointment, appointment_id)
@@ -1132,7 +1198,7 @@ def reschedule_appointment(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="این زمان هم‌اکنون رزرو شد") from exc
     db.refresh(item)
     dispatch_pending_sms(db)
-    return _appointment_read(item, include_patient=True)
+    return _staff_appointment(item, staff)
 
 
 def _staff_consultation_appointment(db: Session, appointment_id: int) -> Appointment:
@@ -1149,7 +1215,7 @@ def _staff_consultation_appointment(db: Session, appointment_id: int) -> Appoint
 
 @router.get("/consultations", response_model=list[ConsultationThreadRead])
 def consultation_threads(
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("consultations.view")),
     db: Session = Depends(get_db),
 ) -> list[ConsultationThreadRead]:
     appointments = db.scalars(
@@ -1184,7 +1250,7 @@ def consultation_threads(
                 appointment_date=item.appointment_date,
                 appointment_time=item.start_time,
                 appointment_status=item.status,
-                patient_note=item.patient_note,
+                patient_note=item.patient_note if can(_staff, "patients.records.view") else None,
                 last_message=(
                     last_message.body
                     if last_message and last_message.body
@@ -1207,7 +1273,7 @@ def consultation_threads(
 )
 def staff_consultation_messages(
     appointment_id: int,
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("consultations.view")),
     db: Session = Depends(get_db),
 ) -> list[ConsultationMessageRead]:
     _staff_consultation_appointment(db, appointment_id)
@@ -1223,7 +1289,7 @@ def staff_consultation_messages(
             changed = True
     if changed:
         db.commit()
-    return [consultation_message_read(message) for message in messages]
+    return [_staff_message(message, _staff) for message in messages]
 
 
 @router.post(
@@ -1235,7 +1301,7 @@ def staff_create_consultation_message(
     appointment_id: int,
     payload: ConsultationMessageCreate,
     background_tasks: BackgroundTasks,
-    staff: StaffUser = Depends(get_current_staff),
+    staff: StaffUser = Depends(require_permission("consultations.send")),
     db: Session = Depends(get_db),
 ) -> ConsultationMessageRead:
     appointment = _staff_consultation_appointment(db, appointment_id)
@@ -1262,13 +1328,13 @@ def staff_create_consultation_message(
         sender_type="staff",
         message_id=message.id,
     )
-    return consultation_message_read(message)
+    return _staff_message(message, staff)
 
 
 @router.get("/waitlist", response_model=list[WaitlistEntryRead])
 def staff_waitlist(
     status_filter: str | None = Query(default=None, alias="status"),
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("waitlist.view")),
     db: Session = Depends(get_db),
 ) -> list[WaitlistEntryRead]:
     if expire_waitlist_offers(db):
@@ -1284,7 +1350,7 @@ def staff_waitlist(
 def update_waitlist_status(
     entry_id: int,
     payload: WaitlistStatusUpdate,
-    staff: StaffUser = Depends(get_current_staff),
+    staff: StaffUser = Depends(require_permission("waitlist.edit")),
     db: Session = Depends(get_db),
 ) -> WaitlistEntryRead:
     item = db.get(WaitlistEntry, entry_id)
@@ -1331,7 +1397,7 @@ def _payment_read(item: Payment) -> PaymentRead:
 
 @router.get("/finance/summary", response_model=FinanceSummary)
 def finance_summary(
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("finance.view")),
     db: Session = Depends(get_db),
 ) -> FinanceSummary:
     items = db.scalars(select(Payment)).unique().all()
@@ -1353,7 +1419,7 @@ def finance_summary(
 @router.get("/finance/payments", response_model=list[PaymentRead])
 def finance_payments(
     refund_status: str | None = None,
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("finance.view")),
     db: Session = Depends(get_db),
 ) -> list[PaymentRead]:
     query = select(Payment)
@@ -1367,7 +1433,7 @@ def finance_payments(
 def update_refund(
     payment_id: int,
     payload: RefundUpdate,
-    staff: StaffUser = Depends(require_admin),
+    staff: StaffUser = Depends(require_permission("finance.refund")),
     db: Session = Depends(get_db),
 ) -> PaymentRead:
     item = db.get(Payment, payment_id)
@@ -1410,7 +1476,7 @@ def update_refund(
 @router.get("/audit-logs", response_model=list[AuditLogRead])
 def audit_logs(
     limit: int = Query(default=100, ge=1, le=300),
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("audit.view")),
     db: Session = Depends(get_db),
 ) -> list[AuditLogRead]:
     items = db.scalars(
@@ -1422,7 +1488,7 @@ def audit_logs(
         actor_role = "system"
         if item.actor_staff:
             actor_name = item.actor_staff.full_name
-            actor_role = item.actor_staff.role
+            actor_role = "، ".join(identity(item.actor_staff)["role_titles"]) or "بدون نقش فعال"
         elif item.actor_patient:
             actor_name = " ".join(
                 filter(None, [item.actor_patient.first_name, item.actor_patient.last_name])
@@ -1446,7 +1512,7 @@ def audit_logs(
 
 @router.get("/sms/rules", response_model=list[SmsAutomationRuleRead])
 def sms_rules(
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("sms.view")),
     db: Session = Depends(get_db),
 ) -> list[SmsAutomationRule]:
     return list(db.scalars(select(SmsAutomationRule).order_by(SmsAutomationRule.id)))
@@ -1456,7 +1522,7 @@ def sms_rules(
 def update_sms_rule(
     event_key: str,
     payload: SmsAutomationRuleWrite,
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("sms.rules.edit")),
     db: Session = Depends(get_db),
 ) -> SmsAutomationRule:
     item = db.scalar(
@@ -1482,7 +1548,7 @@ def update_sms_rule(
 @router.get("/sms/outbox", response_model=list[SmsOutboxRead])
 def sms_outbox(
     limit: int = Query(default=100, ge=1, le=500),
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("sms.view")),
     db: Session = Depends(get_db),
 ) -> list[SmsOutbox]:
     return list(
@@ -1558,7 +1624,7 @@ def _campaign_read(item: SmsCampaign) -> SmsCampaignRead:
 @router.post("/sms/campaigns/preview", response_model=SmsCampaignPreviewResponse)
 def preview_sms_campaign(
     payload: SmsCampaignPreviewRequest,
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("sms.campaigns.create")),
     db: Session = Depends(get_db),
 ) -> SmsCampaignPreviewResponse:
     return SmsCampaignPreviewResponse(
@@ -1569,7 +1635,7 @@ def preview_sms_campaign(
 @router.get("/sms/campaigns", response_model=list[SmsCampaignRead])
 def sms_campaigns(
     limit: int = Query(default=50, ge=1, le=200),
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("sms.view")),
     db: Session = Depends(get_db),
 ) -> list[SmsCampaignRead]:
     items = db.scalars(
@@ -1585,7 +1651,7 @@ def sms_campaigns(
 )
 def create_sms_campaign(
     payload: SmsCampaignCreate,
-    staff: StaffUser = Depends(require_admin),
+    staff: StaffUser = Depends(require_permission("sms.campaigns.create")),
     db: Session = Depends(get_db),
 ) -> SmsCampaignRead:
     variables = _template_variables(payload.message_text)
@@ -1648,7 +1714,7 @@ def create_sms_campaign(
 
 @router.post("/sms/dispatch", response_model=ApiMessage)
 def dispatch_sms(
-    _staff: StaffUser = Depends(require_admin),
+    _staff: StaffUser = Depends(require_permission("sms.dispatch")),
     db: Session = Depends(get_db),
 ) -> ApiMessage:
     expire_unpaid_holds(db)
@@ -1660,7 +1726,7 @@ def dispatch_sms(
 def staff_consultation_image(
     appointment_id: int,
     message_id: int,
-    _staff: StaffUser = Depends(get_current_staff),
+    _staff: StaffUser = Depends(require_permission("images.view")),
     db: Session = Depends(get_db),
 ) -> FileResponse:
     _staff_consultation_appointment(db, appointment_id)

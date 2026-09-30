@@ -48,15 +48,16 @@ const dateTime = (value: string) =>
 const answerLabel = (value: string | boolean | undefined) =>
     value === true ? "بله" : value === false ? "خیر" : value || "بدون پاسخ";
 
+import { useStaffAccess } from "./staffAccess";
+
 export default function StaffPatientsPanel({
     token,
-    role,
     onOpenConversation,
 }: {
     token: string;
-    role: string;
     onOpenConversation: (appointmentId: number) => void;
 }) {
+    const can = useStaffAccess();
     const [pageData, setPageData] = useState<PatientPage>({
         items: [],
         available_tags: [],
@@ -158,12 +159,12 @@ export default function StaffPatientsPanel({
     const recordTabs = useMemo(
         () => [
             { id: "overview" as const, label: "نمای کلی" },
-            { id: "appointments" as const, label: `نوبت‌ها (${record?.appointments.length ?? 0})` },
-            { id: "forms" as const, label: "فرم‌ها" },
-            { id: "conversations" as const, label: `گفتگوها (${record?.conversations.length ?? 0})` },
-            ...(role === "admin" ? [{ id: "payments" as const, label: "پرداخت‌ها" }] : []),
+            ...(can("appointments.view") ? [{ id: "appointments" as const, label: `نوبت‌ها (${record?.appointments.length ?? 0})` }] : []),
+            ...(can("intake.view") ? [{ id: "forms" as const, label: "فرم‌ها" }] : []),
+            ...(can("consultations.view") ? [{ id: "conversations" as const, label: `گفتگوها (${record?.conversations.length ?? 0})` }] : []),
+            ...(can("finance.view") ? [{ id: "payments" as const, label: "پرداخت‌ها" }] : []),
         ],
-        [record, role],
+        [can, record],
     );
 
     return (
@@ -194,11 +195,12 @@ export default function StaffPatientsPanel({
                     value={tag}
                     onChange={setTag}
                     options={[{ value: "", label: "همه برچسب‌ها" }, ...pageData.available_tags.map((value) => ({ value, label: value }))]}
+                    disabled={!can("patients.records.view")}
                     ariaLabel="فیلتر برچسب بیمار"
                 />
                 <button className="h-11 rounded-xl bg-primary px-5 text-sm font-bold text-white">جست‌وجو</button>
                 <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800 md:col-span-3">
-                    <input type="checkbox" checked={followUpOnly} onChange={(event) => setFollowUpOnly(event.target.checked)} className="h-4 w-4 accent-amber-600" />
+                    <input type="checkbox" disabled={!can("patients.records.view")} checked={followUpOnly} onChange={(event) => setFollowUpOnly(event.target.checked)} className="h-4 w-4 accent-amber-600" />
                     فقط بیماران نیازمند پیگیری
                 </label>
             </form>
@@ -210,6 +212,7 @@ export default function StaffPatientsPanel({
                             <button
                                 key={patient.id}
                                 type="button"
+                                disabled={!can("patients.records.view")}
                                 onClick={() => void loadRecord(patient.id)}
                                 className={`w-full p-4 text-right transition hover:bg-slate-50 ${selectedId === patient.id ? "bg-secondary/10" : ""}`}
                             >
@@ -286,7 +289,7 @@ export default function StaffPatientsPanel({
                                         <div className="min-w-0 rounded-2xl bg-slate-50 p-3"><span className="text-xs text-slate-400">ایمیل</span><b dir="ltr" className="mt-1 block truncate text-right text-slate-700">{record.email || "ثبت نشده"}</b></div>
                                     </div>
                                     <form onSubmit={saveRecord} className="rounded-2xl border border-amber-100 bg-amber-50/50 p-4">
-                                        <label className="flex items-center justify-between gap-3 text-sm font-bold text-amber-900">
+                                        <fieldset disabled={!can("patients.records.edit")}><label className="flex items-center justify-between gap-3 text-sm font-bold text-amber-900">
                                             نیازمند پیگیری
                                             <input type="checkbox" checked={needsFollowUp} onChange={(event) => setNeedsFollowUp(event.target.checked)} className="h-5 w-5 accent-amber-600" />
                                         </label>
@@ -296,7 +299,7 @@ export default function StaffPatientsPanel({
                                         <label className="mt-3 block text-xs text-slate-500">یادداشت داخلی
                                             <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={4} maxLength={5000} className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white p-3 text-sm leading-6 outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10" placeholder="فقط کارکنان مطب این متن را می‌بینند" />
                                         </label>
-                                        <button disabled={saving} className="mt-3 h-10 w-full rounded-xl bg-primary text-xs font-bold text-white disabled:opacity-50">{saving ? "در حال ذخیره…" : "ذخیره پرونده"}</button>
+                                        <button disabled={saving || !can("patients.records.edit")} className="mt-3 h-10 w-full rounded-xl bg-primary text-xs font-bold text-white disabled:opacity-50">{saving ? "در حال ذخیره…" : "ذخیره پرونده"}</button></fieldset>
                                     </form>
                                 </div>
                             </article>
@@ -372,7 +375,7 @@ export default function StaffPatientsPanel({
                                 </section>
                             )}
 
-                            {recordTab === "payments" && role === "admin" && (
+                            {recordTab === "payments" && can("finance.view") && (
                                 <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                                     <div className="flex items-center justify-between border-b border-slate-100 p-5"><h4 className="font-dana text-xl text-primary">پرداخت‌های بیمار</h4><b className="text-sm text-emerald-700">جمع تأییدشده: {formatToman(record.total_paid_toman)}</b></div>
                                     <div className="divide-y divide-slate-100">

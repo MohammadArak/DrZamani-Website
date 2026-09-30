@@ -22,6 +22,7 @@ from ..browser_sessions import (
 from ..config import get_settings
 from ..database import get_db
 from ..dependencies import bearer_scheme
+from ..access import assign_legacy_role, identity
 from ..models import AuthSession, CaptchaChallenge, OtpChallenge, Patient, StaffUser
 from ..schemas import (
     ApiMessage,
@@ -334,6 +335,7 @@ def staff_login(
     )
     if not staff or not staff.is_active or not valid_password:
         raise HTTPException(status_code=401, detail="نام کاربری یا رمز عبور صحیح نیست")
+    assign_legacy_role(db, staff)
     reset_limit(db, "staff-login-account", username)
     token, token_hash = issue_session_token()
     expires_at = staff_session_expiry()
@@ -354,6 +356,5 @@ def staff_login(
         access_token="" if browser else token,
         token_type="cookie" if browser else "bearer",
         expires_at=expires_at.isoformat(),
-        full_name=staff.full_name,
-        role=staff.role,
+        **identity(staff),
     )

@@ -28,6 +28,8 @@ import {
     IoTimeOutline,
 } from "react-icons/io5";
 
+import { useStaffAccess } from "./staffAccess";
+
 const inputClass =
     "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-slate-800 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/10";
 
@@ -49,6 +51,7 @@ export const StaffCalendarPanel = ({
     services: Service[];
     onChanged: () => Promise<void>;
 }) => {
+    const can = useStaffAccess();
     const [weekStart, setWeekStart] = useState(() => startOfIranWeek());
     const [items, setItems] = useState<Appointment[]>([]);
     const [selected, setSelected] = useState<Appointment | null>(null);
@@ -166,7 +169,7 @@ export const StaffCalendarPanel = ({
                                         event.preventDefault();
                                         const id = Number(event.dataTransfer.getData("appointment-id"));
                                         const appointment = items.find((item) => item.id === id);
-                                        if (appointment) void move(appointment, key, appointment.start_time);
+                                        if (appointment && can("appointments.reschedule")) void move(appointment, key, appointment.start_time);
                                     }}
                                     className="min-h-[520px] border-l border-slate-100 last:border-l-0"
                                 >
@@ -183,7 +186,7 @@ export const StaffCalendarPanel = ({
                                             <button
                                                 key={appointment.id}
                                                 type="button"
-                                                draggable={appointment.status === "pending" || appointment.status === "confirmed"}
+                                                draggable={can("appointments.reschedule") && (appointment.status === "pending" || appointment.status === "confirmed")}
                                                 onDragStart={(event) => event.dataTransfer.setData("appointment-id", String(appointment.id))}
                                                 onClick={() => {
                                                     setSelected(appointment);
@@ -224,7 +227,7 @@ export const StaffCalendarPanel = ({
                                 <input type="time" value={moveTime} onChange={(event) => setMoveTime(event.target.value)} className={inputClass} />
                                 <button
                                     type="button"
-                                    disabled={busy || !moveDate || !moveTime}
+                                    disabled={busy || !moveDate || !moveTime || !can("appointments.reschedule")}
                                     onClick={() => void move(selected, moveDate, moveTime)}
                                     className="h-11 w-full rounded-xl bg-primary font-bold text-white disabled:opacity-40"
                                 >
@@ -266,6 +269,7 @@ export const StaffWaitlistPanel = ({
     entries: WaitlistEntry[];
     onReload: () => Promise<void>;
 }) => {
+    const can = useStaffAccess();
     const [busy, setBusy] = useState<number | null>(null);
     const [toast, setToast] = useState<{ message: string; kind: "success" | "error" }>({ message: "", kind: "success" });
     return (
@@ -297,7 +301,7 @@ export const StaffWaitlistPanel = ({
                             {entry.status === "notified" && (
                                 <button
                                     type="button"
-                                    disabled={busy === entry.id}
+                                    disabled={busy === entry.id || !can("waitlist.edit")}
                                     onClick={async () => {
                                         setBusy(entry.id);
                                         try {
@@ -318,7 +322,7 @@ export const StaffWaitlistPanel = ({
                             {["waiting", "notified"].includes(entry.status) && (
                                 <button
                                     type="button"
-                                    disabled={busy === entry.id}
+                                    disabled={busy === entry.id || !can("waitlist.edit")}
                                     onClick={async () => {
                                         setBusy(entry.id);
                                         try {
@@ -365,6 +369,7 @@ export const StaffFinancePanel = ({
     payments: PaymentItem[];
     onReload: () => Promise<void>;
 }) => {
+    const can = useStaffAccess();
     const [busy, setBusy] = useState<number | null>(null);
     const [toast, setToast] = useState<{ message: string; kind: "success" | "error" }>({ message: "", kind: "success" });
     const save = async (event: FormEvent<HTMLFormElement>, payment: PaymentItem) => {
@@ -416,11 +421,11 @@ export const StaffFinancePanel = ({
                             <span className="rounded-full bg-slate-50 px-3 py-1.5 text-center text-xs text-slate-600">{refundOptions.find((item) => item.value === payment.refund_status)?.label}</span>
                         </summary>
                         <form onSubmit={(event) => void save(event, payment)} className="grid gap-3 border-t border-slate-100 bg-slate-50/60 p-4 md:grid-cols-2 xl:grid-cols-5">
-                            <AppSelect name="refund_status" defaultValue={payment.refund_status} options={refundOptions} ariaLabel="وضعیت بازپرداخت" />
+                            <fieldset disabled={!can("finance.refund")} className="contents"><AppSelect name="refund_status" defaultValue={payment.refund_status} options={refundOptions} ariaLabel="وضعیت بازپرداخت" />
                             <input name="refund_amount_toman" type="number" min="0" max={payment.amount_toman} step="1000" defaultValue={payment.refund_amount_toman} className={inputClass} placeholder="مبلغ بازپرداخت" />
                             <input name="refund_reference" defaultValue={payment.refund_reference ?? ""} className={inputClass} placeholder="شماره پیگیری" />
                             <input name="refund_note" defaultValue={payment.refund_note ?? ""} className={inputClass} placeholder="یادداشت" />
-                            <button disabled={busy === payment.id} className="h-11 rounded-xl bg-primary px-4 text-sm font-bold text-white disabled:opacity-40">ثبت وضعیت</button>
+                            <button disabled={busy === payment.id || !can("finance.refund")} className="h-11 rounded-xl bg-primary px-4 text-sm font-bold text-white disabled:opacity-40">ثبت وضعیت</button></fieldset>
                         </form>
                     </details>
                 ))}
