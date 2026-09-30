@@ -43,6 +43,7 @@
 - Git schannel خطای SEC_E_NO_CREDENTIALS داشت؛ git -c http.sslBackend=openssl با TLS verification فعال استفاده کن. gh روی PATH نیست، GitHub connector در دسترس بود. credential در چت درخواست نکن.
 - cacheهای uv/tools/pip-audit باید در مسیر قابل‌نوشتن workspace باشند؛ WinError 5 مربوط cache حل شد. DB lock هنگام migration با توقف preview حل شد. SQLite context manager به‌تنهایی close نمی‌کند؛ اسکریپت جدید از closing استفاده می‌کند تا cleanup Windows موفق شود.
 - اجرای مستقل یک تست جدید ابتدا به schema ساخته‌شده هنگام import تست قدیمی وابسته بود؛ fixture ساخت schema در test_auth_hardening اضافه شد و اجرای مستقل تست production logging نیز پاس شد.
+- warning توسعه درباره h2 داخل h3 بخش نظرات با تغییر wrapper انیمیشن PatientsComments به div حل شد؛ lint/build پس از آن نیز بررسی شدند.
 - سه warning تست غیرمسدودکننده درباره httpx2 TestClient و نام قدیمی HTTP 422 و warning Nginx برای listen http2 باقی‌اند؛ همه بررسی‌های ذکرشده موفق بوده‌اند.
 - site live و HTTPS/browser production و سرویس‌های خارجی هنوز تأیید نشده‌اند. خطای ابزار شبکه را خرابی سایت گزارش نکن.
 - iframe نقشه نشان در محیط محلی بارگذاری نشد، fallback موجود نمایش داده شد و خطای CSP دیده نشد؛ نمایش واقعی نقشه خارجی هنوز باید در staging بررسی شود.

@@ -23,6 +23,7 @@
 - ارتقای dependencyهای دارای هشدار؛ اسکن دوباره backend و اسکن dependencyهای اجرایی frontend صفر مورد شناخته‌شده؛ جزئیات گزارش در docs/DEPENDENCY_AUDIT_PHASE01.json.
 - upload: محدودیت pixel/decoder و orphan cleanup؛ Excel متن امن و خروجی calendar بدون property injection؛ نسخه واحد و build guard.
 - ۴۴ تست پاس، lint/build، Ruff بحرانی و fresh/upgrade/downgrade migration موفق؛ مرورگر موبایل/دسکتاپ و login/profile/reload/logout بیمار با داده ساختگی تأیید شدند.
+- هنگام جمع‌کردن preview، warning قدیمی nesting عنوان h2 داخل h3 بخش نظرات از لاگ Vite پیدا شد؛ wrapper به div تبدیل و lint/build دوباره بررسی شد.
 - گزارش دقیق، راهنمای ادامه و وضعیت roadmap همراه کد به‌روز شد؛ هیچ deploy، پیامک/پرداخت واقعی یا روشن‌کردن رزرو انجام نشد.
 - سه warning تست و warning syntax قدیمی http2 باقی‌اند؛ callback پرداخت/outbox مرحله ۵، نقش‌ها مرحله ۲ و CAPTCHA خارجی/MFA مرحله ۴ هستند.
 

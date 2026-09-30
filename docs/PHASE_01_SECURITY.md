@@ -26,6 +26,7 @@
 | CR/LF در متن خروجی تقویم می‌توانست property تزریق کند | حذف CR و escape LF؛ PRODID نیز escape می‌شود |
 | نسخه backend و manifest متفاوت بود | VERSION=1.8.0؛ تطبیق package/lock/pyproject پیش از build و نسخه در health |
 | lint مبنا سه خطا و یک هشدار داشت | اصلاح effectهای context/preview و dependency تقویم؛ lint بدون خطا/هشدار |
+| لاگ توسعه عنوان h2 داخل h3 در بخش نظرات را نامعتبر می‌دانست | wrapper انیمیشن به div تبدیل شد و عنوان h2 حفظ شد؛ ساخت فرانت‌اند دوباره بررسی شد |
 
 اسکن dependency علاوه بر بررسی کد انجام شد. `pip-audit` در مبنا ۶۳ رکورد هشدار در ۵ بسته گزارش کرد؛ برخی alias/رکوردها تکراری‌اند و این عدد، ۶۳ نقص مستقل نیست. نسخه‌های دارای هشدار Pillow، python-multipart، python-dotenv، Starlette و pytest ارتقا یافتند. FastAPI نیز برای سازگاری با Starlette اصلاح‌شده به‌روز شد. نسخه‌های نصب‌شده: FastAPI `0.142.2`، Starlette `1.3.1`، Pillow `12.3.0`، multipart `0.0.31`، dotenv `1.2.2` و pytest `9.0.3`. lock بازتولید و sync منجمد اجرا شد؛ اسکن دوباره صفر مورد شناخته‌شده گزارش کرد. این نتیجه صرفاً وضعیت پایگاه هشدار و وابستگی‌های نصب‌شده در این تاریخ است.
 

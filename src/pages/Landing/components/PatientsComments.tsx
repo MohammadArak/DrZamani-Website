@@ -92,7 +92,7 @@ const PatientsComments = () => {
             className="relative bg-linear-to-tl from-jetblack to-[#1B273B] pt-12 pb-20 md:pt-14 flex flex-col items-center gap-12"
         >
             <div className="relative flex flex-col gap-2 items-center z-20">
-                <motion.h3
+                <motion.div
                     className="relative px-4 flex items-center gap-2"
                     initial={{ opacity: 0, y: -20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ const PatientsComments = () => {
                             fill="none"
                         />
                     </svg>
-                </motion.h3>
+                </motion.div>
             </div>
             <div className="flex flex-col gap-3 items-center">
                 <motion.h5
