@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import HTTPException, status
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from .config import get_settings
+from .runtime_settings import get_settings
 from .models import ConsultationMessage
 from .schemas import ConsultationMessageRead
 

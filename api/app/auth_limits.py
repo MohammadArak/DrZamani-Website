@@ -9,7 +9,7 @@ from sqlalchemy import case, delete
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import Session
 
-from .config import get_settings
+from .runtime_settings import get_settings
 from .models import AuthRateLimit
 from .security import utcnow
 

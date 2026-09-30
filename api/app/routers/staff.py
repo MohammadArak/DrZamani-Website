@@ -546,28 +546,8 @@ def update_settings(
     staff: StaffUser = Depends(require_permission("settings.edit")),
     db: Session = Depends(get_db),
 ) -> ClinicSetting:
-    item = db.get(ClinicSetting, 1)
-    if not item:
-        item = ClinicSetting(id=1)
-        db.add(item)
-    values = payload.model_dump()
-    changed_fields = [
-        field for field, value in values.items() if getattr(item, field, None) != value
-    ]
-    for field, value in values.items():
-        setattr(item, field, value)
-    record_audit(
-        db,
-        action="clinic.settings_updated",
-        entity_type="clinic_setting",
-        entity_id=1,
-        summary="به‌روزرسانی تنظیمات و اطلاعات ثابت مطب",
-        actor_staff_id=staff.id,
-        details={"changed_fields": changed_fields},
-    )
-    db.commit()
-    db.refresh(item)
-    return item
+    from ..runtime_settings import update_clinic
+    return update_clinic(db, staff, payload)
 
 
 @router.post("/operations/run", response_model=OperationsRunResult)

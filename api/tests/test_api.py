@@ -79,7 +79,7 @@ def test_central_clinic_information_is_public_and_admin_only() -> None:
             "address": "شهر نمونه، خیابان نمونه، ساختمان مرکزی",
             "working_hours": "شنبه تا چهارشنبه، ۱۶ تا ۲۰",
             "site_url": "https://clinic.example.com/",
-            "map_embed_url": "https://maps.example.com/embed/clinic/",
+            "map_embed_url": "https://neshan.org/maps/iframe/test/",
             "map_page_url": "https://maps.example.com/clinic/",
             "map_latitude": 34.1234,
             "map_longitude": 49.5678,
@@ -166,7 +166,7 @@ def test_central_clinic_information_is_public_and_admin_only() -> None:
         restore_response = client.put(
             "/api/v1/staff/settings",
             headers=admin_headers,
-            json=original,
+            json={**original, "revision": client.get("/api/v1/staff/settings", headers=admin_headers).json()["revision"]},
         )
         assert restore_response.status_code == 200, restore_response.text
 
@@ -801,7 +801,9 @@ def test_operational_capacity_waitlist_reschedule_and_audit() -> None:
         dates = client.get(
             "/api/v1/availability/dates", params={"service_id": service["id"]}
         ).json()
-        selected_date = dates[0]["date"]
+        # The first date can be today with only one slot left near midnight.
+        # Rescheduling needs another slot, so use a complete future day.
+        selected_date = dates[1]["date"]
         slots = client.get(
             f"/api/v1/availability/{selected_date}",
             params={"service_id": service["id"]},
@@ -1156,6 +1158,6 @@ def test_clinic_public_information_is_managed_centrally() -> None:
             restored = client.put(
                 "/api/v1/staff/settings",
                 headers=staff_headers,
-                json=original,
+                json={**original, "revision": client.get("/api/v1/staff/settings", headers=staff_headers).json()["revision"]},
             )
             assert restored.status_code == 200, restored.text

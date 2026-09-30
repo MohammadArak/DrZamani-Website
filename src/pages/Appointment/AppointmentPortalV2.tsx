@@ -142,12 +142,13 @@ const AuthShell = ({ children }: { children: React.ReactNode }) => {
 const OtpInput = ({
     value,
     onChange,
+    length,
 }: {
     value: string;
     onChange: (value: string) => void;
+    length: number;
 }) => {
     const refs = useRef<(HTMLInputElement | null)[]>([]);
-    const length = 6;
     const update = (index: number, rawValue: string) => {
         const digit = normalizeDigits(rawValue).replace(/\D/g, "").slice(-1);
         const next = value.padEnd(length, " ").split("");
@@ -165,7 +166,8 @@ const OtpInput = ({
     return (
         <div
             dir="ltr"
-            className="grid w-full min-w-0 grid-cols-6 gap-1.5 sm:flex sm:justify-center sm:gap-2"
+            className="grid w-full min-w-0 gap-1.5 sm:flex sm:justify-center sm:gap-2"
+            style={{ gridTemplateColumns: `repeat(${length}, minmax(0, 1fr))` }}
         >
             {Array.from({ length }, (_, index) => (
                 <input
@@ -207,6 +209,7 @@ const Login = ({
     const [phone, setPhone] = useState("");
     const [code, setCode] = useState("");
     const [debugOtp, setDebugOtp] = useState("");
+    const [codeLength, setCodeLength] = useState(6);
     const [cooldown, setCooldown] = useState(0);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
@@ -229,6 +232,8 @@ const Login = ({
             setStage("otp");
             setCooldown(result.retry_after_seconds);
             setDebugOtp(result.debug_otp ?? "");
+            setCodeLength(result.code_length ?? 6);
+            setCode("");
         } catch (requestError) {
             setError(errorMessage(requestError));
             if (
@@ -280,7 +285,7 @@ const Login = ({
                 <p className="mt-4 leading-7 text-slate-500">
                     {stage === "phone"
                         ? "برای ساخت حساب یا ورود، کد یک‌بارمصرف برای شما ارسال می‌شود."
-                        : `کد شش‌رقمی به ${toPersianDigits(phone)} ارسال شد.`}
+                        : `کد ${toPersianDigits(String(codeLength))} رقمی به ${toPersianDigits(phone)} ارسال شد.`}
                 </p>
 
                 {error && (
@@ -326,10 +331,10 @@ const Login = ({
                     </form>
                 ) : (
                     <form onSubmit={verifyCode} className="mt-7 space-y-5">
-                        <OtpInput value={code} onChange={setCode} />
+                        <OtpInput value={code} onChange={setCode} length={codeLength} />
                         <button
                             disabled={
-                                busy || code.replace(/\D/g, "").length !== 6
+                                busy || code.replace(/\D/g, "").length !== codeLength
                             }
                             className="h-13 w-full rounded-2xl bg-secondary font-bold text-primary shadow-lg shadow-secondary/20 transition hover:bg-secondary-mild disabled:opacity-50"
                         >

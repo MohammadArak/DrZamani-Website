@@ -6,7 +6,7 @@ from datetime import timedelta
 
 from fastapi import HTTPException, Request, Response
 
-from .config import get_settings
+from .runtime_settings import get_settings
 from .models import AuthSession, StaffUser
 from .security import utcnow
 

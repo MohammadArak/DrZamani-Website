@@ -26,8 +26,9 @@ const Landing = () => {
     return (
         <>
             <Seo
-                title={`${clinicInfo.doctorName} | ${clinicInfo.specialty}`}
-                description={`وب‌سایت رسمی ${clinicInfo.doctorName}، ${clinicInfo.specialty} در ${clinicInfo.address.city}؛ معرفی خدمات، نمونه‌کارها و نوبت مشاوره.`}
+                title={clinicInfo.seoTitle || `${clinicInfo.doctorName} | ${clinicInfo.specialty}`}
+                description={clinicInfo.seoDescription || `وب‌سایت رسمی ${clinicInfo.doctorName}، ${clinicInfo.specialty} در ${clinicInfo.address.city}؛ معرفی خدمات و راه‌های ارتباطی.`}
+                image={clinicInfo.seoImageUrl || `${clinicInfo.siteUrl}/og-cover.jpg`}
                 canonical={`${clinicInfo.siteUrl}/`}
                 keywords={[
                     clinicInfo.doctorName,

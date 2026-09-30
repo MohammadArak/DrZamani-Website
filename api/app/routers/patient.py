@@ -25,7 +25,7 @@ from ..consultations import (
     optimize_consultation_image,
 )
 from ..calendar_export import appointment_ics
-from ..config import get_settings
+from ..runtime_settings import get_settings
 from ..dependencies import get_current_patient
 from ..models import (
     Appointment,

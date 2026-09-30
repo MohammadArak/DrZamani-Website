@@ -39,6 +39,10 @@ export type PatientProfilePayload = {
 };
 
 export type ClinicSettings = {
+    revision: number;
+    seo_title: string;
+    seo_description: string;
+    seo_image_url: string;
     doctor_name: string;
     specialty: string;
     medical_council_number: string;
@@ -66,6 +70,19 @@ export type ClinicSettings = {
     first_reminder_hours: number;
     final_reminder_hours: number;
     timezone_name: string;
+};
+
+export type SystemSettingField = {
+    key: string; label: string; group: string; kind: "string" | "integer" | "boolean" | "select";
+    minimum: number | null; maximum: number | null; choices: string[]; help: string;
+    secret: boolean; owner_only: boolean; value: string | number | boolean | null;
+    default: string | number | boolean | null; configured: boolean; source: string;
+};
+export type SettingsHistory = { revision: number; changed_keys: string[]; actor_staff_id: number | null; created_at: string };
+export type SystemSettings = {
+    revision: number; fields: SystemSettingField[];
+    status: { environment: string; encryption_ready: boolean; webhook_allowed_hosts: string[]; frontend_origins: string[]; public_html_ready: boolean };
+    infrastructure: { key: string; help: string }[]; future: Record<string, string>;
 };
 
 export type Service = {
@@ -637,7 +654,7 @@ async function apiBlob(path: string, token: string): Promise<Blob> {
 
 export const appointmentApi = {
     requestOtp: (phone: string) =>
-        apiRequest<{ message: string; retry_after_seconds: number; debug_otp?: string }>(
+        apiRequest<{ message: string; retry_after_seconds: number; code_length?: number; debug_otp?: string }>(
             "/auth/otp/request",
             { method: "POST", body: JSON.stringify({ phone }) },
         ),
@@ -798,12 +815,24 @@ export const appointmentApi = {
     saveAccessStaff: (token: string, id: number | null, payload: AccessStaffWrite) => apiRequest<StaffIdentity>(`/staff/access/staff${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", body: JSON.stringify(payload) }, token),
     staffStats: (token: string) => apiRequest<DashboardStats>("/staff/dashboard", {}, token),
     staffSettings: (token: string) => apiRequest<ClinicSettings>("/staff/settings", {}, token),
+    systemSettings: (token: string) => apiRequest<SystemSettings>("/staff/system-settings", {}, token),
+    updateSystemSettings: (token: string, revision: number, values: Record<string, unknown>, reset: string[]) => apiRequest<SystemSettings>("/staff/system-settings", { method: "PUT", body: JSON.stringify({ revision, values, reset }) }, token),
+    settingsHistory: (token: string) => apiRequest<SettingsHistory[]>("/staff/system-settings/history", {}, token),
+    restoreSettings: (token: string, revision: number, target_revision: number) => apiRequest<SystemSettings>("/staff/system-settings/restore", { method: "POST", body: JSON.stringify({ revision, target_revision }) }, token),
+    probeWebhook: (token: string) => apiRequest<{detail: string; http_status: number}>("/staff/system-settings/probe-webhook", { method: "POST" }, token),
     updateStaffSettings: (token: string, payload: ClinicSettings) =>
         apiRequest<ClinicSettings>(
             "/staff/settings",
             { method: "PUT", body: JSON.stringify(payload) },
             token,
-        ),
+        ).then((settings) => {
+            if (typeof BroadcastChannel !== "undefined") {
+                const channel = new BroadcastChannel("drz-clinic-settings");
+                channel.postMessage({ revision: settings.revision });
+                channel.close();
+            }
+            return settings;
+        }),
     runStaffOperations: (token: string) =>
         apiRequest<{
             queued_reminders: number;

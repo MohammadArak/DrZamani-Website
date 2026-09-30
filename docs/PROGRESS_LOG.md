@@ -44,3 +44,18 @@
 - preview جمع و فایل‌های fixture از سورس انتشار حذف شدند. هیچ deploy، پیامک/پرداخت واقعی یا فعال‌سازی رزرو انجام نشد.
 
 قدم بعدی: مرحله ۳؛ مرکز تنظیمات، اسرار و اطلاعات مطب با تازه‌سازی HTML عمومی/سئو. نقشه راه و راهنمای ادامه همراه هر مرحله به‌روز و همان مرحله با main ادغام شود.
+
+## 2026-09-30 — مرحله ۳، نسخه 1.10.0
+
+- PR مرحله ۲ با main ادغام و دوباره دریافت شد: 18711829e0301e8b7d32ebd30de42cb3e2290dd3؛ شاخه phase-03-settings از همین مبنا ایجاد شد.
+- مرکز تنظیمات ۸ بخش، ۲۸ فیلد typed runtime، overlay بر ENV، پاسخ secret ماسک‌شده و Fernet با کلید مستقل، نسخه مشترک/CAS/تاریخچه/بازیابی و audit بدون مقدار اجرا شدند. زیرساخت ENV-only است.
+- API/jobs در خواندن بعدی DB تازه می‌گیرند؛ نشست/OTP/پیامک/درگاه/آپلود مصرف‌کننده‌های runtime شدند. UI OTP طول واقعی ۶ تا ۸ رقمی را می‌پذیرد.
+- وب‌هوک HTTPS/443 allowlist دقیق، رد DNS خصوصی و mixed، IP pin و TLS/SNI، بدون redirect/proxy؛ probe بدون token/payload/پیامک.
+- ClinicSetting قبلی reuse و SEO افزوده شد. HTML اولیه/metadata/JSON-LD/robots/sitemap با backend و Nginx جدید از DB تازه ساخته می‌شود؛ تغییر تلفن/title بدون build روی Nginx واقعی محلی تأیید شد.
+- 142 pytest (38 جدید) PASS؛ lint/build/versions، frozen offline 45 بسته، Ruff بحرانی و migration داده مطب/staff با round-trip/integrity/FK/payment UNIQUE PASS. cookie/CSRF/logout/WS/headers/404/410/rate-limit Nginx و syntax HTTP/HTTPS PASS.
+- UI desktop/390px با API ساختگی مستقل: ذخیره عمومی/نسخه، عدم نمایش رمز، مجوز محدود/read-only و نبود overflow تأیید؛ تصاویر پیوست صرفاً preview هستند.
+- cryptography 50.0.0 اضافه شد؛ نسخه اولیه هشدار audit داشت و جایگزین شد. audit backend و frontend اجرایی نهایی صفر مورد شناخته‌شده. دانلود PyPI CDN خطای DNS داشت؛ hash تمام artifactهای سه بسته جدید mirror با JSON رسمی PyPI تطبیق شد؛ dependency قبلی تغییر نکرد.
+- تست قدیمی ظرفیت به پایان روز وابسته بود؛ روز آینده کامل انتخاب و کل suite دوباره پاس شد. خطاهای گذرای CSS/temp ACL/quoting/key fixture اصلاح شدند. سه warning قدیمی pytest و http2 syntax باقی‌اند.
+- اسناد roadmap/inventory/README/handoff به‌روز شدند؛ previewها جمع و fixture از Git حذف شد. هیچ deploy، مالک production، پیامک/پرداخت واقعی یا روشن‌کردن رزرو انجام نشد.
+
+قدم بعدی: مرحله ۴، Google/Cloudflare با کنترل پنل/اعتبارسنجی سرور، سیاست قطع ارائه‌دهنده و MFA مدیرکل؛ source همین مرحله پس از checks طبق درخواست مالک با main ادغام می‌شود و SHA/ZIP در گزارش تحویل ثبت می‌شود.

@@ -10,6 +10,9 @@ export type ClinicInfo = {
     doctorName: string;
     specialty: string;
     medicalCouncilNumber: string;
+    seoTitle: string;
+    seoDescription: string;
+    seoImageUrl: string;
     siteUrl: string;
     email: string;
     phones: {
@@ -79,6 +82,9 @@ export const fallbackClinicInfo: ClinicInfo = {
     doctorName: "دکتر فرزاد زمانی",
     specialty: "متخصص گوش، حلق و بینی",
     medicalCouncilNumber: "",
+    seoTitle: "",
+    seoDescription: "",
+    seoImageUrl: "",
     siteUrl: "https://drfarzadzamani.ir",
     email: "info@drfarzadzamani.ir",
     phones: {
@@ -110,6 +116,9 @@ const textOrFallback = (value: string | null | undefined, fallback: string) =>
     value?.trim() || fallback;
 
 export const buildClinicInfo = (settings: ClinicSettings): ClinicInfo => ({
+    seoTitle: settings.seo_title?.trim() ?? "",
+    seoDescription: settings.seo_description?.trim() ?? "",
+    seoImageUrl: settings.seo_image_url?.trim() ?? "",
     doctorName: textOrFallback(settings.doctor_name, fallbackClinicInfo.doctorName),
     specialty: textOrFallback(settings.specialty, fallbackClinicInfo.specialty),
     medicalCouncilNumber: settings.medical_council_number?.trim() ?? "",

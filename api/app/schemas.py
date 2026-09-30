@@ -28,6 +28,7 @@ class OtpRequest(BaseModel):
 class OtpRequestResponse(BaseModel):
     message: str
     retry_after_seconds: int
+    code_length: int = 6
     debug_otp: str | None = None
 
 
@@ -322,6 +323,11 @@ class ServiceWrite(BaseModel):
 class ClinicSettingRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    revision: int = 1
+    seo_title: str = ""
+    seo_description: str = ""
+    seo_image_url: str = ""
+
     doctor_name: str
     specialty: str
     medical_council_number: str
@@ -352,6 +358,11 @@ class ClinicSettingRead(BaseModel):
 
 
 class ClinicSettingUpdate(ClinicSettingRead):
+    model_config = ConfigDict(from_attributes=True, extra="forbid")
+    revision: int = Field(default=1, ge=1)
+    seo_title: str = Field(default="", max_length=160)
+    seo_description: str = Field(default="", max_length=320)
+    seo_image_url: str = Field(default="", max_length=500)
     doctor_name: str = Field(min_length=2, max_length=120)
     specialty: str = Field(min_length=2, max_length=160)
     medical_council_number: str = Field(default="", max_length=40)
@@ -395,6 +406,7 @@ class ClinicSettingUpdate(ClinicSettingRead):
         "map_page_url",
         "instagram_url",
         "eitaa_url",
+        "seo_image_url",
     )
     @classmethod
     def validate_public_url(cls, value: str) -> str:
@@ -402,12 +414,23 @@ class ClinicSettingUpdate(ClinicSettingRead):
         if not normalized:
             return ""
         parsed = urlparse(normalized)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-            raise ValueError("نشانی اینترنتی باید با http:// یا https:// شروع شود")
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.fragment:
+            raise ValueError("نشانی اینترنتی باید HTTPS و بدون اطلاعات ورود باشد")
+        if any(ord(char) < 33 for char in normalized) or parsed.port not in {None, 443}:
+            raise ValueError("نشانی اینترنتی معتبر نیست")
         return normalized.rstrip("/")
 
     @model_validator(mode="after")
     def validate_reminder_windows(self) -> "ClinicSettingUpdate":
+        if not self.site_url or urlparse(self.site_url).path not in {"", "/"} or urlparse(self.site_url).query:
+            raise ValueError("دامنه سایت باید یک مبدأ HTTPS باشد")
+        if self.map_embed_url and urlparse(self.map_embed_url).hostname not in {"neshan.org", "www.google.com"}:
+            raise ValueError("دامنه نقشه در سیاست امنیتی سایت مجاز نیست")
+        from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+        try:
+            ZoneInfo(self.timezone_name)
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("منطقه زمانی معتبر نیست") from None
         if self.reminder_enabled and self.first_reminder_hours <= self.final_reminder_hours:
             raise ValueError("یادآوری اول باید زودتر از یادآوری نهایی ارسال شود")
         return self

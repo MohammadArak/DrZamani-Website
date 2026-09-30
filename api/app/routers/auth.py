@@ -19,7 +19,7 @@ from ..browser_sessions import (
     staff_state_hash,
     wants_cookie_session,
 )
-from ..config import get_settings
+from ..runtime_settings import get_settings
 from ..database import get_db
 from ..dependencies import bearer_scheme
 from ..access import assign_legacy_role, identity
@@ -163,6 +163,7 @@ def request_otp(
     return OtpRequestResponse(
         message="کد تأیید ارسال شد",
         retry_after_seconds=settings.otp_resend_seconds,
+        code_length=len(code),
         debug_otp=code if settings.development_debug else None,
     )
 
