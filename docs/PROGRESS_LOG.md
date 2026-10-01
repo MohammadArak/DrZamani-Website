@@ -92,3 +92,31 @@
 
 ادامه: مرحله۶ مقالات/رسانه/بازخوردSEO؛ حدود مجوز و شواهد تحویل مطابق گزارش خروجی. هیچ deploy یا فعال‌سازی production مجاز نشده است.
 اعتبارسنجی اصلاح 1.12.1: 215pytest PASS، lint/build/نسخه PASS؛ مرورگر واقعی API/Nginx در 1280 و390px بدون فرم ورودی و بدون overflow؛ تصویر کنار خروجی‌ها. CSS اولیه و علامت status بررسی شد. MFA/providerهای واقعی و deploy همچنان گیت مستقل هستند.
+
+## 2026-10-01 — واگذاری مرحله۶ ناتمام
+
+
+مالک در2026-10-01 خواست ادامه کار بهAIدیگر واگذار شود؛ تغییرات فعلی برای ادامه در شاخهphase-06-articles وPRپیش‌نویس ذخیره می‌شوند. main نسخه1.12.1 اصلاح رزرو را دارد. مرحله۶ complete/merged/deployed نیست.
+
+پیاده‌سازی فعلی: editorialmodels/migration0018، RBAC زیرقفل/CAS وsnapshotمستقل/publication/schedule، sanitizeHTML/URL،40تستbackend، رسانه جدا/مالکیت/decoderWebP/public-only-onpublication،11بازخوردSEO، publicSSR/canonical/OG/Article/Breadcrumb/category/search/sitemap، editorTiptap/HTML/autosave/history/preview وlibraryUI. شرح معماری، خطاهای شناخته‌شده و قدم‌های لازم درAI_HANDOFF ابتدایفایل است.
+
+شواهد snapshot: 255pytest PASS با3warningقدیمی؛ lint/build/version، Ruffcritical، frozen47، migrationfresh/roundtrip/integrity/FK عمومیPASS؛ auditتازهکلnpm0شناخته‌شده. PublicSSR وpermission/sanitization/snapshot/media باTestClient ساختگی آزموده شدند؛ هیچ UIمرحله۶ درمرورگر یاNginxruntime آن پذیرش نشده. freshbackend audit/staging/cleaninstall و rollbackپرشدهeditorial باقی‌اند.
+
+موارد باز: categories/tagsdelimiter احتمالی، رسانهpicker60آیتم، pagination/total تازه، autosave/error/409/read-only/رفتارimageNodeView/table/link/history/mobile واقعی، previewcover/tagnavigation، budget/bounds/audit بیشتر، revision/scheduledslugraces، NginxHTTP/HTTPS headers/SSR/legacyroutes، editorialbackup/restore وprerendertext قدیمی. کد فعلی نباید بدون بررسیAIبعدی mainmerge/release معرفی شود.
+
+dependencyها: Tiptap3.31.4،DOMPurify3.4.16،Bleach6.4.0،webencodings0.6.1؛ منابع رسمی [React](https://tiptap.dev/docs/editor/getting-started/install/react)،[TableKit](https://tiptap.dev/docs/editor/extensions/nodes/table)،[Image](https://tiptap.dev/docs/editor/extensions/nodes/image)،[Bleach](https://bleach.readthedocs.io/en/latest/clean.html). CDN PyPI DNSخطا داشت، دوartifactجدیدازmirror باhashرسمیverifyشدند؛ docs/DEPENDENCY_PROOF_PHASE06.json. npmcacheاولACL داشت وcacheworkspace حلشکرد؛ critical frontendadvisories باauditfixرفع و ممیزی نهایی0است. importمفقودget_db وlazyimportاشتباه درتوسعه اصلاح وlint/build/fulltestsنهایی پاس.
+
+هیچ production، deploy، داده/رسانه بیمار، حسابownerواقعی، پرداخت/SMSواقعی یا کلیدرزروproduction تغییر نکرد. rolloutسابق1-5 و MFA/captcha/payment/SMSproviderهایreal همچنانstaginggatesدارند.
+
+
+## 2026-10-01 — پذیرش محلی مرحله۶ از snapshot443f466، نسخه1.13.0
+
+شاخه phase-06-articles و همان PR۷ ادامه یافتند. دسته/برچسب حین تایپ، picker جستجو/صفحه‌بندی/انتخاب قدیمی، total تازه، ذخیره هنگام تایپ هم‌زمان و pause روی503/409، restore و guard خروج با dialog داخل پنل، previewcover و tag/sitemap، publisher مستقل و upload input reset اصلاح شدند. تاریخچه به metadata محدود است؛ media audit و bounds بیشتر افزوده شدند. AppointmentGate حتی کد فرم ورود/پنل بیمار را در خاموشی بارگیری نمی‌کند.
+
+266pytest موفق (97.99s،3warning قبلی)؛ سپس51تست مقاله نهایی با byte/pixel limit موفق (31.11s). lint/build/version1.13.0، Ruffcritical، npmci/audit0، نصب47wheel دقیق/hash با mirror و تطبیقuv.lock، ممیزیJSON رسمیPyPI47+uvloopLinux0، migration عمومی و editorialپرشده/backuprestore موفق. frozen sync تازه ازindexاصلی و Linux/systemd/staging واقعی اجرا/پذیرش نشده‌اند.
+
+مرورگر واقعی/APIcookie/CSRF ساختگی: HTML و sanitization، جدول/undo/redo/link/image، دسته/برچسب، pagination>30/60، autosaveHTML/typingduringdelay/503retry/409، تاریخچه/restore، cancelexitEscape، timezoneUTC و scheduledsnapshot مستقل، ناشربدونedit، نویسندهبدونpublish، readonlytext و نبودmutationbuttons، upload/edit/archive/total و publicdesktop390px بررسی شدند. Nginx1.28HTTP/verifiedHTTPS واقعی باheaders/SSR/schema/alias301/draft404/legacy410/search/category/tag/pages/sitemap/privatepublicmedia وclosedbooking گذشت. inventoryصفحهخاموش فقطmain/runtime/AppointmentGate/SEO داشت؛ PatientPortal/CAPTCHA وform/input بارگیری/نمایش نشدند.
+
+خطاهای کشف‌شده و رفع‌شده: انتخاب فایل input را remount می‌کرد؛ setEditable اولیه فرم ناشر را dirty می‌کرد؛ پنجرهconfirm بومی مرورگر در ابزار بررسی گیر می‌کرد و با dialog قابل‌دسترسی داخل پنل جایگزین شد. خطاهای tempACL/Vitespawn با اجرای محلی مجاز، انتظارهای غلط دو تست با اصلاحfixture، و cleanupSQLite با closing رفع شدند. هشدارهای قدیمی pytest و listenhttp2 باقی‌اند. هیچ deploy/production/داده‌بیمار/مالک‌واقعی/پرداخت/SMS واقعی اجرا نشد.
+
+جزئیات در PHASE_06_ARTICLES.md؛ وضعیت ارسال، SHA و tree وZIP بعد از انتشار در گزارش تحویل کنارoutputs ثبت می‌شوند. پس از mergeمرحله۶، مرحله۷ نظرات؛ سپس previewمرحله۸/تصمیم مالک، مرحله۹CI/سرعت و مرحله۱۰پذیرش مستقل باقی‌اند.

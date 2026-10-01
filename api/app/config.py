@@ -93,6 +93,7 @@ class Settings:
     otp_verify_max_per_phone_hour: int
     settings_encryption_keys: tuple[str, ...] = ()
     sms_webhook_allowed_hosts: tuple[str, ...] = ()
+    public_media_dir: Path = BACKEND_DIR / "data" / "public-media"
     public_html_dir: Path = BACKEND_DIR.parent / "public_html"
 
     turnstile_enabled: bool = False
@@ -163,6 +164,11 @@ def get_settings() -> Settings:
     if not secret_key:
         secret_key = "development-only-change-this-secret-key"
 
+    public_media_dir = Path(os.getenv("PUBLIC_MEDIA_DIR") or str(BACKEND_DIR / "data" / "public-media")).resolve()
+    private_media_dir = Path(os.getenv("UPLOAD_DIR", str(BACKEND_DIR / "data" / "uploads"))).resolve()
+    static_dir = Path(os.getenv("PUBLIC_HTML_DIR") or str(BACKEND_DIR.parent / "public_html")).resolve()
+    if any(public_media_dir.is_relative_to(other) or other.is_relative_to(public_media_dir) for other in (private_media_dir, static_dir)):
+        raise RuntimeError("رسانه عمومی باید خارج از پوشه خصوصی بیماران و وب‌روت استاتیک باشد")
     return Settings(
         app_name=os.getenv("APP_NAME", "Dr Zamani Appointment API"),
         app_env=app_env,
@@ -220,5 +226,6 @@ def get_settings() -> Settings:
         mfa_required_owners=_as_bool(os.getenv("MFA_REQUIRED_OWNERS"), False),
         settings_encryption_keys=_as_list(os.getenv("SETTINGS_ENCRYPTION_KEYS")),
         sms_webhook_allowed_hosts=_as_list(os.getenv("SMS_WEBHOOK_ALLOWED_HOSTS")),
+        public_media_dir=public_media_dir,
         public_html_dir=Path(os.getenv("PUBLIC_HTML_DIR") or str(BACKEND_DIR.parent / "public_html")).resolve(),
     )

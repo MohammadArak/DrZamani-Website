@@ -8,6 +8,7 @@ import ReserveDialog from "./ReserveDialog";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
 const navMenu = [
+    { title: "مقالات", value: "articles", href: "/articles/" },
     {
         title: "صفحه اصلی",
         value: "home",

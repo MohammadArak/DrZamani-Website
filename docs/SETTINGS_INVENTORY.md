@@ -86,3 +86,7 @@ timeout ارائه‌دهنده ثابت8ثانیه است و ENV/پنل آزا�
 | BOOKING_DISABLED_MESSAGE | نوبت‌دهی، فقط مدیرکل | متن فارسی غیرخالی حداکثر۱۰۰۰حرف؛ عمومی در API/HTML و راه تماس |
 
 این فیلدها با تغییر اطلاعات مطب نوشته نمی‌شوند؛ مرکز تنظیمات runtime مسیر مجاز تغییر است. مشاهده پرونده/ورود/callback با خاموشی رزرو باز می‌ماند؛ جابه‌جایی و انتظار جدید بسته است.
+
+## Snapshotمرحله۶
+
+PUBLIC_MEDIA_DIR زیرساختی وENV-only است؛ مسیر جدا ازUPLOAD_DIRبیماران وPUBLIC_HTML_DIR، بدون قرار دادن آن دروب‌روت. فایل ازendpointمجاز وUUIDبرگردد، دسترسیstatic aliasمستقیم اضافه نشود. بکاپDBوpublicmediaهماهنگ، privatepatientmediaجدابماند. مرحله۶ ناتمام وruntimeNGINX/browser/staging هنوزپذیرش نشده.

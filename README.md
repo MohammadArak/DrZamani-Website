@@ -345,3 +345,7 @@ Remove-Item Env:PRERENDER_CLINIC_SETTINGS_FILE
 رویدادهای نوبت/پرداخت فقط داخل outbox ثبت می‌شوند؛ timer `drzamani-jobs.timer` و سرویس `python -m app.jobs` باید در استقرار مستقل بررسی شوند. دو worker سالم پیام واحد را claim نمی‌کنند، retry ثبت‌شده و محدود است؛ crash بعد از پذیرش ارائه‌دهنده می‌تواند ارسال تکراری ایجاد کند. ارسال خارجی exactly-once نیست. پرداخت/پیامک واقعی یا deploy خودکار در این مرحله انجام نشده است.
 
 قرارداد callback، expiry/refund، محدودیت تغییر حساب درگاه، backup/maintenance برای rollback و شواهد آزمون در [مرحله۵](docs/PHASE_05_BOOKING_PAYMENTS.md) است. مقالات مرحله۶ قدم بعدی است.
+
+## Snapshot مقالات (مرحله۶ در حال انجام)
+
+شاخهphase-06-articles با نسخه منبع1.13.0 برایادامهAIذخیره شده است؛ release/پذیرش نیست. [راهنمای ادامه](docs/AI_HANDOFF.md)، [گزارشWIP](docs/PHASE_06_ARTICLES_WIP.md) و [پرامپتادامه](docs/CONTINUE_PROMPT.md) مقدم‌اند. main1.12.1 رزروخاموش رافقطباپیاموانیمیشن،بدونورود،نمایشمی‌دهد.

@@ -1,1 +1,1 @@
-export { default } from "./AppointmentPortalV2";
+export { default } from "./AppointmentGate";

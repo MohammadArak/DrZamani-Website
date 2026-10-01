@@ -1,3 +1,56 @@
+# وضعیت مقدم برای ادامه — 2026-10-01، پذیرش محلی مرحله۶
+
+این بخش بر شرح تاریخی پایین مقدم است. دستور تازه مالک ادامه از phase-06-articles/PR۷ و443f466 بود؛ پس از پذیرش هر مرحله test/doc/commit/push/merge با main مجاز است و اجازه دوباره لازم ندارد. deploy مجوز مستقل دارد.
+
+- نسخه1.13.0: مقالات محلی پذیرش شد؛ گزارش مرجع [PHASE_06_ARTICLES.md](PHASE_06_ARTICLES.md). شاخه phase-06-articles، PR۷؛ شناسه دقیق commit/merge/tree در گزارش تحویل کنارoutputs پس از ارسال ثبت می‌شود؛ تاریخچه WIP قبلی وضعیت امروز نیست.
+- 266تست کلbackend موفق (97.99s،3warningقدیمی) و51مقاله بعد ازpixel test موفق (31.11s). lint/build/version، Ruffcritical، npmci/audit0،47wheel دقیق/hash و تطبیقlock، auditرسمیPyPI47+Linuxuvloop0، migration عمومی وeditorialپرشده/DB+mediarestore موفق. frozenindexsync جدید دراینمیزبان وLinux/staging/providerهایواقعی PASS اعلام نشده‌اند.
+- مرورگر React واقعی باAPIواقعی/DBموقت/cookie/CSRF؛ route ورود فقط-fixture در .work و بیرونGit. login/captcha واقعی staging آزموده نشده. دسته/برچسبdelimiter، رسانه>60/انتخابقدیمی، article>30/total، HTML/editor/image/table/link/undo/redo/preview، autosaveHTML/کندی با تایپ/503retry/409preserve، خروجEscape/historyrestore، ناشربدونedit/نویسندهبدونpublish/readonlyمتن، upload/edit/archive، publicdesktop390/tag/page بررسی شدند. NginxHTTP+verifiedHTTPS/HTMLاولیه/meta/schema/cache/securityheaders/404410301/sitemap/privatepublicmedia وclosedbooking موفق؛ هیچpatientdata واقعی نیست.
+- اصلاحات مهم: rawlabeltext جدا ازarray؛ mediaendpoint به items/total/page تبدیل شد، q و metadata تک‌رسانه اضافه شد. تاریخچه metadata-only باحد100. save rowRef/CAS، typed-during-request حفظ؛ disableedit هنگامsave حذف، جلوگیریخروج هنگامbusy. dialogداخلپنل focus/Tab/Escape. setEditable(editable,false) وonUpdate فقطeditable، ناشر بدونedit ازstoredsnapshot منتشرمی‌کند. upload input تنهاپس ازsuccess باversionreset بازنشانی می‌شود.
+- رزرو خاموش فقطپیام وcalendar/halo animation: AppointmentGate lazyimportpatientportal را فقطوقتی initialized&&bookingEnabled فعال می‌کند. inventoryمرورگر noPatientPortal/noCaptcha وDOMnoform/input تأیید شد. رزرو production همچنان خاموش و deployment انجام‌نشده.
+- قدم بعد پس ازmergePR۷: مرحله۷ نظرات مستقل باconsent/permissions/audit/preview وبدونتبدیلhardcodedtestimonials بهنظرواقعی؛ مرحله۸ابتداpreview وتصمیممالک؛ مرحله۹split/budget/CI؛ مرحله۱۰staging/providerها/مالکیتحساب/backup/Linuxjobs/شناسهproduction. بهdeploy یا فعال‌سازی رزرو نیاز خودکار نیست؛ هیچrealowner/payment/SMS/patientdata استفاده نشود.
+- محدودیت عملی: PyPI CDN DNS اینمیزبان؛ wheelهاباhashازHuawei نصبشدند. sandboxtempACL/Vitespawn فقطدرمحیط محلی مجاز گذشتند. هشدار3pytest وnginxhttp2 باقی‌اند. .work/outputs/venv/build/DB هرگزGitنشوند. artifactها فقطtrackedsource+handoff باhash کنارoutputs. script verify-editorial-migrations.py هماهنگیrollback/restore DB/mediaساختگی را آزموده؛ downgrade0018محتوا را حذف ولیmediafile راحفظ می‌کند؛ backup/maintenance/stopwriters/codeENVNginx هماهنگ لازم است.
+
+---
+
+# وضعیت فعلی برای ادامه — 2026-10-01
+
+**این بخش بر توضیحات قدیمی پایین فایل مقدم است.** مالک خواست همه تغییرات فعلی در GitHub ذخیره و ادامه به AI دیگری واگذار شود. قابلیت تازه را توسعه نده؛ ابتدا شاخه و سند حاضر را بررسی کن.
+
+- مراحل۰ تا۵ تکمیل و ادغام شدند؛ اصلاح صریح رزرو در نسخه1.12.1 با PR۶ در main ادغام شده است: `b77c7b33b4439ff441488b9dfc3dd142c3c66f15`، tree `917c519de515c19dadd1b569ce68788060baca6c`، source `eae82c65f3822c52b656ae3be6226c8e8670fa2f`.
+- **در رزرو خاموش، /appointment/ فقط پیام مدیر و تقویم متوقف با انیمیشن آرام نشان می‌دهد. فرم ورود/پنل بیمار نباید mount شود، حتی با cookie بیمار.** حالت کم‌حرکت رعایت شده؛ UI desktop/390px واقعی محلی و215تست نسخه اصلاح پاس شدند. API پرونده/callback پرداخت قبلی حفظ می‌شوند، ولی ورود در صفحه عمومی خاموش نمایش ندارد. ادعای قدیمی «ورود UI در خاموشی باز بماند» منسوخ است.
+- مرحله۶ در شاخه `phase-06-articles` و نسخه منبع1.13.0 **در حال انجام** است؛ PR پیش‌نویس برای نگهداری کار و ادامه، نه مرحله پذیرفته‌شده/merged/release. از همین شاخه ادامه بده، نه فقط main و نه شروع مجدد مراحل قبلی. SHA دقیق شاخه/ZIP در گزارش خروجی نهایی ثبت می‌شود.
+- آخرین آزمون snapshot: **255pytest PASS** (215قبلی+40مقالات)، lint/build/version PASS، Ruff E9/F63/F7/F82 PASS، uv frozen offline با47بسته PASS، migration عمومی fresh/upgrade/downgrade/re-upgrade/integrity/FK PASS. ممیزی تازه کل npm صفر آسیب‌پذیری شناخته‌شده. backend audit تازه اجرا نشده؛ ابزار قبلاً DNS dependency داشت. سه warning قدیمی pytest باقی‌اند. این نتیجه، پذیرش نهایی مرحله۶ نیست.
+
+## کد مقاله فعلی
+
+`api/app/content_models.py`: Article با current `content_json` جدا از `published_json` و `scheduled_json`، ArticleRevision، ArticleAlias و PublicMedia. migration0018 مستقل/frozen؛ downgrade محتوای editorial DB را حذف می‌کند، فایل‌های رسانه را حذف نمی‌کند، backup هماهنگ لازم است.
+
+`api/app/content.py` و `routers/content.py`: مجوز server-side و recheck زیر BEGINIMMEDIATE، optimistic revision/409، slug رزروشده شامل scheduledsnapshot، workflow draft/review/publish/schedule/unpublish/archive، snapshot تأییدشده زمان‌بندی مستقل از ویرایش بعدی نویسنده، history/restore فقط پیش‌نویس. زمان انتشار باید timezone داشته باشد؛ worker و خواندن عمومی due را یک بار زیرقفل منتشر می‌کنند و revision افزایش می‌یابد. author/reviewer/sources/summary/body وalt لازم‌اند؛ H1 متن برای جلوگیری از عنوان تکراری رد می‌شود.
+
+Bleach6.4.0/HTML5 allowlist سمت سرور و DOMPurify3.4.16 در editor/preview؛ scripts/events/style/iframe/arbitraryimage/unsafeURL رد یا حذف می‌شوند. خروجی clean فقط HTMLbody است، attribute/JSON جدا escape می‌شوند. SEO شامل11check شفاف و تخمین فارسی است، تضمین Google یا medicalapproval نیست. reviewer فقط نام ثبت‌شده است؛ هیچ بازبینی علمی خودکار یا احراز صلاحیت ادعا نشده.
+
+رسانه: decoder واقعی JPEG/PNG/WebP، سقف max_upload_bytes و20Mpixel، thumbnail2000، WebP بدون EXIF و UUID، کتابخانه احرازشده؛ عمومی فقط اگر مقاله منتشرشده آن را مصرف کند. رسانه private بیمار هرگز reuse نشود. پوشه جدید ENV-only `PUBLIC_MEDIA_DIR` باید خارج از UPLOAD_DIR وPUBLIC_HTML_DIR باشد؛ config overlap را رد می‌کند. owner رسانه/مدیرکل می‌تواند ویرایش/بایگانی کند؛ رسانه مصرف‌شده در current/public/scheduled حذف نمی‌شود. فایل بایگانی‌شده برای backup نگه می‌ماند.
+
+`public_articles.py`: HTML کامل SSR، فهرست/جستجو/دسته/page، detail، canonical/OG Article/Breadcrumb، منابع/نویسنده/بازبین/تاریخ، dynamic sitemap فقطpublished. این صفحه‌ها native serverHTML هستند؛ script SPA از head حذف می‌شود تا React صفحه404 را روی متن نریزد. CSS عمومی درbundleindex است. ناشناس قدیمی410، alias مقاله تأییدشده301، draft404. هیچ محتوای قدیمی خودکار احیا نمی‌شود. Nginx HTTP/HTTPS مسیرهایarticles/media راproxy می‌کند، اما پذیرش runtime تازه هنوز اجرا نشده.
+
+`StaffArticlesPanel.tsx`, `ArticleEditor.tsx`, `StaffMediaPanel.tsx`, `contentApi.ts`: Tiptap3.31.4 با تیتر/فهرست/quote/table/link/image/undo/redo و HTMLmode، draftautosave/409pause/localdownload، نسخه‌ها، انتشار/زمان‌بندی، preview امن/mobile، feedback سرور؛ lazy editor chunk حدود467KBraw/147KBgzip وStaff پایه163KBraw/36KBgzip. NodeView تصویر ازstaffpreviewcookie می‌خواند و serializer نشانیpublic را نگه می‌دارد؛ این رفتار تازه هنوز در مرورگر پذیرش نشده.
+
+## اولین کارهای AI بعدی — مرحله۶ را فعلاً complete نکن
+
+1. `git fetch` و بررسی SHA/tree/status؛ AGENTS.md، ROADMAP.md، همین فایل، PHASE_06_ARTICLES_WIP وCONTINUE_PROMPT را بخوان. مسیرها/فرمان‌های محیط پایین موجودند. تست قبلی را شاهدproduction معرفی نکن.
+2. QA واقعی پنل editor/media در desktop/390px روی DB ساختگی: نویسنده در برابر publisher/read-only، autosave هنگام تایپ و تغییر انتخاب/خطا/409، خروج با draft، sourceHTML/pasteمخرب، imageNodeView/serializer، table/link/undo، sourceinputs، timezone schedule/history/restore، preview وloading/error/empty. screenshot جدید نشان بده؛ برای حساب/credential واقعی هیچ درخواست لازم نیست. مرورگر واقعی مقالاتِ مرحله۶ هنوز بررسی نشده است.
+3. **عیب محتمل موجود در فرم categories/tags**: value از join و input بلافاصله split/trim/filter می‌شود؛ delimiter پایانی پاک می‌شود و ورود چند مقدار سخت است. قبل از پذیرش اصلاح کن (state متنی/commit مناسب). picker رسانه فعلاً فقط60آیتم اول را دارد؛ pagination/search/انتخاب رسانه قدیمی را کامل کن. لیست باonSaved total/pagination را به‌درستی تازه کند. این‌ها از خواندن کد شناسایی شده‌اند، هنوز تستbrowser ندارند.
+4. بودجه/بازه/اعتبارسنجی frontend و پیام‌های invalidsource/blankslug را دقیق کن؛ autosave فعلاً با خطا pause و manualretry می‌خواهد. serverSEO وقتی payload نامعتبر باشد feedback راnull می‌کند؛ پیام راهنمای معتبر و صریح بده. previewcover، tagnavigation و قابلیت‌های تکمیلی ویرایشگر با نقشه‌راه تطبیق یابند.
+5. regression/adversarial بیشتر برای slugرقابت و رزروscheduled پس از تغییرslugdraft، revision بعدscheduledpublish، چند تغییر/restore هم‌زمان، maxbytes/pixels/decoder، config overlap، mediaaudit/ownership، histories/bounds/rate و محدودیت تعداد رسانه/مقالات. بررسی policy reviewer نامی، حقوق انتشار تصویر و منابع را به مالک/بازبین واقعی واگذار کن؛ داده بیمار یا مقاله پزشکی واقعی نساز.
+6. migration **پرشده editorial** و بازگشت0018، rollbackبا DB/mediabackup، seedmetadata، NginxHTTP/HTTPS syntax/runtime مسیرهایarticle/category/query/media/headers/410/301/404/noJS، jobsLinux وbackup/restore را بررسی کن. script عمومیverify-migrations فعلی رکورد واقعیeditorial درج نمی‌کند؛ PASS آن را با پذیرش rollback محتوایپرشده یکی ندان. پیام build/prerender قدیمی «Articles remain retired pending review» باید با قرارداد SSR جدید هماهنگ شود.
+7. freshbackend dependency audit و نصبclean staging. PyPI CDN files.pythonhosted.org DNS این محیط شکست خورد؛ bleach/webencodings ازmirrorدریافت و **همهhashها با JSON رسمیPyPI تطبیق شدند**، proof درdocs. uv.lock registryرسمی با artifactmirrorhash دارد؛ source/index ناامن دائمی بهpyproject افزوده نشده. dependencyهای قبلی نسخه ثابت حفظ شدند؛ npm auditfix وابستگی‌های آسیب‌پذیر قدیمی را اصلاح کرد و audit تازه کلfrontend صفر است.
+8. وقتی تمامROADMAPمرحله۶ پذیرش شد، docs/roadmap/progress/README/inventory/handoff نهایی، tests مناسب، PR پیش‌نویسready وmerge طبق مجوز قبلی مالک؛ fetchmain/tree/lsremote وsourceZIP+SHA256+handoff کنارخروجی. فعلاًاینsnapshotرا release یاcomplete ننام.
+
+بعد از۶: مرحله۷ نظرات قابل تعریف/ترتیب/نمایش باpermissionsمستقل؛۸ ظاهر وserviceSEO؛۹ بازآرایی/بهینه‌سازی/CI؛۱۰ staging وdeploy پس ازمجوزصریح. مالک «نصب جدید» برایowner و رمزساز+recovery برایMFA انتخاب کرده. هیچ productionowner، deploy، bookingactivation، realpayment/SMS یا داده بیمار مجازنشده. previewها بسته‌اند؛ scratchها درwork و ZIPفقطtrackedsource است.
+
+---
+سوابق مراحل قبلی (بخش وضعیت بالا مقدم است):
+
 # راهنمای ادامه کار برای AI بعدی
 
 آخرین به‌روزرسانی: 2026-10-01، Asia/Tehran. نسخه1.12.0، پروژه MohammadArak/DrZamani-Website. مراحل صفر تا۴ در main؛ مرحله۵ پیاده‌سازی و آزمون نهایی دارد؛ رسید ادغام و SHA دقیق در گزارش تحویل است. قدم بعد مرحله۶ مقالات است. گزارش تحویل PHASE05 کنار خروجی‌ها مبنای دقیق source/merge/tree/ZIP را ثبت می‌کند؛ پرداخت/پیامک/کپچا واقعی و deploy هنوز پذیرش/فعال نشده‌اند.

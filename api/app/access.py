@@ -92,7 +92,7 @@ CATALOG = [
             title,
             "مقالات",
             [] if action == "view" else ["articles.view"],
-            True,
+            False,
         )
         for action, title in [
             ("view", "مشاهده پیش‌نویس"),
@@ -102,7 +102,7 @@ CATALOG = [
             ("publish", "انتشار مقاله"),
         ]
     ],
-    ("media.manage", "کتابخانه رسانه عمومی", "مقالات", [], True),
+    ("media.manage", "کتابخانه رسانه عمومی", "مقالات", [], False),
     *[
         (
             f"comments.{action}",

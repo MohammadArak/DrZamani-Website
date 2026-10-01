@@ -730,5 +730,5 @@ await Promise.all([
 ]);
 
 console.log(
-    "Prerendered homepage, appointment, staff and 404. Articles remain retired pending review.",
+    "Prerendered homepage, appointment, staff and 404. Published articles are rendered dynamically by the API; unreviewed legacy paths remain retired.",
 );
