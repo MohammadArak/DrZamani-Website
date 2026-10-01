@@ -20,6 +20,7 @@ import {
 type ClinicInfoContextValue = {
     clinicInfo: ClinicInfo;
     loading: boolean;
+    initialized: boolean;
     refreshClinicInfo: () => Promise<void>;
     applyClinicSettings: (settings: ClinicSettings) => void;
 };
@@ -36,6 +37,7 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
         }
     });
     const [loading, setLoading] = useState(true);
+    const [initialized, setInitialized] = useState(false);
 
     const applyClinicSettings = useCallback((settings: ClinicSettings) => {
         setClinicInfo(buildClinicInfo(settings));
@@ -58,9 +60,9 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
         void appointmentApi.getClinic().then((settings) => {
             if (!cancelled) applyClinicSettings(settings);
         }).catch(() => {
-            // Keep the public fallback while the API is unavailable.
+            if (!cancelled) setClinicInfo(current => ({ ...current, bookingEnabled: false }));
         }).finally(() => {
-            if (!cancelled) setLoading(false);
+            if (!cancelled) { setLoading(false); setInitialized(true); }
         });
         return () => { cancelled = true; };
     }, [applyClinicSettings]);
@@ -69,10 +71,11 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
         () => ({
             clinicInfo,
             loading,
+            initialized,
             refreshClinicInfo,
             applyClinicSettings,
         }),
-        [applyClinicSettings, clinicInfo, loading, refreshClinicInfo],
+        [applyClinicSettings, clinicInfo, loading, initialized, refreshClinicInfo],
     );
 
     useEffect(() => {

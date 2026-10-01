@@ -88,3 +88,9 @@ SMSoutboxdedupe160/claimtoken64/claimuntil2min/nextattemptat؛ workerclaim1job �
 ۲۱۵ تست pytest (۳۰ تست تازه این مرحله)، lint/build/نسخه، frozen sync با۴۵بسته، Ruff بحرانی، migration با داده قبلی/rollback/seed/CAS، Nginx HTTP/HTTPS syntax و runtime cookie/CSRF/MFA/WebSocket/headers/404/410/rate و تغییر فوری سیاست رزرو PASS. ممیزی frontend production صفر آسیب‌پذیری شناخته‌شده گزارش کرد؛ ممیزی تازه backend به DNS ابزار خورد و اجرا نشد. dependency تازه به پروژه اضافه نشده است. screenshot موبایل رزرو خاموش روی API/Nginx محلی و فرم تنظیمات با API ساختگی ثبت شد؛ پذیرش واقعی ارائه‌دهندگان و Linuxsystemd باقی است.
 
 مرحله۶ بعدی: مقاله/رسانه با RBAC authoritative، HTML sanitization وpreview/draft/publish، SEOfeedback/persistentmetadata/SSR/canonical/sitemap وclinicalreviewcontent. اول ROADMAPمرحله۶ وpermissioncatalogfutureflags راخوانده سپس scopeمشخص؛ همانrepo وtest/doc/commit/PRattach/merge/fetch/tree/sourceZIP+handoff طبق مجوز قبلی مالک. productionowner«نصب جدید» و MFAرمزساز+recovery تصمیم قبلی؛ هیچdeploy/realSMS/payment/bookingactivation بدوندستور صریح. previewDBphase05-* وscreenshots synthetic؛ keysprocessحفظنشده، credentialsواقعی نیستند.
+
+## 2026-10-01 — اصلاح نمایش رزرو خاموش، نسخه1.12.1
+
+طبق اصلاح صریح مالک، /appointment/ در حالت خاموش فقط پیام تنظیم‌شده و تقویم متوقف با انیمیشن تنفس آرام دارد؛ فرم ورود و پنل بیمار اصلاً mount نمی‌شوند، حتی با cookie قبلی. CSS عمومی و HTML اولیه بدون JavaScript هم همین پیام را دارند. prefers-reduced-motion انیمیشن را خاموش می‌کند. برچسب صفحه اصلی وضعیت نوبت‌دهی است؛ ادعای دسترسی UI ورود در خاموشی حذف شد. API پرونده و callback پرداخت شروع‌شده برای سازگاری و رسیدگی قبلی حفظ شده‌اند؛ این تصمیم درباره نمایش عمومی است. بررسی تازه سیاست قبل از mount فرم لازم است و شکست API رزرو را بسته نگه می‌دارد. متن سیاست قدیمی حفظ ورود UI در این اسناد، با همین درخواست تازه مالک جایگزین شد.
+
+ادامه: مرحله۶ مقالات/رسانه/بازخوردSEO؛ حدود مجوز و شواهد تحویل مطابق گزارش خروجی. هیچ deploy یا فعال‌سازی production مجاز نشده است.

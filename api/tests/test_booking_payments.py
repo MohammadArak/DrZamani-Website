@@ -89,7 +89,11 @@ def test_defaults_and_disabled_admission_preserve_records(client, monkeypatch):
     for path in ('/me','/appointments','/waitlist'):
         assert client.get('/api/v1'+path, headers=auth_headers).status_code==200
     assert client.get('/api/v1/clinic').json()['booking_enabled'] is False
-    assert 'رزرو آنلاین' in client.get('/appointment/').text
+    closed = client.get('/appointment/').text
+    assert 'رزرو آنلاین' in closed
+    body = closed.split('<div id="root">')[1].split('</body>')[0]
+    assert 'booking-closed__symbol' in body and 'role="status"' in body
+    assert '<form' not in body and '<input' not in body and 'href="tel:' not in body
     with SessionLocal() as db:
         assert db.scalar(select(func.count(BookingHold.id)))==before
 
