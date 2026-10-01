@@ -2963,7 +2963,7 @@ const SmsCenterPanel = ({
                                     <td className="max-w-md p-3 text-slate-600">{item.rendered_body}</td>
                                     <td className="p-3">
                                         <span className={`rounded-full px-2 py-1 text-xs ${item.status === "sent" ? "bg-emerald-50 text-emerald-700" : item.status === "failed" ? "bg-rose-50 text-rose-700" : "bg-amber-50 text-amber-700"}`}>
-                                            {item.status === "sent" ? "ارسال شد" : item.status === "failed" ? "ناموفق" : "در صف"}
+                                            {item.status === "sent" ? "ارسال شد" : item.status === "failed" ? "ناموفق" : item.status === "cancelled" ? "لغو شد" : item.status === "sending" ? "در حال ارسال" : "در صف"}
                                         </span>
                                     </td>
                                 </tr>

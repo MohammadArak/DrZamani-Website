@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from . import config
 from .database import get_db
 from .models import ClinicSetting
-from .schemas import ClinicSettingRead
+from .booking_policy import public_clinic
 
 router = APIRouter(include_in_schema=False)
 
@@ -35,7 +35,7 @@ def phone(value):
     return value
 
 
-def render(clinic, page):
+def render(clinic, page, db=None):
     template_path = config.get_settings().public_html_dir / "index.html"
     try:
         template = template_path.read_text(encoding="utf-8")
@@ -81,7 +81,7 @@ def render(clinic, page):
               "sameAs": [value for value in [clinic.instagram_url, clinic.eitaa_url] if value]}
     if clinic.medical_council_number:
         schema["identifier"] = clinic.medical_council_number
-    payload = ClinicSettingRead.model_validate(clinic).model_dump()
+    payload = public_clinic(clinic, db).model_dump()
     meta += f'<script data-rh="true" type="application/ld+json">{safe_json(schema)}</script><script id="clinic-bootstrap" type="application/json">{safe_json(payload)}</script>'
     body = f'<main dir="rtl" lang="fa"><h1>{esc(title)}</h1><p>{esc(description)}</p>'
     if page == "home":
@@ -89,6 +89,8 @@ def render(clinic, page):
         for number in [clinic.office_phone, clinic.consultation_phone]:
             body += f'<p><a href="tel:{esc(phone(number))}">{esc(number)}</a></p>'
         body += f'<p><a href="mailto:{esc(clinic.email)}">{esc(clinic.email)}</a></p>'
+    if page in {"home", "appointment"} and not payload["booking_enabled"]:
+        body += f'<p role="status">{esc(payload["booking_disabled_message"])}</p><p><a href="tel:{esc(phone(clinic.office_phone))}">تماس با مطب</a></p>'
     body += '<p><a href="/">صفحه اصلی</a></p></main>'
     return HTMLResponse(f'<!doctype html><html lang="fa" dir="rtl"><head>{head}{meta}</head><body><div id="root">{body}</div></body></html>', status_code=status,
                         headers={"Cache-Control": "no-store", **({"X-Robots-Tag": robots} if page != "home" else {})})
@@ -103,22 +105,22 @@ def clinic_row(db):
 
 @router.get("/", response_class=HTMLResponse)
 def home(db: Session = Depends(get_db)):
-    return render(clinic_row(db), "home")
+    return render(clinic_row(db), "home", db)
 
 
 @router.get("/appointment/", response_class=HTMLResponse)
 def appointment(db: Session = Depends(get_db)):
-    return render(clinic_row(db), "appointment")
+    return render(clinic_row(db), "appointment", db)
 
 
 @router.get("/staff/", response_class=HTMLResponse)
 def staff(db: Session = Depends(get_db)):
-    return render(clinic_row(db), "staff")
+    return render(clinic_row(db), "staff", db)
 
 
 @router.get("/404.html", response_class=HTMLResponse)
 def missing(db: Session = Depends(get_db)):
-    return render(clinic_row(db), "404")
+    return render(clinic_row(db), "404", db)
 
 
 @router.get("/index.html")

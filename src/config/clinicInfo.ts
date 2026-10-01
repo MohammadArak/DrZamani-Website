@@ -7,6 +7,8 @@ export type ClinicPhone = {
 };
 
 export type ClinicInfo = {
+    bookingEnabled: boolean;
+    bookingDisabledMessage: string;
     doctorName: string;
     specialty: string;
     medicalCouncilNumber: string;
@@ -79,6 +81,8 @@ const phoneDetails = (rawValue: string): ClinicPhone => {
 };
 
 export const fallbackClinicInfo: ClinicInfo = {
+    bookingEnabled: false,
+    bookingDisabledMessage: "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید.",
     doctorName: "دکتر فرزاد زمانی",
     specialty: "متخصص گوش، حلق و بینی",
     medicalCouncilNumber: "",
@@ -116,6 +120,8 @@ const textOrFallback = (value: string | null | undefined, fallback: string) =>
     value?.trim() || fallback;
 
 export const buildClinicInfo = (settings: ClinicSettings): ClinicInfo => ({
+    bookingEnabled: settings.booking_enabled === true,
+    bookingDisabledMessage: settings.booking_disabled_message?.trim() || fallbackClinicInfo.bookingDisabledMessage,
     seoTitle: settings.seo_title?.trim() ?? "",
     seoDescription: settings.seo_description?.trim() ?? "",
     seoImageUrl: settings.seo_image_url?.trim() ?? "",

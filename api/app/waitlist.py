@@ -24,6 +24,9 @@ def expire_waitlist_offers(db: Session) -> int:
 
 
 def offer_cancelled_slot(db: Session, appointment: Appointment) -> WaitlistEntry | None:
+    from .booking_policy import policy
+    if not policy(db)["booking_enabled"]:
+        return None
     expire_waitlist_offers(db)
     entry = db.scalar(
         select(WaitlistEntry)

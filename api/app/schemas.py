@@ -329,6 +329,8 @@ class ServiceWrite(BaseModel):
 
 
 class ClinicSettingRead(BaseModel):
+    booking_enabled: bool = False
+    booking_disabled_message: str = "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید."
     model_config = ConfigDict(from_attributes=True)
 
     revision: int = 1

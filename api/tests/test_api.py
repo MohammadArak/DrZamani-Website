@@ -1,6 +1,14 @@
 from __future__ import annotations
 
 from datetime import datetime, time, timedelta
+from dataclasses import replace
+import pytest
+from app import config
+
+@pytest.fixture(autouse=True)
+def booking_fixture(monkeypatch):
+    bootstrap = config.get_settings()
+    monkeypatch.setattr(config, "get_settings", lambda: replace(bootstrap, booking_enabled=True))
 from io import BytesIO
 from zoneinfo import ZoneInfo
 

@@ -109,6 +109,8 @@ class Settings:
     captcha_otp_request: bool = True
     captcha_otp_verify: bool = True
     captcha_hostnames: str = ""
+    booking_enabled: bool = False
+    booking_disabled_message: str = "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید."
     mfa_required_owners: bool = False
 
     @property
@@ -188,6 +190,8 @@ def get_settings() -> Settings:
         upload_dir=Path(os.getenv("UPLOAD_DIR", str(BACKEND_DIR / "data" / "uploads"))).resolve(),
         max_upload_bytes=_bounded_int("MAX_UPLOAD_BYTES", 10 * 1024 * 1024, 1024, 10 * 1024 * 1024),
         frontend_url=frontend_url,
+        booking_enabled=_as_bool(os.getenv("BOOKING_ENABLED"), False),
+        booking_disabled_message=os.getenv("BOOKING_DISABLED_MESSAGE", Settings.booking_disabled_message).strip(),
         booking_hold_minutes=_bounded_int("BOOKING_HOLD_MINUTES", 12, 5, 60),
         zarinpal_merchant_id=os.getenv("ZARINPAL_MERCHANT_ID", "").strip(),
         zarinpal_sandbox=sandbox,

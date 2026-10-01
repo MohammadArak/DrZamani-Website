@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from .models import Appointment, AppointmentReminder, ClinicSetting
@@ -11,8 +11,12 @@ from .sms_automation import queue_sms_event
 
 
 def queue_scheduled_reminders(db: Session) -> int:
+    db.commit()
+    db.execute(text("BEGIN IMMEDIATE"))
+    db.expire_all()
     settings = db.get(ClinicSetting, 1)
     if not settings or not settings.reminder_enabled:
+        db.rollback()
         return 0
 
     timezone_info = ZoneInfo(settings.timezone_name)
@@ -69,6 +73,7 @@ def queue_scheduled_reminders(db: Session) -> int:
         outbox = queue_sms_event(
             db,
             "appointment_reminder",
+            dedupe_key=f"reminder:{appointment.id}:{reminder_key}",
             patient=appointment.patient,
             appointment=appointment,
         )
@@ -87,6 +92,5 @@ def queue_scheduled_reminders(db: Session) -> int:
         )
         queued += 1
 
-    if queued:
-        db.commit()
+    db.commit()
     return queued

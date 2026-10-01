@@ -11,6 +11,7 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from ..booking_policy import admission_lock, require_booking, public_clinic
 from ..database import get_db
 from ..activity import record_audit
 from ..intake import (
@@ -60,7 +61,7 @@ from ..schemas import (
 )
 from ..scheduling import ensure_bookable_date, list_available_slots, slot_key_for_appointment
 from ..security import utcnow
-from ..sms_automation import dispatch_pending_sms, expire_unpaid_holds, queue_sms_event
+from ..sms_automation import expire_unpaid_holds, queue_sms_event, cancel_abandoned_notice
 from ..waitlist import expire_waitlist_offers, offer_cancelled_slot
 
 
@@ -78,6 +79,8 @@ def _patient_reschedule_reason(
     item: Appointment,
     settings: ClinicSetting,
 ) -> str | None:
+    if not get_settings().booking_enabled:
+        return get_settings().booking_disabled_message
     if item.status not in {"pending", "confirmed"}:
         return "این نوبت دیگر قابل جابه‌جایی نیست"
     if settings.max_patient_reschedules <= 0:
@@ -175,7 +178,7 @@ def _patient_consultation_appointment(
 
 @router.get("/clinic", response_model=ClinicSettingRead)
 def clinic_settings(db: Session = Depends(get_db)) -> ClinicSetting:
-    return _settings(db)
+    return public_clinic(_settings(db), db)
 
 
 @router.get("/services", response_model=list[ServiceRead])
@@ -212,8 +215,8 @@ def available_dates(
     urgent: bool = Query(default=False),
     db: Session = Depends(get_db),
 ) -> list[AvailableDate]:
-    if expire_unpaid_holds(db):
-        dispatch_pending_sms(db)
+    require_booking(db)
+    expire_unpaid_holds(db)
     settings = _settings(db)
     service = db.get(Service, service_id) if service_id else None
     if service_id and (not service or not service.is_active):
@@ -240,8 +243,8 @@ def available_slots(
     urgent: bool = Query(default=False),
     db: Session = Depends(get_db),
 ) -> list[AvailableSlot]:
-    if expire_unpaid_holds(db):
-        dispatch_pending_sms(db)
+    require_booking(db)
+    expire_unpaid_holds(db)
     settings = _settings(db)
     if not ensure_bookable_date(day, settings):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="تاریخ خارج از بازه رزرو است")
@@ -428,6 +431,7 @@ def patient_reschedule_appointment(
     patient: Patient = Depends(get_current_patient),
     db: Session = Depends(get_db),
 ) -> AppointmentRead:
+    admission_lock(db)
     item, settings = _patient_reschedule_context(db, appointment_id, patient)
     if (
         item.appointment_date == payload.appointment_date
@@ -504,7 +508,6 @@ def patient_reschedule_appointment(
             detail="این زمان هم‌اکنون رزرو شد؛ زمان دیگری انتخاب کنید",
         ) from exc
     db.refresh(item)
-    dispatch_pending_sms(db)
     return _appointment_read(item, settings=settings)
 
 
@@ -579,6 +582,7 @@ def join_waitlist(
     patient: Patient = Depends(get_current_patient),
     db: Session = Depends(get_db),
 ) -> WaitlistEntryRead:
+    admission_lock(db)
     if not patient.profile_completed:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="ابتدا اطلاعات پروفایل را تکمیل کنید")
     service = db.get(Service, payload.service_id)
@@ -711,6 +715,7 @@ def create_appointment(
     patient: Patient = Depends(get_current_patient),
     db: Session = Depends(get_db),
 ) -> BookingStartResponse:
+    require_booking(db)
     if not patient.profile_completed:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="ابتدا اطلاعات پروفایل را تکمیل کنید")
     settings = _settings(db)
@@ -721,8 +726,13 @@ def create_appointment(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="خدمت انتخاب‌شده فعال نیست")
     if payload.is_urgent and not service.urgent_enabled:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="نوبت فوری برای این خدمت فعال نیست")
-    db.commit()
-    db.execute(text("BEGIN IMMEDIATE"))
+    admission_lock(db)
+    settings = _settings(db)
+    service = db.get(Service, payload.service_id)
+    if not ensure_bookable_date(payload.appointment_date, settings) or not service or not service.is_active:
+        raise HTTPException(409, "زمان یا خدمت انتخاب‌شده دیگر در دسترس نیست")
+    if payload.is_urgent and not service.urgent_enabled:
+        raise HTTPException(409, "نوبت فوری برای این خدمت فعال نیست")
     matching_slot = next(
         (
             (start, end)
@@ -770,7 +780,6 @@ def create_appointment(
             db.rollback()
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="این ساعت هم‌اکنون رزرو شد؛ ساعت دیگری انتخاب کنید") from exc
         db.refresh(item)
-        dispatch_pending_sms(db)
         return BookingStartResponse(
             requires_payment=False,
             appointment=_appointment_read(item, settings=settings),
@@ -803,7 +812,6 @@ def create_appointment(
             extra={"service_title": service.title, "amount_toman": amount_toman},
         )
         db.commit()
-        dispatch_pending_sms(db)
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
     payment.authority = gateway_result.authority
     payment.raw_response = gateway_result.raw_response
@@ -818,6 +826,14 @@ def create_appointment(
     )
 
 
+def _payment_redirect(payment, frontend):
+    if payment.status == "verified" and payment.appointment:
+        return RedirectResponse(f"{frontend}?payment=success&tracking_code={payment.appointment.tracking_code}", status_code=303)
+    if payment.status in {"verified", "verified_conflict"}:
+        return RedirectResponse(f"{frontend}?payment=manual-review", status_code=303)
+    return None
+
+
 @router.get("/payments/zarinpal/callback", name="zarinpal_callback", include_in_schema=False)
 def zarinpal_callback(
     Authority: str = Query(min_length=10, max_length=80),
@@ -828,90 +844,91 @@ def zarinpal_callback(
     payment = db.scalar(select(Payment).where(Payment.authority == Authority))
     if not payment:
         return RedirectResponse(f"{frontend}?payment=unknown", status_code=303)
+    terminal = _payment_redirect(payment, frontend)
+    if terminal:
+        return terminal
+    payment_id, amount = payment.id, payment.amount_toman
+    # No write transaction is held while the provider is contacted.
+    db.rollback()
+    verified = None
+    error = False
+    if Status == "OK":
+        try:
+            verified = verify_payment(authority=Authority, amount_toman=amount)
+        except PaymentGatewayError:
+            error = True
+    db.execute(text("BEGIN IMMEDIATE"))
+    db.expire_all()
+    payment = db.get(Payment, payment_id)
+    if not payment:
+        db.rollback()
+        return RedirectResponse(f"{frontend}?payment=unknown", status_code=303)
+    terminal = _payment_redirect(payment, frontend)
+    if terminal:
+        db.rollback()
+        return terminal
     hold = payment.hold
-    if payment.status == "verified" and payment.appointment:
-        return RedirectResponse(
-            f"{frontend}?payment=success&tracking_code={payment.appointment.tracking_code}",
-            status_code=303,
-        )
-    if Status != "OK":
-        payment.status = "cancelled"
-        hold.status = "payment_failed"
-        queue_sms_event(
-            db,
-            "payment_abandoned",
-            patient=hold.patient,
-            extra={"service_title": hold.service.title, "amount_toman": payment.amount_toman},
-        )
-        db.commit()
-        dispatch_pending_sms(db)
-        return RedirectResponse(f"{frontend}?payment=cancelled", status_code=303)
-    try:
-        verified = verify_payment(authority=Authority, amount_toman=payment.amount_toman)
-    except PaymentGatewayError:
+    if error or (verified and verified.code in {100, 101} and not verified.ref_id):
+        # Leave the hold/payment eligible for a later safe verification retry.
         payment.status = "verification_error"
         db.commit()
         return RedirectResponse(f"{frontend}?payment=verification-error", status_code=303)
-    payment.raw_response = verified.raw_response
-    if verified.code not in {100, 101}:
-        payment.status = "failed"
+    if Status != "OK" or verified.code not in {100, 101}:
+        payment.status = "cancelled" if Status != "OK" else "failed"
         hold.status = "payment_failed"
-        queue_sms_event(
-            db,
-            "payment_abandoned",
-            patient=hold.patient,
-            extra={"service_title": hold.service.title, "amount_toman": payment.amount_toman},
-        )
+        if verified:
+            payment.raw_response = verified.raw_response
+        queue_sms_event(db, "payment_abandoned", patient=hold.patient,
+                        dedupe_key=f"hold:{hold.id}:abandoned",
+                        extra={"service_title": hold.service.title, "amount_toman": amount})
         db.commit()
-        dispatch_pending_sms(db)
-        return RedirectResponse(f"{frontend}?payment=failed", status_code=303)
+        return RedirectResponse(f"{frontend}?payment={'cancelled' if Status != 'OK' else 'failed'}", status_code=303)
 
-    db.commit()
-    db.execute(text("BEGIN IMMEDIATE"))
+    payment.raw_response = verified.raw_response
+    cancel_abandoned_notice(db, hold.id)
+    # A duplicate reference cannot allocate another appointment. Preserve evidence
+    # without violating the UNIQUE ref_id; raw_response is a minimal provider receipt.
+    collision = db.scalar(select(Payment.id).where(Payment.ref_id == verified.ref_id, Payment.id != payment.id))
+    payment.ref_id = None if collision else verified.ref_id
+    payment.verified_at = utcnow()
     settings = _settings(db)
-    matching_slot = next(
-        (
-            (start, end)
-            for start, end in list_available_slots(
-                db,
-                hold.appointment_date,
-                settings,
-                hold.service.duration_minutes,
-                service=hold.service,
-                is_urgent=hold.is_urgent,
-                exclude_hold_id=hold.id,
-            )
-            if start == hold.start_time
-        ),
-        None,
-    )
-    if not matching_slot:
+    matching_slot = next(((start, end) for start, end in list_available_slots(
+        db, hold.appointment_date, settings, hold.service.duration_minutes,
+        service=hold.service, is_urgent=hold.is_urgent, exclude_hold_id=hold.id,
+    ) if start == hold.start_time), None)
+    # Expired holds may safely complete only while the original slot is still free.
+    if collision or not matching_slot or payment.refund_status != "none":
         payment.status = "verified_conflict"
-        payment.ref_id = verified.ref_id
-        payment.verified_at = utcnow()
         hold.status = "conflict_requires_refund"
         db.commit()
         return RedirectResponse(f"{frontend}?payment=manual-review", status_code=303)
     item = _new_appointment(db=db, hold=hold, payment=payment)
     db.add(item)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError:
+        db.rollback()
+        db.execute(text("BEGIN IMMEDIATE"))
+        db.expire_all()
+        payment = db.get(Payment, payment_id)
+        terminal = _payment_redirect(payment, frontend)
+        if terminal:
+            db.rollback()
+            return terminal
+        payment.status = "verified_conflict"
+        payment.raw_response = verified.raw_response
+        payment.verified_at = utcnow()
+        payment.hold.status = "conflict_requires_refund"
+        db.commit()
+        return RedirectResponse(f"{frontend}?payment=manual-review", status_code=303)
     payment.status = "verified"
-    payment.ref_id = verified.ref_id
-    payment.verified_at = utcnow()
     hold.status = "completed"
-    queue_sms_event(
-        db,
-        "payment_succeeded",
-        patient=hold.patient,
-        appointment=item,
-        extra={"amount_toman": payment.amount_toman},
-    )
-    queue_sms_event(db, "appointment_created", patient=hold.patient, appointment=item)
+    queue_sms_event(db, "payment_succeeded", patient=hold.patient, appointment=item,
+                    dedupe_key=f"hold:{hold.id}:paid", extra={"amount_toman": amount})
+    queue_sms_event(db, "appointment_created", patient=hold.patient, appointment=item,
+                    dedupe_key=f"hold:{hold.id}:created")
     db.commit()
-    dispatch_pending_sms(db)
-    return RedirectResponse(
-        f"{frontend}?payment=success&tracking_code={item.tracking_code}", status_code=303
-    )
+    return RedirectResponse(f"{frontend}?payment=success&tracking_code={item.tracking_code}", status_code=303)
 
 
 @router.get(
@@ -1111,7 +1128,6 @@ def cancel_appointment(
     )
     db.commit()
     db.refresh(item)
-    dispatch_pending_sms(db)
     return _appointment_read(item, settings=settings)
 
 

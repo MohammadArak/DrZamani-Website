@@ -76,3 +76,13 @@ revision مشترک، seo_title/seo_description/seo_image_url به همان مد
 | MFA_REQUIRED_OWNERS | boolean؛ همه activeownerها enroll شوند؛ fingerprint/ابطال نشست و promotion gate | false |
 
 timeout ارائه‌دهنده ثابت8ثانیه است و ENV/پنل آزاد ندارد. سیاست MFA خود کاربر در StaffMfa است؛ seed/pending رمزگذاری و recovery hash ذخیره می‌شود. تنظیم اجبار جهانی نسخه‌دار/audit است؛ enroll/rotation/disable audit جدا دارد. تغییر DB خواندن بعدی API/jobs، تغییر ENV restart؛ DB بر ENV مقدم است. attestation به key/credential/score/hostname و SECRET_KEY متصل است؛ وضعیت تأیید owner-only و غیرمحرمانه است. جزئیات rollback/key rotation در PHASE_04_CAPTCHA_MFA.md.
+
+
+## دو فیلد مرحله۵ (۴۵ runtime در مجموع)
+
+| ENV bootstrap | پنل | رفتار |
+|---|---|---|
+| BOOKING_ENABLED | نوبت‌دهی، فقط مدیرکل | پیش‌فرض false؛ مهاجرت override خاموش، چک API زیر قفل، مستقل از درگاه |
+| BOOKING_DISABLED_MESSAGE | نوبت‌دهی، فقط مدیرکل | متن فارسی غیرخالی حداکثر۱۰۰۰حرف؛ عمومی در API/HTML و راه تماس |
+
+این فیلدها با تغییر اطلاعات مطب نوشته نمی‌شوند؛ مرکز تنظیمات runtime مسیر مجاز تغییر است. مشاهده پرونده/ورود/callback با خاموشی رزرو باز می‌ماند؛ جابه‌جایی و انتظار جدید بسته است.

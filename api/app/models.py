@@ -622,6 +622,10 @@ class SmsCampaign(Base):
 
 
 class SmsOutbox(Base):
+    dedupe_key: Mapped[str | None] = mapped_column(String(160), unique=True)
+    claim_token: Mapped[str | None] = mapped_column(String(64))
+    claim_until: Mapped[datetime | None] = mapped_column(DateTime())
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime())
     __tablename__ = "sms_outbox"
 
     id: Mapped[int] = mapped_column(primary_key=True)

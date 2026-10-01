@@ -39,6 +39,8 @@ export type PatientProfilePayload = {
 };
 
 export type ClinicSettings = {
+    booking_enabled?: boolean;
+    booking_disabled_message?: string;
     revision: number;
     seo_title: string;
     seo_description: string;
@@ -366,7 +368,7 @@ export type SmsOutboxItem = {
     campaign_id: number | null;
     phone: string;
     rendered_body: string;
-    status: "pending" | "sent" | "failed";
+    status: "pending" | "sending" | "sent" | "failed" | "cancelled";
     attempts: number;
     last_error: string | null;
     created_at: string;

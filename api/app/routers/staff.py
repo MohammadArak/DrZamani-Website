@@ -537,7 +537,8 @@ def settings(
     item = db.get(ClinicSetting, 1)
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="تنظیمات پیدا نشد")
-    return item
+    from ..booking_policy import public_clinic
+    return public_clinic(item, db)
 
 
 @router.put("/settings", response_model=ClinicSettingRead)
@@ -547,7 +548,8 @@ def update_settings(
     db: Session = Depends(get_db),
 ) -> ClinicSetting:
     from ..runtime_settings import update_clinic
-    return update_clinic(db, staff, payload)
+    from ..booking_policy import public_clinic
+    return public_clinic(update_clinic(db, staff, payload), db)
 
 
 @router.post("/operations/run", response_model=OperationsRunResult)
@@ -1102,7 +1104,6 @@ def update_appointment(
     )
     db.commit()
     db.refresh(item)
-    dispatch_pending_sms(db)
     return _staff_appointment(item, staff)
 
 
@@ -1177,7 +1178,6 @@ def reschedule_appointment(
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="این زمان هم‌اکنون رزرو شد") from exc
     db.refresh(item)
-    dispatch_pending_sms(db)
     return _staff_appointment(item, staff)
 
 
@@ -1300,7 +1300,6 @@ def staff_create_consultation_message(
     )
     db.commit()
     db.refresh(message)
-    dispatch_pending_sms(db)
     background_tasks.add_task(
         publish_consultation_event,
         appointment_id=appointment_id,
@@ -1449,7 +1448,6 @@ def update_refund(
     )
     db.commit()
     db.refresh(item)
-    dispatch_pending_sms(db)
     return _payment_read(item)
 
 

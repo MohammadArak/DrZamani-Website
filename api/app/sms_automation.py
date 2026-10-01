@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from sqlalchemy import select
+from datetime import timedelta
+import secrets
+from sqlalchemy import select, text, or_
 from sqlalchemy.orm import Session
 
 from .models import (
@@ -111,7 +113,12 @@ def queue_sms_event(
     patient: Patient,
     appointment: Appointment | None = None,
     extra: dict[str, str | int] | None = None,
+    dedupe_key: str | None = None,
 ) -> SmsOutbox | None:
+    if dedupe_key:
+        existing = db.scalar(select(SmsOutbox).where(SmsOutbox.dedupe_key == dedupe_key))
+        if existing:
+            return existing
     rule = db.scalar(
         select(SmsAutomationRule).where(SmsAutomationRule.event_key == event_key)
     )
@@ -120,6 +127,7 @@ def queue_sms_event(
     variables = _variables(patient, appointment, extra)
     rendered = rule.template_text.format_map(defaultdict(str, variables)).strip()
     item = SmsOutbox(
+        dedupe_key=dedupe_key,
         event_key=event_key,
         patient_id=patient.id,
         appointment_id=appointment.id if appointment else None,
@@ -134,6 +142,9 @@ def queue_sms_event(
 
 
 def expire_unpaid_holds(db: Session) -> int:
+    db.commit()
+    db.execute(text("BEGIN IMMEDIATE"))
+    db.expire_all()
     holds = db.scalars(
         select(BookingHold).where(
             BookingHold.status == "pending_payment",
@@ -141,20 +152,22 @@ def expire_unpaid_holds(db: Session) -> int:
         )
     ).all()
     for hold in holds:
+        if hold.payment and hold.payment.status in {"verified", "verified_conflict"}:
+            continue
         hold.status = "expired"
         if hold.payment:
             hold.payment.status = "expired"
         queue_sms_event(
             db,
             "payment_abandoned",
+            dedupe_key=f"hold:{hold.id}:abandoned",
             patient=hold.patient,
             extra={
                 "service_title": hold.service.title,
                 "amount_toman": hold.amount_toman,
             },
         )
-    if holds:
-        db.commit()
+    db.commit()
     return len(holds)
 
 
@@ -163,6 +176,14 @@ def queue_appointment_reminders(db: Session, hours_ahead: int | None = None) -> 
     from .appointment_operations import queue_scheduled_reminders
 
     return queue_scheduled_reminders(db)
+
+
+def cancel_abandoned_notice(db: Session, hold_id: str) -> None:
+    item = db.scalar(select(SmsOutbox).where(SmsOutbox.dedupe_key == f"hold:{hold_id}:abandoned"))
+    if item and item.status in {"pending", "failed"}:
+        item.status = "cancelled"
+        item.next_attempt_at = None
+        item.last_error = "پرداخت تأیید شد؛ اعلان پرداخت ناموفق لغو شد"
 
 
 def _refresh_campaign_progress(db: Session, campaign_ids: set[int]) -> None:
@@ -195,42 +216,62 @@ def _refresh_campaign_progress(db: Session, campaign_ids: set[int]) -> None:
 
 
 def dispatch_pending_sms(db: Session, limit: int = 20) -> int:
-    items = db.scalars(
-        select(SmsOutbox)
-        .where(SmsOutbox.status.in_(["pending", "failed"]), SmsOutbox.attempts < 3)
-        .order_by(SmsOutbox.created_at, SmsOutbox.id)
-        .limit(limit)
-    ).all()
-    if not items:
-        return 0
-    campaign_ids = {item.campaign_id for item in items if item.campaign_id is not None}
-    try:
-        provider = get_sms_provider()
-    except SmsDeliveryError as exc:
-        for item in items:
-            item.attempts += 1
-            item.status = "failed"
-            item.last_error = str(exc)[:500]
-        _refresh_campaign_progress(db, campaign_ids)
-        db.commit()
-        return 0
+    """Claim one durable job before network I/O; bounded retries across restarts.
+
+    Delivery is at-least-once: a provider accepting a message followed by process
+    death before the receipt commit can result in a retry after the lease expires.
+    No unsupported exactly-once delivery promise is made.
+    """
+    from .runtime_settings import get_settings
+    if get_settings().sms_provider == "disabled":
+        return 0  # Deliberate suspension must not consume the retry budget.
     sent = 0
-    for item in items:
+    for _ in range(max(0, min(limit, 200))):
+        db.commit()
+        db.execute(text("BEGIN IMMEDIATE"))
+        db.expire_all()
+        now = utcnow()
+        stale = db.scalars(select(SmsOutbox).where(
+            SmsOutbox.status == "sending", SmsOutbox.claim_until <= now)).all()
+        for row in stale:
+            row.status = "failed"
+            row.claim_token = row.claim_until = None
+            row.last_error = "پاسخ ارسال قبلی ثبت نشد؛ احتمال دریافت پیام وجود دارد"
+            row.next_attempt_at = now + timedelta(minutes=5)
+        db.flush()
+        _refresh_campaign_progress(db, {r.campaign_id for r in stale if r.campaign_id})
+        item = db.scalar(select(SmsOutbox).where(
+            SmsOutbox.status.in_(["pending", "failed"]), SmsOutbox.attempts < 3,
+            or_(SmsOutbox.next_attempt_at.is_(None), SmsOutbox.next_attempt_at <= now),
+        ).order_by(SmsOutbox.created_at, SmsOutbox.id).limit(1))
+        if not item:
+            db.commit()
+            break
+        token = secrets.token_hex(24)
+        item.status, item.claim_token = "sending", token
+        item.claim_until = now + timedelta(minutes=2)
         item.attempts += 1
+        item_id = item.id
+        # Snapshot only the data required for this claimed message.
+        phone, body, pattern, variables = item.phone, item.rendered_body, item.provider_pattern_code, item.variables_json
+        db.commit()
+        error = False
         try:
-            provider.send_event(
-                item.phone,
-                item.rendered_body,
-                item.provider_pattern_code,
-                json.loads(item.variables_json),
-            )
-            item.status = "sent"
-            item.sent_at = utcnow()
-            item.last_error = None
-            sent += 1
-        except (SmsDeliveryError, ValueError, TypeError) as exc:
-            item.status = "failed"
-            item.last_error = str(exc)[:500]
-    _refresh_campaign_progress(db, campaign_ids)
-    db.commit()
+            get_sms_provider().send_event(phone, body, pattern, json.loads(variables))
+        except (SmsDeliveryError, ValueError, TypeError):
+            error = True
+        db.execute(text("BEGIN IMMEDIATE"))
+        db.expire_all()
+        item = db.get(SmsOutbox, item_id)
+        if item and item.status == "sending" and item.claim_token == token:
+            item.claim_token = item.claim_until = None
+            item.status = "failed" if error else "sent"
+            item.last_error = "ارسال ناموفق بود؛ تنظیمات سرویس و گزارش ارائه‌دهنده را بررسی کنید" if error else None
+            item.next_attempt_at = utcnow() + timedelta(minutes=5 * item.attempts) if error else None
+            if not error:
+                item.sent_at = utcnow()
+                sent += 1
+            db.flush()
+            _refresh_campaign_progress(db, {item.campaign_id} if item.campaign_id else set())
+        db.commit()
     return sent
