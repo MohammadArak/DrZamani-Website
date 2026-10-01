@@ -1,0 +1,19 @@
+{
+  "environment": "local Nginx 1.28.0 + real API, disposable synthetic-only database; fixture login only",
+  "certificate_validation": "verified fixture CA; never disabled",
+  "results": [
+    {
+      "origin": "http://127.0.0.1:8087",
+      "result": "PASS",
+      "scope": "public pagination, SSR/bootstrap, private consent excluded, published photo, anonymous staff denied, cache/security headers, booking closed"
+    },
+    {
+      "origin": "https://127.0.0.1:8088",
+      "result": "PASS",
+      "scope": "public pagination, SSR/bootstrap, private consent excluded, published photo, anonymous staff denied, cache/security headers, booking closed"
+    }
+  ],
+  "cookie_csrf": "missing token denied 403; valid token accepted",
+  "staff_pagination": "32 comments; pages 30+2",
+  "withdrawal": "browser-edited content revoked consent; public total 0 and photo404 before re-consent"
+}

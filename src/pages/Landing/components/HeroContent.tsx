@@ -1,4 +1,3 @@
-import BookingNotice from "@/components/BookingNotice";
 import { motion } from "@/components/Motion";
 import TextGenerateEffect from "./TextGenerateEffect";
 import { FaCalendar, FaRegImages } from "react-icons/fa";
@@ -60,13 +59,14 @@ const HeroContent = () => {
                         />
                         <TextGenerateEffect
                             as="h1"
+                            className="text-white"
                             wordClassName="font-dana text-2xl md:text-4xl lg:text-8xl font-bold max-w-7xl mt-6 pb-2 relative z-10"
                             words={clinicInfo.doctorName}
                             wordsCallbackClass={({ word }) => {
                                 if (word !== "دکتر") {
                                     return "bg-gradient-to-b from-secondary-mild to-secondary bg-clip-text text-transparent";
                                 }
-                                return "";
+                                return "text-white";
                             }}
                             duration={0.9}
                         />
@@ -81,7 +81,7 @@ const HeroContent = () => {
                             }}
                             viewport={{ once: true }}
                         >
-                            <motion.h3 className="shadow-xl bg-[#0f253e] font-lalezar font-light mt-8 text-lg md:text-xl border border-duskblue w-fit rounded-full px-4 py-1 flex justify-center items-center gap-2">
+                            <motion.h3 className="shadow-xl bg-[#0f253e] text-white font-lalezar font-light mt-8 text-lg md:text-xl border border-duskblue w-fit rounded-full px-4 py-1 flex justify-center items-center gap-2">
                                 <div className="bg-secondary rounded-full w-4 h-4"></div>
                                 {clinicInfo.specialty}
                             </motion.h3>
@@ -119,11 +119,12 @@ const HeroContent = () => {
                         >
                             <a
                                 href="/appointment/"
+                                onClick={event => { if (!clinicInfo.bookingEnabled) { event.preventDefault(); setReserveOpen(true); } }}
                                 className="flex gap-2 px-2 py-1 text-sm md:text-base md:px-5 md:py-3 text-jetblack justify-center items-center bg-linear-to-b from-secondary-mild to-secondary hover:scale-105 transition rounded-md shadow-md shadow-secondary-deep/50"
-                                aria-label={clinicInfo.bookingEnabled ? "رزرو نوبت" : "پیگیری نوبت‌های قبلی"}
+                                aria-label="رزرو نوبت"
                             >
                                 <FaCalendar />
-                                {clinicInfo.bookingEnabled ? "رزرو نوبت مشاوره" : "وضعیت نوبت‌دهی"}
+                                رزرو نوبت
                             </a>
                             {/* <button
                                 onClick={() => setReserveOpen(true)}
@@ -148,7 +149,6 @@ const HeroContent = () => {
                                 مشاهده نمونه کارها
                             </button>
                         </motion.div>
-                        <BookingNotice />
                     </div>
                 </div>
             </div>

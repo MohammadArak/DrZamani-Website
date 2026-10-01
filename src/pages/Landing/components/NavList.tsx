@@ -75,7 +75,7 @@ const NavList = ({
                         }))
                     }
                 >
-                    <span className="heading-text relative z-10 block">
+                    <span className="heading-text relative z-10 block text-inherit">
                         {tab.title}
                     </span>
                 </a>

@@ -120,3 +120,26 @@ dependencyها: Tiptap3.31.4،DOMPurify3.4.16،Bleach6.4.0،webencodings0.6.1؛ 
 خطاهای کشف‌شده و رفع‌شده: انتخاب فایل input را remount می‌کرد؛ setEditable اولیه فرم ناشر را dirty می‌کرد؛ پنجرهconfirm بومی مرورگر در ابزار بررسی گیر می‌کرد و با dialog قابل‌دسترسی داخل پنل جایگزین شد. خطاهای tempACL/Vitespawn با اجرای محلی مجاز، انتظارهای غلط دو تست با اصلاحfixture، و cleanupSQLite با closing رفع شدند. هشدارهای قدیمی pytest و listenhttp2 باقی‌اند. هیچ deploy/production/داده‌بیمار/مالک‌واقعی/پرداخت/SMS واقعی اجرا نشد.
 
 جزئیات در PHASE_06_ARTICLES.md؛ وضعیت ارسال، SHA و tree وZIP بعد از انتشار در گزارش تحویل کنارoutputs ثبت می‌شوند. پس از mergeمرحله۶، مرحله۷ نظرات؛ سپس previewمرحله۸/تصمیم مالک، مرحله۹CI/سرعت و مرحله۱۰پذیرش مستقل باقی‌اند.
+
+## 2026-10-01 — پذیرش محلی مرحله۷ نظرات، نسخه1.14.0
+
+ public_comments بدون patientFK؛ نام نمایشی/متن ساده/optionalmedia/خدمت فعال/ترتیب، current/publicsnapshot، optimisticrevision، softarchive، RBAC مستقل comments.view/create/edit/publish/delete، audit حداقل بدون متن و مرجع خصوصی. رضایت+مرجع خصوصی+privacyreview شرط انتشار؛ تغییر محتوا در فرم تأییدها را پاک می‌کند و ذخیره بدون رضایت یا مرجع فوراً withdraw. ناشر بدونedit پس ازpreview storedsnapshot را منتشر می‌کند. هیچ hardcodedquote قدیمی واردDB نشده و empty state روشن است. نقش‌های موجود خودکار permission تازه نمی‌گیرند؛ مالک واقعی نساز. FAQ/گالری قابل مدیریت در شرط اختیاری نقشه‌راه و خارج محدوده فعلی‌اند.
+
+نتایج
+
+- 287backend موفق210.63s/3warningقدیمی،21اختصاصی رضایت/RBAC/media/snapshot/plaintext/privacy/bounds/pagination/CAS/revokedstaff.
+- lint/build/version1.14.0/Ruff E9/F63/F7/F82 موفق؛ بدون وابستگی تازه. buildmain302.41KB/gzip97.07، comments9.70/3.45، CSS121.79/20.36. prerender باfallback امن چونAPI در دسترس نبود؛ SSR واقعی جدا آزموده شد.
+- migration عمومی/editorial/comments موفق. comments0018→0019 empty(noimport)؛2نظر ساختگی پرشده، downgrade/reupgrade، حفظ article/media، coordinatedSQLitebackup+mediahashrestore، integrity/FK. downgrade0019 نظرات را حذف می‌کند؛ توقف نویسنده/backup هماهنگ DB+media/code/ENV/Nginx لازم؛ reupgrade خودکار محتوا را برنمی‌گرداند.
+- مرورگر React/API واقعی باDB مستقل وfixture-only login/session: draft/image404، preview/disabledpublish/confirmpublish، متن<script> بی‌اثر، تصویرpublic200؛ edit تأییدها را پاک کرد، savewithdraw وpublicempty/photo404؛ reconsent/republication فقطfixture. پنل32در30+2، public14در12+2/loadmore، ناشربدونedit انتشار موفق، writerبدونpublish، readerبدونmutation،409حفظ متن/لغوreload/confirmنسخه تازه، guardخروج، softarchive32→31. دسکتاپ و390px عکس‌برداری شد.
+- Nginx1.28 HTTP+HTTPS با CAfixture معتبر(verifyهرگزخاموش نشد): SSR/bootstrap، pagination، privateconsentدرHTML/APIغایب، anonymousstaff401، missingCSRF403/validaccepted، cache/securityheaders، photo وclosedbooking. PHASE_07_NGINX_CHECKS.json.
+
+CAPTCHA/login واقعی وstagingخارجی/Linuxjobs/providerها اجرا نشده‌اند. no production/deploy/realowner/payment/SMS/patientdata. قدم بعد مرحله۸ previewظاهر و خدمات واقعی؛۹بهینه‌سازی/CI؛۱۰پذیرش خارجی و تحویل. ادعاهای آماری وsamplelegacy ظاهر در۸بازبینی می‌شوند.
+
+
+## 2026-10-01 — اصلاحات نهایی مالک، مرحله۷ نسخه 1.14.0
+
+قالب موجود فرانت مبنا شد و طراحی مرحله۸/صفحات خدمات جدید deferred است. نظرات با همان اسلایدر تیره و کارت شیشه‌ای عکس‌دار/نام/متن/سن اختیاری به پنل وصل شدند؛ داده hardcoded قدیمی وارد DB نشد. قالب مقالات با سربرگ پزشک و sidebar جست‌وجو/دسته/آخرین مطالب، فهرست سه‌ستونی و بخش قبلی تازه‌ترین ENT از مقاله‌های منتشرشده پنل تغذیه می‌شوند. دو CTA «رزرو نوبت» در خاموشی فقط دیالوگ پیام مدیر و در فعالی لینک سامانه‌اند؛ متن وضعیت از صفحه اصلی حذف شد. سه کارت AboutUs حذف، رنگ دکتر/تخصص و عنوان فوتر سفید و هدر اسکرول تیره شد.
+
+۲۹۰ تست backend در 213.59s موفق با سه هشدار قدیمی؛ lint/build/version/Ruff critical و npm audit تازه صفر، migration عمومی/editorial/comments و backup/restore موفق. بررسی نهایی مرورگر عکس/سن، سن۲۹→۳۰ و resetرضایت/preview، desktop/viewport390، header/hero/footer، دیالوگ سفارشی، search+category و detail/sidebar/mobile اجرا شد. تصاویر نهایی جدا از grid/تصاویر قدیمی با عرض اشتباه ثبت شدند. HTTP و HTTPS Nginx با TLS معتبر و مقاله/سن/عکس/پیام سفارشی و عدم افشای رضایت موفق؛ جزئیات و محدودیت‌ها در PHASE_07_COMMENTS.md و دو گزارش JSON.
+
+مرجع ظاهر عکس مالک و asset عمومی سایت اصلی از GET معتبر200 بود؛ مرورگر/جست‌وجو به سایت اصلی وصل نشدند. عکس سربرگ فقط پزشک استفاده شد؛ عکس دیگر حاوی بیمار کنار گذاشته و حذف شد. تصاویر آزمون هندسی و نظرات ساختگی‌اند. رزرو فعال صرفاً DB موقت آزموده و سپس خاموش شد. هیچ deploy یا تغییر production یا داده/مالک/پرداخت/SMS واقعی انجام نشده است. staging/CAPTCHA/provider/Linux/jobs/productionidentity و sync تازه index رسمی Python اجرا نشده‌اند. قدم بعد ارسال و ادغام۷/تطبیق SHA/tree، سپس۹ بدون تغییر ظاهر و۱۰ با گزارش گیت‌های خارجی؛۸ deferred.

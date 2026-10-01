@@ -99,7 +99,11 @@ def render(clinic, page, db=None, editorial=None):
         for number in [clinic.office_phone, clinic.consultation_phone]:
             body += f'<p><a href="tel:{esc(phone(number))}">{esc(number)}</a></p>'
         body += f'<p><a href="mailto:{esc(clinic.email)}">{esc(clinic.email)}</a></p>'
-    if page in {"home", "appointment"} and not payload["booking_enabled"]:
+        from .comments import home_html
+        comment_html,comment_data=home_html(db)
+        body+=comment_html
+        meta+=f'<script id="comment-bootstrap" type="application/json">{safe_json(comment_data)}</script>'
+    if page == "appointment" and not payload["booking_enabled"]:
         body += f'<p role="status">{esc(payload["booking_disabled_message"])}</p><p><a href="tel:{esc(phone(clinic.office_phone))}">تماس با مطب</a></p>'
     body += '<p><a href="/">صفحه اصلی</a></p></main>'
     if page == "appointment" and not payload["booking_enabled"]:
@@ -147,7 +151,10 @@ def sitemap(db: Session = Depends(get_db)):
     clinic = clinic_row(db)
     from .content import public_rows
     rows = public_rows(db)
-    urls = [("/", clinic.updated_at)]
+    from sqlalchemy import select,func
+    from .comment_models import Comment
+    last_comment=db.scalar(select(func.max(Comment.public_updated_at)))
+    urls = [("/", max(clinic.updated_at,last_comment) if last_comment else clinic.updated_at)]
     if rows:
         latest = max(r.public_updated_at for r in rows)
         urls.append(("/articles/", latest))

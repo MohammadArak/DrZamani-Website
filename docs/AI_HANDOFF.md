@@ -1,3 +1,19 @@
+# وضعیت مقدم — نسخه 1.14.0، اتصال قالب قبلی به پنل
+
+این بخش بر شرح‌های تاریخی پایین مقدم است. دستور تازه مالک: ساختار فرانت فعلاً عوض نشود؛ نظرات با همان کارت عکس‌دار قدیمی، و مقالات با قالب سربرگ تصویری و ستون کناری، فقط به backend وصل شوند. بازطراحی مرحله ۸ و صفحات خدمات جدید به تعویق افتاد. تغییرات رزرو/هیرو/هدر/فوتر و حذف سه کارت AboutUs اجرا شد.
+
+مرحله ۶ با همان PR۷ ادغام شد: source `ae52757e95b741169277e319861dda1bfafd1795`، merge `ed549791eec6aaccc9e838c785ef3aa98fae039a`، tree `8a1e9a03d679d5c04f565bcccfa7aa5105d345b1`. مرحله ۷ از همین merge روی `codex/phase-07-comments` پذیرفته شد؛ نسخه 1.14.0. SHA دقیق ارسال/ادغام/tree و ZIP در گزارش کنار outputs پس از ارسال ثبت و با GitHub تطبیق می‌شوند؛ اگر موجود نیست، مرحله ۷ هنوز ارسال نشده است.
+
+گزارش جاری: [PHASE_07_COMMENTS.md](PHASE_07_COMMENTS.md). آخرین اجرای کامل ۲۹۰ تست در 213.59s، سه هشدار قدیمی؛ lint/build/version/Ruff critical و ممیزی تازه npm صفر، migration عمومی/editorial/comments و backup/restore موفق. مرورگر واقعی roles/consent/publish/withdraw/CAS/pagination، عکس و سن اختیاری در قالب قبلی، desktop/viewport390، جست‌وجو+دسته، هیرو/هدر/فوتر/دیالوگ رزرو و HTTP/HTTPS Nginx معتبر بررسی شدند. fixture-only login خارج Git است؛ این آزمون CAPTCHA/ورود واقعی نیست.
+
+نظرات مستقل از patient، سن اختیاری ۱..۱۳۰، رسانه عمومی، current/public snapshot، consent/privateReference/privacyreview و RBAC مستقل‌اند. نقش‌های موجود خودکار permissions تازه نمی‌گیرند. archive نرم است؛ downgrade0019 نظرات را حذف و فایل رسانه را حفظ می‌کند، backup هماهنگ DB+media و stopwriters لازم است. داده/رضایت fixture واقعی نیست. ZIP فقط trackedsource باشد؛ .work، outputs، DB، ENV، build، لاگ حساس و venv وارد Git نشوند.
+
+رزرو خاموش در صفحه اصلی فقط دیالوگ متن مدیر از دکمه «رزرو نوبت» دارد؛ خود /appointment/ فقط پیام و انیمیشن توقف، بدون load فرم/پنل بیمار/CAPTCHA. تست فعال فقط DB موقت بود و به خاموش برگشت. deploy یا productionbooking انجام نشده است. هیچ مالک واقعی، داده بیمار، پرداخت یا SMS واقعی استفاده نشود.
+
+قدم بعد: پس از ادغام ۷، نگهداری و CI مرحله ۹ بدون تغییر ظاهر. مرحله ۸ deferred است و complete نیست. مرحله ۱۰ فقط بررسی‌های ممکن محلی/اسناد؛ staging، CAPTCHA/providerهای واقعی، Linux/jobs، frozen index sync تازه و هویت production هنوز NOT RUN/NOT PASS هستند؛ deploy مجوز جدا دارد. هر مرحله test/doc/commit/push/PR/merge و SHA/treeverify؛ اجازه ادغام دوباره لازم نیست.
+
+---
+
 # وضعیت مقدم برای ادامه — 2026-10-01، پذیرش محلی مرحله۶
 
 این بخش بر شرح تاریخی پایین مقدم است. دستور تازه مالک ادامه از phase-06-articles/PR۷ و443f466 بود؛ پس از پذیرش هر مرحله test/doc/commit/push/merge با main مجاز است و اجازه دوباره لازم ندارد. deploy مجوز مستقل دارد.
