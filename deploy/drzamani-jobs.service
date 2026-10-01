@@ -5,6 +5,7 @@ After=network-online.target drzamani-api.service
 
 [Service]
 Type=oneshot
+TimeoutStartSec=1h
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/drzamani/current/api

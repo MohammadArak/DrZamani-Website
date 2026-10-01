@@ -16,7 +16,7 @@ from fastapi import HTTPException
 
 from . import config
 from .activity import record_audit
-from .models import ClinicSetting, SystemSetting, SettingRevision, StaffUser, CaptchaAttestation
+from .models import ClinicSetting, SystemSetting, SettingRevision, StaffUser, CaptchaAttestation, Payment
 
 if TYPE_CHECKING:
     from .schemas import ClinicSettingUpdate
@@ -66,7 +66,9 @@ FIELDS = [
     Field("faraz_otp_variable", "نام متغیر کد ورود", "sms", maximum=80),
     Field("max_upload_bytes", "حداکثر حجم تصویر (بایت)", "system", "integer", 1024, 10485760, help="از آپلود بعدی؛ حداکثر ۱۰ مگابایت مطابق سقف Nginx، محدودیت پیکسل مستقل است."),
     Field("frontend_url", "مبدأ پنل بیمار و بازگشت پرداخت", "payment", maximum=500, help="باید یکی از مبدأهای مجاز ENV باشد؛ تغییر DNS/CORS و دامنه عمومی سایت جداگانه هماهنگ شود."),
-    Field("booking_hold_minutes", "اعتبار نگهداری نوبت (دقیقه)", "booking", "integer", 5, 60, help="فقط نگهداری‌های جدید؛ فعال‌سازی رزرو در مرحله ۵ ساخته می‌شود."),
+    Field("booking_enabled", "فعال بودن رزرو آنلاین", "booking", "boolean", help="رزرو جدید، جابه‌جایی بیمار و عضویت جدید در انتظار را کنترل می‌کند؛ پرونده و بازگشت پرداخت‌های قبلی باز می‌مانند."),
+    Field("booking_disabled_message", "پیام غیرفعال بودن رزرو", "booking", maximum=1000),
+    Field("booking_hold_minutes", "اعتبار نگهداری نوبت (دقیقه)", "booking", "integer", 5, 60, help="فقط نگهداری‌های جدید؛ پرداخت قبلی پس از خاموش‌شدن همچنان بررسی می‌شود."),
     Field("zarinpal_merchant_id", "شناسه پذیرنده زرین‌پال", "payment", maximum=120, secret=True),
     Field("zarinpal_sandbox", "درگاه آزمایشی", "payment", "boolean", help="در محیط اصلی همیشه ممنوع؛ تنظیم درگاه به معنی روشن‌شدن نوبت‌دهی نیست."),
     Field("turnstile_enabled", "فعال بودن Cloudflare Turnstile", "captcha", "boolean", help="پیش از فعال‌سازی، کلید ذخیره‌شده را روی همین دامنه تأیید کنید."),
@@ -123,20 +125,22 @@ def decode(overrides: dict) -> dict:
     return {key: unseal(key, value) if key in SECRET_KEYS else value for key, value in overrides.items()}
 
 
-def get_settings() -> config.Settings:
+def get_settings(db=None) -> config.Settings:
     from .database import SessionLocal
     bootstrap = config.get_settings()
-    with SessionLocal() as db:
-        row = db.get(SystemSetting, 1)
-        try:
-            values = decode(json.loads(row.overrides_json)) if row else {}
-            effective = replace(bootstrap, **values)
-            validate_effective(effective, check_dns=False)
-            return effective
-        except SettingsUnavailable:
-            raise
-        except (ValueError, TypeError):
-            raise SettingsUnavailable("ساختار تنظیمات ذخیره‌شده معتبر نیست") from None
+    if db is None:
+        with SessionLocal() as session:
+            return get_settings(session)
+    row = db.get(SystemSetting, 1)
+    try:
+        values = decode(json.loads(row.overrides_json)) if row else {}
+        effective = replace(bootstrap, **values)
+        validate_effective(effective, check_dns=False)
+        return effective
+    except SettingsUnavailable:
+        raise
+    except (ValueError, TypeError):
+        raise SettingsUnavailable("ساختار تنظیمات ذخیره‌شده معتبر نیست") from None
 
 
 def validate_value(field: Field, value):
@@ -158,6 +162,8 @@ def validate_value(field: Field, value):
 def validate_effective(settings: config.Settings, *, check_dns: bool):
     for field in FIELDS:
         validate_value(field, getattr(settings, field.key))
+    if not settings.booking_disabled_message.strip():
+        raise ValueError("پیام غیرفعال بودن رزرو نمی‌تواند خالی باشد")
     if not settings.app_name or not settings.faraz_otp_variable:
         raise ValueError("نام سرویس و متغیر کد ورود نمی‌تواند خالی باشد")
     if settings.otp_resend_seconds > settings.otp_ttl_seconds:
@@ -229,7 +235,7 @@ def update_clinic(db, staff, payload: ClinicSettingUpdate):
     clinic = db.get(ClinicSetting, 1)
     if not clinic:
         raise HTTPException(503, "تنظیمات مطب آماده نیست")
-    values = payload.model_dump(exclude={"revision"})
+    values = payload.model_dump(exclude={"revision", "booking_enabled", "booking_disabled_message"})
     changed = [key for key, value in values.items() if getattr(clinic, key) != value]
     if changed:
         checkpoint(db, row, staff, changed)
@@ -274,7 +280,13 @@ def describe(db):
                     ("BOOTSTRAP_ADMIN_*", "فقط نصب اولیه؛ پس از استفاده از محیط حذف شوند."),
                     ("VITE_* / PRERENDER_* / PYTHONDONTWRITEBYTECODE", "تنظیمات ساخت و اجرای سرویس؛ مدیریت از محیط استقرار."),
                 ]],
-            "future": {"booking": "کلید روشن/خاموش رزرو در مرحله ۵", "content": "مقالات و نظرات در مراحل ۶ و ۷"}}
+            "future": {"content": "مقالات و نظرات در مراحل ۶ و ۷"}}
+
+
+def guard_payment_config(db, current, target):
+    if (current.zarinpal_merchant_id, current.zarinpal_sandbox) != (target.zarinpal_merchant_id, target.zarinpal_sandbox):
+        if db.scalar(select(Payment.id).where(Payment.status.in_(["created", "redirected", "verification_error"])).limit(1)):
+            raise HTTPException(409, "پیش از تغییر حساب یا محیط درگاه، پرداخت‌های در انتظار تأیید را تعیین تکلیف کنید")
 
 
 def change(db, staff, revision: int, values: dict, reset: list[str]):
@@ -285,6 +297,7 @@ def change(db, staff, revision: int, values: dict, reset: list[str]):
     if set(values) & set(reset) or (set(values) | set(reset)) - CATALOG.keys():
         raise HTTPException(422, "نام تنظیم یا دستور بازنشانی معتبر نیست")
     overrides = json.loads(row.overrides_json)
+    current = replace(config.get_settings(), **decode(overrides))
     try:
         for key in reset:
             overrides.pop(key, None)
@@ -295,6 +308,7 @@ def change(db, staff, revision: int, values: dict, reset: list[str]):
         validate_effective(effective, check_dns=True)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from None
+    guard_payment_config(db, current, effective)
     checkpoint(db, row, staff, sorted(set(values) | set(reset)))
     row.overrides_json = json.dumps(overrides, ensure_ascii=False)
     db.commit()
@@ -312,10 +326,11 @@ def restore(db, staff, revision: int, target: int):
         raise HTTPException(404, "نسخه مورد نظر پیدا نشد")
     saved = json.loads(previous.snapshot_json)
     try:
-        clinic_values = ClinicSettingUpdate.model_validate(saved["clinic"]).model_dump(exclude={"revision"})
+        clinic_values = ClinicSettingUpdate.model_validate(saved["clinic"]).model_dump(exclude={"revision", "booking_enabled", "booking_disabled_message"})
         validate_effective(replace(config.get_settings(), **decode(saved["overrides"])), check_dns=True)
     except ValueError:
         raise HTTPException(422, "نسخه قدیمی با سیاست فعلی سرور سازگار نیست") from None
+    guard_payment_config(db, replace(config.get_settings(), **decode(json.loads(row.overrides_json))), replace(config.get_settings(), **decode(saved["overrides"])))
     checkpoint(db, row, staff, [f"restore:{target}"])
     row.overrides_json = json.dumps(saved["overrides"], ensure_ascii=False)
     clinic = db.get(ClinicSetting, 1)

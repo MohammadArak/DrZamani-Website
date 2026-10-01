@@ -14,7 +14,7 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
     database = Path(directory) / "migration-test.db"
     env = dict(
         os.environ, APP_ENV="test", APP_DEBUG="false", SMS_PROVIDER="disabled",
-        DATABASE_URL=f"sqlite:///{database.as_posix()}",
+        DATABASE_URL=f"sqlite:///{database.as_posix()}", BOOKING_ENABLED="true",
     )
 
     def migrate(target, operation="upgrade"):
@@ -39,8 +39,11 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
         assert db.execute("SELECT COUNT(*) FROM staff_roles sr JOIN roles r ON r.id=sr.role_id WHERE r.slug='superadmin'").fetchone()[0] == 0
         assert db.execute("SELECT COUNT(*) FROM roles WHERE is_system=1").fetchone()[0] == 5
         assert db.execute("SELECT COUNT(*) FROM role_permissions rp JOIN roles r ON r.id=rp.role_id WHERE r.slug='admin' AND rp.permission_code IN ('roles.manage','staff.manage','secrets.manage')").fetchone()[0] == 0
-        assert db.execute("SELECT revision,overrides_json FROM system_settings WHERE id=1").fetchone() == (1, '{}')
-        assert db.execute("SELECT revision,seo_title,office_phone FROM clinic_settings WHERE id=1").fetchone() == (1, '', '08633333333')
+        assert db.execute("SELECT revision,overrides_json FROM system_settings WHERE id=1").fetchone() == (2, '{"booking_enabled": false}')
+        assert {'dedupe_key','claim_token','claim_until','next_attempt_at'} <= {r[1] for r in db.execute('PRAGMA table_info(sms_outbox)')}
+        db.execute("INSERT INTO sms_outbox (event_key,phone,rendered_body,provider_pattern_code,variables_json,status,attempts,created_at,dedupe_key) VALUES ('fixture','+989121234567','synthetic','','{}','pending',0,CURRENT_TIMESTAMP,'fixture:pending')")
+        db.execute("INSERT INTO sms_outbox (event_key,phone,rendered_body,provider_pattern_code,variables_json,status,attempts,created_at,claim_token,claim_until) VALUES ('fixture','+989121234567','synthetic','','{}','sending',1,CURRENT_TIMESTAMP,'fixture-claim','2099-01-01')")
+        assert db.execute("SELECT revision,seo_title,office_phone FROM clinic_settings WHERE id=1").fetchone() == (2, '', '08633333333')
         assert db.execute("SELECT COUNT(*) FROM setting_revisions").fetchone()[0] == 0
         for name in ['staff_mfa','mfa_challenges','bot_challenges','captcha_attestations']:
             assert db.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0] == 0
@@ -68,8 +71,9 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
     with closing(sqlite3.connect(database)) as db:
         assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
         assert db.execute("PRAGMA foreign_key_check").fetchall() == []
+        assert db.execute("SELECT status,attempts FROM sms_outbox ORDER BY id").fetchall() == [('pending',0),('failed',3)]
         schema = db.execute("SELECT sql FROM sqlite_master WHERE name='appointments'").fetchone()[0]
         assert "uq_appointments_payment_id" in schema
-        assert db.execute("SELECT revision,seo_description,seo_image_url,office_phone FROM clinic_settings WHERE id=1").fetchone() == (1, '', '', '08633333333')
+        assert db.execute("SELECT revision,seo_description,seo_image_url,office_phone FROM clinic_settings WHERE id=1").fetchone() == (2, '', '', '08633333333')
 
-print("PASS: fresh migration, staff/clinic data, disabled MFA defaults, populated MFA rollback/session revocation/overlay cleanup, downgrade/re-upgrade, integrity, foreign keys and payment uniqueness.")
+print("PASS: fresh migration, booking forced closed despite legacy ENV=true, SMS queue/claim rollback preservation, disabled MFA defaults, populated MFA rollback/session revocation/overlay cleanup, downgrade/re-upgrade, integrity, foreign keys and payment uniqueness.")

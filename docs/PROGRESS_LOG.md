@@ -73,3 +73,15 @@
 - docs/README/ENVexamples/roadmap/handoff تازه و previewها جمع شدند. هیچ deploy/مالکproduction/رزرو/پیامک/پرداخت واقعی فعال نشد.
 
 قدم بعد مرحله۵: رزرو خاموش/پیام پنل، callback idempotent و SMS outbox غیرمسدودکننده redirect. پذیرش واقعی کپچا قبل از فعال‌سازی روی staging دنبال شود. هر مرحله طبق مجوز مالک پس از تست با main ادغام و handoff همراه خروجی تازه شود.
+
+
+## 2026-10-01 — مرحله۵، نسخه1.12.0
+
+۲۱۵ تست pytest (۳۰ تست تازه این مرحله)، lint/build/نسخه، frozen sync با۴۵بسته، Ruff بحرانی، migration با داده قبلی/rollback/seed/CAS، Nginx HTTP/HTTPS syntax و runtime cookie/CSRF/MFA/WebSocket/headers/404/410/rate و تغییر فوری سیاست رزرو PASS. ممیزی frontend production صفر آسیب‌پذیری شناخته‌شده گزارش کرد؛ ممیزی تازه backend به DNS ابزار خورد و اجرا نشد. dependency تازه به پروژه اضافه نشده است. screenshot موبایل رزرو خاموش روی API/Nginx محلی و فرم تنظیمات با API ساختگی ثبت شد؛ پذیرش واقعی ارائه‌دهندگان و Linuxsystemd باقی است.
+
+- کلید رزرو و پیام فارسی در runtime نسخه‌دار/owneronly و سیاست مشترک API/HTML/React؛ خاموشی پیش‌فرض نصب/مهاجرت، چک زیرقفل، حفظ ورود/پرونده/لغو و callback قبلی؛ انتظار/جابه‌جایی جدید بسته.
+- callback شبکه خارج قفل و خواندن تازه داخل قفل؛ دو OK یک نوبت/رهگیری، terminalverified در برابر NOK/latefail/network/expiry پایدار؛ conflict/refund/refcollision manualreview و رسید حداقلی بدون کارت.
+- redirect فقطenqueue؛ outboxdedupe وclaim/lease/backoff/max3، providerdisabled حفظ بودجه، پیام شکست پس ازموفقیتcancelled، producer یادآوری هم قفل دارد. خارجی at-least-once است و crash بعد از پذیرش ارائه‌دهنده می‌تواند duplicate کند.
+- migration0017 صف قبلی راحفظ، CASrevisionclinic/system هم‌تراز و seedنصب تازه هم نسخه مهاجرت می‌گیرد. نخستین smoke تداخل نسخه را پیدا کرد؛ اصلاح و migration/integration/fullpytest مجدد پاس. TypeScript status sending/cancelled پس از خطای build هماهنگ شد؛ build نهایی پاس.
+- خطای اولیه schemaupdate از readonlybookingfields اصلاح شد؛ تغییر/restoreclinic این فیلدها را نمی‌نویسد. اصلاحات مالی/SMS با mock و DBساختگی؛ هیچ سرویس واقعی، مالک production، deploy یا فعال‌سازیproduction انجام نشد.
+- تست و docs/handoff با Git tree یکسان منتشر می‌شوند؛ PRattach/merge/fetch و SHA/ZIP در گزارش تحویل کنارoutputs. مرحله۶ مقاله/رسانه با RBAC و پاک‌سازی HTML و بازخوردSEO بعدی است.

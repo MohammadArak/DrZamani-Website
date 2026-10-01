@@ -55,7 +55,9 @@ def seed_defaults() -> None:
     with SessionLocal.begin() as db:
         seed_access(db)
         if not db.get(ClinicSetting, 1):
-            db.add(ClinicSetting(id=1))
+            from .models import SystemSetting
+            system = db.get(SystemSetting, 1)
+            db.add(ClinicSetting(id=1, revision=system.revision if system else 1))
         existing_days = set(db.scalars(select(WeeklySchedule.weekday)).all())
         for weekday in range(7):
             if weekday not in existing_days:

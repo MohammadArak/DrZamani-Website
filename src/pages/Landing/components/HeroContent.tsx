@@ -1,3 +1,4 @@
+import BookingNotice from "@/components/BookingNotice";
 import { motion } from "@/components/Motion";
 import TextGenerateEffect from "./TextGenerateEffect";
 import { FaCalendar, FaRegImages } from "react-icons/fa";
@@ -119,10 +120,10 @@ const HeroContent = () => {
                             <a
                                 href="/appointment/"
                                 className="flex gap-2 px-2 py-1 text-sm md:text-base md:px-5 md:py-3 text-jetblack justify-center items-center bg-linear-to-b from-secondary-mild to-secondary hover:scale-105 transition rounded-md shadow-md shadow-secondary-deep/50"
-                                aria-label="ورود به سامانه رزرو نوبت"
+                                aria-label={clinicInfo.bookingEnabled ? "رزرو نوبت" : "پیگیری نوبت‌های قبلی"}
                             >
                                 <FaCalendar />
-                                رزرو نوبت مشاوره
+                                {clinicInfo.bookingEnabled ? "رزرو نوبت مشاوره" : "پنل بیمار و پیگیری نوبت"}
                             </a>
                             {/* <button
                                 onClick={() => setReserveOpen(true)}
@@ -147,6 +148,7 @@ const HeroContent = () => {
                                 مشاهده نمونه کارها
                             </button>
                         </motion.div>
+                        <BookingNotice />
                     </div>
                 </div>
             </div>

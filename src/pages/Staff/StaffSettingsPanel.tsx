@@ -49,6 +49,8 @@ export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel,
             setData(await appointmentApi.updateSystemSettings(token, data.revision, changes, reset));
             setChanges({}); setReset([]);
             setHistory(await appointmentApi.settingsHistory(token));
+            const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel("drz-clinic-settings");
+            channel?.postMessage("updated"); channel?.close();
             await onReload(); setMessage("تنظیمات ذخیره شد؛ درخواست‌ها و کارهای زمان‌بندی‌شده بعدی نسخه جدید را می‌خوانند.");
         } catch (failure) { setError(failure instanceof Error ? failure.message : "ذخیره ناموفق بود"); }
         finally { setBusy(false); }
@@ -81,7 +83,7 @@ export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel,
         {["clinic", "content"].includes(tab) && <div>{tab === "content" && <p className="mb-4 rounded-xl bg-sky-50 p-4 text-sm leading-7">عنوان، توضیح و تصویر پیش‌فرض سئو در فرم زیر است. ویرایشگر مقاله و مدیریت نظرات در مراحل ۶ و ۷ اضافه می‌شوند.</p>}{clinicPanel}</div>}
         {tab === "captcha" && owner && <CaptchaSetupPanel token={token} disabled={busy || Boolean(dirty)} verified={data?.status.captcha_verified} onVerified={refresh} />}
         {tab === "security" && owner && <StaffMfaPanel token={token} />}
-        {tab === "booking" && <p className="rounded-xl bg-amber-50 p-4 text-sm leading-7">مدت نگهداری نوبت از این بخش تغییر می‌کند. برنامه کاری و سیاست لغو در بخش «برنامه کاری» است. کلید فعال/غیرفعال رزرو و پیام کاربر در مرحله ۵ تکمیل می‌شود.</p>}
+        {tab === "booking" && <p className="rounded-xl bg-amber-50 p-4 text-sm leading-7">خاموش‌کردن رزرو، نوبت جدید، جابه‌جایی بیمار و عضویت جدید در انتظار را متوقف می‌کند؛ ورود، پرونده، لغو و بازگشت پرداخت قبلی باز می‌مانند. برنامه کاری و سیاست لغو در بخش «برنامه کاری» است. پیش از روشن‌کردن، درگاه و پیامک را در محیط آزمایشی بررسی کنید.</p>}
         {owner && !["clinic", "content"].includes(tab) && <form onSubmit={save} className="rounded-3xl border border-slate-200 bg-white p-5">
             {!data && <p>در حال بارگیری تنظیمات…</p>}
             {data && !data.status.encryption_ready && <p className="mb-5 rounded-xl bg-amber-50 p-3 text-sm leading-7">برای ذخیره رمز سرویس‌ها، کلید رمزگذاری مستقل باید در تنظیمات سرور تعریف شود.</p>}

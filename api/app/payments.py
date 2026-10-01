@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+import re
 
 import httpx
 
@@ -25,8 +27,8 @@ class PaymentVerifyResult:
     raw_response: str
 
 
-def _base_urls() -> tuple[str, str]:
-    settings = get_settings()
+def _base_urls(settings=None) -> tuple[str, str]:
+    settings = settings or get_settings()
     if settings.zarinpal_sandbox:
         return (
             "https://sandbox.zarinpal.com/pg/v4/payment",
@@ -38,8 +40,8 @@ def _base_urls() -> tuple[str, str]:
     )
 
 
-def _merchant_id() -> str:
-    merchant_id = get_settings().zarinpal_merchant_id
+def _merchant_id(settings=None) -> str:
+    merchant_id = (settings or get_settings()).zarinpal_merchant_id
     if len(merchant_id) != 36:
         raise PaymentGatewayError("شناسه پذیرنده زرین‌پال تنظیم نشده یا معتبر نیست")
     return merchant_id
@@ -56,7 +58,8 @@ def request_payment(
 ) -> PaymentRequestResult:
     if amount_toman < 1_000:
         raise PaymentGatewayError("مبلغ پرداخت باید حداقل هزار تومان باشد")
-    api_base, start_pay_base = _base_urls()
+    settings = get_settings()
+    api_base, start_pay_base = _base_urls(settings)
     metadata = {
         "mobile": f"0{mobile[3:]}" if mobile.startswith("+98") else mobile,
         "order_id": order_id,
@@ -64,7 +67,7 @@ def request_payment(
     if email:
         metadata["email"] = email
     payload = {
-        "merchant_id": _merchant_id(),
+        "merchant_id": _merchant_id(settings),
         "amount": amount_toman,
         "currency": "IRT",
         "description": description[:255],
@@ -76,28 +79,30 @@ def request_payment(
             f"{api_base}/request.json",
             json=payload,
             headers={"Accept": "application/json", "Content-Type": "application/json"},
-            timeout=15,
+            timeout=15, trust_env=False, follow_redirects=False,
         )
         response.raise_for_status()
         result = response.json()
     except (httpx.HTTPError, ValueError) as exc:
         raise PaymentGatewayError("ارتباط با درگاه زرین‌پال برقرار نشد") from exc
-    data = result.get("data") or {}
-    if data.get("code") != 100 or not data.get("authority"):
-        message = (result.get("errors") or {}).get("message") if isinstance(result.get("errors"), dict) else None
-        raise PaymentGatewayError(message or "زرین‌پال درخواست پرداخت را نپذیرفت")
-    authority = str(data["authority"])
+    data = result.get("data") if isinstance(result, dict) else None
+    if not isinstance(data, dict) or type(data.get("code")) is not int or data["code"] != 100:
+        raise PaymentGatewayError("زرین‌پال درخواست پرداخت را نپذیرفت")
+    authority = data.get("authority")
+    if not isinstance(authority, str) or not re.fullmatch(r"[A-Za-z0-9_-]{10,80}", authority):
+        raise PaymentGatewayError("پاسخ درخواست پرداخت معتبر نیست")
     return PaymentRequestResult(
         authority=authority,
         payment_url=f"{start_pay_base}/{authority}",
-        raw_response=response.text[:4000],
+        raw_response=json.dumps({"code":100, "authority":authority}),
     )
 
 
 def verify_payment(*, authority: str, amount_toman: int) -> PaymentVerifyResult:
-    api_base, _ = _base_urls()
+    settings = get_settings()
+    api_base, _ = _base_urls(settings)
     payload = {
-        "merchant_id": _merchant_id(),
+        "merchant_id": _merchant_id(settings),
         "amount": amount_toman,
         "authority": authority,
     }
@@ -106,16 +111,26 @@ def verify_payment(*, authority: str, amount_toman: int) -> PaymentVerifyResult:
             f"{api_base}/verify.json",
             json=payload,
             headers={"Accept": "application/json", "Content-Type": "application/json"},
-            timeout=15,
+            timeout=15, trust_env=False, follow_redirects=False,
         )
         response.raise_for_status()
         result = response.json()
     except (httpx.HTTPError, ValueError) as exc:
         raise PaymentGatewayError("اعتبارسنجی پرداخت از زرین‌پال ناموفق بود") from exc
-    data = result.get("data") or {}
-    code = int(data.get("code") or 0)
+    data = result.get("data") if isinstance(result, dict) else None
+    if not isinstance(data, dict) or type(data.get("code")) is not int:
+        errors = result.get("errors") if isinstance(result, dict) else None
+        if isinstance(errors, dict) and type(errors.get("code")) is int:
+            data = {"code":errors["code"]}
+        else:
+            raise PaymentGatewayError("پاسخ تأیید پرداخت معتبر نیست")
+    code = data["code"]
+    reference = data.get("ref_id")
+    if code in {100,101} and (type(reference) not in {str,int} or not re.fullmatch(r"[0-9]{1,80}", str(reference)) or int(reference) <= 0):
+        raise PaymentGatewayError("شناسه رسید پرداخت معتبر نیست")
+    ref_id = str(reference) if code in {100,101} else None
     return PaymentVerifyResult(
         code=code,
-        ref_id=str(data["ref_id"]) if data.get("ref_id") is not None else None,
-        raw_response=response.text[:4000],
+        ref_id=ref_id,
+        raw_response=json.dumps({"code":code, "ref_id":ref_id}),
     )

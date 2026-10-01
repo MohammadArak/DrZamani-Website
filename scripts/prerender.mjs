@@ -6,6 +6,8 @@ const projectDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputDirectory = resolve(projectDirectory, "public_html");
 
 const fallbackClinicSettings = Object.freeze({
+    booking_enabled: false,
+    booking_disabled_message: "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید.",
     doctor_name: "دکتر فرزاد زمانی",
     specialty: "متخصص گوش، حلق و بینی",
     medical_council_number: "",

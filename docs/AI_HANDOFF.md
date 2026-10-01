@@ -1,6 +1,6 @@
 # راهنمای ادامه کار برای AI بعدی
 
-آخرین به‌روزرسانی: 2026-10-01، Asia/Tehran. نسخه 1.11.0، پروژه MohammadArak/DrZamani-Website. مراحل صفر تا۳ در main و پیاده‌سازی/آزمون محلی مرحله۴ تکمیل‌اند؛ پذیرش حساب/شبکه واقعی کپچا باقی است. SHA نهایی commit/merge/tree و ZIP در DELIVERY_REPORT-PHASE04 کنار خروجی‌ها ثبت می‌شود؛ شناسه دوری داخل کامیت خودش نوشته نمی‌شود.
+آخرین به‌روزرسانی: 2026-10-01، Asia/Tehran. نسخه1.12.0، پروژه MohammadArak/DrZamani-Website. مراحل صفر تا۴ در main؛ مرحله۵ پیاده‌سازی و آزمون نهایی دارد؛ رسید ادغام و SHA دقیق در گزارش تحویل است. قدم بعد مرحله۶ مقالات است. گزارش تحویل PHASE05 کنار خروجی‌ها مبنای دقیق source/merge/tree/ZIP را ثبت می‌کند؛ پرداخت/پیامک/کپچا واقعی و deploy هنوز پذیرش/فعال نشده‌اند.
 
 ## شروع و تصمیم‌های مالک
 
@@ -73,3 +73,18 @@ browser_sessions.staff_state_hash شامل enabledMFA/revision و policyrequired
 185pytest/43new،lint/build/versions،frozen45packages،Ruffcritical،migrationpopulatedroundtrip وNginxactuallocalcookie/CSRF/MFApreauth/recovery/WSrevoke/CSP/headers/404/410/ratePASS؛ auditfreshknown0،newdependency0. UI syntheticdesktop390px checks؛ actualproviderkeys/widget/network/quotas/CSPacceptance وrealbrowserauthenticatedAPIstagingباقی. Screenshotsphase04-... درoutputs ساختگی‌اند. previewfilesازrepoپاک وserversجمع‌شده‌اند؛ DBهایworkphase04-* synthetic هستند و Fernet/SECRET runtimeحفظنشده، دادهproduction نیستند. testhelperimports APPENVexplicit، basetemp unique، uvpathsJoin/FullPath (uv-tool-bin ممکن است هنوزdirectoryنباشد؛ Resolve-Path برای nonexistent استفاده نکن). گذرای pendinghashbug/testproperty/CSPserverorigin/envhelper/productionlocalhostfixture اصلاح شده وcheckspass. سهwarningoldpytest،nginxlistenhttp2 وfallbackprerenderبدونAPI باقی.
 
 مرحله۵ را محدود به booking_enabledfalse/پیام وAPIhold/paymentstartgate، callback100/101/NOKracefreshafterlock/idempotency وoutboxworker انجام بده؛ لاگین/پرونده وcallbackپرداختقبلی با خاموش‌شدن رزرو قطع نشوند. phase4externalacceptanceقبلروشن‌کردنproduction باقی؛ هیچ deploy/مالکproduction/realpaymentSMS/bookingactivation خودکار مجاز نیست. همانریپو، test/doc/commit/PRattach/merge/fetch/tree وsourceZIPverification+handoff طبق مجوز قبلی مالک انجام شود.
+
+
+## آخرین مرحله:۵ — رزرو و پرداخت/پیامک
+
+مبنای این مرحله main16dbccd2d957e993c21057dcc5485ac084acd8fe، PR۴ است. گزارش مرجع PHASE_05_BOOKING_PAYMENTS.md را قبل ادامه بخوان. BOOKING_ENABLEDfalse و پیام عمومی فارسی در runtime45fields، policyمشترک API/HTML/React، checkزیرقفل روی createhold/booking/reschedule/newwaitlist؛ login/records/cancel/readwaitlist/leave/callback برقرار. staff عملیات داخلی موجود را انجام می‌دهد ولی offer جدید در خاموشی صادر نمی‌شود. UI focus/broadcast/30srefresh و getClinic پیش ازفرم؛ API مرجع نهایی است.
+
+callbackverifyoutsidewrite سپس BEGINIMMEDIATE/expire_all/reload/terminalrecheck؛ 100/101+validref، NOK/latefailed/networkerror/expiry نمی‌تواندverified را خراب کند. expiredhold اگرslotfree کامل، conflict/refund/refcollision manualreview؛ UNIQUEpaymentid/ref محفوظ و حداقلیreceipt بدونPAN/cardhash. redirect فقطenqueue؛ failedpendingSMS پس ازموفقیتcancelled. merchant/sandbox پنل وrestore باcreated/redirected/verification_error ممنوع؛ ENV/accountقبلی برایlateexpired/failedreconciliation حفظ شود، snapshotcredentialperpayment هنوزوجودندارد.
+
+SMSoutboxdedupe160/claimtoken64/claimuntil2min/nextattemptat؛ workerclaim1job زیرSQLitewrite، سپسnetworkoutside وtokencheckedreceipt. attemptsmax3/backoff5,10min؛ staleleasefaileddelay5 و warningdeliveryuncertain. externalSMSatleastonce: crashafterprovidersendbeforeDBreceipt ممکن استduplicate؛ دقیقاًیک‌بار خارجی تضمین نیست. providerdisabled صف/attemptbudget راحفظ؛ OTPdirectباقی. reminderproducerهمlock/dedupe دارد. jobs CLI/timer1min/TimeoutStartSec1h وstaffexplicitdispatch ازهمانworker. Linuxsystemd/realSMSپذیرش نشده.
+
+0017forcesclosed حتیENVtrue وSMS4columnsunique، existingrows حفظ. CAS ایراد اولیه: centralrevision2 ولیclinic1 باعث409 بود؛ migrationalignclinic وseedfreshmigrationrevision اصلاح وintegrationNginxassert شد. rollbacksending→failedattempt3manualreview، bookingkeysstripoverlay/history؛ oldcodebookingflagندارد پسmaintenanceقبلrollback وbackupcoordinated؛ 0016disableaccounts/revokesessions نیز برقرار.
+
+۲۱۵ تست pytest (۳۰ تست تازه این مرحله)، lint/build/نسخه، frozen sync با۴۵بسته، Ruff بحرانی، migration با داده قبلی/rollback/seed/CAS، Nginx HTTP/HTTPS syntax و runtime cookie/CSRF/MFA/WebSocket/headers/404/410/rate و تغییر فوری سیاست رزرو PASS. ممیزی frontend production صفر آسیب‌پذیری شناخته‌شده گزارش کرد؛ ممیزی تازه backend به DNS ابزار خورد و اجرا نشد. dependency تازه به پروژه اضافه نشده است. screenshot موبایل رزرو خاموش روی API/Nginx محلی و فرم تنظیمات با API ساختگی ثبت شد؛ پذیرش واقعی ارائه‌دهندگان و Linuxsystemd باقی است.
+
+مرحله۶ بعدی: مقاله/رسانه با RBAC authoritative، HTML sanitization وpreview/draft/publish، SEOfeedback/persistentmetadata/SSR/canonical/sitemap وclinicalreviewcontent. اول ROADMAPمرحله۶ وpermissioncatalogfutureflags راخوانده سپس scopeمشخص؛ همانrepo وtest/doc/commit/PRattach/merge/fetch/tree/sourceZIP+handoff طبق مجوز قبلی مالک. productionowner«نصب جدید» و MFAرمزساز+recovery تصمیم قبلی؛ هیچdeploy/realSMS/payment/bookingactivation بدوندستور صریح. previewDBphase05-* وscreenshots synthetic؛ keysprocessحفظنشده، credentialsواقعی نیستند.

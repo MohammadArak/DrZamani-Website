@@ -23,7 +23,7 @@ const FAQ = () => {
         },
         {
             title: "چگونه می‌توان برای مشاوره یا تعیین وقت اقدام کرد؟",
-            content: `برای دریافت مشاوره تخصصی یا رزرو نوبت، از سامانه نوبت‌دهی یا شماره‌های ${clinicInfo.phones.office.display} و ${clinicInfo.phones.consultation.display} استفاده کنید.`,
+            content: clinicInfo.bookingEnabled ? `برای دریافت مشاوره تخصصی یا رزرو نوبت، از سامانه نوبت‌دهی یا شماره‌های ${clinicInfo.phones.office.display} و ${clinicInfo.phones.consultation.display} استفاده کنید.` : `${clinicInfo.bookingDisabledMessage} شماره‌های تماس: ${clinicInfo.phones.office.display} و ${clinicInfo.phones.consultation.display}.`,
         },
     ];
 

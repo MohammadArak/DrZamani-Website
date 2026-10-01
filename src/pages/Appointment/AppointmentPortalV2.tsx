@@ -1,3 +1,4 @@
+import BookingNotice from "@/components/BookingNotice";
 import BotProtection, { type BotHandle } from "@/components/BotProtection";
 /* eslint-disable react-hooks/set-state-in-effect */
 import Seo from "@/components/SEO";
@@ -120,11 +121,10 @@ const AuthShell = ({ children }: { children: React.ReactNode }) => {
                         سامانه نوبت‌دهی مطب {clinicInfo.doctorName}
                     </span>
                     <h1 className="font-dana text-4xl leading-normal">
-                        رزرو نوبت، بدون تماس و انتظار
+                        {clinicInfo.bookingEnabled ? "رزرو نوبت، بدون تماس و انتظار" : "پرونده و پیگیری نوبت‌های شما"}
                     </h1>
                     <p className="mt-5 leading-8 text-slate-300">
-                        با وارد کردن مشخصات خود بسیار سریع نوبت مورد نظر خود را
-                        دریافت کنید
+                        {clinicInfo.bookingEnabled ? "با وارد کردن مشخصات، خدمت و زمان مراجعه را انتخاب کنید." : clinicInfo.bookingDisabledMessage}
                     </p>
                 </div>
                 <p className="relative text-sm text-slate-400">
@@ -1424,7 +1424,16 @@ const Portal = ({
 }) => {
     const clinicInfo = useMemo(() => buildClinicInfo(clinic), [clinic]);
     const [tab, setTab] = useState<PortalTab>("home");
+    const { clinicInfo: bookingPolicy, refreshClinicInfo } = useClinicInfo();
     const [bookingOpen, setBookingOpen] = useState(false);
+    const openBooking = async () => {
+        await refreshClinicInfo();
+        try {
+            const latest = await appointmentApi.getClinic();
+            if (latest.booking_enabled !== true) { setMessage(latest.booking_disabled_message || bookingPolicy.bookingDisabledMessage); return; }
+            setBookingOpen(true);
+        } catch (error) { setMessage(errorMessage(error)); }
+    };
     const [message, setMessage] = useState("");
     const [messageKind, setMessageKind] = useState<"success" | "error">(
         "success",
@@ -1463,7 +1472,9 @@ const Portal = ({
             setMessage(
                 payment === "manual-review"
                     ? "پرداخت انجام شده اما زمان نیاز به بررسی مطب دارد؛ با شما تماس گرفته می‌شود."
-                    : "پرداخت کامل نشد و نوبتی ثبت نشد.",
+                    : payment === "verification-error"
+                      ? "نتیجه پرداخت هنوز تأیید نشده است؛ دوباره پرداخت نکنید و برای بررسی با مطب تماس بگیرید."
+                      : "پرداخت کامل نشد و نوبتی ثبت نشد.",
             );
         }
         window.history.replaceState({}, "", window.location.pathname);
@@ -1569,7 +1580,7 @@ const Portal = ({
                     </div>
                     <button
                         type="button"
-                        onClick={() => setBookingOpen(true)}
+                        disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()}
                         className="hidden h-12 shrink-0 items-center gap-2 rounded-2xl bg-secondary px-6 font-bold text-primary shadow-lg shadow-black/10 transition hover:-translate-y-0.5 md:inline-flex"
                     >
                         دریافت نوبت <IoChevronBackOutline />
@@ -1600,11 +1611,11 @@ const Portal = ({
                     <section className="app-panel-enter min-w-0 space-y-5">
                         <button
                             type="button"
-                            onClick={() => setBookingOpen(true)}
+                            disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()}
                             className="flex w-full items-center justify-between rounded-3xl bg-[linear-gradient(135deg,#d9ad5f,#f1d69e)] p-5 text-right text-primary shadow-lg shadow-secondary/15 transition active:scale-[.99] md:hidden"
                         >
                             <span>
-                                <b className="block font-dana text-xl">دریافت نوبت جدید</b>
+                                <b className="block font-dana text-xl">{bookingPolicy.bookingEnabled ? "دریافت نوبت جدید" : "رزرو آنلاین غیرفعال است"}</b>
                                 <span className="mt-1 block text-xs text-primary/70">انتخاب خدمت، تاریخ و ساعت در چند مرحله کوتاه</span>
                             </span>
                             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/55 text-2xl"><IoChevronBackOutline /></span>
@@ -1656,7 +1667,7 @@ const Portal = ({
                                     <div className="mt-5 flex flex-col items-center rounded-2xl bg-slate-50 px-5 py-8 text-center">
                                         <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-3xl text-secondary shadow-sm"><IoCalendarOutline /></span>
                                         <p className="mt-4 text-sm leading-7 text-slate-500">اولین زمان مناسب را آنلاین انتخاب کنید؛ نتیجه در همین پنل نمایش داده می‌شود.</p>
-                                        <button type="button" onClick={() => setBookingOpen(true)} className="mt-5 h-11 rounded-xl bg-primary px-6 text-sm font-bold text-white">دریافت نوبت</button>
+                                        <button type="button" disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()} className="mt-5 h-11 rounded-xl bg-primary px-6 text-sm font-bold text-white">دریافت نوبت</button>
                                     </div>
                                 )}
                             </section>
@@ -1680,11 +1691,11 @@ const Portal = ({
                         <section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
                             <div className="flex items-center justify-between gap-3">
                                 <div><span className="text-xs text-secondary-deep">رزرو آنلاین</span><h2 className="mt-1 font-dana text-xl text-primary">خدمت‌های قابل رزرو</h2></div>
-                                <button type="button" onClick={() => setBookingOpen(true)} className="shrink-0 text-xs font-bold text-secondary-deep">مشاهده زمان‌ها</button>
+                                <button type="button" disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()} className="shrink-0 text-xs font-bold text-secondary-deep">مشاهده زمان‌ها</button>
                             </div>
                             <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                 {services.slice(0, 6).map((service) => (
-                                    <button key={service.id} type="button" onClick={() => setBookingOpen(true)} className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-right transition hover:-translate-y-0.5 hover:border-secondary/40 hover:bg-white hover:shadow-md">
+                                    <button key={service.id} type="button" disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()} className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-right transition hover:-translate-y-0.5 hover:border-secondary/40 hover:bg-white hover:shadow-md">
                                         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl text-secondary-deep shadow-sm"><ServiceIcon icon={service.icon_key} /></span>
                                         <span className="min-w-0 flex-1"><b className="block truncate text-sm text-primary">{service.title}</b><span className="mt-1 block truncate text-xs text-slate-500">{toPersianDigits(service.duration_minutes)} دقیقه</span></span>
                                         <IoChevronBackOutline className="shrink-0 text-secondary-deep" />
@@ -1706,7 +1717,7 @@ const Portal = ({
                                 </h2>
                             </div>
                             <button
-                                onClick={() => setBookingOpen(true)}
+                                disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()}
                                 className="h-11 rounded-xl bg-secondary px-5 font-bold text-white"
                             >
                                 نوبت جدید
@@ -1944,7 +1955,7 @@ const Portal = ({
                     ))}
                 </div>
             </nav>
-            {bookingOpen && (
+            {bookingOpen && bookingPolicy.bookingEnabled && (
                 <BookingWizard
                     token={token}
                     services={services}
@@ -2075,9 +2086,10 @@ const AppointmentPortal = () => {
 
     return (
         <>
+            <BookingNotice />
             <Seo
-                title={`سامانه نوبت‌دهی مطب ${publicClinicInfo.doctorName}`}
-                description={`رزرو اینترنتی نوبت حضوری مطب ${publicClinicInfo.doctorName}؛ ورود امن با شماره موبایل و انتخاب خدمت، تاریخ و ساعت حضور.`}
+                title={`${publicClinicInfo.bookingEnabled ? "سامانه نوبت‌دهی" : "پنل بیمار"} مطب ${publicClinicInfo.doctorName}`}
+                description={publicClinicInfo.bookingEnabled ? `رزرو اینترنتی نوبت حضوری مطب ${publicClinicInfo.doctorName}؛ ورود امن با شماره موبایل و انتخاب خدمت، تاریخ و ساعت حضور.` : `پنل بیمار مطب ${publicClinicInfo.doctorName}؛ مشاهده پرونده و پیگیری نوبت‌های قبلی. ${publicClinicInfo.bookingDisabledMessage}`}
                 canonical={`${publicClinicInfo.siteUrl}/appointment/`}
                 noIndex
             />

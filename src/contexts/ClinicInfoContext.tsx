@@ -46,7 +46,8 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
         try {
             applyClinicSettings(await appointmentApi.getClinic());
         } catch {
-            // The public site keeps a safe build-time fallback if the API is temporarily unavailable.
+            setClinicInfo(current => ({ ...current, bookingEnabled: false }));
+            // Keep contact information, but close booking on failed refresh.
         } finally {
             setLoading(false);
         }
@@ -77,10 +78,12 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel("drz-clinic-settings");
         if (channel) channel.onmessage = () => { void refreshClinicInfo(); };
+        const timer = window.setInterval(() => { if (document.visibilityState === "visible") void refreshClinicInfo(); }, 30000);
         const refreshOnFocus = () => { if (document.visibilityState === "visible") void refreshClinicInfo(); };
         window.addEventListener("focus", refreshOnFocus);
         document.addEventListener("visibilitychange", refreshOnFocus);
         return () => {
+            window.clearInterval(timer);
             channel?.close();
             window.removeEventListener("focus", refreshOnFocus);
             document.removeEventListener("visibilitychange", refreshOnFocus);
