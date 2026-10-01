@@ -558,7 +558,7 @@ const getMessage = (payload: ApiErrorPayload, fallback: string) => {
     return payload.message ? translateServerMessage(payload.message) : fallback;
 };
 
-async function apiRequest<T>(
+export async function apiRequest<T>(
     path: string,
     options: RequestInit = {},
     token?: string | null,

@@ -208,8 +208,13 @@ async def unavailable_settings(_request, exc):
     return JSONResponse(status_code=503, content={"detail": str(exc)})
 
 app.include_router(settings_router.router, prefix=settings.api_prefix)
+from . import public_articles  # Register editorial HTML before copying router routes.
 app.include_router(public_pages_router)
 
 from .routers import bot as bot_router, mfa as mfa_router
 app.include_router(bot_router.router, prefix=settings.api_prefix)
 app.include_router(mfa_router.router, prefix=settings.api_prefix)
+
+from .routers import content as content_router
+app.include_router(content_router.router, prefix=settings.api_prefix)
+app.include_router(content_router.staff_router, prefix=settings.api_prefix)

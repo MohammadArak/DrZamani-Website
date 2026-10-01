@@ -68,6 +68,8 @@ import {
     IoTimeOutline,
 } from "react-icons/io5";
 import {
+    lazy,
+    Suspense,
     useCallback,
     useEffect,
     useMemo,
@@ -78,6 +80,8 @@ import {
 
 const inputClass =
     "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-slate-800 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/10";
+const StaffArticlesPanel = lazy(() => import("./StaffArticlesPanel"));
+const StaffMediaPanel = lazy(() => import("./StaffMediaPanel"));
 const errorMessage = (error: unknown) =>
     error instanceof Error ? error.message : "در انجام درخواست خطایی رخ داد";
 
@@ -105,6 +109,8 @@ type StaffTab =
     | "sms"
     | "finance"
     | "audit"
+    | "articles"
+    | "media"
     | "access";
 
 const statusLabels: Record<Appointment["status"], string> = {
@@ -3235,6 +3241,8 @@ export const StaffDashboard = ({
               ]
             : []),
         { id: "account-security", label: "امنیت حساب من", icon: <IoShieldCheckmarkOutline /> },
+        { id: "articles", label: "مقالات و آموزش", icon: <IoListOutline /> },
+        { id: "media", label: "رسانه عمومی", icon: <IoListOutline /> },
         { id: "access", label: "نقش‌ها و کارکنان", icon: <IoShieldCheckmarkOutline /> },
     ].filter(item => item.id === "account-security" || can(staffTabPermissions[item.id])) as typeof navItems;
     const sidebar = (
@@ -3574,6 +3582,8 @@ export const StaffDashboard = ({
                             onReload={loadOperations}
                         />
                     )}
+                    {tab === "articles" && can("articles.view") && <Suspense fallback={<p>در حال آماده‌سازی ویرایشگر…</p>}><StaffArticlesPanel token={token} /></Suspense>}
+                    {tab === "media" && can("media.manage") && <Suspense fallback={<p>در حال آماده‌سازی رسانه…</p>}><StaffMediaPanel token={token} /></Suspense>}
                     {tab === "account-security" && <StaffMfaPanel token={token} />}
                     {tab === "clinic-info" && can("settings.view") && settings && (
                         <StaffSettingsPanel token={token} clinicRevision={settings.revision} onReload={loadAll} clinicPanel={<ClinicInfoPanel

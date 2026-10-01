@@ -16,11 +16,14 @@ logger = logging.getLogger(__name__)
 
 def run() -> None:
     with SessionLocal() as db:
+        from .content import publish_due
+        published = publish_due(db)
         expired = expire_unpaid_holds(db)
         reminders = queue_appointment_reminders(db)
         sent = dispatch_pending_sms(db, limit=200)
     logger.info(
-        "Appointment jobs completed: expired_holds=%s reminders=%s sms_sent=%s",
+        "Editorial publications=%s; appointment jobs completed: expired_holds=%s reminders=%s sms_sent=%s",
+        published,
         expired,
         reminders,
         sent,
