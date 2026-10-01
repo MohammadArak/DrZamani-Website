@@ -64,7 +64,7 @@ const Navigation = () => {
                 className={classNames(
                     "flex flex-row self-start items-center justify-between py-2 px-4 relative z-60 w-full transition duration-175",
                     isSticky
-                        ? "bg-white dark:bg-[#0E192C]/95 shadow-lg"
+                        ? "bg-[#0E192C]/95 shadow-lg"
                         : "bg-transparent dark:bg-transparent",
                 )}
             >
@@ -101,7 +101,7 @@ const Navigation = () => {
                     </div>
                 </Drawer>
                 <div className="lg:flex flex-row flex-1 absolute inset-0 hidden items-center justify-center text-sm text-zinc-600 font-medium hover:text-zinc-800 transition duration-200 perspective-[1000px] overflow-auto sm:overflow-visible no-visible-scrollbar">
-                    <NavList tabs={navMenu} />
+                    <NavList tabs={navMenu} tabClassName="text-white" />
                 </div>
                 <div className="flex items-center gap-2">
                     {/* <button
@@ -148,10 +148,11 @@ const Navigation = () => {
                     </button> */}
                     <a
                         href="/appointment/"
+                                onClick={event => { if (!clinicInfo.bookingEnabled) { event.preventDefault(); setReserveOpen(true); } }}
                         className="text-white hover:bg-secondary-deep dark:hover:bg-secondary-deep relative block heading-text z-10 shadow-md rounded-lg items-center justify-center py-1 px-2 bg-secondary dark:bg-secondary"
-                        aria-label={clinicInfo.bookingEnabled ? "رزرو نوبت" : "وضعیت نوبت‌دهی"}
+                        aria-label="رزرو نوبت"
                     >
-                        {clinicInfo.bookingEnabled ? "رزرو نوبت" : "وضعیت نوبت‌دهی"}
+                        رزرو نوبت
                     </a>
                     {/* <button
                         onClick={() => setReserveOpen(true)}

@@ -19,7 +19,7 @@ with TemporaryDirectory(prefix='drzamani-editorial-') as directory:
     digest=hashlib.sha256(image.read_bytes()).hexdigest()
     env=dict(os.environ,APP_ENV='test',APP_DEBUG='false',SMS_PROVIDER='disabled',BOOKING_ENABLED='false',DATABASE_URL=f'sqlite:///{database.as_posix()}',PUBLIC_MEDIA_DIR=str(media),UPLOAD_DIR=str(root/'private'))
     def migrate(operation,target):subprocess.run([sys.executable,'-m','alembic',operation,target],cwd=api,env=env,check=True)
-    migrate('upgrade','head')
+    migrate('upgrade','20261001_0018')
     snapshot=json.dumps(dict(title='Synthetic migration fixture',slug='fixture',body_html='<p>Synthetic</p>',cover_key=key),ensure_ascii=False)
     with closing(sqlite3.connect(database)) as db:
         db.execute('PRAGMA foreign_keys=ON')
@@ -40,7 +40,7 @@ with TemporaryDirectory(prefix='drzamani-editorial-') as directory:
         assert db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
         assert db.execute('PRAGMA foreign_key_check').fetchall()==[]
     assert hashlib.sha256(image.read_bytes()).hexdigest()==digest
-    migrate('upgrade','head')
+    migrate('upgrade','20261001_0018')
     with closing(sqlite3.connect(database)) as db:assert db.execute('SELECT COUNT(*) FROM articles').fetchone()[0]==0
     # Restore both parts while no API/jobs process is running; no live files are touched.
     with closing(sqlite3.connect(root/'backup.db')) as backup,closing(sqlite3.connect(database)) as db:backup.backup(db)

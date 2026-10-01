@@ -3,11 +3,6 @@ import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import { FaUsers } from "react-icons/fa6";
 import GlassCard from "./GlassCard";
 import { BiSolidCheckShield } from "react-icons/bi";
-import {
-    IoHeartCircleOutline,
-    IoPersonCircleOutline,
-    IoSearchCircleOutline,
-} from "react-icons/io5";
 
 const ServiceMinimalCard = ({
     title,
@@ -115,46 +110,7 @@ const AboutUs = () => {
                                     تصمیم‌گیری نهایی شفاف‌تر و برنامه درمانی متناسب
                                     با نیاز هر فرد تنظیم شود.
                                 </motion.p>
-                                <motion.div
-                                    className="mt-7 grid gap-3 sm:grid-cols-3"
-                                    initial={{ opacity: 0, y: 24 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.7 }}
-                                    viewport={{ once: true }}
-                                >
-                                    {[
-                                        {
-                                            title: "ارزیابی همه‌جانبه",
-                                            text: "بررسی ساختار، عملکرد تنفسی و تناسب چهره پیش از انتخاب مسیر درمان.",
-                                            icon: <IoSearchCircleOutline />,
-                                        },
-                                        {
-                                            title: "برنامه اختصاصی",
-                                            text: "تنظیم پیشنهاد درمان بر پایه شرایط بالینی و هدف واقع‌بینانه هر بیمار.",
-                                            icon: <IoPersonCircleOutline />,
-                                        },
-                                        {
-                                            title: "همراهی درمانی",
-                                            text: "ارائه راهنمای روشن برای آمادگی قبل از درمان و مراقبت‌های پس از آن.",
-                                            icon: <IoHeartCircleOutline />,
-                                        },
-                                    ].map((item) => (
-                                        <article
-                                            key={item.title}
-                                            className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm transition hover:-translate-y-1 hover:border-secondary/50 hover:shadow-lg"
-                                        >
-                                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/12 text-2xl text-secondary-deep">
-                                                {item.icon}
-                                            </span>
-                                            <h4 className="mt-3 font-dana text-sm text-duskblue">
-                                                {item.title}
-                                            </h4>
-                                            <p className="mt-2 text-xs font-light leading-6 text-slate-600">
-                                                {item.text}
-                                            </p>
-                                        </article>
-                                    ))}
-                                </motion.div>
+
                             </motion.div>
                             <motion.div
                                 className="grid grid-cols-2 md:grid-cols-4 gap-4"

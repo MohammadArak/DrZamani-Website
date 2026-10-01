@@ -224,4 +224,7 @@ def media_keys(snapshot):
     return keys
 
 
-def is_public_media(db,key):return any(key in media_keys(r.published_json) for r in public_rows(db))
+def is_public_media(db,key):
+    if any(key in media_keys(r.published_json) for r in public_rows(db)):return True
+    from .comments import public_rows as public_comments
+    return any(row['photo_key']==key for row in public_comments(db))

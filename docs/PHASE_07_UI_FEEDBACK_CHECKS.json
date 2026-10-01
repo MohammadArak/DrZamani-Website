@@ -1,0 +1,16 @@
+{
+  "environment": "disposable local fixture; real Nginx and API",
+  "TLS": "verified fixture CA",
+  "results": [
+    {
+      "origin": "http://127.0.0.1:8087",
+      "result": "PASS",
+      "scope": "restored article index/detail/category/tag/search/page2, canonical, published snapshots, private draft404, validated header image, public age/photo, no homepage booking status text, closed appointment custom message"
+    },
+    {
+      "origin": "https://127.0.0.1:8088",
+      "result": "PASS",
+      "scope": "restored article index/detail/category/tag/search/page2, canonical, published snapshots, private draft404, validated header image, public age/photo, no homepage booking status text, closed appointment custom message"
+    }
+  ]
+}

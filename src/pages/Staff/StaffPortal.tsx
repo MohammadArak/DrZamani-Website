@@ -82,6 +82,7 @@ import {
 const inputClass =
     "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-slate-800 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/10";
 const StaffArticlesPanel = lazy(() => import("./StaffArticlesPanel"));
+const StaffCommentsPanel = lazy(() => import("./StaffCommentsPanel"));
 const StaffMediaPanel = lazy(() => import("./StaffMediaPanel"));
 const errorMessage = (error: unknown) =>
     error instanceof Error ? error.message : "در انجام درخواست خطایی رخ داد";
@@ -110,6 +111,7 @@ type StaffTab =
     | "sms"
     | "finance"
     | "audit"
+    | "comments"
     | "articles"
     | "media"
     | "access";
@@ -3048,8 +3050,8 @@ export const StaffDashboard = ({
     const [articleBusy,setArticleBusy]=useState(false);
     const {ask:askContent,confirmation:contentConfirmation}=useContentConfirm();
     const leaveArticle=async()=>{
-        if(articleBusy){setError("ذخیره مقاله در حال انجام است؛ پس از پایان آن خارج شوید.");return false;}
-        return !articleDirty||await askContent("تغییرات مقاله هنوز ذخیره نشده‌اند؛ از ویرایش خارج شوید؟");
+        if(articleBusy){setError("ذخیره محتوا در حال انجام است؛ پس از پایان آن خارج شوید.");return false;}
+        return !articleDirty||await askContent("تغییرات محتوا هنوز ذخیره نشده‌اند؛ از ویرایش خارج شوید؟");
     };
     const navigateTab=async(next:StaffTab)=>{if(next===tab||await leaveArticle())setTab(next);};
     const [mobileMenu, setMobileMenu] = useState(false);
@@ -3250,6 +3252,7 @@ export const StaffDashboard = ({
               ]
             : []),
         { id: "account-security", label: "امنیت حساب من", icon: <IoShieldCheckmarkOutline /> },
+        { id: "comments", label: "نظرات مراجعین", icon: <IoListOutline /> },
         { id: "articles", label: "مقالات و آموزش", icon: <IoListOutline /> },
         { id: "media", label: "رسانه عمومی", icon: <IoListOutline /> },
         { id: "access", label: "نقش‌ها و کارکنان", icon: <IoShieldCheckmarkOutline /> },
@@ -3594,6 +3597,7 @@ export const StaffDashboard = ({
                         />
                     )}
                     {tab === "articles" && can("articles.view") && <Suspense fallback={<p>در حال آماده‌سازی ویرایشگر…</p>}><StaffArticlesPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
+                    {tab === "comments" && can("comments.view") && <Suspense fallback={<p>در حال آماده‌سازی نظرات…</p>}><StaffCommentsPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {tab === "media" && can("media.manage") && <Suspense fallback={<p>در حال آماده‌سازی رسانه…</p>}><StaffMediaPanel token={token} /></Suspense>}
                     {tab === "account-security" && <StaffMfaPanel token={token} />}
                     {tab === "clinic-info" && can("settings.view") && settings && (

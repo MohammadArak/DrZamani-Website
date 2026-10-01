@@ -218,3 +218,6 @@ app.include_router(mfa_router.router, prefix=settings.api_prefix)
 from .routers import content as content_router
 app.include_router(content_router.router, prefix=settings.api_prefix)
 app.include_router(content_router.staff_router, prefix=settings.api_prefix)
+from .routers import comments as comments_router
+app.include_router(comments_router.router, prefix=settings.api_prefix)
+app.include_router(comments_router.staff_router, prefix=settings.api_prefix)

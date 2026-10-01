@@ -109,7 +109,7 @@ CATALOG = [
             title,
             "نظرات",
             [] if action == "view" else ["comments.view"],
-            True,
+            False,
         )
         for action, title in [
             ("view", "مشاهده نظرات"),

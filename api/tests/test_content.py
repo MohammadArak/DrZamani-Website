@@ -179,6 +179,21 @@ def test_rename_redirect_and_unpublish_tombstone(client):
     assert client.get('/articles/new-slug/').status_code==410
 
 
+def test_historical_article_layout_uses_published_content_and_category_queries(client):
+    access,row=create(client,categories=['دسته آزمون'])
+    draft=client.get('/articles/').text
+    assert row['content']['title'] not in draft
+    assert 'legacy-article-header' in draft and 'فیلتر دسته‌بندی' in draft
+    transition(client,access,row)
+    listing=client.get('/articles/',params={'category':'دسته آزمون','q':row['content']['title']})
+    assert listing.status_code==200 and row['content']['title'] in listing.text
+    assert 'legacy-article-index-container' in listing.text and 'دسته‌بندی' in listing.text
+    detail=client.get('/articles/test-article/').text
+    assert 'legacy-article-detail' in detail and 'آخرین مطالب' in detail
+    assert '<h2>' in detail and 'rel="canonical"' in detail
+    assert client.get('/articles/?category=missing').status_code==404
+
+
 def test_media_public_only_when_used_by_publication(client):
     access,media=upload(client);key=media['key']
     assert client.get(media['url']).status_code==404

@@ -1,4 +1,6 @@
 import PatientComment from "./PatientComment";
+import {useCallback,useEffect,useRef,useState} from "react";
+import {commentsApi,type CommentPage,type PublicComment} from "@/services/commentsApi";
 import { motion } from "@/components/Motion";
 
 import { useKeenSlider } from "keen-slider/react";
@@ -12,37 +14,36 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
         [
             (slider) => {
                 let timeout: ReturnType<typeof setTimeout>;
-                let mouseOver = false;
-
-                function clearNextTimeout() {
-                    clearTimeout(timeout);
-                }
-
-                function nextTimeout() {
-                    clearTimeout(timeout);
-                    if (mouseOver) return;
-                    timeout = setTimeout(() => {
-                        slider.next();
-                    }, 3000);
-                }
-
+                let paused = false;
+                const interaction = slider.container.parentElement ?? slider.container;
+                const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+                const clear = () => clearTimeout(timeout);
+                const next = () => {
+                    clear();
+                    if (paused || reduced.matches || slides.length < 2) return;
+                    timeout = setTimeout(() => slider.next(), 3000);
+                };
+                const enter = () => { paused = true; clear(); };
+                const leave = () => { paused = false; next(); };
                 slider.on("created", () => {
-                    slider.container.addEventListener("mouseover", () => {
-                        mouseOver = true;
-                        clearNextTimeout();
-                    });
-
-                    slider.container.addEventListener("mouseout", () => {
-                        mouseOver = false;
-                        nextTimeout();
-                    });
-
-                    nextTimeout();
+                    interaction.addEventListener("mouseenter", enter);
+                    interaction.addEventListener("mouseleave", leave);
+                    interaction.addEventListener("focusin", enter);
+                    interaction.addEventListener("focusout", leave);
+                    reduced.addEventListener("change", next);
+                    next();
                 });
-
-                slider.on("dragStarted", clearNextTimeout);
-                slider.on("animationEnded", nextTimeout);
-                slider.on("updated", nextTimeout);
+                slider.on("destroyed", () => {
+                    clear();
+                    interaction.removeEventListener("mouseenter", enter);
+                    interaction.removeEventListener("mouseleave", leave);
+                    interaction.removeEventListener("focusin", enter);
+                    interaction.removeEventListener("focusout", leave);
+                    reduced.removeEventListener("change", next);
+                });
+                slider.on("dragStarted", clear);
+                slider.on("animationEnded", next);
+                slider.on("updated", next);
             },
         ],
     );
@@ -64,14 +65,14 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
             </div>
 
             <button
-                onClick={() => instanceRef.current?.prev()}
+                aria-label="نظر قبلی" onClick={() => instanceRef.current?.prev()}
                 className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-linear-to-b from-[#182435] to-[#2e3d51] border border-primary-subtle rounded-full text-secondary shadow hover:shadow-lg hover:scale-105 transition duration-150 ease-in-out"
             >
                 <MdNavigateBefore size={32} />
             </button>
 
             <button
-                onClick={() => instanceRef.current?.next()}
+                aria-label="نظر بعدی" onClick={() => instanceRef.current?.next()}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-linear-to-b from-[#182435] to-[#2e3d51] border border-primary-subtle rounded-full text-secondary shadow hover:shadow-lg hover:scale-105 transition duration-150 ease-in-out"
             >
                 <MdNavigateNext size={32} />
@@ -80,7 +81,25 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
     );
 }
 
+function initial():CommentPage<PublicComment>{
+    try{return JSON.parse(document.getElementById("comment-bootstrap")?.textContent??"");}catch{return {items:[],total:0,page:1};}
+}
 const PatientsComments = () => {
+    const [result,setResult]=useState(initial); const [busy,setBusy]=useState(false); const [error,setError]=useState(false); const generation=useRef({value:0});
+    const load=useCallback(async()=>{
+        const sequence=++generation.current.value;setBusy(true);
+        try{
+            let next=await commentsApi.publicList(); const items=[...next.items];
+            while(next.page*12<next.total && next.items.length){
+                if(sequence!==generation.current.value)return;
+                next=await commentsApi.publicList(next.page+1);items.push(...next.items);
+            }
+            if(sequence===generation.current.value){setResult({...next,items:[...new Map(items.map(item=>[item.id,item])).values()]});setError(false);}
+        }
+        catch{if(sequence===generation.current.value){setResult({items:[],total:0,page:1});setError(true);}}
+        finally{if(sequence===generation.current.value)setBusy(false);}
+    },[]);
+    useEffect(()=>{const requests=generation.current;const refresh=()=>{if(document.visibilityState==="visible")void load();};const start=window.setTimeout(()=>void load(),0);const timer=window.setInterval(refresh,30000);window.addEventListener("focus",refresh);return()=>{requests.value++;window.clearTimeout(start);window.clearInterval(timer);window.removeEventListener("focus",refresh);};},[load]);
     return (
         <section
             id="comments"
@@ -120,7 +139,7 @@ const PatientsComments = () => {
                             fill="none"
                         />
                     </svg>
-                    <h2 className="font-lalezar text-2xl md:text-5xl ">
+                    <h2 className="font-lalezar text-2xl md:text-5xl text-white ">
                         نظرات مراجعین
                     </h2>
                     <svg
@@ -157,7 +176,7 @@ const PatientsComments = () => {
                     رضایت بیماران مهمترین دستاورد ماست.
                 </motion.h5>
                 <motion.h6
-                    className="md:text-lg font-shahab"
+                    className="md:text-lg font-shahab text-white"
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{
@@ -200,31 +219,10 @@ const PatientsComments = () => {
                 }}
                 viewport={{ once: true }}
             >
-                <Carousel
-                    slides={[
-                        <PatientComment
-                            key="parastoo"
-                            img={"/img/comments/profile-1.jpg"}
-                            name="پرستو"
-                            age={22}
-                            body="من خیلی دوست داشتم بینی عمل کنم ولی چون گوشتی بود خیلی نگران نتیجه بودم به دکتر های زیادی مراجعه کردم که نهایتا با دکتر زمانی کار انجام دادم و الان بعد از یک سال نتیجه رو واقعا می پسندم."
-                        />,
-                        <PatientComment
-                            key="niloufar"
-                            img={"/img/comments/profile-2.jpg"}
-                            name="نیلوفر"
-                            age={28}
-                            body="به توصیه دوستان با دکتر زمانی آشناشدم و برای تزریق چربی یک جلسه مشاوره با ایشون داشتم که به خوبی به تمام سوالات پاسخ دادن و نگرانی من برای عمل از بین بردند."
-                        />,
-                        <PatientComment
-                            key="fatemeh"
-                            img={"/img/comments/profile-3.jpg"}
-                            name="فاطمه"
-                            age={25}
-                            body="تقریبا کار بوتاکس صورت همیشه با دکتر زمانی انجام دادم چون مطمئن هستم از مواد درجه یک استفاده می کنند و  نگران عوارض نیستم."
-                        />,
-                    ]}
-                />
+                {error&&<p role="status" className="text-center text-white">دریافت نظرات ممکن نشد. <button onClick={()=>void load()} className="underline">تلاش مجدد</button></p>}
+                {!result.items.length&&!error&&<p className="text-center text-white">{busy?"در حال دریافت نظرات…":"هنوز نظری برای نمایش منتشر نشده است."}</p>}
+                {result.items.length>0&&<Carousel key={result.items.map(r=>r.id).join(",")} slides={result.items.map(item=><PatientComment key={item.id} img={item.photo_key?`/media/${item.photo_key}.webp`:undefined} imageAlt={item.photo_alt} name={item.display_name} age={item.age??undefined} body={item.body}/>)}/>}
+
             </motion.div>
         </section>
     );

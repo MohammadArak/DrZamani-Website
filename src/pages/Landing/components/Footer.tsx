@@ -69,7 +69,7 @@ const Footer = () => {
                         className="col-span-8 md:col-span-2 lg:col-span-2 flex flex-col items-center gap-8 px-2 py-8 lg:py-0"
                     >
                         <div className="w-full flex flex-col gap-2 items-center">
-                            <h5 className="text-2xl font-lalezar">لینک ها</h5>
+                            <h5 className="text-2xl font-lalezar text-white">لینک ها</h5>
                             <div className="w-20 bg-linear-to-l from-secondary to-secondary-mild/10 h-px rounded-full"></div>
                         </div>
                         <div className="w-full flex flex-col gap-3">
@@ -147,14 +147,14 @@ const Footer = () => {
                         className="col-span-8 md:col-span-6 lg:col-span-3 flex flex-col items-center gap-8 px-3 py-8 lg:py-0"
                     >
                         <div className="w-full flex flex-col gap-2 items-center">
-                            <h5 className="text-2xl font-lalezar">تماس ها</h5>
+                            <h5 className="text-2xl font-lalezar text-white">تماس ها</h5>
                             <div className="w-20 bg-linear-to-l from-secondary to-secondary-mild/10 h-px rounded-full"></div>
                         </div>
                         <ul className="flex flex-col gap-6">
                             <li className="flex flex-col">
                                 <div className="flex justify-between items-center gap-6">
                                     <div className="flex flex-col gap-1">
-                                        <h6 className="text-2xl text-secondary font-lalezar">
+                                        <h6 className="text-2xl text-secondary font-lalezar text-white">
                                             شماره تلفن:
                                         </h6>
                                         <a href={`tel:${clinicInfo.phones.office.value}`}>
@@ -175,7 +175,7 @@ const Footer = () => {
                             <li className="flex flex-col">
                                 <div className="flex justify-between items-center gap-6">
                                     <div className="flex flex-col gap-1">
-                                        <h6 className="text-2xl text-secondary font-lalezar">
+                                        <h6 className="text-2xl text-secondary font-lalezar text-white">
                                             آدرس ایمیل:
                                         </h6>
                                         <p>
@@ -236,7 +236,7 @@ const Footer = () => {
                         className="col-span-8 lg:col-span-3 flex flex-col items-center gap-8 px-6 py-8 lg:py-0"
                     >
                         <div className="flex flex-col gap-2">
-                            <h5 className="text-2xl font-lalezar">
+                            <h5 className="text-2xl font-lalezar text-white">
                                 آدرس ما روی نقشه
                             </h5>
                             <span>

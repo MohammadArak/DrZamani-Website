@@ -9,6 +9,7 @@ const AboutUs = lazy(() => import("./components/AboutUs"));
 const Services = lazy(() => import("./components/Services"));
 const PatientsComments = lazy(() => import("./components/PatientsComments"));
 const Samples = lazy(() => import("./components/Samples"));
+const BlogPreview = lazy(() => import("./components/BlogPreview"));
 const FAQ = lazy(() => import("./components/FAQ"));
 const Footer = lazy(() => import("./components/Footer"));
 
@@ -53,6 +54,9 @@ const Landing = () => {
                 </Suspense>
                 <Suspense fallback={<SectionFallback />}>
                     <Samples />
+                </Suspense>
+                <Suspense fallback={<SectionFallback />}>
+                    <BlogPreview />
                 </Suspense>
                 <Suspense fallback={<SectionFallback />}>
                     <FAQ />
