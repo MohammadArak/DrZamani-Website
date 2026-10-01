@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { appointmentApi, type SystemSettings, type SettingsHistory } from "@/services/appointmentApi";
 import { useStaffAccess } from "./staffAccess";
+import CaptchaSetupPanel from "./CaptchaSetupPanel";
+import StaffMfaPanel from "./StaffMfaPanel";
 
 const inputClass = "mt-2 w-full min-w-0 rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-secondary";
 const groups = [
@@ -77,9 +79,10 @@ export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel,
         {error && <p role="alert" className="rounded-xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>}
         {message && <p role="status" className="rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{message}</p>}
         {["clinic", "content"].includes(tab) && <div>{tab === "content" && <p className="mb-4 rounded-xl bg-sky-50 p-4 text-sm leading-7">عنوان، توضیح و تصویر پیش‌فرض سئو در فرم زیر است. ویرایشگر مقاله و مدیریت نظرات در مراحل ۶ و ۷ اضافه می‌شوند.</p>}{clinicPanel}</div>}
-        {tab === "captcha" && <p className="rounded-3xl bg-white p-6 leading-8">کپچای تصویری فعلی و محدودیت تلاش ورود فعال است. تنظیم Google و Cloudflare و اعتبارسنجی سرور در مرحله ۴ اضافه می‌شود.</p>}
+        {tab === "captcha" && owner && <CaptchaSetupPanel token={token} disabled={busy || Boolean(dirty)} verified={data?.status.captcha_verified} onVerified={refresh} />}
+        {tab === "security" && owner && <StaffMfaPanel token={token} />}
         {tab === "booking" && <p className="rounded-xl bg-amber-50 p-4 text-sm leading-7">مدت نگهداری نوبت از این بخش تغییر می‌کند. برنامه کاری و سیاست لغو در بخش «برنامه کاری» است. کلید فعال/غیرفعال رزرو و پیام کاربر در مرحله ۵ تکمیل می‌شود.</p>}
-        {owner && !["clinic", "content", "captcha"].includes(tab) && <form onSubmit={save} className="rounded-3xl border border-slate-200 bg-white p-5">
+        {owner && !["clinic", "content"].includes(tab) && <form onSubmit={save} className="rounded-3xl border border-slate-200 bg-white p-5">
             {!data && <p>در حال بارگیری تنظیمات…</p>}
             {data && !data.status.encryption_ready && <p className="mb-5 rounded-xl bg-amber-50 p-3 text-sm leading-7">برای ذخیره رمز سرویس‌ها، کلید رمزگذاری مستقل باید در تنظیمات سرور تعریف شود.</p>}
             <fieldset disabled={busy} className="grid min-w-0 gap-5 md:grid-cols-2">

@@ -84,8 +84,10 @@ def request_token(request: Request, audience: str, credentials) -> str:
 def staff_state_hash(staff: StaffUser) -> str:
     roles = sorted((role.id, role.slug, role.is_system, role.is_active, role.revision,
                     sorted(p.code for p in role.permissions)) for role in staff.roles)
+    mfa_state = (True, staff.mfa.revision) if staff.mfa and staff.mfa.enabled else (False, 0)
+    mandatory = get_settings().mfa_required_owners if any(r.slug == "superadmin" and r.is_active for r in staff.roles) else False
     return hashlib.sha256(
-        f"{staff.password_hash}:{staff.role}:{staff.is_active}:{roles}".encode()
+        f"{staff.password_hash}:{staff.role}:{staff.is_active}:{roles}:{mfa_state}:{mandatory}".encode()
     ).hexdigest()
 
 

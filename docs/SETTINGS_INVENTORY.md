@@ -49,8 +49,8 @@ revision مشترک، seo_title/seo_description/seo_image_url به همان مد
 ## تنظیمات آینده و اجراشده
 
 - booking_enabled (پیش‌فرض خاموش) و booking_disabled_message؛ رفتار رزرو/جابه‌جایی/لیست انتظار.
-- Turnstile enabled/site key/secret و Google enabled/site key/project/credential/score threshold؛ primary provider، fallback و سیاست هر عملیات.
-- rate limit ورود کارکنان/قفل/نشست در مرحله ۳ پنل دارند؛ MFA مرحله ۴ است.
+- Turnstile و Google، primary/fallback و per-action، hostname/score و سیاست اجبار MFA اکنون در مرحله۴ اجرا شده‌اند؛ همه15فیلد جدید پنل owner و ENV bootstrap دارند.
+- rate limit ورود کارکنان/قفل/نشست در مرحله ۳ پنل دارند؛ MFA در مرحله۴ اجرا شده است.
 - meta/OG/تصویر SEO و sitemap تازه در مرحله ۳ اجرا شدند؛ تنظیمات مقاله/نظر و رسانه عمومی آینده‌اند.
 - کلید رمزگذاری تنظیمات محرمانه فقط ENV مستقل؛ پنل امکان استخراج آن نداشته باشد.
 
@@ -59,3 +59,20 @@ revision مشترک، seo_title/seo_description/seo_image_url به همان مد
 ## رفتار نهایی مرحله ۳
 
 همه تنظیمات runtime فقط مدیرکل، و clinic عمومی مطابق settings.view/edit است. تغییر DB در خواندن بعدی API/jobs اعمال و revision از overwrite هم‌زمان جلوگیری می‌کند. reset به ENV جاری، clear رمز به overlay خالی رمزگذاری‌شده و restore به snapshot به‌عنوان نسخه تازه است. کلید امضا/DB/مسیر/CORS/build ENV-only و نیازمند restart/هماهنگی استقرارند؛ نمایش مقدار محرمانه ندارند. راهنمای backup/rotation/rollback و نتیجه تست در PHASE_03_SETTINGS.md است.
+
+## پانزده فیلد مرحله۴ (۴۳ runtime در مجموع)
+
+| ENV پایه | پنل و اعتبارسنجی | پیش‌فرض |
+|---|---|---|
+| TURNSTILE_ENABLED / GOOGLE_ENABLED | boolean، owner secrets.manage؛ attestation منطبق قبل از true | false |
+| TURNSTILE_SITE_KEY / GOOGLE_SITE_KEY | متن محدود/شکل key، عمومی برای widget؛ تغییر نیازمند آزمون مجدد | خالی |
+| TURNSTILE_SECRET / GOOGLE_API_KEY | secret Fernet مستقل، هرگز مقدار API/UI/default؛ api key گوگل server-only | خالی |
+| GOOGLE_PROJECT_ID | شناسه پروژه bounded/regex؛ URL assessments ثابت | خالی |
+| GOOGLE_MIN_SCORE | integer0..100 معادل0..1، آزمون مجدد fingerprint | 50 |
+| CAPTCHA_PRIMARY | turnstile یا google؛ انتخاب سروری | turnstile |
+| CAPTCHA_FALLBACK | boolean؛ تنها اختلال backend و هر دو فعال، فقط یک بار | false |
+| CAPTCHA_STAFF_LOGIN / CAPTCHA_OTP_REQUEST / CAPTCHA_OTP_VERIFY | boolean هر عملیات؛ rate limit و PNG کارکنان مستقل باقی‌اند | true |
+| CAPTCHA_HOSTNAMES | CSV hostname دقیق بدون scheme/wildcard؛ production دامنه معتبر | خالی یعنی frontend/allowed origins |
+| MFA_REQUIRED_OWNERS | boolean؛ همه activeownerها enroll شوند؛ fingerprint/ابطال نشست و promotion gate | false |
+
+timeout ارائه‌دهنده ثابت8ثانیه است و ENV/پنل آزاد ندارد. سیاست MFA خود کاربر در StaffMfa است؛ seed/pending رمزگذاری و recovery hash ذخیره می‌شود. تنظیم اجبار جهانی نسخه‌دار/audit است؛ enroll/rotation/disable audit جدا دارد. تغییر DB خواندن بعدی API/jobs، تغییر ENV restart؛ DB بر ENV مقدم است. attestation به key/credential/score/hostname و SECRET_KEY متصل است؛ وضعیت تأیید owner-only و غیرمحرمانه است. جزئیات rollback/key rotation در PHASE_04_CAPTCHA_MFA.md.

@@ -59,3 +59,17 @@
 - اسناد roadmap/inventory/README/handoff به‌روز شدند؛ previewها جمع و fixture از Git حذف شد. هیچ deploy، مالک production، پیامک/پرداخت واقعی یا روشن‌کردن رزرو انجام نشد.
 
 قدم بعدی: مرحله ۴، Google/Cloudflare با کنترل پنل/اعتبارسنجی سرور، سیاست قطع ارائه‌دهنده و MFA مدیرکل؛ source همین مرحله پس از checks طبق درخواست مالک با main ادغام می‌شود و SHA/ZIP در گزارش تحویل ثبت می‌شود.
+
+## 2026-10-01 — مرحله۴، نسخه1.11.0
+
+- مبنا PR۳/main با SHA7814713e2391c0efec01d36b18fe96cca1d18c2d؛ شاخه phase-04-captcha-mfa. مالک رمزساز + کد بازیابی را صریحاً انتخاب کرد.
+- Google assessments v1 score-based و Turnstile؛15فیلد پنل owner، اسرار encrypted، انتخاب server-primary، per-action، outage-only fallback یک بار، domain/action/age/score، policy/IP و replay/race safety.
+- فعال‌سازی فقط بعد از آزمون مرورگر/سرور کلید ذخیره‌شده و attestation منطبق؛ وضعیت تأیید پنل؛ تغییر credential نیازمند reproof؛ ابزار خصوصی app.recover_access با تأیید دقیق و audit، بدون HTTP bypass.
+- MFA TOTP/recovery، pending10دقیقه و فعال‌سازی بعد از کد درست، pre-auth180ثانیه بدون نشست/profile، محدودیت مستقل حساب/IP، seed Fernet، recovery HMAC و مصرف اتمیک، revocation نشست/WS و gate اجبار/ارتقای owner.
+- 185pytest (43تازه) PASS، lint/build/نسخه، frozen45بسته، Ruffبحرانی، migration0016 تازه و rollbackپرشده/session/overlay/history و integrity/FK/UNIQUE، Nginx HTTP/HTTPS syntax و runtime cookie/CSRF/MFA/WS/headers/404/410/rate PASS. audit جدید backend/frontend اجرایی صفرشناخته‌شده؛ dependency تازه نیست.
+- UI desktop/390px با API ساختگی: فرم کپچا، maskedsecret، رمزساز و selfsecuritynav بدون overflow بررسی؛ screenshot صرفاً syntheticpreview است. widget واقعی/مرورگر احرازشده API و شبکه/هزینه حساب واقعی پذیرش نشده‌اند.
+- ایراد اولیه pending fingerprint نشست را زود می‌بست، اصلاح شد. property تست audit و CSP expectation برای endpoint server-only و ENV helper smoke اشتباه اصلاح شدند. با enforcebootstrap، fixtureproduction localhost نامعتبر شد؛ دامنه production ساختگی معتبر جایگزین و همه checks دوباره پاس شد. warningقدیمیpytest/http2 و fallbackbuild باقی‌اند.
+- downgrade0016 حفاظت کد قدیمی را جبران می‌کند: همه کارکنان غیرفعال/نشست‌ها باطل، MFA/attestation و fields جدید overlay/history حذف؛ backup/restore و reviewبازفعال‌سازی ضروری است.
+- docs/README/ENVexamples/roadmap/handoff تازه و previewها جمع شدند. هیچ deploy/مالکproduction/رزرو/پیامک/پرداخت واقعی فعال نشد.
+
+قدم بعد مرحله۵: رزرو خاموش/پیام پنل، callback idempotent و SMS outbox غیرمسدودکننده redirect. پذیرش واقعی کپچا قبل از فعال‌سازی روی staging دنبال شود. هر مرحله طبق مجوز مالک پس از تست با main ادغام و handoff همراه خروجی تازه شود.

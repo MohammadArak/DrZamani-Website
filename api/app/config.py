@@ -95,6 +95,22 @@ class Settings:
     sms_webhook_allowed_hosts: tuple[str, ...] = ()
     public_html_dir: Path = BACKEND_DIR.parent / "public_html"
 
+    turnstile_enabled: bool = False
+    turnstile_site_key: str = ""
+    turnstile_secret: str = ""
+    google_enabled: bool = False
+    google_site_key: str = ""
+    google_project_id: str = ""
+    google_api_key: str = ""
+    google_min_score: int = 50
+    captcha_primary: str = "turnstile"
+    captcha_fallback: bool = False
+    captcha_staff_login: bool = True
+    captcha_otp_request: bool = True
+    captcha_otp_verify: bool = True
+    captcha_hostnames: str = ""
+    mfa_required_owners: bool = False
+
     @property
     def development_debug(self) -> bool:
         return self.app_env in {"development", "test"} and self.debug
@@ -183,6 +199,21 @@ def get_settings() -> Settings:
         captcha_max_per_ip_hour=_bounded_int("CAPTCHA_MAX_PER_IP_HOUR", 60, 1, 300),
         otp_verify_max_per_ip_minute=_bounded_int("OTP_VERIFY_MAX_PER_IP_MINUTE", 30, 1, 120),
         otp_verify_max_per_phone_hour=_bounded_int("OTP_VERIFY_MAX_PER_PHONE_HOUR", 30, 1, 120),
+        turnstile_enabled=_as_bool(os.getenv("TURNSTILE_ENABLED"), False),
+        turnstile_site_key=os.getenv("TURNSTILE_SITE_KEY", "").strip(),
+        turnstile_secret=os.getenv("TURNSTILE_SECRET", "").strip(),
+        google_enabled=_as_bool(os.getenv("GOOGLE_ENABLED"), False),
+        google_site_key=os.getenv("GOOGLE_SITE_KEY", "").strip(),
+        google_project_id=os.getenv("GOOGLE_PROJECT_ID", "").strip(),
+        google_api_key=os.getenv("GOOGLE_API_KEY", "").strip(),
+        google_min_score=_bounded_int("GOOGLE_MIN_SCORE", 50, 0, 100),
+        captcha_primary=os.getenv("CAPTCHA_PRIMARY", "turnstile").strip(),
+        captcha_fallback=_as_bool(os.getenv("CAPTCHA_FALLBACK"), False),
+        captcha_staff_login=_as_bool(os.getenv("CAPTCHA_STAFF_LOGIN"), True),
+        captcha_otp_request=_as_bool(os.getenv("CAPTCHA_OTP_REQUEST"), True),
+        captcha_otp_verify=_as_bool(os.getenv("CAPTCHA_OTP_VERIFY"), True),
+        captcha_hostnames=os.getenv("CAPTCHA_HOSTNAMES", "").strip(),
+        mfa_required_owners=_as_bool(os.getenv("MFA_REQUIRED_OWNERS"), False),
         settings_encryption_keys=_as_list(os.getenv("SETTINGS_ENCRYPTION_KEYS")),
         sms_webhook_allowed_hosts=_as_list(os.getenv("SMS_WEBHOOK_ALLOWED_HOSTS")),
         public_html_dir=Path(os.getenv("PUBLIC_HTML_DIR") or str(BACKEND_DIR.parent / "public_html")).resolve(),

@@ -33,6 +33,7 @@ from ..schemas import (
     SessionResponse,
     StaffLoginRequest,
     StaffSessionResponse,
+    MfaLoginRequired,
 )
 from ..security import (
     generate_nonce,
@@ -50,6 +51,7 @@ from ..security import (
     verify_password,
 )
 from ..sms import SmsDeliveryError, get_sms_provider
+from .. import bot_protection as bot
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 staff_router = APIRouter(prefix="/staff/auth", tags=["staff authentication"])
@@ -133,6 +135,7 @@ def request_otp(
     consume_limit(
         db, "otp-request-phone", payload.phone, settings.otp_max_per_phone_hour, 3600
     )
+    bot.verify(db, request, settings, "otp_request", payload.bot)
     consume_limit(db, "otp-resend", payload.phone, 1, settings.otp_resend_seconds)
     now = utcnow()
     db.execute(text("BEGIN IMMEDIATE"))
@@ -191,6 +194,7 @@ def verify_otp(
         settings.otp_verify_max_per_phone_hour,
         3600,
     )
+    bot.verify(db, request, settings, "otp_verify", payload.bot)
     # Serialize consumption and failed-attempt increments, including concurrent valid submissions.
     db.execute(text("BEGIN IMMEDIATE"))
     now = utcnow()
@@ -281,13 +285,13 @@ def staff_logout(
     return _logout("staff", request, response, credentials, db)
 
 
-@staff_router.post("/login", response_model=StaffSessionResponse)
+@staff_router.post("/login", response_model=StaffSessionResponse | MfaLoginRequired)
 def staff_login(
     payload: StaffLoginRequest,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-) -> StaffSessionResponse:
+) -> StaffSessionResponse | MfaLoginRequired:
     settings = get_settings()
     browser = wants_cookie_session(request)
     ip = client_ip(request)
@@ -298,30 +302,33 @@ def staff_login(
         settings.staff_login_max_per_ip_window,
         settings.staff_login_lock_seconds,
     )
-    db.execute(text("BEGIN IMMEDIATE"))
-    now = utcnow()
-    captcha = db.get(CaptchaChallenge, payload.captcha_id)
-    valid = bool(
-        captcha
-        and captcha.request_ip == ip
-        and captcha.consumed_at is None
-        and captcha.expires_at > now
-        and captcha.attempts < CAPTCHA_MAX_ATTEMPTS
-        and verify_captcha_hash(
-            payload.captcha_id, payload.captcha_answer, captcha.nonce, captcha.code_hash
+    if bot.provider_for(settings, "staff_login") in {"google", "turnstile"}:
+        bot.verify(db, request, settings, "staff_login", payload.bot)
+    else:
+        db.execute(text("BEGIN IMMEDIATE"))
+        now = utcnow()
+        captcha = db.get(CaptchaChallenge, payload.captcha_id)
+        valid = bool(
+            captcha
+            and captcha.request_ip == ip
+            and captcha.consumed_at is None
+            and captcha.expires_at > now
+            and captcha.attempts < CAPTCHA_MAX_ATTEMPTS
+            and verify_captcha_hash(
+                payload.captcha_id, payload.captcha_answer, captcha.nonce, captcha.code_hash
+            )
         )
-    )
-    if not valid:
-        if captcha and captcha.consumed_at is None:
-            captcha.attempts += 1
-            if captcha.attempts >= CAPTCHA_MAX_ATTEMPTS:
-                captcha.consumed_at = now
+        if not valid:
+            if captcha and captcha.consumed_at is None:
+                captcha.attempts += 1
+                if captcha.attempts >= CAPTCHA_MAX_ATTEMPTS:
+                    captcha.consumed_at = now
+            db.commit()
+            raise HTTPException(
+                status_code=400, detail="کد امنیتی صحیح نیست یا منقضی شده است"
+            )
+        captcha.consumed_at = now
         db.commit()
-        raise HTTPException(
-            status_code=400, detail="کد امنیتی صحیح نیست یا منقضی شده است"
-        )
-    captcha.consumed_at = now
-    db.commit()
     username = payload.username.strip().lower()
     consume_limit(
         db,
@@ -337,6 +344,11 @@ def staff_login(
     if not staff or not staff.is_active or not valid_password:
         raise HTTPException(status_code=401, detail="نام کاربری یا رمز عبور صحیح نیست")
     assign_legacy_role(db, staff)
+    from ..mfa import create_login_challenge
+    if staff.mfa and staff.mfa.enabled:
+        return create_login_challenge(db, request, staff, browser)
+    if settings.mfa_required_owners and any(r.slug == "superadmin" and r.is_active for r in staff.roles):
+        raise HTTPException(403, "حساب مدیرکل باید عامل دوم تأییدشده داشته باشد")
     reset_limit(db, "staff-login-account", username)
     token, token_hash = issue_session_token()
     expires_at = staff_session_expiry()

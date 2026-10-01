@@ -118,6 +118,7 @@ class StaffUser(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
     roles: Mapped[list["Role"]] = relationship(secondary="staff_roles", lazy="selectin")
+    mfa: Mapped["StaffMfa | None"] = relationship(lazy="selectin", uselist=False, cascade="all, delete-orphan")
 
 
 class Role(Base):
@@ -694,3 +695,49 @@ class AuditLog(Base):
 
     actor_staff: Mapped[StaffUser | None] = relationship()
     actor_patient: Mapped[Patient | None] = relationship()
+
+
+class BotChallenge(Base):
+    __tablename__ = "bot_challenges"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(24))
+    operation: Mapped[str] = mapped_column(String(32))
+    ip_hash: Mapped[str] = mapped_column(String(64))
+    policy_hash: Mapped[str] = mapped_column(String(64))
+    fallback_used: Mapped[bool] = mapped_column(Boolean, default=False)
+    token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(), index=True)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime())
+
+
+class CaptchaAttestation(Base):
+    __tablename__ = "captcha_attestations"
+    fingerprint: Mapped[str] = mapped_column(String(64), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(24))
+    actor_staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id", ondelete="SET NULL"))
+    verified_at: Mapped[datetime] = mapped_column(DateTime(), default=utcnow)
+
+
+class StaffMfa(Base):
+    __tablename__ = "staff_mfa"
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff_users.id", ondelete="CASCADE"), primary_key=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    secret_json: Mapped[str] = mapped_column(Text, default="{}")
+    recovery_hashes_json: Mapped[str] = mapped_column(Text, default="[]")
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+    last_counter: Mapped[int] = mapped_column(Integer, default=-1)
+    pending_json: Mapped[str | None] = mapped_column(Text)
+    pending_id: Mapped[str | None] = mapped_column(String(64))
+    pending_expires_at: Mapped[datetime | None] = mapped_column(DateTime())
+
+
+class MfaChallenge(Base):
+    __tablename__ = "mfa_challenges"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff_users.id", ondelete="CASCADE"), index=True)
+    state_hash: Mapped[str] = mapped_column(String(64))
+    ip_hash: Mapped[str] = mapped_column(String(64))
+    browser: Mapped[bool] = mapped_column(Boolean)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(), index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime())
