@@ -136,7 +136,8 @@ def test_clear_blocks_env_and_reset_restores_env(client, monkeypatch):
 def test_production_cannot_enable_test_services(client, monkeypatch):
     auth = access()
     bootstrap = config.get_settings()
-    monkeypatch.setattr(config, "get_settings", lambda: replace(bootstrap, app_env="production", debug=False, zarinpal_sandbox=False, sms_provider="disabled"))
+    monkeypatch.setattr(config, "get_settings", lambda: replace(bootstrap, app_env="production", debug=False,
+        zarinpal_sandbox=False, sms_provider="disabled", frontend_url="https://clinic.example", allowed_origins=("https://clinic.example",)))
     assert save(client, auth, {"zarinpal_sandbox":True}).status_code == 422
     assert save(client, auth, {"sms_provider":"console"}).status_code == 422
 

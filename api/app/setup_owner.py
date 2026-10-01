@@ -44,6 +44,9 @@ def main():
                 raise SystemExit(
                     "Username exists; promotion requires --promote-existing"
                 )
+            from .runtime_settings import get_settings
+            if get_settings().mfa_required_owners:
+                raise SystemExit("Create a regular account, enroll its MFA, then promote it explicitly while owner MFA is mandatory")
             staff = StaffUser(
                 username=username,
                 full_name=args.name.strip(),
@@ -53,6 +56,9 @@ def main():
             db.add(staff)
             db.flush()
         owner = db.scalar(select(Role).where(Role.slug == "superadmin"))
+        from .runtime_settings import get_settings
+        if get_settings().mfa_required_owners and (not staff.mfa or not staff.mfa.enabled):
+            raise SystemExit("Enroll and confirm this account's MFA before promotion")
         if owner not in staff.roles:
             staff.roles.append(owner)
         revoke_staff(db, [staff.id])

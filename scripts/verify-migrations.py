@@ -42,6 +42,21 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
         assert db.execute("SELECT revision,overrides_json FROM system_settings WHERE id=1").fetchone() == (1, '{}')
         assert db.execute("SELECT revision,seo_title,office_phone FROM clinic_settings WHERE id=1").fetchone() == (1, '', '08633333333')
         assert db.execute("SELECT COUNT(*) FROM setting_revisions").fetchone()[0] == 0
+        for name in ['staff_mfa','mfa_challenges','bot_challenges','captcha_attestations']:
+            assert db.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0] == 0
+        db.execute("INSERT INTO staff_mfa (staff_id,enabled,secret_json) VALUES (1,1,'{\"encrypted\":\"fixture\"}')")
+        db.execute("UPDATE system_settings SET overrides_json='{\"patient_session_days\":3,\"google_enabled\":false}'")
+        db.execute("INSERT INTO setting_revisions (revision,snapshot_json,changed_keys_json,created_at) VALUES (1,'{\"overrides\":{\"patient_session_days\":2,\"mfa_required_owners\":false},\"clinic\":{}}','[\"patient_session_days\",\"mfa_required_owners\"]',CURRENT_TIMESTAMP)")
+        db.execute("INSERT INTO auth_sessions (token_hash,staff_id,expires_at,created_at) VALUES ('mfa-migration-session',1,'2099-01-01',CURRENT_TIMESTAMP)")
+        db.commit()
+    migrate("20260930_0015", "downgrade")
+    with closing(sqlite3.connect(database)) as db:
+        assert db.execute("SELECT is_active FROM staff_users WHERE id=1").fetchone()[0] == 0
+        assert db.execute("SELECT revoked_at FROM auth_sessions WHERE token_hash='mfa-migration-session'").fetchone()[0] is not None
+        assert db.execute("SELECT overrides_json FROM system_settings").fetchone()[0] == '{"patient_session_days": 3}'
+        assert 'mfa_required_owners' not in db.execute("SELECT snapshot_json FROM setting_revisions").fetchone()[0]
+        assert db.execute("SELECT name FROM sqlite_master WHERE name IN ('staff_mfa','bot_challenges','mfa_challenges','captcha_attestations')").fetchall() == []
+    migrate("head")
     migrate("20260828_0012", "downgrade")
     with closing(sqlite3.connect(database)) as db:
         assert "staff_state_hash" not in {row[1] for row in db.execute("PRAGMA table_info(auth_sessions)")}
@@ -57,4 +72,4 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
         assert "uq_appointments_payment_id" in schema
         assert db.execute("SELECT revision,seo_description,seo_image_url,office_phone FROM clinic_settings WHERE id=1").fetchone() == (1, '', '', '08633333333')
 
-print("PASS: fresh migration, existing staff/clinic data, settings defaults, downgrade/re-upgrade, integrity, foreign keys and payment uniqueness.")
+print("PASS: fresh migration, staff/clinic data, disabled MFA defaults, populated MFA rollback/session revocation/overlay cleanup, downgrade/re-upgrade, integrity, foreign keys and payment uniqueness.")

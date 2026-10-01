@@ -13,7 +13,14 @@ class ApiMessage(BaseModel):
     message: str
 
 
+class BotProof(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    challenge_id: str = Field(min_length=16, max_length=64)
+    token: str = Field(min_length=1, max_length=2048)
+
+
 class OtpRequest(BaseModel):
+    bot: BotProof | None = None
     phone: str
 
     @field_validator("phone")
@@ -33,6 +40,7 @@ class OtpRequestResponse(BaseModel):
 
 
 class OtpVerifyRequest(BaseModel):
+    bot: BotProof | None = None
     phone: str
     code: str = Field(min_length=4, max_length=8)
 
@@ -722,10 +730,11 @@ class AppointmentMovePreview(BaseModel):
 
 
 class StaffLoginRequest(BaseModel):
+    bot: BotProof | None = None
     username: str = Field(min_length=2, max_length=80)
     password: str = Field(min_length=8, max_length=200)
-    captcha_id: str = Field(min_length=16, max_length=64)
-    captcha_answer: str = Field(min_length=4, max_length=8)
+    captcha_id: str = Field(default="", max_length=64)
+    captcha_answer: str = Field(default="", max_length=8)
 
     @field_validator("captcha_answer", mode="before")
     @classmethod
@@ -743,6 +752,13 @@ class StaffIdentity(BaseModel):
     permissions: list[str]
     is_superadmin: bool
     is_active: bool
+
+
+class MfaLoginRequired(BaseModel):
+    mfa_required: bool = True
+    challenge_id: str
+    expires_in_seconds: int = 180
+    methods: list[str] = ["totp", "recovery"]
 
 
 class StaffSessionResponse(StaffIdentity):

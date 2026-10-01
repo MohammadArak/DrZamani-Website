@@ -10,6 +10,8 @@ import StaffChatWorkspace from "./StaffChatWorkspace";
 import StaffPatientsPanel from "./StaffPatientsPanel";
 import StaffAccessPanel from "./StaffAccessPanel";
 import StaffSettingsPanel from "./StaffSettingsPanel";
+import StaffLogin from "./StaffLogin";
+import StaffMfaPanel from "./StaffMfaPanel";
 import { StaffPermissionsContext, staffTabPermissions, useStaffAccess } from "./staffAccess";
 import {
     StaffAuditPanel,
@@ -31,7 +33,6 @@ import {
     type StaffIdentity,
     type Appointment,
     type AppointmentPage,
-    type CaptchaChallenge,
     type ClinicSettings,
     type DashboardStats,
     type ConsultationThread,
@@ -63,7 +64,6 @@ import {
     IoListOutline,
     IoShieldCheckmarkOutline,
     IoSearchOutline,
-    IoRefreshOutline,
     IoSettingsOutline,
     IoTimeOutline,
 } from "react-icons/io5";
@@ -93,6 +93,7 @@ const DetailsChevron = () => (
 type StaffProfile = StaffIdentity;
 type StaffTab =
     | "dashboard"
+    | "account-security"
     | "clinic-info"
     | "appointments"
     | "patients"
@@ -155,164 +156,6 @@ const weekdayNames = [
     "یکشنبه",
 ];
 const iranWeekOrder = [5, 6, 0, 1, 2, 3, 4];
-const StaffLogin = ({
-    onLogin,
-}: {
-    onLogin: (token: string, profile: StaffProfile) => void;
-}) => {
-    const { clinicInfo } = useClinicInfo();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [busy, setBusy] = useState(false);
-    const [error, setError] = useState("");
-    const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
-    const [captchaAnswer, setCaptchaAnswer] = useState("");
-
-    const loadCaptcha = useCallback(async () => {
-        try {
-            setCaptcha(await appointmentApi.staffCaptcha());
-            setCaptchaAnswer("");
-        } catch (captchaError) {
-            setError(errorMessage(captchaError));
-        }
-    }, []);
-
-    useEffect(() => {
-        void loadCaptcha();
-    }, [loadCaptcha]);
-
-    const submit = async (event: FormEvent) => {
-        event.preventDefault();
-        setBusy(true);
-        setError("");
-        try {
-            if (!captcha) return;
-            const result = await appointmentApi.staffLogin(
-                username,
-                password,
-                captcha.captcha_id,
-                captchaAnswer,
-            );
-            const profile: StaffIdentity = result;
-            localStorage.removeItem(STAFF_TOKEN_KEY);
-            localStorage.removeItem(STAFF_PROFILE_KEY);
-            onLogin(STAFF_COOKIE_SESSION, profile);
-        } catch (loginError) {
-            setError(errorMessage(loginError));
-            await loadCaptcha();
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    return (
-        <main
-            dir="rtl"
-            className="flex min-h-screen items-center justify-center bg-primary px-4 py-10 text-slate-800"
-        >
-            <div className="w-full max-w-md rounded-4xl bg-white p-6 shadow-2xl md:p-9">
-                <a href="/" className="mx-auto mb-7 block w-fit">
-                    <img
-                        src="/img/logo/logo-dark-full.webp"
-                        alt={clinicInfo.doctorName}
-                        width="560"
-                        height="175"
-                        className="w-52"
-                    />
-                </a>
-                <span className="text-sm text-secondary-deep">
-                    ورود کارکنان مطب
-                </span>
-                <h1 className="mt-2 font-dana text-3xl text-primary">
-                    پنل مدیریت نوبت‌ها
-                </h1>
-                <p className="mt-3 text-sm leading-7 text-slate-500">
-                    ورود کارکنان مجاز مطب
-                </p>
-                {error && (
-                    <div
-                        role="alert"
-                        className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700"
-                    >
-                        {error}
-                    </div>
-                )}
-                <form onSubmit={submit} className="mt-7 space-y-4">
-                    <label className="block">
-                        <span className="mb-2 block text-sm">نام کاربری</span>
-                        <input
-                            dir="ltr"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className={`${inputClass} text-left`}
-                            autoComplete="username"
-                            required
-                        />
-                    </label>
-                    <label className="block">
-                        <span className="mb-2 block text-sm">رمز عبور</span>
-                        <input
-                            dir="ltr"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className={`${inputClass} text-left`}
-                            autoComplete="current-password"
-                            required
-                        />
-                    </label>
-                    <div>
-                        <span className="mb-2 block text-sm">کد امنیتی</span>
-                        <div
-                            className="grid grid-cols-[minmax(0,1fr)_132px_40px] items-center gap-2"
-                            dir="ltr"
-                        >
-                            <input
-                                inputMode="numeric"
-                                value={captchaAnswer}
-                                onChange={(event) =>
-                                    setCaptchaAnswer(event.target.value)
-                                }
-                                className={`${inputClass} text-center text-lg tracking-[0.25em]`}
-                                aria-label="کد امنیتی"
-                                maxLength={8}
-                                required
-                            />
-                            <div className="h-11 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                                {captcha ? (
-                                    <img
-                                        src={captcha.image_data}
-                                        alt="کد امنیتی"
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <span className="flex h-full items-center justify-center text-xs text-slate-400">
-                                        در حال بارگذاری…
-                                    </span>
-                                )}
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => void loadCaptcha()}
-                                aria-label="ساخت کد امنیتی جدید"
-                                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-primary hover:border-secondary"
-                            >
-                                <IoRefreshOutline />
-                            </button>
-                        </div>
-                    </div>
-                    <button
-                        disabled={busy || !captcha}
-                        className="h-12 w-full rounded-xl bg-secondary font-bold text-primary transition hover:bg-secondary-mild disabled:opacity-60"
-                    >
-                        {busy ? "در حال ورود…" : "ورود به پنل"}
-                    </button>
-                </form>
-            </div>
-        </main>
-    );
-};
-
 const StatCard = ({
     label,
     value,
@@ -3193,7 +3036,7 @@ export const StaffDashboard = ({
 }) => {
     const { clinicInfo } = useClinicInfo();
     const can = useCallback((code: string) => profile.permissions.includes(code), [profile.permissions]);
-    const [tab, setTab] = useState<StaffTab>(() => (Object.keys(staffTabPermissions).find(t => can(staffTabPermissions[t])) ?? "dashboard") as StaffTab);
+    const [tab, setTab] = useState<StaffTab>(() => (Object.keys(staffTabPermissions).find(t => can(staffTabPermissions[t])) ?? "account-security") as StaffTab);
     const [mobileMenu, setMobileMenu] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -3391,8 +3234,9 @@ export const StaffDashboard = ({
                   { id: "audit" as const, label: "تاریخچه عملیات", icon: <IoShieldCheckmarkOutline /> },
               ]
             : []),
+        { id: "account-security", label: "امنیت حساب من", icon: <IoShieldCheckmarkOutline /> },
         { id: "access", label: "نقش‌ها و کارکنان", icon: <IoShieldCheckmarkOutline /> },
-    ].filter(item => can(staffTabPermissions[item.id])) as typeof navItems;
+    ].filter(item => item.id === "account-security" || can(staffTabPermissions[item.id])) as typeof navItems;
     const sidebar = (
         <>
             <div className="border-b border-white/8 px-5 py-6">
@@ -3730,6 +3574,7 @@ export const StaffDashboard = ({
                             onReload={loadOperations}
                         />
                     )}
+                    {tab === "account-security" && <StaffMfaPanel token={token} />}
                     {tab === "clinic-info" && can("settings.view") && settings && (
                         <StaffSettingsPanel token={token} clinicRevision={settings.revision} onReload={loadAll} clinicPanel={<ClinicInfoPanel
                             token={token}

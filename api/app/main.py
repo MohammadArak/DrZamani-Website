@@ -207,3 +207,7 @@ async def unavailable_settings(_request, exc):
 
 app.include_router(settings_router.router, prefix=settings.api_prefix)
 app.include_router(public_pages_router)
+
+from .routers import bot as bot_router, mfa as mfa_router
+app.include_router(bot_router.router, prefix=settings.api_prefix)
+app.include_router(mfa_router.router, prefix=settings.api_prefix)

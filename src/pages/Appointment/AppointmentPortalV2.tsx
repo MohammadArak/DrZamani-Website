@@ -1,3 +1,4 @@
+import BotProtection, { type BotHandle } from "@/components/BotProtection";
 /* eslint-disable react-hooks/set-state-in-effect */
 import Seo from "@/components/SEO";
 import AppSelect from "@/components/AppSelect";
@@ -205,6 +206,8 @@ const Login = ({
 }: {
     onAuthenticated: (token: string) => void;
 }) => {
+    const bot = useRef<BotHandle>(null);
+    const resendBot = useRef<BotHandle>(null);
     const [stage, setStage] = useState<"phone" | "otp">("phone");
     const [phone, setPhone] = useState("");
     const [code, setCode] = useState("");
@@ -228,7 +231,8 @@ const Login = ({
         setBusy(true);
         setError("");
         try {
-            const result = await appointmentApi.requestOtp(phone);
+            const activeBot = stage === "phone" ? bot : resendBot;
+            const result = await appointmentApi.requestOtp(phone, await activeBot.current?.proof());
             setStage("otp");
             setCooldown(result.retry_after_seconds);
             setDebugOtp(result.debug_otp ?? "");
@@ -236,6 +240,7 @@ const Login = ({
             setCode("");
         } catch (requestError) {
             setError(errorMessage(requestError));
+            (stage === "phone" ? bot : resendBot).current?.retry(requestError);
             if (
                 requestError instanceof AppointmentApiError &&
                 requestError.retryAfter
@@ -255,11 +260,13 @@ const Login = ({
             await appointmentApi.verifyOtp(
                 phone,
                 code.replace(/\D/g, ""),
+                await bot.current?.proof(),
             );
             localStorage.removeItem(PATIENT_TOKEN_KEY);
             onAuthenticated(PATIENT_COOKIE_SESSION);
         } catch (verifyError) {
             setError(errorMessage(verifyError));
+            bot.current?.retry(verifyError);
         } finally {
             setBusy(false);
         }
@@ -305,6 +312,7 @@ const Login = ({
 
                 {stage === "phone" ? (
                     <form onSubmit={requestCode} className="mt-7 space-y-5">
+                        <BotProtection ref={bot} operation="otp_request" />
                         <label className="block">
                             <span className="mb-2 block text-sm text-slate-600">
                                 شماره موبایل
@@ -332,6 +340,7 @@ const Login = ({
                 ) : (
                     <form onSubmit={verifyCode} className="mt-7 space-y-5">
                         <OtpInput value={code} onChange={setCode} length={codeLength} />
+                        <BotProtection ref={bot} operation="otp_verify" />
                         <button
                             disabled={
                                 busy || code.replace(/\D/g, "").length !== codeLength
@@ -340,6 +349,7 @@ const Login = ({
                         >
                             {busy ? "در حال بررسی…" : "تأیید و ادامه"}
                         </button>
+                        {!cooldown && <BotProtection ref={resendBot} operation="otp_request" />}
                         <div className="flex items-center justify-between text-sm">
                             <button
                                 type="button"

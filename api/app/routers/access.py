@@ -96,6 +96,9 @@ def ensure_owner_remains(db: Session) -> None:
         raise HTTPException(
             409, "آخرین مدیرکل فعال باید حفظ شود؛ ابتدا مدیرکل دیگری تعیین کنید"
         )
+    from ..runtime_settings import get_settings
+    if get_settings().mfa_required_owners and any(is_owner(s) and (not s.mfa or not s.mfa.enabled) for s in db.scalars(select(StaffUser)).unique()):
+        raise HTTPException(409, "حساب جدید باید پیش از گرفتن نقش مدیرکل، رمزساز خود را تأیید کند")
 
 
 @router.get("/permissions")

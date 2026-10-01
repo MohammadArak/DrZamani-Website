@@ -81,7 +81,7 @@ export type SystemSettingField = {
 export type SettingsHistory = { revision: number; changed_keys: string[]; actor_staff_id: number | null; created_at: string };
 export type SystemSettings = {
     revision: number; fields: SystemSettingField[];
-    status: { environment: string; encryption_ready: boolean; webhook_allowed_hosts: string[]; frontend_origins: string[]; public_html_ready: boolean };
+    status: { environment: string; encryption_ready: boolean; captcha_verified: {google: boolean; turnstile: boolean}; webhook_allowed_hosts: string[]; frontend_origins: string[]; public_html_ready: boolean };
     infrastructure: { key: string; help: string }[]; future: Record<string, string>;
 };
 
@@ -472,20 +472,30 @@ export type CaptchaChallenge = {
     debug_answer?: string | null;
 };
 
+export type BotOperation = "staff_login" | "otp_request" | "otp_verify";
+export type BotProof = { challenge_id: string; token: string };
+export type BotChallenge = { challenge_id: string; provider: "local" | "none" | "google" | "turnstile"; operation: BotOperation | "captcha_setup"; site_key: string; expires_in_seconds: number; fallback_used: boolean };
+export type MfaLoginRequired = { mfa_required: true; challenge_id: string; expires_in_seconds: number; methods: string[] };
+export type MfaStatus = { enabled: boolean; required: boolean; recovery_remaining: number; encryption_ready: boolean };
+export type MfaEnrollment = { enrollment_id: string; secret: string; otpauth_uri: string; expires_in_seconds: number };
+export type MfaPassword = { password: string; code?: string; method?: "totp" | "recovery" };
+
 type ApiErrorPayload = {
-    detail?: string | { message?: string; retry_after_seconds?: number } | Array<{ msg?: string }>;
+    detail?: string | { message?: string; retry_after_seconds?: number; bot_challenge?: BotChallenge } | Array<{ msg?: string }>;
     message?: string;
 };
 
 export class AppointmentApiError extends Error {
     status: number;
     retryAfter?: number;
+    botChallenge?: BotChallenge;
 
-    constructor(message: string, status: number, retryAfter?: number) {
+    constructor(message: string, status: number, retryAfter?: number, botChallenge?: BotChallenge) {
         super(message);
         this.name = "AppointmentApiError";
         this.status = status;
         this.retryAfter = retryAfter;
+        this.botChallenge = botChallenge;
     }
 }
 
@@ -575,6 +585,7 @@ async function apiRequest<T>(
             getMessage(payload, "در انجام درخواست خطایی رخ داد"),
             response.status,
             retryAfter,
+            payload.detail && !Array.isArray(payload.detail) && typeof payload.detail === "object" ? payload.detail.bot_challenge : undefined,
         );
     }
     if (response.status === 204) return undefined as T;
@@ -653,12 +664,21 @@ async function apiBlob(path: string, token: string): Promise<Blob> {
 }
 
 export const appointmentApi = {
-    requestOtp: (phone: string) =>
+    botChallenge: (operation: BotOperation) => apiRequest<BotChallenge>(`/auth/bot/challenge?operation=${operation}`),
+    captchaSetup: (token: string, provider: "google" | "turnstile") => apiRequest<BotChallenge>(`/staff/system-settings/captcha/setup?provider=${provider}`, {}, token),
+    captchaConfirm: (token: string, proof: BotProof) => apiRequest<{verified: boolean; provider: string}>("/staff/system-settings/captcha/confirm", {method: "POST", body: JSON.stringify(proof)}, token),
+    mfaStatus: (token: string) => apiRequest<MfaStatus>("/staff/auth/mfa/status", {}, token),
+    mfaEnroll: (token: string, payload: MfaPassword) => apiRequest<MfaEnrollment>("/staff/auth/mfa/enroll", {method: "POST", body: JSON.stringify(payload)}, token),
+    mfaConfirm: (token: string, enrollment_id: string, code: string) => apiRequest<{recovery_codes: string[]}>("/staff/auth/mfa/confirm", {method: "POST", body: JSON.stringify({enrollment_id, code})}, token),
+    mfaRecovery: (token: string, payload: MfaPassword) => apiRequest<{recovery_codes: string[]}>("/staff/auth/mfa/recovery-codes", {method: "POST", body: JSON.stringify(payload)}, token),
+    mfaDisable: (token: string, payload: MfaPassword) => apiRequest<{enabled: boolean}>("/staff/auth/mfa/disable", {method: "POST", body: JSON.stringify(payload)}, token),
+    mfaLogin: (challenge_id: string, code: string, method: "totp" | "recovery") => apiRequest<StaffIdentity & {access_token: string; expires_at: string}>("/staff/auth/mfa/verify", {method: "POST", headers: {"X-Session-Transport":"cookie"}, body: JSON.stringify({challenge_id, code, method})}),
+    requestOtp: (phone: string, bot?: BotProof) =>
         apiRequest<{ message: string; retry_after_seconds: number; code_length?: number; debug_otp?: string }>(
             "/auth/otp/request",
-            { method: "POST", body: JSON.stringify({ phone }) },
+            { method: "POST", body: JSON.stringify({ phone, bot }) },
         ),
-    verifyOtp: (phone: string, code: string) =>
+    verifyOtp: (phone: string, code: string, bot?: BotProof) =>
         apiRequest<{
             access_token: string;
             expires_at: string;
@@ -666,7 +686,7 @@ export const appointmentApi = {
         }>("/auth/otp/verify", {
             method: "POST",
             headers: { "X-Session-Transport": "cookie" },
-            body: JSON.stringify({ phone, code }),
+            body: JSON.stringify({ phone, code, bot }),
         }),
     logout: (token: string) =>
         apiRequest<{ message: string }>(token === STAFF_COOKIE_SESSION ? "/staff/auth/logout" : "/auth/logout", { method: "POST" }, token),
@@ -795,8 +815,9 @@ export const appointmentApi = {
         password: string,
         captchaId: string,
         captchaAnswer: string,
+        bot?: BotProof,
     ) =>
-        apiRequest<StaffIdentity & { access_token: string; expires_at: string }>("/staff/auth/login", {
+        apiRequest<(StaffIdentity & { access_token: string; expires_at: string }) | MfaLoginRequired>("/staff/auth/login", {
             method: "POST",
             headers: { "X-Session-Transport": "cookie" },
             body: JSON.stringify({
@@ -804,6 +825,7 @@ export const appointmentApi = {
                 password,
                 captcha_id: captchaId,
                 captcha_answer: captchaAnswer,
+                bot,
             }),
         }),
     staffMe: () => apiRequest<StaffIdentity>("/staff/me", {}, STAFF_COOKIE_SESSION),

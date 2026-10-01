@@ -16,7 +16,7 @@ from fastapi import HTTPException
 
 from . import config
 from .activity import record_audit
-from .models import ClinicSetting, SystemSetting, SettingRevision, StaffUser
+from .models import ClinicSetting, SystemSetting, SettingRevision, StaffUser, CaptchaAttestation
 
 if TYPE_CHECKING:
     from .schemas import ClinicSettingUpdate
@@ -69,6 +69,21 @@ FIELDS = [
     Field("booking_hold_minutes", "اعتبار نگهداری نوبت (دقیقه)", "booking", "integer", 5, 60, help="فقط نگهداری‌های جدید؛ فعال‌سازی رزرو در مرحله ۵ ساخته می‌شود."),
     Field("zarinpal_merchant_id", "شناسه پذیرنده زرین‌پال", "payment", maximum=120, secret=True),
     Field("zarinpal_sandbox", "درگاه آزمایشی", "payment", "boolean", help="در محیط اصلی همیشه ممنوع؛ تنظیم درگاه به معنی روشن‌شدن نوبت‌دهی نیست."),
+    Field("turnstile_enabled", "فعال بودن Cloudflare Turnstile", "captcha", "boolean", help="پیش از فعال‌سازی، کلید ذخیره‌شده را روی همین دامنه تأیید کنید."),
+    Field("turnstile_site_key", "Site key کلادفلر", "captcha", maximum=200),
+    Field("turnstile_secret", "Secret کلادفلر", "captcha", maximum=2048, secret=True),
+    Field("google_enabled", "فعال بودن Google Fraud Defense", "captcha", "boolean", help="کلید score-based Enterprise و تأیید مرورگر/سرور لازم است؛ از API assessments v1 استفاده می‌شود."),
+    Field("google_site_key", "Site key گوگل", "captcha", maximum=200),
+    Field("google_project_id", "شناسه پروژه Google Cloud", "captcha", maximum=100),
+    Field("google_api_key", "API key سروری گوگل", "captcha", maximum=2048, secret=True),
+    Field("google_min_score", "حداقل امتیاز گوگل (از ۱۰۰)", "captcha", "integer", 0, 100, help="۵۰ یعنی 0.5؛ با امتیازهای واقعی و نرخ خطا تنظیم شود."),
+    Field("captcha_primary", "ارائه‌دهنده اصلی", "captcha", "select", choices=("turnstile", "google")),
+    Field("captcha_fallback", "جایگزین فقط هنگام قطع سرویس سروری", "captcha", "boolean", help="هر دو باید فعال باشند. امتیاز پایین یا توکن نامعتبر به جایگزین منتقل نمی‌شود؛ خطای مرورگر نیز به‌تنهایی مجوز جایگزین نیست."),
+    Field("captcha_staff_login", "محافظت از ورود کارکنان", "captcha", "boolean"),
+    Field("captcha_otp_request", "محافظت از ارسال کد بیمار", "captcha", "boolean"),
+    Field("captcha_otp_verify", "محافظت از تأیید کد بیمار", "captcha", "boolean"),
+    Field("captcha_hostnames", "دامنه‌های دقیق مجاز کپچا", "captcha", maximum=500, help="CSV بدون wildcard و scheme؛ خالی یعنی hostname مبدأهای مجاز سرور. برای چند دامنه، کلید ارائه‌دهنده هم باید آن‌ها را بپذیرد."),
+    Field("mfa_required_owners", "اجباری بودن عامل دوم مدیرکل", "security", "boolean", help="تنها وقتی همه مدیرکل‌های فعال رمزساز تأییدشده دارند قابل روشن‌کردن است. تغییر، نشست مدیرکل را باطل می‌کند."),
 ]
 CATALOG = {field.key: field for field in FIELDS}
 SECRET_KEYS = {field.key for field in FIELDS if field.secret}
@@ -113,10 +128,8 @@ def get_settings() -> config.Settings:
     bootstrap = config.get_settings()
     with SessionLocal() as db:
         row = db.get(SystemSetting, 1)
-        if not row:
-            return bootstrap
         try:
-            values = decode(json.loads(row.overrides_json))
+            values = decode(json.loads(row.overrides_json)) if row else {}
             effective = replace(bootstrap, **values)
             validate_effective(effective, check_dns=False)
             return effective
@@ -156,6 +169,14 @@ def validate_effective(settings: config.Settings, *, check_dns: bool):
     parsed = urlsplit(settings.frontend_url)
     if settings.frontend_url not in allowed or parsed.username or parsed.password or parsed.path not in {"", "/"} or parsed.query or parsed.fragment:
         raise ValueError("مبدأ بازگشت باید از مبدأهای مجاز سرور انتخاب شود")
+    from .bot_protection import validate_configuration
+    validate_configuration(settings)
+    if settings.mfa_required_owners:
+        from .database import SessionLocal
+        from .access import is_owner
+        with SessionLocal() as check_db:
+            if any(is_owner(staff) and (not staff.mfa or not staff.mfa.enabled) for staff in check_db.scalars(select(StaffUser)).unique()):
+                raise ValueError("همه مدیرکل‌های فعال باید ابتدا رمزساز خود را تأیید کنند")
     if settings.sms_webhook_url:
         from .outbound import validate_webhook
         validate_webhook(settings.sms_webhook_url, resolve=check_dns)
@@ -223,6 +244,7 @@ def update_clinic(db, staff, payload: ClinicSettingUpdate):
 
 
 def describe(db):
+    from .bot_protection import fingerprint
     row = db.get(SystemSetting, 1)
     stored = json.loads(row.overrides_json) if row else {}
     effective = get_settings()
@@ -237,6 +259,7 @@ def describe(db):
         fields.append(data)
     return {"revision": row.revision if row else 1, "fields": fields,
             "status": {"environment": bootstrap.app_env, "encryption_ready": bool(bootstrap.settings_encryption_keys),
+                       "captcha_verified": {p: bool(db.get(CaptchaAttestation, fingerprint(effective, p))) for p in ("google", "turnstile")},
                        "webhook_allowed_hosts": list(bootstrap.sms_webhook_allowed_hosts),
                        "frontend_origins": [bootstrap.frontend_url, *bootstrap.allowed_origins],
                        "public_html_ready": (bootstrap.public_html_dir / "index.html").is_file()},
@@ -251,7 +274,7 @@ def describe(db):
                     ("BOOTSTRAP_ADMIN_*", "فقط نصب اولیه؛ پس از استفاده از محیط حذف شوند."),
                     ("VITE_* / PRERENDER_* / PYTHONDONTWRITEBYTECODE", "تنظیمات ساخت و اجرای سرویس؛ مدیریت از محیط استقرار."),
                 ]],
-            "future": {"captcha": "Google و Cloudflare در مرحله ۴", "booking": "کلید روشن/خاموش رزرو در مرحله ۵", "content": "مقالات و نظرات در مراحل ۶ و ۷"}}
+            "future": {"booking": "کلید روشن/خاموش رزرو در مرحله ۵", "content": "مقالات و نظرات در مراحل ۶ و ۷"}}
 
 
 def change(db, staff, revision: int, values: dict, reset: list[str]):
