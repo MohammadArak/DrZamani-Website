@@ -8,7 +8,8 @@ export type ArticleContent = {
 export type SeoFeedback={score:number;word_count:number;notice:string;checks:{code:string;passed:boolean;reason:string;suggestion:string}[]};
 export type Article={id:number;revision:number;content:ArticleContent;status:string;scheduled_at:string|null;has_publication:boolean;unpublished_changes:boolean;author_id:number;seo:SeoFeedback;sanitized?:boolean};
 export type Media={key:string;alt:string;width:number;height:number;size:number;owner_id:number;url:string;preview_url:string};
-export type ArticleHistory={id:number;revision:number;action:string;created_at:string;content:ArticleContent};
+export type MediaPage={items:Media[];total:number;page:number};
+export type ArticleHistory={id:number;revision:number;action:string;created_at:string};
 export const emptyArticle=():ArticleContent=>({title:"",slug:"",summary:"",body_html:"<p></p>",cover_key:null,cover_alt:"",categories:[],tags:[],author_name:"",reviewer:"",sources:[],seo_title:"",seo_description:"",target_keyword:""});
 export function safeContentHtml(value:string,preview=false){
     const clean=DOMPurify.sanitize(value,{ALLOWED_TAGS:"p br h1 h2 h3 h4 ul ol li strong b em i u s blockquote pre code hr table thead tbody tr th td a img figure figcaption".split(" "),ALLOWED_ATTR:["href","src","alt","title","colspan","rowspan"]});
@@ -26,7 +27,8 @@ export const contentApi={
     archive:(token:string,row:Article)=>apiRequest<{message:string}>(`/staff/articles/${row.id}`,{method:"DELETE",body:JSON.stringify({revision:row.revision})},token),
     history:(token:string,id:number)=>apiRequest<ArticleHistory[]>(`/staff/articles/${id}/revisions`,{},token),
     restore:(token:string,row:Article,revision_id:number)=>apiRequest<Article>(`/staff/articles/${row.id}/restore/${revision_id}`,{method:"POST",body:JSON.stringify({revision:row.revision})},token),
-    media:(token:string,page=1)=>apiRequest<Media[]>(`/staff/media?page=${page}`,{},token),
+    media:(token:string,page=1,q="")=>apiRequest<MediaPage>(`/staff/media?page=${page}&q=${encodeURIComponent(q)}`,{},token),
+    getMedia:(token:string,key:string)=>apiRequest<Media>(`/staff/media/${key}`,{},token),
     upload:(token:string,file:File,alt:string)=>{const body=new FormData();body.append("file",file);body.append("alt",alt);return apiRequest<Media>("/staff/media",{method:"POST",body},token);},
     editMedia:(token:string,key:string,alt:string)=>apiRequest<Media>(`/staff/media/${key}`,{method:"PUT",body:JSON.stringify({alt})},token),
     archiveMedia:(token:string,key:string)=>apiRequest<{message:string}>(`/staff/media/${key}`,{method:"DELETE"},token),

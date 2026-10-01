@@ -16,13 +16,14 @@ from .routers.content import listing, public_file
 def article_url(slug):return '/articles/'+quote(slug)+'/'
 
 
-def list_html(db,q='',category='',page=1):
-    clinic=clinic_row(db);rows=public_rows(db);items=listing(rows,q,category)
+def list_html(db,q='',category='',page=1,tag=''):
+    clinic=clinic_row(db);rows=public_rows(db);items=listing(rows,q,category,tag)
     categories=sorted({v for r in rows for v in json.loads(r.published_json)['categories']})
     if category and category not in categories:raise HTTPException(404,'دسته پیدا نشد')
+    if tag and tag not in {v for r in rows for v in json.loads(r.published_json)['tags']}:raise HTTPException(404,'برچسب پیدا نشد')
     if page>1 and (page-1)*12>=len(items):raise HTTPException(404,'صفحه پیدا نشد')
-    esc=html.escape;title='مقالات'+(' '+category if category else '')+' | '+clinic.doctor_name
-    path='/articles/category/'+quote(category)+'/' if category else '/articles/'
+    esc=html.escape;title='مقالات'+(' '+(category or tag) if category or tag else '')+' | '+clinic.doctor_name
+    path='/articles/category/'+quote(category)+'/' if category else '/articles/tag/'+quote(tag)+'/' if tag else '/articles/'
     body=f'<main class="article-page" lang="fa" dir="rtl"><a href="/">صفحه اصلی</a><h1>{esc(title)}</h1><p>مطالب آموزشی با منابع و مشخصات بازبین؛ جایگزین معاینه و مشاوره پزشکی نیست.</p><form method="get"><label>جستجوی مقالات <input name="q" value="{esc(q)}" maxlength="120"></label><button>جستجو</button></form><nav aria-label="دسته‌های مقالات"><a href="/articles/">همه مقالات</a>'
     for value in categories:body+=f'<a href="/articles/category/{quote(value)}/">{esc(value)}</a>'
     body+='</nav><div class="article-grid">'
@@ -51,6 +52,11 @@ def category_list(category:str,q:str=Query('',max_length=120),page:int=Query(1,g
     return list_html(db,q,category,page)
 
 
+@router.get('/articles/tag/{tag}/')
+def tag_list(tag:str,q:str=Query('',max_length=120),page:int=Query(1,ge=1,le=10000),db:Session=Depends(get_db)):
+    return list_html(db,q,page=page,tag=tag)
+
+
 @router.get('/articles/{slug}/')
 def article_detail(slug:str,db:Session=Depends(get_db)):
     publish_due(db);clinic=clinic_row(db);esc=html.escape
@@ -69,6 +75,8 @@ def article_detail(slug:str,db:Session=Depends(get_db)):
     for source in data['sources']:body+=f'<li><a href="{esc(source["url"])}" rel="noopener noreferrer">{esc(source["title"])}</a></li>'
     body+='</ul><p>این مطلب برای آموزش است و جایگزین مشاوره و معاینه پزشکی نیست.</p><nav aria-label="دسته‌ها">'
     for category in data['categories']:body+=f'<a href="/articles/category/{quote(category)}/">{esc(category)}</a>'
+    body+='</nav><nav aria-label="برچسب‌ها">'
+    for tag in data['tags']:body+=f'<a href="/articles/tag/{quote(tag)}/">{esc(tag)}</a>'
     body+='</nav></footer></article></main>'
     schema={'@context':'https://schema.org','@type':'Article','headline':data['title'],'description':data['summary'],'mainEntityOfPage':canonical,'datePublished':row.published_at.isoformat()+'Z','dateModified':row.public_updated_at.isoformat()+'Z','author':{'@type':'Person','name':data['author_name']},'reviewedBy':{'@type':'Person','name':data['reviewer']},'publisher':{'@type':'Organization','name':clinic.doctor_name,'url':site},'citation':[s['url'] for s in data['sources']],'keywords':data['tags']}
     if image:schema['image']=image

@@ -11,6 +11,7 @@ import StaffPatientsPanel from "./StaffPatientsPanel";
 import StaffAccessPanel from "./StaffAccessPanel";
 import StaffSettingsPanel from "./StaffSettingsPanel";
 import StaffLogin from "./StaffLogin";
+import {useContentConfirm} from "./useContentConfirm";
 import StaffMfaPanel from "./StaffMfaPanel";
 import { StaffPermissionsContext, staffTabPermissions, useStaffAccess } from "./staffAccess";
 import {
@@ -3043,6 +3044,14 @@ export const StaffDashboard = ({
     const { clinicInfo } = useClinicInfo();
     const can = useCallback((code: string) => profile.permissions.includes(code), [profile.permissions]);
     const [tab, setTab] = useState<StaffTab>(() => (Object.keys(staffTabPermissions).find(t => can(staffTabPermissions[t])) ?? "account-security") as StaffTab);
+    const [articleDirty,setArticleDirty]=useState(false);
+    const [articleBusy,setArticleBusy]=useState(false);
+    const {ask:askContent,confirmation:contentConfirmation}=useContentConfirm();
+    const leaveArticle=async()=>{
+        if(articleBusy){setError("ذخیره مقاله در حال انجام است؛ پس از پایان آن خارج شوید.");return false;}
+        return !articleDirty||await askContent("تغییرات مقاله هنوز ذخیره نشده‌اند؛ از ویرایش خارج شوید؟");
+    };
+    const navigateTab=async(next:StaffTab)=>{if(next===tab||await leaveArticle())setTab(next);};
     const [mobileMenu, setMobileMenu] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -3262,7 +3271,8 @@ export const StaffDashboard = ({
                 {navItems.map((item) => (
                     <button
                         key={item.id}
-                        onClick={() => {
+                        onClick={async() => {
+                            if(item.id!==tab&&!await leaveArticle())return;
                             setTab(item.id);
                             setMobileMenu(false);
                         }}
@@ -3289,7 +3299,7 @@ export const StaffDashboard = ({
                     </span>
                 </div>
                 <button
-                    onClick={onLogout}
+                    onClick={async()=>{if(await leaveArticle())onLogout();}}
                     className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-white/5"
                 >
                     <IoLogOutOutline /> خروج
@@ -3366,6 +3376,7 @@ export const StaffDashboard = ({
             dir="rtl"
             className="staff-shell min-h-screen w-full max-w-full overflow-x-clip bg-[#f3f5f8] text-slate-800"
         >
+            {contentConfirmation}
             <aside className="fixed inset-y-0 right-0 hidden w-62 flex-col bg-[#18344f] shadow-2xl shadow-slate-900/10 lg:flex">
                 {sidebar}
             </aside>
@@ -3443,7 +3454,7 @@ export const StaffDashboard = ({
                                 {can("consultations.view") && (<button
                                     type="button"
                                     disabled={!can(staffTabPermissions["consultations"])}
-                                    onClick={() => setTab("consultations")}
+                                    onClick={() => navigateTab("consultations")}
                                     className="flex items-center justify-between rounded-2xl border border-sky-100 bg-sky-50/70 p-4 text-right transition hover:bg-sky-50"
                                 >
                                     <span><b className="block text-sm text-sky-900">پیام‌های خوانده‌نشده</b><span className="mt-1 block text-xs text-sky-600">پاسخ سریع به بیماران</span></span>
@@ -3452,7 +3463,7 @@ export const StaffDashboard = ({
                                 {can("waitlist.view") && (<button
                                     type="button"
                                     disabled={!can(staffTabPermissions["waitlist"])}
-                                    onClick={() => setTab("waitlist")}
+                                    onClick={() => navigateTab("waitlist")}
                                     className="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50/70 p-4 text-right transition hover:bg-amber-50"
                                 >
                                     <span><b className="block text-sm text-amber-900">لیست انتظار فعال</b><span className="mt-1 block text-xs text-amber-600">جایگزینی ظرفیت لغوشده</span></span>
@@ -3461,7 +3472,7 @@ export const StaffDashboard = ({
                                 {can("finance.view") ? (
                                     <button
                                         type="button"
-                                        onClick={() => setTab("finance")}
+                                        onClick={() => navigateTab("finance")}
                                         className="flex items-center justify-between rounded-2xl border border-rose-100 bg-rose-50/70 p-4 text-right transition hover:bg-rose-50"
                                     >
                                         <span><b className="block text-sm text-rose-900">بازپرداخت نیازمند پیگیری</b><span className="mt-1 block text-xs text-rose-600">تسویه و ثبت شماره پیگیری</span></span>
@@ -3471,7 +3482,7 @@ export const StaffDashboard = ({
                                     <button
                                         type="button"
                                         disabled={!can(staffTabPermissions["calendar"])}
-                                    onClick={() => setTab("calendar")}
+                                    onClick={() => navigateTab("calendar")}
                                         className="flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-right transition hover:bg-emerald-50"
                                     >
                                         <span><b className="block text-sm text-emerald-900">تقویم کاری</b><span className="mt-1 block text-xs text-emerald-600">مدیریت سریع نوبت‌ها</span></span>
@@ -3496,7 +3507,7 @@ export const StaffDashboard = ({
                                     </h2>
                                     <button
                                         disabled={!can(staffTabPermissions["appointments"])}
-                                    onClick={() => setTab("appointments")}
+                                    onClick={() => navigateTab("appointments")}
                                         className="text-sm text-secondary-deep"
                                     >
                                         مشاهده همه
@@ -3546,7 +3557,7 @@ export const StaffDashboard = ({
                             onOpenConsultation={(item) =>
                                 {
                                     setChatAppointmentId(item.id);
-                                    setTab("consultations");
+                                    navigateTab("consultations");
                                 }
                             }
                         />
@@ -3563,7 +3574,7 @@ export const StaffDashboard = ({
                             token={token}
                             onOpenConversation={(appointmentId) => {
                                 setChatAppointmentId(appointmentId);
-                                setTab("consultations");
+                                navigateTab("consultations");
                             }}
                         />
                     )}
@@ -3582,7 +3593,7 @@ export const StaffDashboard = ({
                             onReload={loadOperations}
                         />
                     )}
-                    {tab === "articles" && can("articles.view") && <Suspense fallback={<p>در حال آماده‌سازی ویرایشگر…</p>}><StaffArticlesPanel token={token} /></Suspense>}
+                    {tab === "articles" && can("articles.view") && <Suspense fallback={<p>در حال آماده‌سازی ویرایشگر…</p>}><StaffArticlesPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {tab === "media" && can("media.manage") && <Suspense fallback={<p>در حال آماده‌سازی رسانه…</p>}><StaffMediaPanel token={token} /></Suspense>}
                     {tab === "account-security" && <StaffMfaPanel token={token} />}
                     {tab === "clinic-info" && can("settings.view") && settings && (

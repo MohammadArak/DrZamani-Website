@@ -4,6 +4,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import {TableKit} from "@tiptap/extension-table";
 import {safeContentHtml,type Media} from "@/services/contentApi";
+import MediaPicker from "./MediaPicker";
 
 const LibraryImage=Image.extend({addNodeView(){return ({node})=>{
     const img=document.createElement("img");
@@ -11,13 +12,14 @@ const LibraryImage=Image.extend({addNodeView(){return ({node})=>{
     update(node.attrs);return {dom:img,update(next){if(next.type!==node.type)return false;update(next.attrs);return true;}};
 };}});
 
-export default function ArticleEditor({html,onChange,media,editable}:{html:string;onChange:(value:string)=>void;media:Media[];editable:boolean}){
-    const [source,setSource]=useState(false);const [link,setLink]=useState("");const [selected,setSelected]=useState("");
+export default function ArticleEditor({html,onChange,token,editable,canUseMedia}:{html:string;onChange:(value:string)=>void;token:string;editable:boolean;canUseMedia:boolean}){
+    const [source,setSource]=useState(false);const [link,setLink]=useState("");const [selected,setSelected]=useState<Media|null>(null);
+    const [linkError,setLinkError]=useState("");
     const editor=useEditor({extensions:[StarterKit.configure({heading:{levels:[2,3,4]},link:{openOnClick:false,autolink:false,protocols:["https"]}}),LibraryImage.configure({allowBase64:false}),TableKit],content:safeContentHtml(html),editable,
         editorProps:{attributes:{dir:"rtl",lang:"fa","aria-label":"متن مقاله","role":"textbox","aria-multiline":"true"},transformPastedHTML:value=>safeContentHtml(value)},
-        onUpdate:({editor:active})=>onChange(active.getHTML())});
+        onUpdate:({editor:active})=>{if(editable)onChange(active.getHTML());}});
     useEffect(()=>{if(editor&&editor.getHTML()!==html&&!source)editor.commands.setContent(safeContentHtml(html),{emitUpdate:false});},[html,editor,source]);
-    useEffect(()=>{editor?.setEditable(editable);},[editor,editable]);
+    useEffect(()=>{editor?.setEditable(editable,false);},[editor,editable]);
     if(!editor)return null;
     const button=(label:string,action:()=>void,active=false)=><button type="button" disabled={!editable} aria-pressed={active} onClick={action}>{label}</button>;
     return <section className="editor-shell" aria-label="ویرایشگر مقاله">
@@ -37,10 +39,11 @@ export default function ArticleEditor({html,onChange,media,editable}:{html:strin
         </div>
         {!source&&<div className="editor-insert">
             <label>نشانی پیوند<input dir="ltr" value={link} onChange={e=>setLink(e.target.value)} placeholder="https://… یا /articles/…" disabled={!editable}/></label>
-            {button("درج پیوند",()=>{if(/^(https:\/\/|\/(?!\/)|#)/.test(link))editor.chain().focus().extendMarkRange("link").setLink({href:link}).run();})}
+            {button("درج پیوند",()=>{if(/^(https:\/\/|\/(?!\/)|#)/.test(link)&&!/[\s\\]/.test(link)){editor.chain().focus().extendMarkRange("link").setLink({href:link}).run();setLinkError("");}else setLinkError("نشانی پیوند باید HTTPS یا مسیر داخلی معتبر باشد.");})}
             {button("حذف پیوند",()=>editor.chain().focus().unsetLink().run())}
-            <label>تصویر کتابخانه<select value={selected} onChange={e=>setSelected(e.target.value)} disabled={!editable}><option value="">انتخاب تصویر</option>{media.map(m=><option key={m.key} value={m.key}>{m.alt}</option>)}</select></label>
-            {button("درج تصویر",()=>{const item=media.find(m=>m.key===selected);if(item)editor.chain().focus().setImage({src:item.url,alt:item.alt}).run();})}
+            {linkError&&<p role="alert">{linkError}</p>}
+            {canUseMedia&&<><MediaPicker token={token} label="تصویر کتابخانه" value={selected?.key??""} disabled={!editable} onSelect={setSelected}/>
+            {button("درج تصویر",()=>{if(selected)editor.chain().focus().setImage({src:selected.url,alt:selected.alt}).run();})}</>}
         </div>}
         {source?<><textarea className="html-source" aria-label="کد HTML مقاله" dir="ltr" value={html} onChange={e=>onChange(e.target.value)} readOnly={!editable}/><p className="editor-help">کد HTML در سرور و پیش‌نمایش پاک‌سازی می‌شود؛ اسکریپت، iframe، استایل دلخواه و تصویر خارج از کتابخانه مجاز نیست.</p></>:<EditorContent editor={editor} className="article-body"/>}
     </section>;

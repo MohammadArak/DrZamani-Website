@@ -1,3 +1,17 @@
+# وضعیت مقدم برای ادامه — 2026-10-01، پذیرش محلی مرحله۶
+
+این بخش بر شرح تاریخی پایین مقدم است. دستور تازه مالک ادامه از phase-06-articles/PR۷ و443f466 بود؛ پس از پذیرش هر مرحله test/doc/commit/push/merge با main مجاز است و اجازه دوباره لازم ندارد. deploy مجوز مستقل دارد.
+
+- نسخه1.13.0: مقالات محلی پذیرش شد؛ گزارش مرجع [PHASE_06_ARTICLES.md](PHASE_06_ARTICLES.md). شاخه phase-06-articles، PR۷؛ شناسه دقیق commit/merge/tree در گزارش تحویل کنارoutputs پس از ارسال ثبت می‌شود؛ تاریخچه WIP قبلی وضعیت امروز نیست.
+- 266تست کلbackend موفق (97.99s،3warningقدیمی) و51مقاله بعد ازpixel test موفق (31.11s). lint/build/version، Ruffcritical، npmci/audit0،47wheel دقیق/hash و تطبیقlock، auditرسمیPyPI47+Linuxuvloop0، migration عمومی وeditorialپرشده/DB+mediarestore موفق. frozenindexsync جدید دراینمیزبان وLinux/staging/providerهایواقعی PASS اعلام نشده‌اند.
+- مرورگر React واقعی باAPIواقعی/DBموقت/cookie/CSRF؛ route ورود فقط-fixture در .work و بیرونGit. login/captcha واقعی staging آزموده نشده. دسته/برچسبdelimiter، رسانه>60/انتخابقدیمی، article>30/total، HTML/editor/image/table/link/undo/redo/preview، autosaveHTML/کندی با تایپ/503retry/409preserve، خروجEscape/historyrestore، ناشربدونedit/نویسندهبدونpublish/readonlyمتن، upload/edit/archive، publicdesktop390/tag/page بررسی شدند. NginxHTTP+verifiedHTTPS/HTMLاولیه/meta/schema/cache/securityheaders/404410301/sitemap/privatepublicmedia وclosedbooking موفق؛ هیچpatientdata واقعی نیست.
+- اصلاحات مهم: rawlabeltext جدا ازarray؛ mediaendpoint به items/total/page تبدیل شد، q و metadata تک‌رسانه اضافه شد. تاریخچه metadata-only باحد100. save rowRef/CAS، typed-during-request حفظ؛ disableedit هنگامsave حذف، جلوگیریخروج هنگامbusy. dialogداخلپنل focus/Tab/Escape. setEditable(editable,false) وonUpdate فقطeditable، ناشر بدونedit ازstoredsnapshot منتشرمی‌کند. upload input تنهاپس ازsuccess باversionreset بازنشانی می‌شود.
+- رزرو خاموش فقطپیام وcalendar/halo animation: AppointmentGate lazyimportpatientportal را فقطوقتی initialized&&bookingEnabled فعال می‌کند. inventoryمرورگر noPatientPortal/noCaptcha وDOMnoform/input تأیید شد. رزرو production همچنان خاموش و deployment انجام‌نشده.
+- قدم بعد پس ازmergePR۷: مرحله۷ نظرات مستقل باconsent/permissions/audit/preview وبدونتبدیلhardcodedtestimonials بهنظرواقعی؛ مرحله۸ابتداpreview وتصمیممالک؛ مرحله۹split/budget/CI؛ مرحله۱۰staging/providerها/مالکیتحساب/backup/Linuxjobs/شناسهproduction. بهdeploy یا فعال‌سازی رزرو نیاز خودکار نیست؛ هیچrealowner/payment/SMS/patientdata استفاده نشود.
+- محدودیت عملی: PyPI CDN DNS اینمیزبان؛ wheelهاباhashازHuawei نصبشدند. sandboxtempACL/Vitespawn فقطدرمحیط محلی مجاز گذشتند. هشدار3pytest وnginxhttp2 باقی‌اند. .work/outputs/venv/build/DB هرگزGitنشوند. artifactها فقطtrackedsource+handoff باhash کنارoutputs. script verify-editorial-migrations.py هماهنگیrollback/restore DB/mediaساختگی را آزموده؛ downgrade0018محتوا را حذف ولیmediafile راحفظ می‌کند؛ backup/maintenance/stopwriters/codeENVNginx هماهنگ لازم است.
+
+---
+
 # وضعیت فعلی برای ادامه — 2026-10-01
 
 **این بخش بر توضیحات قدیمی پایین فایل مقدم است.** مالک خواست همه تغییرات فعلی در GitHub ذخیره و ادامه به AI دیگری واگذار شود. قابلیت تازه را توسعه نده؛ ابتدا شاخه و سند حاضر را بررسی کن.

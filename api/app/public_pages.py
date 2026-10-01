@@ -154,6 +154,8 @@ def sitemap(db: Session = Depends(get_db)):
         for row in rows: urls.append(("/articles/"+quote(row.published_slug)+"/", row.public_updated_at))
         for category in sorted({v for r in rows for v in json.loads(r.published_json)['categories']}):
             urls.append(("/articles/category/"+quote(category)+"/", latest))
+        for tag in sorted({v for r in rows for v in json.loads(r.published_json)['tags']}):
+            urls.append(("/articles/tag/"+quote(tag)+"/", latest))
     xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join(f'<url><loc>{html.escape(clinic.site_url.rstrip("/")+path)}</loc><lastmod>{stamp.date().isoformat()}</lastmod></url>' for path,stamp in urls)+'</urlset>'
     return Response(xml, media_type="application/xml", headers={"Cache-Control": "no-store"})
 

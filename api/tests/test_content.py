@@ -243,3 +243,87 @@ def test_unicode_metadata_and_script_like_text_escaped(client):
     assert page.status_code==200 and '&lt;script&gt;' in page.text
     assert '"reviewedBy"' in page.text and '\\u003c/script' in page.text
     assert quote('مقاله-آزمایشی') in client.get('/sitemap.xml').text
+
+
+def test_media_search_pagination_and_selected_metadata(client):
+    access=headers(owner()[2])
+    from app.models import StaffUser
+    with SessionLocal.begin() as db:
+        staff=db.scalar(select(StaffUser).order_by(StaffUser.id))
+        for i in range(65):
+            db.add(PublicMedia(key=f'{i:032x}',alt=f'تصویر آزمایشی {i:03d}',owner_id=staff.id,width=40,height=60,size=100))
+    first=client.get('/api/v1/staff/media',headers=access).json()
+    second=client.get('/api/v1/staff/media?page=2',headers=access).json()
+    assert first['total']==65 and len(first['items'])==60 and len(second['items'])==5
+    assert not {v['key'] for v in first['items']} & {v['key'] for v in second['items']}
+    older=second['items'][0]
+    assert client.get('/api/v1/staff/media/'+older['key'],headers=access).json()==older
+    assert client.get('/api/v1/staff/media?q='+quote(older['alt']),headers=access).json()['total']==1
+    assert client.get('/api/v1/staff/media?q=%25',headers=access).json()['total']==0
+    assert client.get('/api/v1/staff/media?page=10001',headers=access).status_code==422
+    assert client.get('/api/v1/staff/media/'+older['key']).status_code==401
+
+
+def test_article_pagination_refresh_after_create_and_archive(client):
+    access=headers(owner()[2])
+    for i in range(31):create(client,access,slug=f'page-{i}')
+    first=client.get('/api/v1/staff/articles',headers=access).json()
+    second=client.get('/api/v1/staff/articles?page=2',headers=access).json()
+    assert first['total']==31 and len(first['items'])==30 and len(second['items'])==1
+    row=second['items'][0]
+    assert client.request('DELETE',f'/api/v1/staff/articles/{row["id"]}',headers=access,json={'revision':row['revision']}).status_code==200
+    assert client.get('/api/v1/staff/articles?page=2',headers=access).json()['total']==30
+
+
+def test_scheduled_slug_stays_reserved_after_draft_rename(client):
+    access,row=create(client)
+    row=transition(client,access,row,'schedule',scheduled_at=(utcnow()+timedelta(days=1)).isoformat()+'Z').json()
+    renamed=dict(row['content'],slug='draft-renamed')
+    row=client.put(f'/api/v1/staff/articles/{row["id"]}',headers=access,json={'revision':row['revision'],'content':renamed}).json()
+    response=client.post('/api/v1/staff/articles',headers=access,json={'revision':0,'content':draft()})
+    assert response.status_code==409
+    with SessionLocal.begin() as db:db.get(Article,row['id']).scheduled_at=utcnow()-timedelta(seconds=1)
+    assert client.get('/api/v1/articles/test-article').status_code==200
+    assert client.put(f'/api/v1/staff/articles/{row["id"]}',headers=access,json={'revision':row['revision'],'content':renamed}).status_code==409
+
+
+def test_tag_pages_and_history_payload_are_bounded(client):
+    access,row=create(client)
+    assert transition(client,access,row).status_code==200
+    page=client.get('/articles/tag/'+quote('آزمایشی')+'/')
+    assert page.status_code==200 and row['content']['title'] in page.text
+    assert client.get('/articles/tag/missing/').status_code==404
+    assert '/articles/tag/' in client.get('/articles/test-article/').text
+    assert '/articles/tag/'+quote('آزمایشی')+'/' in client.get('/sitemap.xml').text
+    history=client.get(f'/api/v1/staff/articles/{row["id"]}/revisions',headers=access).json()
+    assert all('content' not in item for item in history)
+
+
+@pytest.mark.parametrize('changes',[{'title':'  '},{'sources':[{'title':'  ','url':'https://example.org'}]},{'tags':['a'*81]},{'categories':['a']*11},{'body_html':'x'*200001}])
+def test_editorial_input_bounds(client,changes):
+    access=headers(owner()[2])
+    response=client.post('/api/v1/staff/articles',headers=access,json={'revision':0,'content':dict(draft(),**changes)})
+    assert response.status_code==422
+
+
+def test_media_byte_and_pixel_limits_and_audit(client):
+    original=config.get_settings()
+    access=headers(owner()[2])
+    response=client.post('/api/v1/staff/media',headers=access,data={'alt':'آزمایشی'},files={'file':('big.png',b'x'*(original.max_upload_bytes+1),'image/png')})
+    assert response.status_code==413
+    oversized=BytesIO();Image.new('1',(5000,4001)).save(oversized,format='PNG')
+    assert client.post('/api/v1/staff/media',headers=access,data={'alt':'آزمایشی'},files={'file':('oversized.png',oversized.getvalue(),'image/png')}).status_code==413
+    _,media=upload(client,access)
+    assert client.put('/api/v1/staff/media/'+media['key'],headers=access,json={'alt':'توضیح تازه'}).status_code==200
+    assert client.delete('/api/v1/staff/media/'+media['key'],headers=access).status_code==200
+    from app.models import AuditLog
+    with SessionLocal() as db:
+        actions=set(db.scalars(select(AuditLog.action).where(AuditLog.entity_id==media['key'])))
+    assert actions=={'media.upload','media.edit','media.archive'}
+
+
+def test_restore_race_only_one_revision_wins(client):
+    access,row=create(client)
+    old=client.get(f'/api/v1/staff/articles/{row["id"]}/revisions',headers=access).json()[0]
+    def restore():return client.post(f'/api/v1/staff/articles/{row["id"]}/restore/{old["id"]}',headers=access,json={'revision':row['revision']}).status_code
+    with ThreadPoolExecutor(max_workers=2) as pool:assert sorted(pool.map(lambda _:restore(),range(2)))==[200,409]

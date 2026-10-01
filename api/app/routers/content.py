@@ -17,6 +17,7 @@ from ..database import get_db
 from ..dependencies import require_permission
 from ..models import utcnow
 from ..runtime_settings import get_settings
+from ..activity import record_audit
 
 router=APIRouter(tags=['articles and media'])
 staff_router=APIRouter(prefix='/staff',tags=['editorial'])
@@ -58,9 +59,9 @@ def public_article(slug:str,db:Session=Depends(get_db)):
 
 
 @staff_router.get('/articles')
-def staff_list(page:int=Query(1,ge=1),db:Session=Depends(get_db),staff=Depends(require_permission('articles.view'))):
+def staff_list(page:int=Query(1,ge=1,le=10000),db:Session=Depends(get_db),staff=Depends(require_permission('articles.view'))):
     count=db.scalar(select(func.count(Article.id)).where(Article.deleted.is_(False)))
-    rows=db.scalars(select(Article).where(Article.deleted.is_(False)).order_by(Article.updated_at.desc()).offset((page-1)*30).limit(30))
+    rows=db.scalars(select(Article).where(Article.deleted.is_(False)).order_by(Article.updated_at.desc(),Article.id.desc()).offset((page-1)*30).limit(30))
     return dict(items=[c.read(r) for r in rows],total=count,page=page)
 
 
@@ -127,7 +128,7 @@ def delete_article(article_id:int,payload:RevisionInput,db:Session=Depends(get_d
 def history(article_id:int,db:Session=Depends(get_db),staff=Depends(require_permission('articles.view'))):
     c.article_row(db,article_id)
     rows=db.scalars(select(ArticleRevision).where(ArticleRevision.article_id==article_id).order_by(ArticleRevision.id.desc()).limit(100))
-    return [dict(id=r.id,revision=r.revision,action=r.action,created_at=r.created_at,content=json.loads(r.content_json)) for r in rows]
+    return [dict(id=r.id,revision=r.revision,action=r.action,created_at=r.created_at) for r in rows]
 
 
 @staff_router.post('/articles/{article_id}/restore/{revision_id}')
@@ -157,8 +158,17 @@ def media_path(key):
 
 
 @staff_router.get('/media')
-def media_list(page:int=Query(1,ge=1),db:Session=Depends(get_db),staff=Depends(require_permission('media.manage'))):
-    return [media_read(r) for r in db.scalars(select(PublicMedia).where(PublicMedia.deleted.is_(False)).order_by(PublicMedia.created_at.desc()).offset((page-1)*60).limit(60))]
+def media_list(page:int=Query(1,ge=1,le=10000),q:str=Query('',max_length=120),db:Session=Depends(get_db),staff=Depends(require_permission('media.manage'))):
+    filters=[PublicMedia.deleted.is_(False)]
+    if q.strip():filters.append(PublicMedia.alt.contains(q.strip(),autoescape=True))
+    total=db.scalar(select(func.count(PublicMedia.key)).where(*filters))
+    rows=db.scalars(select(PublicMedia).where(*filters).order_by(PublicMedia.created_at.desc(),PublicMedia.key.desc()).offset((page-1)*60).limit(60))
+    return dict(items=[media_read(r) for r in rows],total=total,page=page)
+
+
+@staff_router.get('/media/{key}')
+def media_metadata(key:str,db:Session=Depends(get_db),staff=Depends(require_permission('media.manage'))):
+    return media_read(media_row(db,key))
 
 
 @staff_router.post('/media',status_code=201)
@@ -177,7 +187,9 @@ async def upload(file:UploadFile=File(...),alt:str=Form(...,min_length=2,max_len
     root.mkdir(parents=True,exist_ok=True);path=root/(key+'.webp');path.write_bytes(output.getvalue())
     try:
         row=PublicMedia(key=key,owner_id=staff.id,alt=alt,width=image.width,height=image.height,size=len(output.getvalue()))
-        db.add(row);db.commit()
+        db.add(row)
+        record_audit(db,action='media.upload',entity_type='public_media',entity_id=key,summary='بارگذاری رسانه عمومی',actor_staff_id=staff.id)
+        db.commit()
     except Exception:
         path.unlink(missing_ok=True);raise
     return media_read(row)
@@ -198,7 +210,9 @@ def media_edit(key:str,payload:MediaEdit,db:Session=Depends(get_db),staff=Depend
     c.lock(db,staff,'media.manage');row=media_row(db,key)
     if row.owner_id!=staff.id and not is_owner(staff):raise HTTPException(403,'فقط بارگذار یا مدیرکل می‌تواند این رسانه را ویرایش کند')
     if len(payload.alt.strip())<2:raise HTTPException(422,'توضیح تصویر لازم است')
-    row.alt=payload.alt.strip();db.commit();return media_read(row)
+    row.alt=payload.alt.strip()
+    record_audit(db,action='media.edit',entity_type='public_media',entity_id=key,summary='ویرایش توضیح رسانه',actor_staff_id=staff.id)
+    db.commit();return media_read(row)
 
 
 @staff_router.delete('/media/{key}')
@@ -208,7 +222,9 @@ def media_delete(key:str,db:Session=Depends(get_db),staff=Depends(require_permis
     articles=db.scalars(select(Article).where(Article.deleted.is_(False)))
     if any(key in c.media_keys(s) for a in articles for s in (a.content_json,a.published_json,a.scheduled_json)):
         raise HTTPException(409,'رسانه در یک مقاله استفاده شده است')
-    row.deleted=True;db.commit();return {'message':'رسانه بایگانی شد'}
+    row.deleted=True
+    record_audit(db,action='media.archive',entity_type='public_media',entity_id=key,summary='بایگانی رسانه',actor_staff_id=staff.id)
+    db.commit();return {'message':'رسانه بایگانی شد'}
 
 
 def public_file(key,db):

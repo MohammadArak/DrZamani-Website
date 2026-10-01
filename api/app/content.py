@@ -48,6 +48,13 @@ class Source(BaseModel):
     title: str = Field(min_length=2, max_length=300)
     url: str = Field(max_length=2000)
 
+    @field_validator('title')
+    @classmethod
+    def source_title(cls,value):
+        value=value.strip()
+        if len(value)<2:raise ValueError('عنوان منبع را کامل کنید')
+        return value
+
     @field_validator('url')
     @classmethod
     def check_url(cls, value):
@@ -80,7 +87,10 @@ class ArticleContent(BaseModel):
 
     @field_validator('title','author_name','reviewer','summary','seo_title','seo_description','target_keyword','cover_alt')
     @classmethod
-    def strip_text(cls, value): return value.strip()
+    def strip_text(cls, value,info):
+        value=value.strip()
+        if info.field_name=='title' and len(value)<2:raise ValueError('عنوان مقاله را کامل کنید')
+        return value
 
     @field_validator('slug')
     @classmethod
@@ -133,6 +143,7 @@ def analyze(content):
 def clean_content(content, db):
     data=content.model_dump(); cleaned=sanitize(data['body_html']); changed=cleaned!=data['body_html'];data['body_html']=cleaned
     parser=Outline();parser.feed(cleaned)
+    if len(parser.images)>100:raise HTTPException(422,'هر مقاله حداکثر ۱۰۰ تصویر می‌پذیرد')
     keys={MEDIA_RE.fullmatch(i.get('src','')).group(1) for i in parser.images if MEDIA_RE.fullmatch(i.get('src',''))}
     if data['cover_key']:keys.add(data['cover_key'])
     if keys and set(db.scalars(select(PublicMedia.key).where(PublicMedia.key.in_(keys),PublicMedia.deleted.is_(False))))!=keys:

@@ -1,4 +1,3 @@
-import BookingClosed from "@/components/BookingClosed";
 import BotProtection, { type BotHandle } from "@/components/BotProtection";
 /* eslint-disable react-hooks/set-state-in-effect */
 import Seo from "@/components/SEO";
@@ -2118,15 +2117,4 @@ const EnabledAppointmentPortal = () => {
     );
 };
 
-const AppointmentPortal = () => {
-    const { clinicInfo, initialized } = useClinicInfo();
-    if (!clinicInfo.bookingEnabled) return <>
-        <Seo title={`نوبت‌دهی مطب ${clinicInfo.doctorName}`} description={clinicInfo.bookingDisabledMessage}
-            canonical={`${clinicInfo.siteUrl}/appointment/`} noIndex />
-        <BookingClosed message={clinicInfo.bookingDisabledMessage} />
-    </>;
-    // Mount private patient data and login only after a successful public policy check.
-    return initialized ? <EnabledAppointmentPortal /> : <LoadingScreen />;
-};
-
-export default AppointmentPortal;
+export default EnabledAppointmentPortal;

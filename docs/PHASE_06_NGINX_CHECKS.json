@@ -1,0 +1,23 @@
+{
+  "environment": "local Windows Nginx 1.28.0 + real FastAPI on disposable DB; no browser JS used for these HTTP assertions",
+  "certificate_validation": "HTTPS verified against fixture CA; verification never disabled",
+  "results": [
+    {
+      "origin": "http://127.0.0.1:8087",
+      "result": "PASS",
+      "scope": "HTTP statuses, initial HTML/meta/schema, search/category/tag/pagination, alias301/legacy410/draft404, sitemap, closed appointment, public/private media and security/cache headers"
+    },
+    {
+      "origin": "https://127.0.0.1:8088",
+      "result": "PASS",
+      "scope": "HTTP statuses, initial HTML/meta/schema, search/category/tag/pagination, alias301/legacy410/draft404, sitemap, closed appointment, public/private media and security/cache headers"
+    }
+  ],
+  "security_headers": {
+    "CSP": "PASS",
+    "X-Frame-Options": "PASS",
+    "Permissions-Policy": "PASS",
+    "Referrer-Policy": "PASS",
+    "X-Content-Type-Options": "PASS"
+  }
+}
