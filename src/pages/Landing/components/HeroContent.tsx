@@ -123,7 +123,7 @@ const HeroContent = () => {
                                 aria-label={clinicInfo.bookingEnabled ? "رزرو نوبت" : "پیگیری نوبت‌های قبلی"}
                             >
                                 <FaCalendar />
-                                {clinicInfo.bookingEnabled ? "رزرو نوبت مشاوره" : "پنل بیمار و پیگیری نوبت"}
+                                {clinicInfo.bookingEnabled ? "رزرو نوبت مشاوره" : "وضعیت نوبت‌دهی"}
                             </a>
                             {/* <button
                                 onClick={() => setReserveOpen(true)}

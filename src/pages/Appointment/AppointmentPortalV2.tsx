@@ -1,4 +1,4 @@
-import BookingNotice from "@/components/BookingNotice";
+import BookingClosed from "@/components/BookingClosed";
 import BotProtection, { type BotHandle } from "@/components/BotProtection";
 /* eslint-disable react-hooks/set-state-in-effect */
 import Seo from "@/components/SEO";
@@ -2014,7 +2014,7 @@ const Portal = ({
     );
 };
 
-const AppointmentPortal = () => {
+const EnabledAppointmentPortal = () => {
     const { clinicInfo: publicClinicInfo } = useClinicInfo();
     const [token, setToken] = useState(
         () => browserCsrf("patient") ? PATIENT_COOKIE_SESSION : "",
@@ -2086,7 +2086,6 @@ const AppointmentPortal = () => {
 
     return (
         <>
-            <BookingNotice />
             <Seo
                 title={`${publicClinicInfo.bookingEnabled ? "سامانه نوبت‌دهی" : "پنل بیمار"} مطب ${publicClinicInfo.doctorName}`}
                 description={publicClinicInfo.bookingEnabled ? `رزرو اینترنتی نوبت حضوری مطب ${publicClinicInfo.doctorName}؛ ورود امن با شماره موبایل و انتخاب خدمت، تاریخ و ساعت حضور.` : `پنل بیمار مطب ${publicClinicInfo.doctorName}؛ مشاهده پرونده و پیگیری نوبت‌های قبلی. ${publicClinicInfo.bookingDisabledMessage}`}
@@ -2117,6 +2116,17 @@ const AppointmentPortal = () => {
             )}
         </>
     );
+};
+
+const AppointmentPortal = () => {
+    const { clinicInfo, initialized } = useClinicInfo();
+    if (!clinicInfo.bookingEnabled) return <>
+        <Seo title={`نوبت‌دهی مطب ${clinicInfo.doctorName}`} description={clinicInfo.bookingDisabledMessage}
+            canonical={`${clinicInfo.siteUrl}/appointment/`} noIndex />
+        <BookingClosed message={clinicInfo.bookingDisabledMessage} />
+    </>;
+    // Mount private patient data and login only after a successful public policy check.
+    return initialized ? <EnabledAppointmentPortal /> : <LoadingScreen />;
 };
 
 export default AppointmentPortal;

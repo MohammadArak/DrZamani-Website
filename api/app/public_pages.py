@@ -92,6 +92,8 @@ def render(clinic, page, db=None):
     if page in {"home", "appointment"} and not payload["booking_enabled"]:
         body += f'<p role="status">{esc(payload["booking_disabled_message"])}</p><p><a href="tel:{esc(phone(clinic.office_phone))}">تماس با مطب</a></p>'
     body += '<p><a href="/">صفحه اصلی</a></p></main>'
+    if page == "appointment" and not payload["booking_enabled"]:
+        body = f'''<main class="booking-closed" dir="rtl" lang="fa"><div class="booking-closed__card" role="status"><div class="booking-closed__symbol" aria-hidden="true"><span class="booking-closed__halo"></span><svg viewBox="0 0 80 80" fill="none"><rect x="14" y="18" width="52" height="48" rx="12" stroke="currentColor" stroke-width="3"/><path d="M14 32h52M28 12v12M52 12v12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><rect x="30" y="41" width="6" height="15" rx="2" fill="currentColor"/><rect x="44" y="41" width="6" height="15" rx="2" fill="currentColor"/></svg></div><p>{esc(payload["booking_disabled_message"])}</p></div></main>''' 
     return HTMLResponse(f'<!doctype html><html lang="fa" dir="rtl"><head>{head}{meta}</head><body><div id="root">{body}</div></body></html>', status_code=status,
                         headers={"Cache-Control": "no-store", **({"X-Robots-Tag": robots} if page != "home" else {})})
 

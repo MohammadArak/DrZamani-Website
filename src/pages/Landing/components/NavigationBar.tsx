@@ -148,9 +148,9 @@ const Navigation = () => {
                     <a
                         href="/appointment/"
                         className="text-white hover:bg-secondary-deep dark:hover:bg-secondary-deep relative block heading-text z-10 shadow-md rounded-lg items-center justify-center py-1 px-2 bg-secondary dark:bg-secondary"
-                        aria-label={clinicInfo.bookingEnabled ? "رزرو نوبت" : "پنل بیمار"}
+                        aria-label={clinicInfo.bookingEnabled ? "رزرو نوبت" : "وضعیت نوبت‌دهی"}
                     >
-                        {clinicInfo.bookingEnabled ? "رزرو نوبت" : "پنل بیمار"}
+                        {clinicInfo.bookingEnabled ? "رزرو نوبت" : "وضعیت نوبت‌دهی"}
                     </a>
                     {/* <button
                         onClick={() => setReserveOpen(true)}
