@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import {useCallback,useEffect,useRef,useState} from "react";
-import {contentApi,emptyArticle,safeContentHtml,type Article,type ArticleContent,type ArticleHistory,type SeoFeedback} from "@/services/contentApi";
-import {useStaffAccess} from "./staffAccess";
+import { contentApi,emptyArticle,safeContentHtml,type Article,type ArticleContent,type ArticleHistory,type SeoFeedback } from "@/services/contentApi";
+import { useCallback,useEffect,useRef,useState } from "react";
 import ArticleEditor from "./ArticleEditor";
 import MediaPicker from "./MediaPicker";
-import {articleValidation} from "./articleValidation";
-import {useContentConfirm} from "./useContentConfirm";
+import { articleValidation } from "./articleValidation";
+import { useStaffAccess } from "./staffAccess";
+import { useContentConfirm } from "./useContentConfirm";
 const statusLabels:Record<string,string>={draft:"پیش‌نویس",review:"در انتظار بازبینی",published:"منتشرشده",scheduled:"زمان‌بندی‌شده",archived:"بایگانی"};
 const failure=(e:unknown)=>e instanceof Error?e.message:"خطای ارتباط با سرور";
 

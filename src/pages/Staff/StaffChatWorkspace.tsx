@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import Toast from "@/components/Toast";
 import AutoGrowTextarea from "@/components/AutoGrowTextarea";
-import { useStaffAccess } from "./staffAccess";
+import Toast from "@/components/Toast";
 import useConsultationRealtime from "@/hooks/useConsultationRealtime";
 import {
     appointmentApi,
@@ -12,7 +11,7 @@ import {
     type ConsultationMessage,
     type ConsultationThread,
 } from "@/services/appointmentApi";
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback,useEffect,useMemo,useRef,useState,type FormEvent } from "react";
 import {
     IoArrowForwardOutline,
     IoChatbubbleEllipsesOutline,
@@ -22,6 +21,7 @@ import {
     IoSearchOutline,
     IoSendOutline,
 } from "react-icons/io5";
+import { useStaffAccess } from "./staffAccess";
 
 const statusLabel: Record<ConsultationThread["appointment_status"], string> = {
     pending: "در انتظار",

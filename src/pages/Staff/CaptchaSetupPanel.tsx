@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
-import BotProtection, { type BotHandle } from "@/components/BotProtection";
-import { appointmentApi, type BotChallenge } from "@/services/appointmentApi";
+import BotProtection,{ type BotHandle } from "@/components/BotProtection";
+import { appointmentApi,type BotChallenge } from "@/services/appointmentApi";
+import { useRef,useState } from "react";
 
 export default function CaptchaSetupPanel({ token, onVerified, disabled, verified }: { token: string; onVerified: () => Promise<void>; disabled: boolean; verified?: {google: boolean; turnstile: boolean} }) {
     const [challenge, setChallenge] = useState<BotChallenge | null>(null);

@@ -1,3 +1,15 @@
+# وضعیت مقدم — 2026-10-02، مرحله۹ نسخه1.15.0
+
+PR۸ ادغام و SHA/tree تأیید شد: merge `2ddd9c76381a8a17b5495c5118512bd2115b5986`، source `2e322f0d260d7c197fe0406be854c85ac4c10f08`، tree `6b0695f7327eef8749fc8fab4c19a02f0401a757`. مرحله۶ PR۷ هم merged است.
+
+مرحله۹ در codex/phase-09-maintenance؛ PHASE_09_MAINTENANCE.md و METRICS مرجع. ۲۹۲pytest/lint/build/budgets/fonts/Ruff/migration/restore محلی موفق؛ browser staff panels/patientprofile/wizard وclosedgate بررسی شدند. remoteCI هنوز NOT RUN و قبل merge باید نتیجه واقعی بررسی شود؛ scan تاریخچه بعد commit لازم. کاهش entry با افزایش3.4% مجموعJS گزارش شده است. قراردادAPI محفوظ، دو querybudgettest افزوده شد. استخراج/import-only بدنۀ ۱۷ فایل با AST تأیید شد. یک git restore گروهی رد خودکار شد و انجام نشد؛ importها حفظ شدند، دور زدن رد انجام نشود.
+
+مالک گفت staging ندارد؛ مرحله۱۰ خارجی کامل نیست. طراحی مرحله۸ deferred. فرانت قالب قدیمی مقالات (سربرگ تصویری/sidebar)، نظرات carousel عکس/نام/متن/سن ازپنل، هیرو سفید/طلایی، هدر تیره و فوتر سفید حفظ شود. رزروخاموش دیالوگ مدیر درhomepage و فقطmessage/animation بدونloadpatientUI درappointment.
+
+قدم بعد: commit/push/PRمرحله۹، اجرای واقعی CI و رفع خطا، mergeexpectedSHA و treeverify، ZIP tracked-only و handoff کنارoutputs. سپس پذیرش محلی/گزارش مرحله۱۰ با گیت‌های خارجی NOT RUN؛ deploy/productionbooking/realowner/realpayment/SMS/patientdata مجاز نیست. نتیجه unrun را PASS ننام. sourceSHA پس ازcommit درreceipt بیرونGit ثبت شود.
+
+---
+
 # وضعیت مقدم — نسخه 1.14.0، اتصال قالب قبلی به پنل
 
 این بخش بر شرح‌های تاریخی پایین مقدم است. دستور تازه مالک: ساختار فرانت فعلاً عوض نشود؛ نظرات با همان کارت عکس‌دار قدیمی، و مقالات با قالب سربرگ تصویری و ستون کناری، فقط به backend وصل شوند. بازطراحی مرحله ۸ و صفحات خدمات جدید به تعویق افتاد. تغییرات رزرو/هیرو/هدر/فوتر و حذف سه کارت AboutUs اجرا شد.
