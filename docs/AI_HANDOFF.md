@@ -1,3 +1,11 @@
+# وضعیت جاری — شروع runtime لینوکس 1.18.0
+
+مالک قدم بعدی را تأیید کرد. نسخه قبلی 1.17.0 با PR۱۲ و merge `4ed7b8c17a75cbfaa50d8ea2b7b5fe23115044ea` در main است؛ رسید outputs/AI_HANDOFF-1.17.0.md مرجع است. گام جدید در شاخه `codex/phase-10-linux-runtime`، آزمون مستقل واقعی زیرساخت روی GitHub-hosted Ubuntu است؛ فقط fixture و loopback، booking/provider خاموش. scripts/verify-linux-runtime.py روی Windows/self-hosted/نصب موجود اجرا را قبل از تغییر رد می‌کند. CI runtime هنوز NOT RUN، دو guard محلی passed؛ شواهد و PR/merge نهایی پس از اجرا ثبت شوند.
+
+مرجع جزئیات docs/PHASE_10_LINUX_RUNTIME.md است. هیچ تست اجرا نشده را PASS ننام. این آزمون جای پذیرش VPS، DNS/Cloudflare/provider واقعی، backup رمزگذاری‌شده offsite، قطع برق میزبان و هویت production نیست. سایت زنده deploy و booking/payment فعال نشوند. پس از آزمون، docs/ROADMAP/PROGRESS_LOG/handoff و رسید exact source/merge/tree/CI/ZIP/hash تازه شوند؛ merge حوزه آزموده از قبل مجاز است.
+
+---
+
 # وضعیت فعلی — 2026-10-02، طراحی و خدمات نسخه 1.17.0
 
 مالک ادامه مستقل کار و گزارش نهایی را خواست. حوزه اجرای طراحی مرحله ۸ و صفحات خدمات پیاده و محلی آزموده شده است. مرجع جزئیات [PHASE_08_IMPLEMENTATION.md](PHASE_08_IMPLEMENTATION.md)، شواهد مرورگر و وابستگی‌ها و [راهنمای SEO](PHASE_08_SEO_CHECKLIST.md) هستند. کار در شاخه `codex/phase-08-design-preview` و PR شماره ۱۲ ادامه یافته؛ نتیجه نهایی CI، کامیت ادغام، tree و hash آرشیو در `outputs/AI_HANDOFF-1.17.0.md` و رسید تحویل ثبت می‌شود. ادعای ادغام فقط بر مبنای آن رسید و ref واقعی GitHub باشد.
