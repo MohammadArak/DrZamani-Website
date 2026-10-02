@@ -1,4 +1,16 @@
-# وضعیت مقدم — 2026-10-02، پذیرش محلی و گیت‌های بازمرحله۱۰
+# وضعیت فعلی — 2026-10-02، بازیابی هماهنگ1.16.0 در حال پذیرش
+
+شاخه codex/phase-10-recovery از main `00dd2802b4ac673cca3afe339af49fedefd7e169`، tree `451f35a323b91d36ce3432e56c18c60a08a65e2a`. PR۱۰ نسخه1.15 با source `33fb38e2e2e712c010b747fc5b2de3058e164785` ادغام شد؛ CI36963277372 چهار job موفق و294 pytest هر OS. رسید/ZIP/handoff در outputs موجود است؛ قدم‌های pending متن تاریخی پایین دیگر مربوط به PR۱۰ نیستند.
+
+گام جاری اصلاح backup/rollback هماهنگ DB، public/private media، ENV و snippets است؛ توقف timer/job/API، lock مشترک، maintenance، صحت SQLite/WAL/hash، اعتبارسنجی ZIP و rollback با رسید موفق متناظر. docs/PHASE_10_RECOVERY.md و deploy/RECOVERY.md جزئیات و محدودیت‌ها را دارند. 16 آزمون Windows موفق،13 آزمون Linux هنوز اجرا نشده؛ Ruff کامل فایل‌های جدید موفق. آزمون کامل/CI/source SHA/merge/tree هنوز در انتظار این تحویل است. فرانت هیچ تغییر جدید ندارد.
+
+مرحله۱۰ کلی ناتمام: staging نداریم، adapter سرویس در تست ساختگی است؛ اجرای واقعی VPS/systemd/runuser/Nginx، provider، هویت commit بسته انتشار/production، offsite encryption/retention و بازیابی پس از قطع برق اجرا/پذیرش نشده‌اند. rollback تغییرات بعد از backup را از وضعیت فعال خارج می‌کند، pre-rollback snapshot نگه می‌دارد. journal و فایل کنارگذاشته‌شده خودکار پاک نمی‌شوند. همه writerهای خارج سه unit باید اپراتور متوقف کند. هیچ deploy/productionbooking/realowner/realpayment/SMS/patientdata مجاز نیست. طراحی۸ deferred و ظاهر پذیرفته قبلی حفظ شود.
+
+قدم بعد همین scope: fulltests محلی و CI Linux/Windows، رفع خطاهای واقعی، docs نتیجه، commit/push/PR/merge با expectedSHA و تأیید remote/tree؛ سپس ZIP فقط tracked source و handoff/receipt کنار آن. تأیید merge از قبل مجاز است؛ deploy جداست. پرسش staging تکرار نشود.
+
+---
+
+# وضعیت تاریخی — پذیرش محلی و گیت‌های بازمرحله۱۰
 
 نسخه1.15.0، PR۹ merged: source `9b75629732e48c2ee2bde45652ee27781b71a467`، merge `913a43d1c6e69a4749a8aa3e38625b7de5692252`، tree `21bcac5e3906828279b2334296ea9997d87de718`؛ remote/source/treeتطبیقشد. CI run36957457614 تمام۴jobLinux/Windows/frontend/secrets موفق، freshfrozeninstall/full292tests/migrationrestore/dependencyaudit/historyscan واقعی. رسید وZIP/hash/AI_HANDOFF-PHASE09 کنارoutputs است. وضعیتNOTRUNمرحله۹پایین تاریخی است.
 

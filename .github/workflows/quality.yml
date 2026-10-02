@@ -51,7 +51,7 @@ jobs:
       - name: Install fixed quality tools
         run: python -m pip install uv==0.11.24 ruff==0.16.9 pip-audit==2.10.1
       - run: uv sync --frozen --all-groups
-      - run: ruff check app tests ../scripts --select E9,F63,F7,F82
+      - run: ruff check app tests ../scripts ../deploy --select E9,F63,F7,F82
       - run: uv run --frozen python -m pytest -o addopts='' -q
       - run: uv run --frozen python ../scripts/verify-migrations.py
       - run: uv run --frozen python ../scripts/verify-editorial-migrations.py

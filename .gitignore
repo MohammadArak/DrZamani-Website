@@ -28,6 +28,7 @@ api/.venv/
 api/data/
 api/__pycache__/
 api/**/__pycache__/
+**/__pycache__/
 api/.pytest_cache/
 api/pytest-cache-files-*/
 .ruff_cache/

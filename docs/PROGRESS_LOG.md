@@ -1,5 +1,9 @@
 # گزارش پیشرفت
 
+## 2026-10-02 — بازیابی هماهنگ1.16.0، در حال پذیرش
+
+پس از ادغام PR۱۰ با main00dd2802b4ac673cca3afe339af49fedefd7e169، scope بعدی مرحله۱۰ بازیابی DB/publicmedia/privateuploads/ENV/Nginx است. اسکریپت‌های قدیمی با مدیریت هماهنگ، توقف سه writer، قفل مشترک، maintenance، snapshot مستقل از WAL، integrity/hash و rollback با رسید متناظر جایگزین شدند. راهنمای deploy/RECOVERY.md حدود rollback و journal/قطع برق/offsite را شفاف می‌کند. فرانت دست‌نخورده است. 16 تست Windows موفق و13 Linux اجرا نشده؛ Ruff کامل فایل‌های جدید موفق. fulltests و CI در انتظارند؛ مرحله۱۰ کلی complete نیست. هیچ live deploy، فعال‌سازی production، داده بیمار یا provider واقعی استفاده نشده است.
+
 ## 2026-09-30 — مرحله 0
 
 - کاربر خواست ابتدا ریپو و نقشه‌راه آماده شود و پیاده‌سازی تمام قابلیت‌ها در این نوبت انجام نشود.
