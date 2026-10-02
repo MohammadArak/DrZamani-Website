@@ -1,5 +1,9 @@
 # گزارش پیشرفت
 
+## 2026-10-02 — اجرای مستقل طراحی۸، نسخه1.17.0
+
+پس از درخواست مالک برای ادامه مستقل، طرح موجود بهhomepage/mobile تبدیل شد؛ خدماتSSR/canonical/breadcrumb/sitemap/404 وNginxmaintenanceguard افزوده شد. گالری۱۶assetعمومیقبلی وarticletemplate مستقل حفظ؛ نمایشcomments/articles ازAPI،رزروخاموش/closedgate محفوظ. آمار/وعدهدرمانی قبلی حذف،data/consentواقعی ساخته نشد. runtimeمیزبان پیدا وvenvignored اصلاح؛freshsyncPython شبکهfailed،npmcioffline/export/۴۷match موفق. fullpytest317pass/14Linuxskip/3oldwarning؛related44pass پسSSR؛lint/build1.17/Ruff/fonts/budgets/سهmigrationrestore وEdgedesktop/mobile۵عرض بدونoverflow/error موفق. گزارش PHASE_08_IMPLEMENTATION وشواهدJSON محدودیت را ثبت می‌کنند؛CI/source/merge/tree دررسیدoutputs پسارسال. fieldSEO/runtimeVPS/provider/offsite/powerloss ناتمام،stagingنداریم؛هیچdeploy/bookingproduction/providerreal/owner/patientprivate انجام نشد.
+
 ## 2026-10-02 — بررسی پیش از ادامه روی میزبان فعلی
 
 ساختار، اسناد، مسیر صفحه اصلی/رزرو خاموش و workflow خوانده شد؛ نسخه1.16.0 و hash کانسپت تطبیق خواندنی شدند. GitHub main=db6de0c و PR۱۲ draft/head46625be با ref محلی تطبیق دارد. گزارش محدودیت و قدم بعد در PROJECT_REVIEW_2026-10-02.md و ابتدای AI_HANDOFF ثبت شد. Git/Node/npm در PATH نیستند، venv به Python پروفایل admin قدیمی متکی است و اجرا نمی‌شود؛ bundled runtime ندارد. تست تازه/lint/build/migration/browser اجرا نشده و پاک‌بودن checkout اثبات نشده است. هیچ کد، deploy یا وضعیت production تغییر نکرد. ادامه مرحله۸، پس از آماده‌سازی محیط و جمع‌بندی طرح/موبایل/گالری؛ مرحله۸/۱۰ ناتمام باقی‌اند.

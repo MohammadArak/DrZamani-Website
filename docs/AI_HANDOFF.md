@@ -1,4 +1,16 @@
-# وضعیت مقدم — 2026-10-02، بررسی فایل‌ها برای ادامه
+# وضعیت مقدم — 2026-10-02، اجرای مستقل طراحی1.17.0
+
+مالک ادامه مستقل همه کارهای لازم و گزارش پس از پایان را خواست. حوزه محلی طراحی۸/خدمات اجرا شده؛ [PHASE_08_IMPLEMENTATION.md](PHASE_08_IMPLEMENTATION.md)، شواهدbrowser/dependency و راهنمایSEO مرجع‌اند. شاخهcodex/phase-08-design-preview وPR۱۲ ادامه یافته؛source/merge/tree/ZIP/hash/CI نهایی در رسیدoutputs ثبت می‌شود. تا رسید نهایی، ادعای merge/CI نکن.
+
+هیرو/هدرسرمه‌ای، خدمات، معرفی، نظراتAPI، گالریnative۱۶تصویرقبلی/بزرگ‌نمایی، مقالهAPI،FAQتماس،نقشه/فوتر وmobilebar پیاده‌اند. رزروخاموش homepage دیالوگمدیر وappointmentبدونpatientmodules حفظ شده. آمار/وعدهدرمانی بدونمرجع قبلی حذف؛ رأی/رضایت/عکسprivateجدید ساخته نشده. خدماتSSR باکاتالوگapi/app/clinic_services.json،breadcrumb/canonical/sitemap/404 وguardNginx افزوده‌اند؛ مقاله مستقل ساختار قبلی دارد. frontend/API/lock/VERSION1.17.0.
+
+runtimeاینمیزبان اکنون فراهم است وvenvignored مسیرPythonاصلاح شد. npmciآفلاینlocked،frozenexport و۴۷بسته موجودmatch؛ freshlocalsyncPython شبکه/DNSfailed،cleaninstallCI پیشmerge لازم. fullpytest317passed/14Linuxskip/3oldwarnings؛related44passed پسSSR؛lint/build/Ruff/fonts/budgets و۳migrationrestore محلی موفق. browserEdge۵عرض320..1440 بدونoverflow/pageerror،menu/dialog/gallery/closedgate/servicesSSR/404 وfixtures کارت بررسی شدند. fixturecomment/article فقطmockمرورگر است؛ داده/رضایت واقعی نیست.
+
+مرحله۸ پذیرشfieldspeed/SearchConsole/medicalcontent/consent/accessibilityمستقل باقی؛ مرحله۱۰actualVPS/provider/artifactproduction/offsite/powerloss باز وstagingنداریم. mergeحوزهآزموده مجاز؛deploy/productionbooking/realowner/paymentSMS/patientprivatedata مجوزجدا. اسناد قدیمیdeferred/WIP تاریخی‌اند. فایلادامهکنارZIP/تصاویر درoutputs تازه شود. پس از merge قدم بعد تعیین محیط مستقلLinux برایruntime/artifactidentity، بدونتکرارپرسشstaging وبدونdeployخودکار است.
+
+---
+
+# وضعیت تاریخی — 2026-10-02، بررسی فایل‌ها برای ادامه
 
 گزارش این نوبت: [PROJECT_REVIEW_2026-10-02.md](PROJECT_REVIEW_2026-10-02.md). نسخه1.16.0، HEAD محلی از ref و head پیش‌نویس PR۱۲ در GitHub هر دو `46625befb8742a6974f85a8d6d5ded22fc50ae4e`؛ main آنلاین `db6de0c24a59b3cedf4ac1b4a4be1d6c8eb1238f`. کد اجرایی تغییر نکرد؛ بررسی ساختار/اسناد و مسیرهای Landing/AppointmentGate/ReserveDialog و CI انجام شد، hash تصویر طرح تطبیق شد. این مرور ممیزی کامل یا پذیرش تازه نیست.
 

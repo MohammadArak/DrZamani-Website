@@ -176,6 +176,9 @@ def test_maintenance_blocks_publication_requests_before_upstream(
         else:
             pytest.fail("fixture Nginx did not become ready")
         paths = [
+            "/services/",
+            "/services/rhinoplasty/",
+            "/services/not-a-service/",
             "/articles/",
             "/articles/?page=2",
             "/articles/category/fixture/",

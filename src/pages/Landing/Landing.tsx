@@ -40,14 +40,15 @@ const Landing = () => {
                 ]}
             />
 
-            <main className="text-base">
+            <div className="landing-site">
                 <NavigationBar />
+                <main id="main-content" tabIndex={-1}>
                 <HeroContent />
                 <Suspense fallback={<SectionFallback />}>
-                    <AboutUs />
+                    <Services />
                 </Suspense>
                 <Suspense fallback={<SectionFallback />}>
-                    <Services />
+                    <AboutUs />
                 </Suspense>
                 <Suspense fallback={<SectionFallback />}>
                     <PatientsComments />
@@ -61,10 +62,11 @@ const Landing = () => {
                 <Suspense fallback={<SectionFallback />}>
                     <FAQ />
                 </Suspense>
+                </main>
                 <Suspense fallback={<SectionFallback />}>
                     <Footer />
                 </Suspense>
-            </main>
+            </div>
         </>
     );
 };

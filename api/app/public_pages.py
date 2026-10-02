@@ -99,6 +99,8 @@ def render(clinic, page, db=None, editorial=None):
         for number in [clinic.office_phone, clinic.consultation_phone]:
             body += f'<p><a href="tel:{esc(phone(number))}">{esc(number)}</a></p>'
         body += f'<p><a href="mailto:{esc(clinic.email)}">{esc(clinic.email)}</a></p>'
+        from .public_services import service_cards
+        body += '<section id="services"><h2>خدمات تخصصی</h2>' + service_cards() + '</section>'
         from .comments import home_html
         comment_html,comment_data=home_html(db)
         body+=comment_html
@@ -154,7 +156,10 @@ def sitemap(db: Session = Depends(get_db)):
     from sqlalchemy import select,func
     from .comment_models import Comment
     last_comment=db.scalar(select(func.max(Comment.public_updated_at)))
-    urls = [("/", max(clinic.updated_at,last_comment) if last_comment else clinic.updated_at)]
+    from .public_services import CONTENT_UPDATED_AT, SERVICES
+    site_updated = max(clinic.updated_at, CONTENT_UPDATED_AT)
+    urls = [("/", max(site_updated,last_comment) if last_comment else site_updated), ("/services/", site_updated)]
+    urls.extend((f'/services/{service["slug"]}/', site_updated) for service in SERVICES)
     if rows:
         latest = max(r.public_updated_at for r in rows)
         urls.append(("/articles/", latest))
