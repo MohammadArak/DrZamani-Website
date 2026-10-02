@@ -103,6 +103,7 @@ def fixture_setup(runtime, layout):
     env = env.replace('SECRET_KEY=CHANGE_ME_GENERATE_WITH_openssl_rand_hex_32', 'SECRET_KEY='+secrets.token_hex(32))
     env = env.replace('https://drfarzadzamani.ir,https://www.drfarzadzamani.ir', 'https://127.0.0.1:18443')
     env = env.replace('FRONTEND_URL=https://drfarzadzamani.ir', 'FRONTEND_URL=https://127.0.0.1:18443')
+    env = env.replace('CAPTCHA_HOSTNAMES=\n', 'CAPTCHA_HOSTNAMES=runtime.invalid\n')
     layout.env.write_text(env)
     os.chown(layout.env, 0, owner.pw_gid)
     layout.env.chmod(0o640)
@@ -341,7 +342,7 @@ def verify(report):
         log = layout.data/'fixture-api.log'
         if log.exists():
             journal += log.read_text(errors='replace')[-32000:]
-        markers = ['PermissionError', 'ModuleNotFoundError', 'RuntimeError', 'OperationalError', 'No such file or directory', 'Permission denied', 'Failed at step', 'Read-only file system', 'error while loading shared libraries', 'Application startup complete', 'Uvicorn running']
+        markers = ['PermissionError', 'ModuleNotFoundError', 'RuntimeError', 'OperationalError', 'SettingsUnavailable', 'No such file or directory', 'Permission denied', 'Failed at step', 'Read-only file system', 'error while loading shared libraries', 'Application startup complete', 'Uvicorn running']
         result = {'status':'failed','stage':stage,'errorType':type(error).__name__,'checks':checks,
                   'failedCommands':runtime.failures,'healthProbe':runtime.health_failure,'unitStatus':diagnostics,'journalErrorTypes':[marker for marker in markers if marker in journal]}
     finally:

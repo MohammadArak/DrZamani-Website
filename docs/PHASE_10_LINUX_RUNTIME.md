@@ -18,6 +18,8 @@ adapter واقعی Runtime و ReleaseManager بدون mock استفاده می�
 
 ## گیت‌های باز
 
+در راه‌اندازی نخست، API در lifespan تنظیمات production را رد کرد: hostname مشتق‌شده از IP loopback برای کپچا معتبر نیست، حتی با provider خاموش. fixture اکنون CAPTCHA_HOSTNAMES=runtime.invalid صریح دارد؛ هیچ سیاست محصول relax و provider فعال نشد. سرویس fixture از Python مستقل /usr/bin/python3.12 استفاده می‌کند؛ وابسته به environment مربوط به setup-python نیست. خروجی تشخیص فقط برچسب فرمان، وضعیت unit و وجود نوع خطا را دارد؛ لاگ کامل خصوصی داخل VM می‌ماند.
+
 تلاش‌های نخست CI: context مربوط به runner در job env پذیرفته نشد و به step env انتقال یافت. سپس پوشه ignored `.work` در checkout تازه وجود نداشت؛ ساخت آن پس از guard اضافه شد. Git زیر root با safe.directory محدود به checkout تأییدشده خوانده می‌شود. اسکن تاریخچه دو literal مربوط به گزینه `--property=MainPID` را generic-api-key شناخت؛ مقادیر credential نبودند. ترتیب آرگومان تازه اصلاح و فقط دو fingerprint دقیق کامیت تاریخی در .gitleaksignore ثبت شدند؛ هیچ مسیر یا rule کلی از اسکن مستثنا نشده است. [روش رسمی fingerprint](https://github.com/gitleaks/gitleaks#%EF%B8%8F-configuration).
 
 این پذیرش کل مرحله۱۰ را کامل نمی‌کند: VPS واقعی و تنظیمات فعال آن، DNS/Cloudflare/provider، artifact identity در production، offsite encryption/retention، قطع برق میزبان، ممیزی محتوا/رضایت و داده میدانی SEO بازند. SIGKILL فقط قطع پردازش است؛ قطع برق یا crash filesystem نیست. این گام installer کامل VPS را اجرا نمی‌کند؛ unit/templateهای موجود و adapter واقعی را در VM تست می‌کند. deploy سایت زنده و فعال‌سازی production اجازه جدا می‌خواهند.
