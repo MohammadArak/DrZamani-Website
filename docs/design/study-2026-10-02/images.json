@@ -1,0 +1,18 @@
+{
+  "hero-navy.png": {
+    "bytes": 1632567,
+    "sha256": "dc2e612f9ad64ef3f5a001ff2c59a6c67c150c4d4f0795d936393db204167461"
+  },
+  "hero-cream.png": {
+    "bytes": 1719343,
+    "sha256": "e0d2789087949ddec6b1b7b9e27ad589214c66df199c46d4d51a1f7c656b875c"
+  },
+  "contact-footer.png": {
+    "bytes": 1404470,
+    "sha256": "e6bfbf21293be057de124d80711a87ebdb4bef6999ba7e983d835fa5c4fe80dd"
+  },
+  "services-gallery.png": {
+    "bytes": 1459462,
+    "sha256": "e1d4d9c9a66319c1c5e862225884a56d8874cc409af3f77efa9d45a9b49d1e5c"
+  }
+}

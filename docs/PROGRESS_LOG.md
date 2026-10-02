@@ -1,5 +1,11 @@
 # گزارش پیشرفت
 
+## 2026-10-02 — مطالعه بصری و امکانات پیشنهادی، مبنای1.18.0
+
+پس از درخواست مالک برای بررسی نمونه‌ها و ساخت طرح قسمت‌های سایت، چهار سایت واقعی Sam Rizk، Jonathan Sykes، Cleveland Clinic و دکتر امین آمالی با وب و نمای مرورگر بررسی شدند. چهار board با image_gen داخلی ساخته شدند: هیرو سرمه‌ای، هیرو روشن، خدمات/گالری و مراجعه/فوتر؛ هرکدام desktop/mobile دارند. پیش‌نمایش مستقل پنج نمای HTML با عکس/لوگوی اصلی و کپی خنثی، گالری placeholder و تعاملات محلی آماده شد. بیست بررسی layout در 1440/768/390/320 بدون overflow و با تصاویر قابل مشاهده سالم بود؛ تب/صفحه‌کلید RTL، فیلتر، dialog/Escape، منوی موبایل و FAQ بررسی شدند و لاگ error مرورگر خالی بود. تست backend و سنجش سایت زنده برای این مطالعه اجرا نشد.
+
+گزارش DESIGN_STUDY_2026-10-02.md امکانات موجود را از پیشنهاد تازه جدا می‌کند؛ اولویت‌ها CMS گالری/رضایت، محتوای خدمات، راهنمای مراجعه و FAQ قابل مدیریتند. طرح‌ها و پرامپت‌ها در docs/design/study-2026-10-02 نگهداری می‌شوند؛ تحویل portable و رسید source/merge/tree/CI/hash در outputs است. نسخه اجرایی 1.18.0 و کد محصول حفظ شده‌اند. پذیرش/انتخاب مالک و اجرای طراحی هنوز باز است؛ deployment و booking/payment production انجام نشده‌اند. CI نهایی پیش از ارسال PENDING است و نتیجه مشاهده‌شده در رسید خواهد آمد.
+
 ## 2026-10-02 — پذیرش واقعی runtime در VM مستقل، 1.18.0
 
 آزمون واقعی runtime روی source `9cbc634b88309901301d31ebdd09a302b8b409f3` در [run 37035493682](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37035493682) موفق شد: ۱۶ بررسی زیرساختی با systemd255، runuser/www-data، frozen install، migration، HTTPS معتبر fixture، WSS احراز‌شده/رد ناشناس، timer/job واقعی، deploy/rollback پرشده با مالکیت، شکست عمدی Nginx و بازیابی، حفظ وضعیت timer و restart پس از SIGKILL. شواهد پاک‌سازی‌شده در PHASE_10_RUNTIME_CHECKS.json است. کل pytest لینوکس همان source: 333 passed و ۳ هشدار قبلی. نتیجه همه jobهای کامیت نهایی، Windows، source/merge/tree و ZIP/hash در رسید outputs/AI_HANDOFF-1.18.0.md ثبت می‌شود؛ پذیرش VPS واقعی از این نتیجه استنباط نشود.
