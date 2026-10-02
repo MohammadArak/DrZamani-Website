@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-02",
+  "subject": "Independent static design prototype; not live-site acceptance",
+  "browser": "Codex in-app browser",
+  "url": "http://127.0.0.1:8092/index.html",
+  "layout": {
+    "widths": [1440, 768, 390, 320],
+    "views": ["hero-navy", "hero-cream", "services-gallery", "contact-footer", "articles-faq"],
+    "observed_cases": 20,
+    "horizontal_overflow_cases": 0,
+    "all_visible_images_loaded": true
+  },
+  "interactions": {
+    "view_switching": "PASS",
+    "rtl_arrow_left_selects_next_tab": "PASS: hero-cream",
+    "nose_filter": "PASS: 1 visible placeholder card, Persian live count",
+    "gallery_detail_dialog": "PASS",
+    "booking_coordination_dialog": "PASS",
+    "escape_closes_dialog": "PASS",
+    "mobile_menu": "PASS: aria-expanded=true",
+    "faq_expansion": "PASS: second question open",
+    "browser_error_logs_at_inspection": []
+  },
+  "inline_comparison": {
+    "viewport_widths": [736, 320],
+    "observed_iframe_widths": [704, 288],
+    "variants": ["navy", "cream"],
+    "observed_cases": 4,
+    "horizontal_overflow_cases": 0,
+    "all_visible_images_loaded": true,
+    "previous_next_switching": "PASS",
+    "booking_message": "PASS",
+    "browser_error_logs_at_inspection": []
+  },
+  "not_run": ["live site", "patient study", "complete WCAG or screen reader audit", "LCP/CLS performance", "backend behavior", "real booking or payment", "host Tweak submission"]
+}
