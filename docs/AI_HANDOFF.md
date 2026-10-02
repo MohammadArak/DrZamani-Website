@@ -1,3 +1,19 @@
+# وضعیت جاری — پذیرش مستقل runtime لینوکس 1.18.0
+
+مالک «بریم قدم بعدی» را تأیید کرد. حوزه این گام آزمون واقعی runtime و بازیابی در ماشین موقت GitHub-hosted Ubuntu، شاخه `codex/phase-10-linux-runtime` و PR۱۳ است. سایت زنده و VPS مالک استفاده نشده‌اند. طراحی1.17 در main از PR۱۲/merge `4ed7b8c17a75cbfaa50d8ea2b7b5fe23115044ea` حفظ شده است. frontend/API/lock/VERSION1.18.0 هماهنگ‌اند؛ dependency یا schema تازه لازم نبود.
+
+آزمون واقعی runtime روی source `9cbc634b88309901301d31ebdd09a302b8b409f3` در [run 37035493682](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37035493682) موفق شد: ۱۶ بررسی زیرساختی با systemd255، runuser/www-data، frozen install، migration، HTTPS معتبر fixture، WSS احراز‌شده/رد ناشناس، timer/job واقعی، deploy/rollback پرشده با مالکیت، شکست عمدی Nginx و بازیابی، حفظ وضعیت timer و restart پس از SIGKILL. شواهد پاک‌سازی‌شده در PHASE_10_RUNTIME_CHECKS.json است. کل pytest لینوکس همان source: 333 passed و ۳ هشدار قبلی. نتیجه همه jobهای کامیت نهایی، Windows، source/merge/tree و ZIP/hash در رسید outputs/AI_HANDOFF-1.18.0.md ثبت می‌شود؛ پذیرش VPS واقعی از این نتیجه استنباط نشود.
+
+مرجع جزئیات [PHASE_10_LINUX_RUNTIME.md](PHASE_10_LINUX_RUNTIME.md) است. scripts/verify-linux-runtime.py قبل از تغییر روی Windows/self-hosted/نصب موجود/marker غایب/workspace نادرست رد می‌شود. روی VPS آن را اجرا و guard را حذف نکن. تمام داده، session، SMS outbox و رسانه fixture هستند؛ مالک واقعی و provider ساخته نشدند. خروجی عمومی فقط نتیجه پاک‌سازی‌شده است؛ ENV/DB/token/backup/لاگ/certificate خصوصی در VM ماندند. unitهای واقعی و template اصلی با bind loopback و interval کوتاه timer fixture استفاده می‌شوند؛ installer کامل آزموده نشده است.
+
+محلی guard/recovery/defaults: 21 passed / 14 Linux skipped؛ پس از اصلاح جداسازی guard دو تست مجدد passed. Ruff/version consistency موفق. خطاهای مسیر: ACL pytest با اجرای مجاز مستقل حل شد؛ context runner به step رفت؛ .work ساخته شد؛ Git root فقط checkout معتبر را trust می‌کند؛ fixture production برای CAPTCHA_HOSTNAMES مقدار runtime.invalid گرفت، بدون فعال‌کردن provider یا relax سیاست؛ Python مستقل سیستم انتخاب شد. دو false positive Gitleaks رشته --property=MainPID بودند و فقط fingerprint دقیق تاریخی مستثنا شد؛ اسکن کلی برقرار است.
+
+مرحله۱۰ کامل نیست: actualVPS/DNS/TLSعمومی/Cloudflare/provider، هویت artifact درproduction، offsite encryption/retention و قطع برق میزبان بازند. SIGKILL قطع پردازش است، نه قطع برق. staging نداریم و سؤال تکراری مطرح نشود. fieldSEO/محتوا/رضایت/دسترس‌پذیری مستقل نیز بازند. merge حوزه آزموده پس از docs/CI مجاز؛ deploy زنده و booking/payment/SMS production اجازه جدا می‌خواهند.
+
+قدم بعد: ساخت و اعتبارسنجی manifest بسته انتشار برای source/tree/build و سپس چرخه backup رمزگذاری‌شده و retention با مقصد مستقل ساختگی. رسید دقیق و فایل کنار ZIP در outputs/AI_HANDOFF-1.18.0.md مرجع ادامه‌اند. تا اثبات refs/CI، merge یا تست نهایی را PASS ننام. بخش‌های پایین تاریخی هستند.
+
+---
+
 # وضعیت فعلی — 2026-10-02، طراحی و خدمات نسخه 1.17.0
 
 مالک ادامه مستقل کار و گزارش نهایی را خواست. حوزه اجرای طراحی مرحله ۸ و صفحات خدمات پیاده و محلی آزموده شده است. مرجع جزئیات [PHASE_08_IMPLEMENTATION.md](PHASE_08_IMPLEMENTATION.md)، شواهد مرورگر و وابستگی‌ها و [راهنمای SEO](PHASE_08_SEO_CHECKLIST.md) هستند. کار در شاخه `codex/phase-08-design-preview` و PR شماره ۱۲ ادامه یافته؛ نتیجه نهایی CI، کامیت ادغام، tree و hash آرشیو در `outputs/AI_HANDOFF-1.17.0.md` و رسید تحویل ثبت می‌شود. ادعای ادغام فقط بر مبنای آن رسید و ref واقعی GitHub باشد.

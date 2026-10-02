@@ -1,3 +1,9 @@
+# یادداشت جاری runtime — نسخه1.18.0
+
+آزمون مستقل adapter واقعی، systemd/runuser/www-data، Nginx/HTTPS/WSS، timer/job و populated rollback در VM تازه GitHub-hosted Ubuntu موفق شد. [گزارش runtime](../docs/PHASE_10_LINUX_RUNTIME.md) و رسید outputs/AI_HANDOFF-1.18.0.md وضعیت جدید را دارند. متن‌های زیر درباره NOT RUN مربوط به وضعیت تاریخی‌اند؛ اجرای این موارد روی VPS واقعی و installer کامل هنوز پذیرش نشده‌اند. offsite/قطع برق/production identity و مجوز deploy زنده باز هستند.
+
+---
+
 # انتشار و بازیابی هماهنگ — نسخه 1.16.0
 
 این راهنما مجوز استقرار نیست. سایت زنده، رزرو، پرداخت، پیامک و حساب واقعی در این مرحله تغییر نکرده‌اند. آزمون‌ها از دیتابیس و فایل‌های ساختگی مستقل استفاده می‌کنند. فرمان‌های systemd، Nginx، runuser و نصب uv روی VPS هنوز پذیرش عملی ندارند.

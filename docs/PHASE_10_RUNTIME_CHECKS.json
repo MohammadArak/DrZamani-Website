@@ -1,0 +1,35 @@
+{
+  "run": 37035493682,
+  "url": "https://github.com/MohammadArak/DrZamani-Website/actions/runs/37035493682",
+  "status": "passed",
+  "checks": [
+    "runuser frozen install",
+    "all Alembic migrations",
+    "verified HTTPS and SSR",
+    "closed booking",
+    "private uploads inaccessible",
+    "authenticated WSS and unauthenticated rejection",
+    "real API/job hardened units",
+    "real timer launches actual jobs",
+    "disabled SMS outbox remains unsent",
+    "deploy stops real writers and resumes previously active timer",
+    "populated DB/media/ENV/snippet rollback with ownership",
+    "API and WSS usable after restore",
+    "real failed nginx validation restores coordinated state",
+    "previously disabled timer stays disabled",
+    "systemd restarts API after SIGKILL; not a power-loss test",
+    "active TLS Nginx maintenance guards"
+  ],
+  "source": "9cbc634b88309901301d31ebdd09a302b8b409f3",
+  "version": "1.18.0",
+  "releasePackageSha256": "6775ba993c097b3d90e4fc16b074deea43eb397c44371534c2b152cb3e7afb33",
+  "systemd": "systemd 255 (255.4-1ubuntu8.17)",
+  "scope": "disposable GitHub-hosted VM; fixture data and loopback only; no VPS/production acceptance",
+  "openGates": [
+    "actual VPS/DNS/Cloudflare/providers",
+    "offsite encrypted backup/retention",
+    "host power loss",
+    "production artifact identity",
+    "live deploy authorization"
+  ]
+}

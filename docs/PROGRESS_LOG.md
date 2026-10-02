@@ -1,5 +1,16 @@
 # گزارش پیشرفت
 
+## 2026-10-02 — پذیرش واقعی runtime در VM مستقل، 1.18.0
+
+آزمون واقعی runtime روی source `9cbc634b88309901301d31ebdd09a302b8b409f3` در [run 37035493682](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37035493682) موفق شد: ۱۶ بررسی زیرساختی با systemd255، runuser/www-data، frozen install، migration، HTTPS معتبر fixture، WSS احراز‌شده/رد ناشناس، timer/job واقعی، deploy/rollback پرشده با مالکیت، شکست عمدی Nginx و بازیابی، حفظ وضعیت timer و restart پس از SIGKILL. شواهد پاک‌سازی‌شده در PHASE_10_RUNTIME_CHECKS.json است. کل pytest لینوکس همان source: 333 passed و ۳ هشدار قبلی. نتیجه همه jobهای کامیت نهایی، Windows، source/merge/tree و ZIP/hash در رسید outputs/AI_HANDOFF-1.18.0.md ثبت می‌شود؛ پذیرش VPS واقعی از این نتیجه استنباط نشود.
+
+خطاهای fixture و workflow اصلاح شدند؛ product security و VPS زنده تغییر نکردند. backup offsite، قطع برق و هویت production بازند. شواهد و محدودیت در PHASE_10_LINUX_RUNTIME.md ثبت‌اند؛ رسید و sourceZIP کنار handoff تازه شوند.
+
+## 2026-10-02 — شروع پذیرش runtime لینوکس، نسخه 1.18.0
+
+مالک قدم بعدی را تأیید کرد. WSL آماده، Docker و Podman روی این میزبان پیدا نشدند. یک آزمون واقعی و محدود به GitHub-hosted Ubuntu ساخته شد: refuse روی Windows/self-hosted/نصب موجود، نصب frozen تحت www-data، unitهای سخت‌گیری‌شده واقعی، timer و jobs، HTTPS با certificate معتبر fixture، WSS احراز‌شده/رد ناشناس، deploy و rollback داده/رسانه/ENV/snippets، شکست واقعی Nginx و بازیابی، حفظ وضعیت قبلی timer و restart پس از SIGKILL. دو تست guard محلی passed؛ اجرای runtime هنوز NOT RUN است. هیچ اتصال/نصب/deploy روی VPS زنده انجام نمی‌شود. خروجی عمومی تنها گزارش وضعیت بدون secret/DB/media/ENV است.
+
+
 ## 2026-10-02 — اجرای مستقل طراحی۸، نسخه1.17.0
 
 پس از درخواست مالک برای ادامه مستقل، طرح موجود به صفحه اصلی و موبایل تبدیل شد. صفحات خدمات SSR با canonical، breadcrumb، sitemap، 404 و guard تعمیر Nginx اضافه شدند. گالری ۱۶ تصویر عمومی قبلی و قالب مستقل مقاله حفظ شدند؛ نظرات و مقالات از API می‌آیند و رفتار رزرو خاموش محفوظ است. آمار و وعده درمانی بدون مرجع قبلی حذف شدند؛ داده یا رضایت واقعی تازه ساخته نشد.
