@@ -25,6 +25,7 @@ from .models import (
 from .routers import access, auth, patient, staff, settings as settings_router
 from .runtime_settings import SettingsUnavailable
 from .public_pages import router as public_pages_router
+from .public_services import router as public_services_router
 from .realtime import router as realtime_router
 from .security import hash_password
 from .sms_automation import seed_sms_rules
@@ -210,6 +211,7 @@ async def unavailable_settings(_request, exc):
 app.include_router(settings_router.router, prefix=settings.api_prefix)
 from . import public_articles  # Register editorial HTML before copying router routes.
 app.include_router(public_pages_router)
+app.include_router(public_services_router)
 
 from .routers import bot as bot_router, mfa as mfa_router
 app.include_router(bot_router.router, prefix=settings.api_prefix)

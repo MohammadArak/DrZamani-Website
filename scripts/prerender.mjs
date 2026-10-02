@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const projectDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputDirectory = resolve(projectDirectory, "public_html");
+const serviceCatalog = JSON.parse(await readFile(resolve(projectDirectory, "api/app/clinic_services.json"), "utf8"));
 
 const fallbackClinicSettings = Object.freeze({
     booking_enabled: false,
@@ -521,7 +522,8 @@ const homeBody = `
                 <a href="tel:${escapeHtml(clinic.consultationPhone.international)}">شماره مشاوره: ${escapeHtml(clinic.consultationPhone.display)}</a>
             </p>
             <p>ساعات کاری: ${escapeHtml(clinic.workingHours)}</p>
-            <address>${escapeHtml(clinic.address)}</address>
+              <address>${escapeHtml(clinic.address)}</address>
+              <nav aria-label="خدمات">${serviceCatalog.map(service => `<a href="/services/${escapeHtml(service.slug)}/">${escapeHtml(service.title)}</a>`).join(" · ")}</nav>
         </section>
     </main>
 `;
@@ -537,10 +539,6 @@ const homeDocument = prepareDocument({
         {
             href: "/img/zamani/dr-zamani-hero.webp",
             type: "image/webp",
-        },
-        {
-            href: "/img/zamani/shoar.png",
-            type: "image/png",
         },
     ],
     schema: [
@@ -694,12 +692,12 @@ const staffDocument = prepareDocument({
     },
 });
 
-const latestModifiedAt = new Date().toISOString().slice(0, 10);
+// Static fallback cannot know the latest clinic edit. Live Nginx/API provides
+// authoritative publication/update dates; do not invent lastmod from build time.
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>${siteUrl}/</loc>
-        <lastmod>${latestModifiedAt}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>

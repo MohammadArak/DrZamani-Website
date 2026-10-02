@@ -1,0 +1,241 @@
+{
+  "checked": 47,
+  "rows": [
+    {
+      "name": "alembic",
+      "installed": "1.16.5",
+      "matches": true
+    },
+    {
+      "name": "annotated-doc",
+      "installed": "0.0.5",
+      "matches": true
+    },
+    {
+      "name": "annotated-types",
+      "installed": "0.8.0",
+      "matches": true
+    },
+    {
+      "name": "anyio",
+      "installed": "4.14.2",
+      "matches": true
+    },
+    {
+      "name": "bleach",
+      "installed": "6.4.0",
+      "matches": true
+    },
+    {
+      "name": "certifi",
+      "installed": "2026.7.22",
+      "matches": true
+    },
+    {
+      "name": "cffi",
+      "installed": "2.1.1",
+      "matches": true
+    },
+    {
+      "name": "click",
+      "installed": "8.4.2",
+      "matches": true
+    },
+    {
+      "name": "colorama",
+      "installed": "0.4.6",
+      "matches": true
+    },
+    {
+      "name": "cryptography",
+      "installed": "50.0.0",
+      "matches": true
+    },
+    {
+      "name": "dnspython",
+      "installed": "2.8.0",
+      "matches": true
+    },
+    {
+      "name": "email-validator",
+      "installed": "2.2.0",
+      "matches": true
+    },
+    {
+      "name": "et-xmlfile",
+      "installed": "2.0.0",
+      "matches": true
+    },
+    {
+      "name": "fastapi",
+      "installed": "0.142.2",
+      "matches": true
+    },
+    {
+      "name": "greenlet",
+      "installed": "3.5.5",
+      "matches": true
+    },
+    {
+      "name": "h11",
+      "installed": "0.16.0",
+      "matches": true
+    },
+    {
+      "name": "httpcore",
+      "installed": "1.0.9",
+      "matches": true
+    },
+    {
+      "name": "httptools",
+      "installed": "0.8.0",
+      "matches": true
+    },
+    {
+      "name": "httpx",
+      "installed": "0.28.1",
+      "matches": true
+    },
+    {
+      "name": "idna",
+      "installed": "3.19",
+      "matches": true
+    },
+    {
+      "name": "iniconfig",
+      "installed": "2.3.0",
+      "matches": true
+    },
+    {
+      "name": "jalali-core",
+      "installed": "1.0.0",
+      "matches": true
+    },
+    {
+      "name": "jdatetime",
+      "installed": "5.2.0",
+      "matches": true
+    },
+    {
+      "name": "mako",
+      "installed": "1.4.1",
+      "matches": true
+    },
+    {
+      "name": "markupsafe",
+      "installed": "3.0.3",
+      "matches": true
+    },
+    {
+      "name": "openpyxl",
+      "installed": "3.1.5",
+      "matches": true
+    },
+    {
+      "name": "opentelemetry-api",
+      "installed": "1.45.0",
+      "matches": true
+    },
+    {
+      "name": "packaging",
+      "installed": "26.3",
+      "matches": true
+    },
+    {
+      "name": "pillow",
+      "installed": "12.3.0",
+      "matches": true
+    },
+    {
+      "name": "pluggy",
+      "installed": "1.6.0",
+      "matches": true
+    },
+    {
+      "name": "pycparser",
+      "installed": "3.0",
+      "matches": true
+    },
+    {
+      "name": "pydantic",
+      "installed": "2.13.4",
+      "matches": true
+    },
+    {
+      "name": "pydantic-core",
+      "installed": "2.46.4",
+      "matches": true
+    },
+    {
+      "name": "pygments",
+      "installed": "2.21.0",
+      "matches": true
+    },
+    {
+      "name": "pytest",
+      "installed": "9.0.3",
+      "matches": true
+    },
+    {
+      "name": "python-dotenv",
+      "installed": "1.2.2",
+      "matches": true
+    },
+    {
+      "name": "python-multipart",
+      "installed": "0.0.31",
+      "matches": true
+    },
+    {
+      "name": "pyyaml",
+      "installed": "6.0.3",
+      "matches": true
+    },
+    {
+      "name": "sqlalchemy",
+      "installed": "2.0.43",
+      "matches": true
+    },
+    {
+      "name": "starlette",
+      "installed": "1.3.1",
+      "matches": true
+    },
+    {
+      "name": "typing-extensions",
+      "installed": "4.16.0",
+      "matches": true
+    },
+    {
+      "name": "typing-inspection",
+      "installed": "0.4.4",
+      "matches": true
+    },
+    {
+      "name": "tzdata",
+      "installed": "2026.3",
+      "matches": true
+    },
+    {
+      "name": "uvicorn",
+      "installed": "0.35.0",
+      "matches": true
+    },
+    {
+      "name": "watchfiles",
+      "installed": "1.2.0",
+      "matches": true
+    },
+    {
+      "name": "webencodings",
+      "installed": "0.6.1",
+      "matches": true
+    },
+    {
+      "name": "websockets",
+      "installed": "17.0.1",
+      "matches": true
+    }
+  ],
+  "installation": "Existing project packages with current Python; frozen export matched. Fresh local sync failed network; CI clean install still required."
+}

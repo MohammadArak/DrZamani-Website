@@ -1,0 +1,41 @@
+{
+  "widths": [
+    {
+      "width": 1440,
+      "scroll": 1440
+    },
+    {
+      "width": 1024,
+      "scroll": 1024
+    },
+    {
+      "width": 768,
+      "scroll": 768
+    },
+    {
+      "width": 390,
+      "scroll": 390
+    },
+    {
+      "width": 320,
+      "scroll": 320
+    }
+  ],
+  "pageErrors": [],
+  "checks": [
+    "real API empty state",
+    "single h1",
+    "four service cards",
+    "16 original samples",
+    "closed booking dialog",
+    "gallery and Escape",
+    "mobile menu",
+    "mobile CTA",
+    "appointment no patient modules",
+    "service SSR",
+    "HTTP 404",
+    "synthetic comments and articles",
+    "reduced motion"
+  ],
+  "fixtures": "comments/articles mocked only in browser; no actual patient or published data"
+}

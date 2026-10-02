@@ -1,5 +1,23 @@
 # گزارش پیشرفت
 
+## 2026-10-02 — اجرای مستقل طراحی۸، نسخه1.17.0
+
+پس از درخواست مالک برای ادامه مستقل، طرح موجود به صفحه اصلی و موبایل تبدیل شد. صفحات خدمات SSR با canonical، breadcrumb، sitemap، 404 و guard تعمیر Nginx اضافه شدند. گالری ۱۶ تصویر عمومی قبلی و قالب مستقل مقاله حفظ شدند؛ نظرات و مقالات از API می‌آیند و رفتار رزرو خاموش محفوظ است. آمار و وعده درمانی بدون مرجع قبلی حذف شدند؛ داده یا رضایت واقعی تازه ساخته نشد.
+
+Runtime میزبان پیدا و مسیر Python در venv محلی اصلاح شد. نصب تازه Python محلی به شبکه/cache خورد؛ نصب فرانت‌اند از cache، export و تطبیق ۴۷ بسته موفق بودند. pytest محلی: ۳۱۷ passed، ۱۴ skip مخصوص لینوکس و ۳ هشدار قبلی؛ مجموعه مرتبط پس از SSR: ۴۴ passed. lint، build 1.17.0، Ruff، فونت، بودجه bundle، سه verifier migration/restore و Edge در پنج عرض بدون overflow/page error موفق بودند. جزئیات و محدودیت‌ها در PHASE_08_IMPLEMENTATION.md و شواهد JSON ثبت شده‌اند؛ CI و شناسه‌های دقیق تحویل در رسید outputs درج می‌شوند. پذیرش میدانی SEO، VPS/provider، backup خارج میزبان و قطع برق باز هستند؛ سایت زنده منتشر و booking/payment production فعال نشدند.
+
+نصب تمیز و CI کد اجرایی `582b9cf62dab60919ba1362e4df0d0ca0b706c9e` در [run 37029364306](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37029364306) با هر چهار job موفق بود: لینوکس ۳۳۱ passed و ویندوز ۳۱۵ passed / ۱۶ skipped، هر دو با ۳ هشدار قدیمی. frozen sync، سه verifier migration/restore و pip-audit در هر دو محیط موفق؛ frontend نصب/lint/build/fonts/budgets و npm audit موفق؛ اسکن تاریخچه نیز موفق. شواهد مرحله‌ها در PHASE_08_CI_CHECKS.json هستند. کامیت تکمیل اسناد پس از این شاهد CI جدا بررسی می‌شود و نتیجه نهایی ادغام در رسید outputs خواهد آمد.
+
+## 2026-10-02 — بررسی پیش از ادامه روی میزبان فعلی
+
+ساختار، اسناد، مسیر صفحه اصلی/رزرو خاموش و workflow خوانده شد؛ نسخه1.16.0 و hash کانسپت تطبیق خواندنی شدند. GitHub main=db6de0c و PR۱۲ draft/head46625be با ref محلی تطبیق دارد. گزارش محدودیت و قدم بعد در PROJECT_REVIEW_2026-10-02.md و ابتدای AI_HANDOFF ثبت شد. Git/Node/npm در PATH نیستند، venv به Python پروفایل admin قدیمی متکی است و اجرا نمی‌شود؛ bundled runtime ندارد. تست تازه/lint/build/migration/browser اجرا نشده و پاک‌بودن checkout اثبات نشده است. هیچ کد، deploy یا وضعیت production تغییر نکرد. ادامه مرحله۸، پس از آماده‌سازی محیط و جمع‌بندی طرح/موبایل/گالری؛ مرحله۸/۱۰ ناتمام باقی‌اند.
+
+## 2026-10-02 — شروع دوباره مرحله۸، concept-v1
+
+مالک طراحی جدید را خواست و فقط پیشنهاد بصری برای بررسی درخواست کرد. یک تصویر homepage با imagegen و رفرنس عمومی پزشک/لوگو/screenshot مالک ساخته شد؛ navy/gold، hero/header تیره، خدمات ساده، نظرات باعکس/نام/متن درcarousel، کارت مقاله/FAQ/contact/footer. تصویر971×1619/1574700bytes، فایل بازخوانی و بصری دیده شد؛ SHA25659df4e073488c0d81f574be1c6e80b96bb74a3174c410f2c13b6c622b8463a1e. نمونه‌کار در کانسپت اول نیست و باید با محتوای تأییدشده حفظ شود؛ متن و تصاویر مکمل تولیدی داده مرجع واقعی نیستند. کد، mobile، عملکرد، accessibility/contrast و SEO جدید آزموده نشده‌اند؛ مرحله۸ complete نیست. شاخه/PR پیش‌نمایش draft است و source دقیق در handoff کنار تصویر ثبت می‌شود؛ بدون deploy/productionactivation/realpatient/provider/owner.
+
+مبنای این مرحله main db6de0c24a59b3cedf4ac1b4a4be1d6c8eb1238f از PR۱۱، نسخه1.16.0/source40ada26346de67ecdf57665db091fd57ef9103e9؛ CI36969641558 چهارjob موفق،327 Linux و311 Windows/16skip. این تست‌ها کد قبلی‌اند و برای کانسپت تازه PASS عملکرد ثبت نمی‌شود.
+
 ## 2026-10-02 — بازیابی هماهنگ1.16.0، در حال پذیرش
 
 پس از ادغام PR۱۰ با main00dd2802b4ac673cca3afe339af49fedefd7e169، scope بعدی مرحله۱۰ بازیابی DB/publicmedia/privateuploads/ENV/Nginx است. اسکریپت‌های قدیمی با مدیریت هماهنگ، توقف سه writer، قفل مشترک، maintenance، snapshot مستقل از WAL، integrity/hash و rollback با رسید متناظر جایگزین شدند. گروه پردازشی فرمان در timeout/interrupt بسته می‌شود و ENV با Python سرویس تحت www-data خوانده می‌شود. راهنمای deploy/RECOVERY.md حدود rollback و journal/قطع برق/offsite را شفاف می‌کند. فرانت دست‌نخورده است. CI f980cfe/run36968560715 چهارjob موفق:325 Linux و311 Windows/14skipped، هرکدام3warning قبلی. محلی recovery17passed/14skipped؛ fullsuite root308passed/2cwd-fail/13skip بود، دو خطا از cwd=api همراه تست‌های جدید18passed/14skip تکرار و رفع شد؛ fullsuite موفق محلی ادعا نشود.

@@ -132,7 +132,7 @@ uv run alembic upgrade head
 مدیر اولیه را بسازید:
 
 ```powershell
-uv run python -m app.create_admin --username admin --name "Clinic Admin"
+uv run python -m app.setup_owner --username YOUR_OWNER_USERNAME --name "مدیرکل"
 ```
 
 رمز مدیر در ترمینال درخواست می‌شود و باید حداقل ۱۲ کاراکتر داشته باشد.
@@ -346,19 +346,12 @@ Remove-Item Env:PRERENDER_CLINIC_SETTINGS_FILE
 
 قرارداد callback، expiry/refund، محدودیت تغییر حساب درگاه، backup/maintenance برای rollback و شواهد آزمون در [مرحله۵](docs/PHASE_05_BOOKING_PAYMENTS.md) است. مقالات مرحله۶ قدم بعدی است.
 
-## Snapshot مقالات (مرحله۶ در حال انجام)
+## وضعیت فعلی — نسخه1.17.0
 
-شاخهphase-06-articles با نسخه منبع1.13.0 برایادامهAIذخیره شده است؛ release/پذیرش نیست. [راهنمای ادامه](docs/AI_HANDOFF.md)، [گزارشWIP](docs/PHASE_06_ARTICLES_WIP.md) و [پرامپتادامه](docs/CONTINUE_PROMPT.md) مقدم‌اند. main1.12.1 رزروخاموش رافقطباپیاموانیمیشن،بدونورود،نمایشمی‌دهد.
+طراحی صفحه اصلی و موبایل، گالری فعلی، نظرات و مقاله‌های متصل به پنل و صفحات معرفی خدمات در حوزه مرحله۸ پیاده شده‌اند. صفحات خدمات از HTML سروری و کاتالوگ مشترک api/app/clinic_services.json استفاده می‌کنند؛ ساختار مستقل مقالات حفظ شده است. نسخه‌های frontend/backend/lock/VERSION هماهنگ‌اند.
 
+[گزارش طراحی و محدودیت‌ها](docs/PHASE_08_IMPLEMENTATION.md)، [راهنمای پذیرش SEO](docs/PHASE_08_SEO_CHECKLIST.md)، [وضعیت ادامه AI](docs/AI_HANDOFF.md) و [نقشه راه](ROADMAP.md) مراجع جاری‌اند. WIPهای مراحل۶/۷ و تعویق قبلی طراحی، گزارش تاریخی‌اند. رسید source/merge/tree/CI در outputs کنار فایل تحویل ثبت می‌شود.
 
-## نسخه1.14.0 — مرحله۷ در حال توسعه
+نوبت‌دهی در نصب/مهاجرت پیش‌فرض خاموش است؛ صفحه اصلی پیام تنظیم‌شده را در دیالوگ و /appointment/ فقط پیام و انیمیشن نمایش می‌دهد. هیچ انتشار زنده یا روشن‌کردن production انجام نشده است. staging موجود نیست؛ پذیرش واقعی VPS/systemd/providers، هویت artifact/production، بکاپ offsite/قطع برق و داده میدانی سرعت هنوز کامل نشده‌اند. راهنمای بازیابی هماهنگ در deploy/RECOVERY.md و docs/PHASE_10_RECOVERY.md است.
 
-مرحله۶ با PR۷ در main ادغام شده است: ed549791eec6aaccc9e838c785ef3aa98fae039a (tree8a1e9a03d679d5c04f565bcccfa7aa5105d345b1). گزارش تاریخی WIP قبلی وضعیت فعلی نیست؛ PHASE_06_ARTICLES.md مرجع پذیرش محلی است. مرحله۷ نظرات با رضایت انتشار در شاخه مستقل توسعه می‌یابد؛ هنوز پذیرش نشده. هیچ deploy یا فعال‌سازی production مجاز نشده است.
-
-مرحله۷ نسخه1.14.0 پذیرش محلی شده؛ docs/PHASE_07_COMMENTS.md برWIPقبلی مقدم است. deployانجام نشده، stagingگیت مستقل است.
-
-
-مرحله۹ نگهداری بدون تغییر ظاهر: [گزارش و محدودیت‌ها](docs/PHASE_09_MAINTENANCE.md). PR۸ در main ادغام شد؛ remoteCI مرحله۹ باید پیش از ادغام پذیرفته شود. staging موجود نیست و سایت زنده deploy نشده است.
-
-
-[پذیرش نهایی محلی و موارد باز](docs/PHASE_10_ACCEPTANCE.md): PR۹ و CI لینوکس/ویندوز موفق؛ staging موجود نیست و مرحله۱۰ کامل نشده است. نمونه نصب جدید پیامک خاموش و رسانه پایدار دارد؛ اسکریپت استقرار برای backup رسانه/jobs روی VPS هنوز پذیرش نشده. هیچ deploy انجام نشده است.
+برای محیط توسعه، ابزارهای Git/Node/Python/uv معتبر همین میزبان و محیط/DB مستقل استفاده کنید. venv یا node_modules منتقل‌شده از رایانه دیگر ممکن است مسیر اجرایی قدیمی داشته باشد؛ نصب locked تازه/CI ملاک است. فایل‌های ENV، DB، خروجی build، لاگ و رسانه خصوصی وارد Git نشوند.

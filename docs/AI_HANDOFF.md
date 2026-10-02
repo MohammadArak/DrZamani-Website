@@ -1,4 +1,42 @@
-# وضعیت فعلی — 2026-10-02، بازیابی هماهنگ1.16.0 در حال پذیرش
+# وضعیت فعلی — 2026-10-02، طراحی و خدمات نسخه 1.17.0
+
+مالک ادامه مستقل کار و گزارش نهایی را خواست. حوزه اجرای طراحی مرحله ۸ و صفحات خدمات پیاده و محلی آزموده شده است. مرجع جزئیات [PHASE_08_IMPLEMENTATION.md](PHASE_08_IMPLEMENTATION.md)، شواهد مرورگر و وابستگی‌ها و [راهنمای SEO](PHASE_08_SEO_CHECKLIST.md) هستند. کار در شاخه `codex/phase-08-design-preview` و PR شماره ۱۲ ادامه یافته؛ نتیجه نهایی CI، کامیت ادغام، tree و hash آرشیو در `outputs/AI_HANDOFF-1.17.0.md` و رسید تحویل ثبت می‌شود. ادعای ادغام فقط بر مبنای آن رسید و ref واقعی GitHub باشد.
+
+هیرو و هدر سرمه‌ای، خدمات، معرفی، نظرات API، گالری ۱۶ تصویر عمومی قبلی با بزرگ‌نمایی، مقالات API، پرسش‌های تماس، نقشه، فوتر و نوار موبایل پیاده‌اند. رزرو خاموش در صفحه اصلی دیالوگ پیام مدیر را نشان می‌دهد؛ صفحه appointment فرم و ماژول بیمار بارگیری نمی‌کند. آمار و وعده درمانی بدون مرجع قبلی حذف شدند. نظر، رضایت یا تصویر بیمار تازه ساخته نشده است. چهار خدمت با HTML اولیه سرور، canonical، breadcrumb، sitemap، 404 واقعی و guard تعمیر Nginx اضافه شدند. کاتالوگ مشترک `api/app/clinic_services.json` است؛ صفحه مستقل مقاله قالب قبلی را دارد. نسخه frontend/API/lock/VERSION برابر 1.17.0 است.
+
+Runtime میزبان پیدا شد و مسیر Python در venv محلی ignored اصلاح شد. نصب locked فرانت‌اند از cache، frozen export و تطبیق ۴۷ بسته ویندوز موفق بودند؛ نصب تازه محلی Python به شبکه و cache ناقص خورد. نتیجه نصب تمیز CI جدا ثبت می‌شود. محلی: کل pytest با ۳۱۷ passed، ۱۴ تست مخصوص لینوکس skipped و ۳ هشدار قبلی؛ آزمون‌های مرتبط پس از تغییر SSR با ۴۴ passed؛ lint، build، Ruff، فونت، بودجه bundle و سه verifier migration/restore موفق. Edge در پنج عرض ۳۲۰ تا ۱۴۴۰ بدون سرریز و page error بررسی شد؛ منو، دیالوگ، گالری، رزرو خاموش، خدمات SSR و 404 گذشتند. کارت‌های نظر و مقاله پرشده در screenshots فقط mock مرورگر هستند و در DB یا سایت منتشر نشده‌اند.
+
+پذیرش میدانی سرعت، Search Console، بازبینی مستقل کامل دسترس‌پذیری و تأیید تخصصی محتوا/رضایت دارایی‌های موجود باز هستند. مرحله ۱۰ شامل اجرای واقعی VPS/systemd/provider، هویت artifact در production، backup خارج میزبان و آزمون قطع برق همچنان ناتمام است. staging نداریم و این سؤال تکرار نشود. ادغام حوزه آزموده مجاز است؛ deploy زنده و فعال‌سازی booking/payment/SMS واقعی اجازه جدا می‌خواهند. داده خصوصی بیمار و حساب مالک واقعی استفاده نشده‌اند.
+
+قدم بعد: ادامه پذیرش runtime و هویت artifact در یک محیط مستقل لینوکس، سپس گیت‌های خارجی محتوا/SEO و انتشار فقط با مجوز مالک. اسناد و نتایج قدیمی پایین تاریخی هستند؛ بخش فعلی و رسید کنار ZIP بر آن‌ها مقدم‌اند.
+
+نصب تمیز و CI کد اجرایی `582b9cf62dab60919ba1362e4df0d0ca0b706c9e` در [run 37029364306](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37029364306) با هر چهار job موفق بود: لینوکس ۳۳۱ passed و ویندوز ۳۱۵ passed / ۱۶ skipped، هر دو با ۳ هشدار قدیمی. frozen sync، سه verifier migration/restore و pip-audit در هر دو محیط موفق؛ frontend نصب/lint/build/fonts/budgets و npm audit موفق؛ اسکن تاریخچه نیز موفق. شواهد مرحله‌ها در PHASE_08_CI_CHECKS.json هستند. کامیت تکمیل اسناد پس از این شاهد CI جدا بررسی می‌شود و نتیجه نهایی ادغام در رسید outputs خواهد آمد.
+
+---
+
+# وضعیت تاریخی — 2026-10-02، بررسی فایل‌ها برای ادامه
+
+گزارش این نوبت: [PROJECT_REVIEW_2026-10-02.md](PROJECT_REVIEW_2026-10-02.md). نسخه1.16.0، HEAD محلی از ref و head پیش‌نویس PR۱۲ در GitHub هر دو `46625befb8742a6974f85a8d6d5ded22fc50ae4e`؛ main آنلاین `db6de0c24a59b3cedf4ac1b4a4be1d6c8eb1238f`. کد اجرایی تغییر نکرد؛ بررسی ساختار/اسناد و مسیرهای Landing/AppointmentGate/ReserveDialog و CI انجام شد، hash تصویر طرح تطبیق شد. این مرور ممیزی کامل یا پذیرش تازه نیست.
+
+مانع میزبان: Git/Node/npm در PATH در دسترس نیستند؛ venv موجود به Python رایانه قبلی در پروفایل admin اشاره دارد و اجرا نمی‌شود. lint/build/pytest/migration/browser این نوبت NOT RUN؛ git status/diff و clean checkout اثبات نشده. bundled runtime پیکربندی ندارد. برای ادامه محیط معتبر همین میزبان و DB مستقل آماده شود؛ لاگ/ENV/DB/خروجی‌ها وارد Git نشوند.
+
+قدم بعد مرحله۸: جمع‌بندی کانسپت موجود، تکمیل موبایل و گالری و پیاده‌سازی در همان شاخه/PR۱۲. طراحی و مرحله۱۰ هنوز ناتمام‌اند؛ متن تاریخی deferred/WIP پایین بر وضعیت جدید مقدم نیست. README و checkbox Hero روشن در ROADMAP نیاز همسوسازی با تصمیم نهایی طراحی دارند. اجازه merge مرحله آزموده برقرار است؛ deploy/productionbooking/provider/patientdata واقعی مجوز جدا دارند.
+
+---
+
+# وضعیت فعلی — 2026-10-02، شروع دوباره طراحی مرحله۸ با پیشنهاد بصری
+
+درخواست تازه مالک: «طراحی جدید رو الان انجام بدیم؛ یه طرح بصری بکش». طراحی دیگر برای بررسی بصری deferred نیست؛ فقط مفهوم صفحه اصلی concept-v1 ساخته شده، کد اجرایی/سرور تغییر نکرده و پذیرش طراحی ثبت نشده. docs/PHASE_08_DESIGN_PREVIEW.md و docs/design/homepage-concept-v1.png مرجع‌اند. PNG971×1619، SHA25659df4e073488c0d81f574be1c6e80b96bb74a3174c410f2c13b6c622b8463a1e. تصویر با imagegen از منابع عمومی پزشک/لوگو و screenshot مالک ساخته و دیده شد؛ avatar/photoهای مکمل نمایشی‌اند، داده/نظر واقعی بیمار نیستند. پیاده‌سازی، mobile، contrast/accessibility/SEO/interaction هنوز NOT RUN، مرحله۸ complete نیست.
+
+main مبنا db6de0c24a59b3cedf4ac1b4a4be1d6c8eb1238f؛ نسخه1.16.0، source40ada26346de67ecdf57665db091fd57ef9103e9 و tree3cc4dad989be879f32414960cccec2a2de06ed58. PR۱۱ merged و CI36969641558 چهارjob موفق327 Linux/311 Windows/16skip؛ نتایج اجرا شده مربوط به کد قبلی‌اند. رسید دقیق outputs/AI_HANDOFF-1.16.0.md بر pending تاریخی پایین مقدم است. preview در شاخه codex/phase-08-design-preview با PRdraft جدا ثبت می‌شود، نه پذیرش/ادغام مرحله۸ کامل.
+
+جهت: navy/gold، هدر/هیرو تیره، نام طلایی/متن سفید، کارت خدمات خلوت، درباره پزشک دو ستون، نظراتphoto/name/body درcarousel تیره/شیشه‌ای، کارت مقاله، FAQ/contact وfooterheading سفید. سه کارت حذف‌شده AboutUs بازنگردند؛ وضعیت رزرو رویhomepage نوشته نشود و دیالوگ managertext/closed appointment no-patient-load حفظ شود. صفحه مستقل مقالات در این کانسپت تغییر ندارد. **نمونه‌کار در کانسپت۱ دیده نمی‌شود؛ حذف قابلیت منظور نیست و گالری محتوای تأییدشده در طرح تکمیلی حفظ شود.** متن/عکس/نقشه تولیدی داده مرجع پنل نیست؛ اجرای نهایی با داده backend و عکس واقعی تأییدشده تطبیق یابد.
+
+قدم بعد: دریافت بازخورد بصری مالک، تکمیل desktop/mobile وگالری/صفحاتخدمات، سپس پیاده‌سازی روی همین PR/شاخه طراحی و بررسی مرتبط. stage۱۰/runtime/providers/sourceartifact/productionidentity/offsite/power-loss همچنان ناتمام. merge پس از تکمیل/test/docs از قبل مجاز است؛ deploy، productionbooking، realowner، payment/SMS و patientdata واقعی بدون اجازه صریح ممنوع. فایل ادامه کنار تصویر خروجی تحویل می‌شود.
+
+---
+
+# وضعیت تاریخی — بازیابی هماهنگ1.16.0 پیش از ادغام PR۱۱
 
 شاخه codex/phase-10-recovery از main `00dd2802b4ac673cca3afe339af49fedefd7e169`، tree `451f35a323b91d36ce3432e56c18c60a08a65e2a`. PR۱۰ نسخه1.15 با source `33fb38e2e2e712c010b747fc5b2de3058e164785` ادغام شد؛ CI36963277372 چهار job موفق و294 pytest هر OS. رسید/ZIP/handoff در outputs موجود است؛ قدم‌های pending متن تاریخی پایین دیگر مربوط به PR۱۰ نیستند.
 
