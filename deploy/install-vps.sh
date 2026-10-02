@@ -40,6 +40,7 @@ install -o root -g root -m 0755 "$(command -v uv)" /usr/local/bin/uv
 install -d -o www-data -g www-data -m 0750 /var/www/drzamani/releases
 install -d -o www-data -g www-data -m 0750 /var/www/drzamani/shared
 install -d -o www-data -g www-data -m 0700 /var/lib/drzamani/uploads
+install -d -o www-data -g www-data -m 0700 /var/lib/drzamani/public-media
 install -d -o www-data -g www-data -m 0750 /var/lib/drzamani/uv-cache
 install -d -o www-data -g www-data -m 0750 /var/lib/drzamani/uv-python
 install -d -o root -g root -m 0700 /var/backups/drzamani

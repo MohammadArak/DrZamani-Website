@@ -1,5 +1,3 @@
-# دستور ادامه — 2026-10-02
+# ادامه — نسخه1.15.0، 2026-10-02
 
-ابتدا AGENTS.md، ROADMAP، ابتدایAI_HANDOFF وPROGRESS_LOG وPHASE_09_MAINTENANCE را بخوان. مرحله۶/۷ PR۷/۸ merged؛ SHAهای دقیق handoff/outputs. مرحله۹ نسخه1.15.0 محلی۲۹۲test/build/lint/migration/مرورگر پذیرفته؛ remoteCI وcommit/push/PR/merge باexpectedSHA/treeverify هنوز لازم. مرحله۸ طراحی deferred به دستورمالک؛ ظاهرقدیمی مقالات/sidebar وcarouselنظرات عکس‌دار حفظ شود.
-
-مالک staging ندارد. مرحله۱۰ خارجی unrun است؛ هیچdeploy/productionbooking/realowner/payment/SMS/patientdata مجاز نیست. هر تحویل handoff+رسید source/merge/tree/archivehash کنارoutputs. بررسی اجرا نشده را PASS یا complete ننام.
+AGENTS/ROADMAP/AI_HANDOFF/PROGRESS_LOG/PHASE_10_ACCEPTANCEرااولبخوان. PR۷/۸/۹ merged؛ PR۹source9b75629732e48c2ee2bde45652ee27781b71a467/merge913a43d1c6e69a4749a8aa3e38625b7de5692252/tree21bcac5e3906828279b2334296ea9997d87de718، CI36957457614 همهjobsuccess. receipt/ZIP/hash کنارoutputs. مرحله۱۰localreport/defaults درcodex/phase-10-acceptance؛ قبلmergeCIactual وSHA/treeverify. ownerstagingندارد؛۱۰externalincomplete،۸designdeferred. هدفبعدیsandboxLinuxcoordinatedbackup/jobs/media وartifactidentity؛ deployscriptsruntimeNOTACCEPTED. frontendقالبقدیمحفظ؛ bookingclosednoPatientPortal. deploy/productionbooking/realowner/payment/SMS/patientdataمجازنیست، unrunNOTPASS، هر تحویلhandoff.

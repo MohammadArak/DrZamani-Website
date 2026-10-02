@@ -359,3 +359,6 @@ Remove-Item Env:PRERENDER_CLINIC_SETTINGS_FILE
 
 
 مرحله۹ نگهداری بدون تغییر ظاهر: [گزارش و محدودیت‌ها](docs/PHASE_09_MAINTENANCE.md). PR۸ در main ادغام شد؛ remoteCI مرحله۹ باید پیش از ادغام پذیرفته شود. staging موجود نیست و سایت زنده deploy نشده است.
+
+
+[پذیرش نهایی محلی و موارد باز](docs/PHASE_10_ACCEPTANCE.md): PR۹ و CI لینوکس/ویندوز موفق؛ staging موجود نیست و مرحله۱۰ کامل نشده است. نمونه نصب جدید پیامک خاموش و رسانه پایدار دارد؛ اسکریپت استقرار برای backup رسانه/jobs روی VPS هنوز پذیرش نشده. هیچ deploy انجام نشده است.
