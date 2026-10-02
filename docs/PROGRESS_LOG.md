@@ -2,7 +2,11 @@
 
 ## 2026-10-02 — اجرای مستقل طراحی۸، نسخه1.17.0
 
-پس از درخواست مالک برای ادامه مستقل، طرح موجود بهhomepage/mobile تبدیل شد؛ خدماتSSR/canonical/breadcrumb/sitemap/404 وNginxmaintenanceguard افزوده شد. گالری۱۶assetعمومیقبلی وarticletemplate مستقل حفظ؛ نمایشcomments/articles ازAPI،رزروخاموش/closedgate محفوظ. آمار/وعدهدرمانی قبلی حذف،data/consentواقعی ساخته نشد. runtimeمیزبان پیدا وvenvignored اصلاح؛freshsyncPython شبکهfailed،npmcioffline/export/۴۷match موفق. fullpytest317pass/14Linuxskip/3oldwarning؛related44pass پسSSR؛lint/build1.17/Ruff/fonts/budgets/سهmigrationrestore وEdgedesktop/mobile۵عرض بدونoverflow/error موفق. گزارش PHASE_08_IMPLEMENTATION وشواهدJSON محدودیت را ثبت می‌کنند؛CI/source/merge/tree دررسیدoutputs پسارسال. fieldSEO/runtimeVPS/provider/offsite/powerloss ناتمام،stagingنداریم؛هیچdeploy/bookingproduction/providerreal/owner/patientprivate انجام نشد.
+پس از درخواست مالک برای ادامه مستقل، طرح موجود به صفحه اصلی و موبایل تبدیل شد. صفحات خدمات SSR با canonical، breadcrumb، sitemap، 404 و guard تعمیر Nginx اضافه شدند. گالری ۱۶ تصویر عمومی قبلی و قالب مستقل مقاله حفظ شدند؛ نظرات و مقالات از API می‌آیند و رفتار رزرو خاموش محفوظ است. آمار و وعده درمانی بدون مرجع قبلی حذف شدند؛ داده یا رضایت واقعی تازه ساخته نشد.
+
+Runtime میزبان پیدا و مسیر Python در venv محلی اصلاح شد. نصب تازه Python محلی به شبکه/cache خورد؛ نصب فرانت‌اند از cache، export و تطبیق ۴۷ بسته موفق بودند. pytest محلی: ۳۱۷ passed، ۱۴ skip مخصوص لینوکس و ۳ هشدار قبلی؛ مجموعه مرتبط پس از SSR: ۴۴ passed. lint، build 1.17.0، Ruff، فونت، بودجه bundle، سه verifier migration/restore و Edge در پنج عرض بدون overflow/page error موفق بودند. جزئیات و محدودیت‌ها در PHASE_08_IMPLEMENTATION.md و شواهد JSON ثبت شده‌اند؛ CI و شناسه‌های دقیق تحویل در رسید outputs درج می‌شوند. پذیرش میدانی SEO، VPS/provider، backup خارج میزبان و قطع برق باز هستند؛ سایت زنده منتشر و booking/payment production فعال نشدند.
+
+نصب تمیز و CI کد اجرایی `582b9cf62dab60919ba1362e4df0d0ca0b706c9e` در [run 37029364306](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37029364306) با هر چهار job موفق بود: لینوکس ۳۳۱ passed و ویندوز ۳۱۵ passed / ۱۶ skipped، هر دو با ۳ هشدار قدیمی. frozen sync، سه verifier migration/restore و pip-audit در هر دو محیط موفق؛ frontend نصب/lint/build/fonts/budgets و npm audit موفق؛ اسکن تاریخچه نیز موفق. شواهد مرحله‌ها در PHASE_08_CI_CHECKS.json هستند. کامیت تکمیل اسناد پس از این شاهد CI جدا بررسی می‌شود و نتیجه نهایی ادغام در رسید outputs خواهد آمد.
 
 ## 2026-10-02 — بررسی پیش از ادامه روی میزبان فعلی
 

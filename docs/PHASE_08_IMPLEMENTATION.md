@@ -21,11 +21,13 @@
 - lint صفر warning، TypeScript/build1.17.0، Ruffcritical،۸فونت/206004bytes و bundle budgets موفق. build نهایی اطلاعات را از APIfixture واقعی خواند. gzipهای نهایی پیش از کامیت: main96142،staff24607،patientGate876،patientSession1551،allJs418815،CSS21098bytes؛ اعداد artifact هستند و LCP/INP میدانی نیستند.
 - سه verifier migration عمومی/editorial/comments با داده پرشده و restore مستقل موفق؛ schema migration تازه لازم نبود. API مرورگر با DB جدید و۱۹migration، بدون حساب مالک و providerdisabled/bookingfalse بالا آمد.
 - Edge واقعی desktop/mobile، عرض۱۴۴۰/۱۰۲۴/۷۶۸/۳۹۰/۳۲۰ بدون سرریز افقی؛ singleh1،۴خدمت،۱۶نمونه، منو، CTAخاموش، دیالوگ وEscape، بزرگ‌نمایی، سرویسSSR،404 و نبود ماژول بیمار در appointment بررسی شد؛ pageerror صفر. PHASE_08_BROWSER_CHECKS.json مرجع است. نظرات/مقالاتِ کارت‌های پرشده در تصاویر، فقط پاسخ mock مرورگر و صریحاً نمونه آزمایشی‌اند؛ درDB/سایت واقعی منتشر نشده‌اند.
-- screenshots درoutputs خارجGit هستند؛ PNGهای نهایی بصری بازخوانی شدند. اندازه تصویر/متن فارسی/فاصله‌ها بررسی شد. fullPage مرورگر عناصر fixed را با موقعیت viewport ثبت می‌کند؛ نمای hero/mobile viewport نیز برای بررسی دقیق حفظ شود.
+- screenshots درoutputs خارجGit هستند؛ PNGهای نهایی بصری بازخوانی شدند. اندازه تصویر/متن فارسی/فاصله‌ها بررسی شد. fullPage مرورگر عناصر fixed را با موقعیت viewport ثبت می‌کند؛ نمای hero دسکتاپ و viewport موبایل نیز ثبت و بصری بررسی شدند.
 
 ## موارد باز و ادامه
 
-نتیجه CI نهایی، source/merge/tree وZIP/hash در رسید outputs پس از ارسال ثبت می‌شود. اسکن تاریخچه/کامیت نهایی پیش از merge لازم است. متن این گزارش ادعای نتیجه CI قبل از اجرای آن ندارد.
+نصب تمیز و CI کد اجرایی `582b9cf62dab60919ba1362e4df0d0ca0b706c9e` در [run 37029364306](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37029364306) با هر چهار job موفق بود: لینوکس ۳۳۱ passed و ویندوز ۳۱۵ passed / ۱۶ skipped، هر دو با ۳ هشدار قدیمی. frozen sync، سه verifier migration/restore و pip-audit در هر دو محیط موفق؛ frontend نصب/lint/build/fonts/budgets و npm audit موفق؛ اسکن تاریخچه نیز موفق. شواهد مرحله‌ها در PHASE_08_CI_CHECKS.json هستند. کامیت تکمیل اسناد پس از این شاهد CI جدا بررسی می‌شود و نتیجه نهایی ادغام در رسید outputs خواهد آمد.
+
+source/merge/tree و ZIP/hash دقیق در رسید outputs پس از ادغام ثبت می‌شوند. اسکن کامیت تکمیل اسناد و موفقیت CI همان head پیش از merge لازم است.
 
 Search Console/Google crawl، field LCP≤2.5s/INP≤200ms/CLS≤0.1، بررسی مستقل کامل دسترس‌پذیری و بازبینی تخصصی محتوای پزشکی/رضایت دارایی‌ها در محیط واقعی انجام نشده‌اند. راهنمای SEO در PHASE_08_SEO_CHECKLIST.md است. بنابراین checkboxهای پذیرش خارجی مرحله۸ و کل مرحله۱۰ complete نیستند.
 
