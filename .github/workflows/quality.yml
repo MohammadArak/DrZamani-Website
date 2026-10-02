@@ -18,7 +18,6 @@ jobs:
     timeout-minutes: 20
     env:
       DRZ_RUNTIME_ACCEPTANCE: fixture-only
-      RUNNER_ENVIRONMENT: ${{ runner.environment }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,6 +38,8 @@ jobs:
           python3 -m pip install uv==0.11.24
           sudo install -m 0755 "$(command -v uv)" /usr/local/bin/uv
       - name: Exercise actual systemd, runuser, HTTPS, WSS and coordinated recovery
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: sudo --preserve-env=GITHUB_ACTIONS,RUNNER_ENVIRONMENT,GITHUB_WORKSPACE,GITHUB_SHA,DRZ_RUNTIME_ACCEPTANCE /usr/bin/python3 scripts/verify-linux-runtime.py --report .work/linux-runtime-report.json
 
   frontend:
