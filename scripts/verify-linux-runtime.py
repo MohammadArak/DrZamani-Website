@@ -103,7 +103,7 @@ def fixture_setup(runtime, layout):
 
 def package(path, *, broken=False):
     with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as archive:
-        names = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
+        names = subprocess.check_output(['git', '-c', 'safe.directory='+str(ROOT), 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
         for name in filter(None, names):
             if name == 'VERSION' or name.startswith(('api/', 'deploy/')):
                 data = (ROOT/name).read_bytes()
@@ -196,6 +196,7 @@ def fingerprint(layout):
 
 def verify(report):
     require_disposable_runner()
+    report.parent.mkdir(exist_ok=True, mode=0o700)
     runtime, layout = Runtime(), Layout()
     manager = ReleaseManager(layout, runtime)
     checks = []
@@ -270,10 +271,16 @@ def verify(report):
         request('/api/health', context)
         checks += ['real failed nginx validation restores coordinated state', 'previously disabled timer stays disabled']
         stage = 'unexpected API process termination'
-        previous_pid = runtime.run(['systemctl','show',API,'--property=MainPID','--value'])
+        previous_pid = runtime.run(['systemctl','show','--property=MainPID','--value',API])
         runtime.run(['systemctl','kill','--kill-whom=main','--signal=SIGKILL',API])
+        for _ in range(30):
+            restarted_pid = runtime.run(['systemctl','show','--property=MainPID','--value',API])
+            if restarted_pid not in ('0', previous_pid) and runtime.active(API):
+                break
+            time.sleep(1)
+        else:
+            raise AssertionError('API did not restart after SIGKILL')
         runtime.health((ROOT/'VERSION').read_text().strip())
-        assert runtime.run(['systemctl','show',API,'--property=MainPID','--value']) != previous_pid
         checks += ['systemd restarts API after SIGKILL; not a power-loss test']
         stage = 'maintenance HTTP guards'
         layout.maintenance.touch(mode=0o600)

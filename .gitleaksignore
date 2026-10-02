@@ -1,0 +1,4 @@
+# Two historical false positives: systemctl's literal --property=MainPID option.
+# Exact commit/file/rule/line only; no real credential and no file/rule exclusion.
+fb36349208e17ba8d5e6c34cc0c3cbe3009101d9:scripts/verify-linux-runtime.py:generic-api-key:273
+fb36349208e17ba8d5e6c34cc0c3cbe3009101d9:scripts/verify-linux-runtime.py:generic-api-key:276
