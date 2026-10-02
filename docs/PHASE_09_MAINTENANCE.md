@@ -15,3 +15,8 @@ CI checkout تمیز برای Node24.19.0 و Python3.12 در Linux/Windows، lin
 مرورگر واقعی React/API/Nginx با fixture بیرونGit: داشبورد، تقویم، فهرست نوبت، برنامه نوبت‌دهی، خدمات، مرکز پیامکی و اطلاعات مطب بعد از lazyload بررسی شدند. پروفایل بیمار ساختگی و wizard مراحل۱→۲ بارگیری شدند؛ نوبت/پرداخت/پیامک ساخته نشد. آزمون فعال فقط SQLite موقت و سپس false شد؛ خود صفحه بیمار با تازه‌شدن سیاست بسته شد. خاموشی: forms/input صفر و فقط index/appointmentApi/AppointmentGate/SEO، بدون PatientPortal/CAPTCHA. هیرو سفید/طلایی و ظاهر قبلی حفظ شد. جزئیات فرم intake در مرورگر این مرحله اجرا نشده؛ تست‌های backend مرتبط برقرارند. NOT RUN را PASS نکن.
 
 مالک تأیید کرد staging ندارد. مرحله۸ بازطراحی/صفحات جدید deferred، complete نیست؛ مرحله۱۰ پذیرش محلی/اسناد ممکن است، اما staging/provider/CAPTCHA واقعی/Linuxjobs/هویت production و deploy اجرا نشده‌اند. هیچ realowner/patientdata/payment/SMS/deploy/productionbooking استفاده/تغییر نشده. source/merge/tree و CI نهایی در رسید خروجی پس از ارسال ثبت می‌شوند.
+
+
+## رسید نهایی GitHub — 2026-10-02
+
+PR۹ source9b75629732e48c2ee2bde45652ee27781b71a467، merge913a43d1c6e69a4749a8aa3e38625b7de5692252، tree21bcac5e3906828279b2334296ea9997d87de718؛ treeبرابر وremoteSHA تأیید شد. run36957457614 هر۴job موفق؛ frozeninstall/LinuxWindows/full292/migrationrestore/pip-audit/npm-audit/historyscan واقعی پذیرفته شد. توضیح NOTRUNremote بالاتر وضعیتپیشارسال بود و اینرسیدمقدم است. oversizebudgetباexit1 ردشد؛ Gitleaks14commitsپسcommitبدونleak. fieldmetrics/تصاویرresponsiveجدید اجرا/تغییر نشده‌اند.

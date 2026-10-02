@@ -160,3 +160,11 @@ CI checkout تمیز برای Node24.19.0 و Python3.12 در Linux/Windows، lin
 مرورگر واقعی React/API/Nginx با fixture بیرونGit: داشبورد، تقویم، فهرست نوبت، برنامه نوبت‌دهی، خدمات، مرکز پیامکی و اطلاعات مطب بعد از lazyload بررسی شدند. پروفایل بیمار ساختگی و wizard مراحل۱→۲ بارگیری شدند؛ نوبت/پرداخت/پیامک ساخته نشد. آزمون فعال فقط SQLite موقت و سپس false شد؛ خود صفحه بیمار با تازه‌شدن سیاست بسته شد. خاموشی: forms/input صفر و فقط index/appointmentApi/AppointmentGate/SEO، بدون PatientPortal/CAPTCHA. هیرو سفید/طلایی و ظاهر قبلی حفظ شد. جزئیات فرم intake در مرورگر این مرحله اجرا نشده؛ تست‌های backend مرتبط برقرارند. NOT RUN را PASS نکن.
 
 مالک تأیید کرد staging ندارد. مرحله۸ بازطراحی/صفحات جدید deferred، complete نیست؛ مرحله۱۰ پذیرش محلی/اسناد ممکن است، اما staging/provider/CAPTCHA واقعی/Linuxjobs/هویت production و deploy اجرا نشده‌اند. هیچ realowner/patientdata/payment/SMS/deploy/productionbooking استفاده/تغییر نشده. source/merge/tree و CI نهایی در رسید خروجی پس از ارسال ثبت می‌شوند.
+
+
+## 2026-10-02 — ادغام۹ وپذیرش محلی۱۰
+
+PR۹ merge913a43d1c6e69a4749a8aa3e38625b7de5692252/source9b75629732e48c2ee2bde45652ee27781b71a467/tree21bcac5e3906828279b2334296ea9997d87de718 verified. CI36957457614 چهارjobتماماًsuccess؛ freshfrozen/full292/migrations/restore/audits/secrets واقعی. PHASE_10_ACCEPTANCE گیت‌های باز/عدمstaging/productionidentitynonJSON وbackupjobsmedia limitationراثبتکرد. نمونهpublicmediapersistent0700 وproviderdisabled/merchantempty اصلاح،۲test0.09s وbashsyntax موفق؛ نصب/deployLinuxNOTRUN. مرحله۱۰ incomplete،۸deferred، هیچlive/owner/payment/SMS/patientdataتغییر/استفاده نشد.
+
+
+بررسی نهایی هیرو: سرریز افقی۱۴px درdesktop دیده شد؛ فقط overflow-x-clip روی همانsection افزوده شد، ساختار/رنگ/چیدمان تغییر نکرد. مرورگر نهایی desktop clientWidth=scrollWidth=1265؛ lint/build/نسخه1.15.0 وbundlebudget نهایی موفق. screenshotهای phase10-hero-final.jpg وphase10-comments-final.jpg (کارت عکس هندسی/نام/متن/سن۲۹) بیرونGit ثبت شدند.

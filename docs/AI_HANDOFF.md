@@ -1,3 +1,17 @@
+# وضعیت مقدم — 2026-10-02، پذیرش محلی و گیت‌های بازمرحله۱۰
+
+نسخه1.15.0، PR۹ merged: source `9b75629732e48c2ee2bde45652ee27781b71a467`، merge `913a43d1c6e69a4749a8aa3e38625b7de5692252`، tree `21bcac5e3906828279b2334296ea9997d87de718`؛ remote/source/treeتطبیقشد. CI run36957457614 تمام۴jobLinux/Windows/frontend/secrets موفق، freshfrozeninstall/full292tests/migrationrestore/dependencyaudit/historyscan واقعی. رسید وZIP/hash/AI_HANDOFF-PHASE09 کنارoutputs است. وضعیتNOTRUNمرحله۹پایین تاریخی است.
+
+مرحله۱۰ در codex/phase-10-acceptance: گزارش PHASE_10_ACCEPTANCE.md و۲guardtest نمونهdeploydefaults؛ SMSdisabled/merchantempty/publicmediapersistent0700، تنظیمواقعیسرور دست‌نخورده. bashsyntax سه اسکریپت موفق؛ خودdeploymentLinux اجرا/پذیرش نشده. مرحله۱۰ کامل نیست: مالک staging ندارد. productionhealth200nonJSON، commitlive اثباتنشد. actualfinding: deployscriptbackupفقطDB، timerstopبدونjobstop، mediarestoreهماهنگنیست؛ قبلrollout درsandboxLinux اصلاح/پذیرش شود. rollbackکد DBdowngradeنمی‌کند. sourceZIPbuilddeploymentpackageنیست.
+
+مرحله۸ طراحی/صفحاتجدید deferred، frontendقالبقدیم مقالات/sidebar، نظراتcarouselphoto/name/body/age، herowhitegold/headerdark/footerwhite حفظ شود. رزروخاموش homepageدیالوگپیاممدیر وappointmentفقطmessage/animation بدونloadpatientUI. دادهfixtureرضایت/بیمارواقعی نیست. هیچdeploy/productionbooking/realowner/payment/SMS/patientdata مجازنیست؛ هرunrunNOTPASS.
+
+اصلاح نهایی کوچک: overflow-x-clip همانsectionهیرو، بدونتغییرساختار؛ desktop1265=scrollWidth، screenshothero/commentsfinal بیرونGit.
+
+قدمبعد: مرحله۱۰scope/doc/defaults کامیت/ارسال/PR وCIواقعی، سپسmergeexpectedSHA/treeverify وsource/handoffreceipt. گزارش خارجیincompleteبماند. بعدsandboxLinuxbackupjobsmedia+artifactidentity وstaging نیازدارد؛ مالکگفتstagingندارد، پرسش تکراری نکن. deployمجوزجداست؛ ادغام مجوزقبلی دارد. فایلادامه را هر تحویل تازهکن.
+
+---
+
 # وضعیت مقدم — 2026-10-02، مرحله۹ نسخه1.15.0
 
 PR۸ ادغام و SHA/tree تأیید شد: merge `2ddd9c76381a8a17b5495c5118512bd2115b5986`، source `2e322f0d260d7c197fe0406be854c85ac4c10f08`، tree `6b0695f7327eef8749fc8fab4c19a02f0401a757`. مرحله۶ PR۷ هم merged است.
