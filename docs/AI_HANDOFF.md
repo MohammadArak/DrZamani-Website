@@ -6,6 +6,8 @@
 
 مرحله۸ طراحی/صفحاتجدید deferred، frontendقالبقدیم مقالات/sidebar، نظراتcarouselphoto/name/body/age، herowhitegold/headerdark/footerwhite حفظ شود. رزروخاموش homepageدیالوگپیاممدیر وappointmentفقطmessage/animation بدونloadpatientUI. دادهfixtureرضایت/بیمارواقعی نیست. هیچdeploy/productionbooking/realowner/payment/SMS/patientdata مجازنیست؛ هرunrunNOTPASS.
 
+اصلاح نهایی کوچک: overflow-x-clip همانsectionهیرو، بدونتغییرساختار؛ desktop1265=scrollWidth، screenshothero/commentsfinal بیرونGit.
+
 قدمبعد: مرحله۱۰scope/doc/defaults کامیت/ارسال/PR وCIواقعی، سپسmergeexpectedSHA/treeverify وsource/handoffreceipt. گزارش خارجیincompleteبماند. بعدsandboxLinuxbackupjobsmedia+artifactidentity وstaging نیازدارد؛ مالکگفتstagingندارد، پرسش تکراری نکن. deployمجوزجداست؛ ادغام مجوزقبلی دارد. فایلادامه را هر تحویل تازهکن.
 
 ---

@@ -11,7 +11,7 @@ const HeroContent = () => {
     return (
         <section
             id="hero"
-            className="relative bg-linear-to-br from-jetblack z-0 to-[#1B273B] px-4 lg:px-0 pt-12 min-h-dvh"
+            className="relative overflow-x-clip bg-linear-to-br from-jetblack z-0 to-[#1B273B] px-4 lg:px-0 pt-12 min-h-dvh"
         >
             <ReserveDialog
                 dialogIsOpen={reserveOpen}

@@ -29,3 +29,6 @@
 ## ادامهAI
 
 اولAGENTS/ROADMAP/ابتدایAI_HANDOFF/PROGRESS_LOG/اینreport. مرحله۸طراحی/صفحاتجدید بهدستورمالکdeferredاست؛ frontendساختارجدیدنساز. هدفبعدی رفعdeployreadinessدرsandboxLinux و سپسstaging، نهتکرارپرسشاجازهmerge. فایل‌هایخروجیtrackedsourceوhandoffباexactSHA/hash تحویلبده. هیچunrun راPASS/complete گزارش نکن.
+
+
+بررسی نهایی هیرو: سرریز افقی۱۴px درdesktop دیده شد؛ فقط overflow-x-clip روی همانsection افزوده شد، ساختار/رنگ/چیدمان تغییر نکرد. مرورگر نهایی desktop clientWidth=scrollWidth=1265؛ lint/build/نسخه1.15.0 وbundlebudget نهایی موفق. screenshotهای phase10-hero-final.jpg وphase10-comments-final.jpg (کارت عکس هندسی/نام/متن/سن۲۹) بیرونGit ثبت شدند.
