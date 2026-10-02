@@ -346,7 +346,7 @@ Remove-Item Env:PRERENDER_CLINIC_SETTINGS_FILE
 
 قرارداد callback، expiry/refund، محدودیت تغییر حساب درگاه، backup/maintenance برای rollback و شواهد آزمون در [مرحله۵](docs/PHASE_05_BOOKING_PAYMENTS.md) است. مقالات مرحله۶ قدم بعدی است.
 
-## وضعیت فعلی — نسخه1.17.0
+## وضعیت فعلی — نسخه1.18.0
 
 طراحی صفحه اصلی و موبایل، گالری فعلی، نظرات و مقاله‌های متصل به پنل و صفحات معرفی خدمات در حوزه مرحله۸ پیاده شده‌اند. صفحات خدمات از HTML سروری و کاتالوگ مشترک api/app/clinic_services.json استفاده می‌کنند؛ ساختار مستقل مقالات حفظ شده است. نسخه‌های frontend/backend/lock/VERSION هماهنگ‌اند.
 
@@ -355,3 +355,5 @@ Remove-Item Env:PRERENDER_CLINIC_SETTINGS_FILE
 نوبت‌دهی در نصب/مهاجرت پیش‌فرض خاموش است؛ صفحه اصلی پیام تنظیم‌شده را در دیالوگ و /appointment/ فقط پیام و انیمیشن نمایش می‌دهد. هیچ انتشار زنده یا روشن‌کردن production انجام نشده است. staging موجود نیست؛ پذیرش واقعی VPS/systemd/providers، هویت artifact/production، بکاپ offsite/قطع برق و داده میدانی سرعت هنوز کامل نشده‌اند. راهنمای بازیابی هماهنگ در deploy/RECOVERY.md و docs/PHASE_10_RECOVERY.md است.
 
 برای محیط توسعه، ابزارهای Git/Node/Python/uv معتبر همین میزبان و محیط/DB مستقل استفاده کنید. venv یا node_modules منتقل‌شده از رایانه دیگر ممکن است مسیر اجرایی قدیمی داشته باشد؛ نصب locked تازه/CI ملاک است. فایل‌های ENV، DB، خروجی build، لاگ و رسانه خصوصی وارد Git نشوند.
+
+آزمون مستقل زیرساخت نسخه1.18.0 با systemd/runuser واقعی، HTTPS/WSS و بازیابی هماهنگ در VM موقت انجام شده؛ [گزارش runtime](docs/PHASE_10_LINUX_RUNTIME.md) و شواهد آن مرجع‌اند. این نتیجه جای پذیرش VPS واقعی، offsite backup، قطع برق و هویت artifact در production نیست.

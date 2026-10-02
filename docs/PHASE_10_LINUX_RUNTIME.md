@@ -14,12 +14,14 @@ adapter واقعی Runtime و ReleaseManager بدون mock استفاده می�
 
 ## نتیجه فعلی
 
-آزمون‌های guard/recovery/defaults محلی: ۲۱ passed و ۱۴ تست مخصوص لینوکس skipped؛ Ruff critical rules و هماهنگی نسخه 1.18.0 passed. تلاش اول بازیابی به ACL پوشه pytest در sandbox خورد؛ اجرای مجاز با fixture مستقل گذشت. اجرای زیرساخت روی Windows پشتیبانی نمی‌شود و PASS نیست. CI واقعی هنوز NOT RUN؛ پس از ارسال نتیجه دقیق، شناسه run و خطا/اصلاح احتمالی در این بخش و رسید تحویل ثبت می‌شود. آزمون‌های portable و کل suite در Quality جدا اجرا می‌شوند.
+آزمون‌های guard/recovery/defaults محلی: ۲۱ passed و ۱۴ تست مخصوص لینوکس skipped؛ Ruff critical rules و هماهنگی نسخه 1.18.0 passed. تلاش اول بازیابی به ACL پوشه pytest در sandbox خورد؛ اجرای مجاز با fixture مستقل گذشت. اجرای زیرساخت روی Windows پشتیبانی نمی‌شود و PASS نیست. آزمون واقعی runtime روی source `9cbc634b88309901301d31ebdd09a302b8b409f3` در [run 37035493682](https://github.com/MohammadArak/DrZamani-Website/actions/runs/37035493682) موفق شد: ۱۶ بررسی زیرساختی با systemd255، runuser/www-data، frozen install، migration، HTTPS معتبر fixture، WSS احراز‌شده/رد ناشناس، timer/job واقعی، deploy/rollback پرشده با مالکیت، شکست عمدی Nginx و بازیابی، حفظ وضعیت timer و restart پس از SIGKILL. شواهد پاک‌سازی‌شده در PHASE_10_RUNTIME_CHECKS.json است. کل pytest لینوکس همان source: 333 passed و ۳ هشدار قبلی. نتیجه همه jobهای کامیت نهایی، Windows، source/merge/tree و ZIP/hash در رسید outputs/AI_HANDOFF-1.18.0.md ثبت می‌شود؛ پذیرش VPS واقعی از این نتیجه استنباط نشود. آزمون‌های guard نهایی با شبیه‌سازی صریح Linux/root برای جداسازی شرط self-hosted و marker دوباره ۲ passed شدند؛ policy محصول تغییر نکرد.
 
-## گیت‌های باز
+## خطاهای اصلاح‌شده در مسیر آزمون
 
 در راه‌اندازی نخست، API در lifespan تنظیمات production را رد کرد: hostname مشتق‌شده از IP loopback برای کپچا معتبر نیست، حتی با provider خاموش. fixture اکنون CAPTCHA_HOSTNAMES=runtime.invalid صریح دارد؛ هیچ سیاست محصول relax و provider فعال نشد. سرویس fixture از Python مستقل /usr/bin/python3.12 استفاده می‌کند؛ وابسته به environment مربوط به setup-python نیست. خروجی تشخیص فقط برچسب فرمان، وضعیت unit و وجود نوع خطا را دارد؛ لاگ کامل خصوصی داخل VM می‌ماند.
 
 تلاش‌های نخست CI: context مربوط به runner در job env پذیرفته نشد و به step env انتقال یافت. سپس پوشه ignored `.work` در checkout تازه وجود نداشت؛ ساخت آن پس از guard اضافه شد. Git زیر root با safe.directory محدود به checkout تأییدشده خوانده می‌شود. اسکن تاریخچه دو literal مربوط به گزینه `--property=MainPID` را generic-api-key شناخت؛ مقادیر credential نبودند. ترتیب آرگومان تازه اصلاح و فقط دو fingerprint دقیق کامیت تاریخی در .gitleaksignore ثبت شدند؛ هیچ مسیر یا rule کلی از اسکن مستثنا نشده است. [روش رسمی fingerprint](https://github.com/gitleaks/gitleaks#%EF%B8%8F-configuration).
+
+## گیت‌های باز
 
 این پذیرش کل مرحله۱۰ را کامل نمی‌کند: VPS واقعی و تنظیمات فعال آن، DNS/Cloudflare/provider، artifact identity در production، offsite encryption/retention، قطع برق میزبان، ممیزی محتوا/رضایت و داده میدانی SEO بازند. SIGKILL فقط قطع پردازش است؛ قطع برق یا crash filesystem نیست. این گام installer کامل VPS را اجرا نمی‌کند؛ unit/templateهای موجود و adapter واقعی را در VM تست می‌کند. deploy سایت زنده و فعال‌سازی production اجازه جدا می‌خواهند.

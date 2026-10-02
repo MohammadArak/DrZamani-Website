@@ -1,3 +1,9 @@
+# یادداشت جاری runtime — نسخه1.18.0
+
+آزمون مستقل adapter واقعی، systemd/runuser/www-data، Nginx/HTTPS/WSS، timer/job و populated rollback در VM تازه GitHub-hosted Ubuntu موفق شد. [گزارش runtime](PHASE_10_LINUX_RUNTIME.md) و رسید outputs/AI_HANDOFF-1.18.0.md وضعیت جدید را دارند. متن‌های زیر درباره NOT RUN مربوط به وضعیت تاریخی‌اند؛ اجرای این موارد روی VPS واقعی و installer کامل هنوز پذیرش نشده‌اند. offsite/قطع برق/production identity و مجوز deploy زنده باز هستند.
+
+---
+
 # یادداشت جاری — 2026-10-02، نسخه 1.17.0
 
 گزارش پایین تاریخی و مربوط به پذیرش محلی 1.15.0 است. محدودیت backup قدیمی بعداً در 1.16.0 اصلاح و در [PHASE_10_RECOVERY.md](PHASE_10_RECOVERY.md) آزموده شد؛ اجرای واقعی VPS/systemd و سایر گیت‌های خارجی همچنان پذیرش نشده‌اند. طراحی دیگر deferred نیست و حوزه طراحی/خدمات 1.17.0 پیاده و محلی و در CI آزموده شده است؛ [PHASE_08_IMPLEMENTATION.md](PHASE_08_IMPLEMENTATION.md) و ابتدای [AI_HANDOFF.md](AI_HANDOFF.md) وضعیت جاری را دارند. دستور تاریخی «frontend ساختار جدید نساز» پایین برای ادامه فعلی اعتبار ندارد. سایت زنده منتشر نشده و booking/payment production عمداً خاموش می‌مانند. شناسه‌های دقیق تحویل و قدم بعد در رسید outputs ثبت می‌شوند.
