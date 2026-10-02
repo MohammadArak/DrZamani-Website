@@ -32,6 +32,7 @@ class ObservedRuntime(Runtime):
     """Real adapter with fixed diagnostic labels; never emits command payloads."""
     def __init__(self):
         self.failures = []
+        self.health_failure = {}
 
     def run(self, args, **kwargs):
         try:
@@ -50,6 +51,14 @@ class ObservedRuntime(Runtime):
             return super().health(expected_version)
         except Exception:
             self.failures.append('API-health')
+            self.health_failure['unit'] = subprocess.run(['systemctl','show',API,'--property=ActiveState,SubState,ExecMainStatus'],capture_output=True,text=True).stdout.strip().splitlines()
+            try:
+                with urlopen('http://127.0.0.1:8000/api/health', timeout=3) as response:
+                    payload = json.loads(response.read(4096))
+                self.health_failure['respondedOK'] = payload.get('status') == 'ok'
+                self.health_failure['expectedVersionMatch'] = payload.get('version') == expected_version
+            except Exception as error:
+                self.health_failure['probeErrorType'] = type(error).__name__
             raise
 
 
@@ -74,6 +83,8 @@ def require_disposable_runner():
 
 
 def fixture_setup(runtime, layout):
+    # Match Ubuntu's independent system Python, not setup-python's CI process env.
+    os.environ['UV_PYTHON'] = '/usr/bin/python3.12'
     import pwd
     owner = pwd.getpwnam('www-data')
     for path, mode in [(layout.releases, 0o750), (layout.data, 0o700),
@@ -97,6 +108,9 @@ def fixture_setup(runtime, layout):
     layout.env.chmod(0o640)
     for name in (API, JOB, TIMER):
         shutil.copyfile(ROOT/'deploy'/name, Path('/etc/systemd/system')/name)
+    logging_dropin = Path('/etc/systemd/system')/(API+'.d')
+    logging_dropin.mkdir()
+    (logging_dropin/'fixture-log.conf').write_text('[Service]\nStandardOutput=append:/var/lib/drzamani/fixture-api.log\nStandardError=append:/var/lib/drzamani/fixture-api.log\n')
     # Accelerate only this disposable timer; use the real job command and unit.
     dropin = Path('/etc/systemd/system')/(TIMER+'.d')
     dropin.mkdir()
@@ -324,9 +338,12 @@ def verify(report):
             state = subprocess.run(['systemctl','show',unit,'--property=ActiveState,SubState,ExecMainStatus'], capture_output=True, text=True)
             diagnostics[unit] = state.stdout.strip().splitlines()
         journal = subprocess.run(['journalctl','-u',API,'--no-pager','-n','100'], capture_output=True, text=True).stdout
-        markers = ['PermissionError', 'ModuleNotFoundError', 'RuntimeError', 'OperationalError', 'No such file or directory', 'Permission denied', 'Failed at step', 'Read-only file system']
+        log = layout.data/'fixture-api.log'
+        if log.exists():
+            journal += log.read_text(errors='replace')[-32000:]
+        markers = ['PermissionError', 'ModuleNotFoundError', 'RuntimeError', 'OperationalError', 'No such file or directory', 'Permission denied', 'Failed at step', 'Read-only file system', 'error while loading shared libraries', 'Application startup complete', 'Uvicorn running']
         result = {'status':'failed','stage':stage,'errorType':type(error).__name__,'checks':checks,
-                  'failedCommands':runtime.failures,'unitStatus':diagnostics,'journalErrorTypes':[marker for marker in markers if marker in journal]}
+                  'failedCommands':runtime.failures,'healthProbe':runtime.health_failure,'unitStatus':diagnostics,'journalErrorTypes':[marker for marker in markers if marker in journal]}
     finally:
         for unit in (TIMER, JOB, API):
             try:
