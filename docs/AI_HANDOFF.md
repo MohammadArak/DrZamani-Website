@@ -1,3 +1,13 @@
+# وضعیت مقدم — 2026-10-02، بررسی فایل‌ها برای ادامه
+
+گزارش این نوبت: [PROJECT_REVIEW_2026-10-02.md](PROJECT_REVIEW_2026-10-02.md). نسخه1.16.0، HEAD محلی از ref و head پیش‌نویس PR۱۲ در GitHub هر دو `46625befb8742a6974f85a8d6d5ded22fc50ae4e`؛ main آنلاین `db6de0c24a59b3cedf4ac1b4a4be1d6c8eb1238f`. کد اجرایی تغییر نکرد؛ بررسی ساختار/اسناد و مسیرهای Landing/AppointmentGate/ReserveDialog و CI انجام شد، hash تصویر طرح تطبیق شد. این مرور ممیزی کامل یا پذیرش تازه نیست.
+
+مانع میزبان: Git/Node/npm در PATH در دسترس نیستند؛ venv موجود به Python رایانه قبلی در پروفایل admin اشاره دارد و اجرا نمی‌شود. lint/build/pytest/migration/browser این نوبت NOT RUN؛ git status/diff و clean checkout اثبات نشده. bundled runtime پیکربندی ندارد. برای ادامه محیط معتبر همین میزبان و DB مستقل آماده شود؛ لاگ/ENV/DB/خروجی‌ها وارد Git نشوند.
+
+قدم بعد مرحله۸: جمع‌بندی کانسپت موجود، تکمیل موبایل و گالری و پیاده‌سازی در همان شاخه/PR۱۲. طراحی و مرحله۱۰ هنوز ناتمام‌اند؛ متن تاریخی deferred/WIP پایین بر وضعیت جدید مقدم نیست. README و checkbox Hero روشن در ROADMAP نیاز همسوسازی با تصمیم نهایی طراحی دارند. اجازه merge مرحله آزموده برقرار است؛ deploy/productionbooking/provider/patientdata واقعی مجوز جدا دارند.
+
+---
+
 # وضعیت فعلی — 2026-10-02، شروع دوباره طراحی مرحله۸ با پیشنهاد بصری
 
 درخواست تازه مالک: «طراحی جدید رو الان انجام بدیم؛ یه طرح بصری بکش». طراحی دیگر برای بررسی بصری deferred نیست؛ فقط مفهوم صفحه اصلی concept-v1 ساخته شده، کد اجرایی/سرور تغییر نکرده و پذیرش طراحی ثبت نشده. docs/PHASE_08_DESIGN_PREVIEW.md و docs/design/homepage-concept-v1.png مرجع‌اند. PNG971×1619، SHA25659df4e073488c0d81f574be1c6e80b96bb74a3174c410f2c13b6c622b8463a1e. تصویر با imagegen از منابع عمومی پزشک/لوگو و screenshot مالک ساخته و دیده شد؛ avatar/photoهای مکمل نمایشی‌اند، داده/نظر واقعی بیمار نیستند. پیاده‌سازی، mobile، contrast/accessibility/SEO/interaction هنوز NOT RUN، مرحله۸ complete نیست.
