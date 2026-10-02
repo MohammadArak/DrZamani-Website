@@ -2,7 +2,9 @@
 
 ## 2026-10-02 — بازیابی هماهنگ1.16.0، در حال پذیرش
 
-پس از ادغام PR۱۰ با main00dd2802b4ac673cca3afe339af49fedefd7e169، scope بعدی مرحله۱۰ بازیابی DB/publicmedia/privateuploads/ENV/Nginx است. اسکریپت‌های قدیمی با مدیریت هماهنگ، توقف سه writer، قفل مشترک، maintenance، snapshot مستقل از WAL، integrity/hash و rollback با رسید متناظر جایگزین شدند. راهنمای deploy/RECOVERY.md حدود rollback و journal/قطع برق/offsite را شفاف می‌کند. فرانت دست‌نخورده است. 16 تست Windows موفق و13 Linux اجرا نشده؛ Ruff کامل فایل‌های جدید موفق. fulltests و CI در انتظارند؛ مرحله۱۰ کلی complete نیست. هیچ live deploy، فعال‌سازی production، داده بیمار یا provider واقعی استفاده نشده است.
+پس از ادغام PR۱۰ با main00dd2802b4ac673cca3afe339af49fedefd7e169، scope بعدی مرحله۱۰ بازیابی DB/publicmedia/privateuploads/ENV/Nginx است. اسکریپت‌های قدیمی با مدیریت هماهنگ، توقف سه writer، قفل مشترک، maintenance، snapshot مستقل از WAL، integrity/hash و rollback با رسید متناظر جایگزین شدند. گروه پردازشی فرمان در timeout/interrupt بسته می‌شود و ENV با Python سرویس تحت www-data خوانده می‌شود. راهنمای deploy/RECOVERY.md حدود rollback و journal/قطع برق/offsite را شفاف می‌کند. فرانت دست‌نخورده است. CI f980cfe/run36968560715 چهارjob موفق:325 Linux و311 Windows/14skipped، هرکدام3warning قبلی. محلی recovery17passed/14skipped؛ fullsuite root308passed/2cwd-fail/13skip بود، دو خطا از cwd=api همراه تست‌های جدید18passed/14skip تکرار و رفع شد؛ fullsuite موفق محلی ادعا نشود.
+
+یافته Nginx: GET مقالات/sitemap می‌تواند scheduled_publish بنویسد؛ guard تعمیر نداشت. دو template همراه media/robots/404 اصلاح شدند؛ Nginx واقعی Windows محلی HTTP و TLS verified2passed در2.94s، fixture initialtemp-path مشکل داشت و اصلاح شد. در Linux CI Nginx نصب/آزموده می‌شود؛ Windows CI بدون binary skip دارد. بررسی آخر CI و source/merge/tree در رسید خروجی ثبت می‌شود. نصب config فعال VPS وظیفه اپراتور پیش از rollout است، ابزار انتشار آن template را خودکار تغییر نمی‌دهد. مرحله۱۰ کلی complete نیست؛ هیچ live deploy، فعال‌سازی production، داده بیمار یا provider واقعی استفاده نشده است.
 
 ## 2026-09-30 — مرحله 0
 
