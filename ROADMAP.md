@@ -190,7 +190,9 @@
 
 ## مرحله ۱۰ — تحویل و انتشار مرحله‌ای
 
-[گزارش پذیرش](docs/PHASE_10_ACCEPTANCE.md): بخش محلی و CI پذیرفته؛ staging نداریم و گیت خارجی/production incomplete. نمونه رسانه persistent/providerdisabled اصلاح شد؛ deployment scripts فقط syntax بررسی شده‌اند و هماهنگیbackup/jobs/media هنوز پذیرش نمی‌شود.
+[گزارش پذیرش](docs/PHASE_10_ACCEPTANCE.md): بخش محلی و CI نسخه1.15 پذیرفته؛ staging نداریم و گیت خارجی/production incomplete. اصلاح بازیابی هماهنگ نسخه1.16 در [گزارش بازیابی](docs/PHASE_10_RECOVERY.md) در حال بررسی مستقل است؛ اجرای واقعی VPS/systemd/Nginx پذیرفته نشده است.
+
+نسخه1.16، PR۱۱: هماهنگی snapshot/restore و قفل/writers با fixture، توقف گروه پردازشی timeout و guard درخواست عمومی مقالات/sitemap در تعمیر. CI کد f980cfe موفق325 Linux و311 Windows/14skip؛ Nginx واقعی Windows محلی HTTP/TLS2passed. نتیجه CI نهایی guardها و source/merge/tree در رسید تحویل ثبت می‌شود. تطبیق config فعال Nginx و پذیرش runtime واقعی هنوز گیت باز است، checkbox کلی backup/jobs/HTTPS را complete نکن.
 
 - [ ] آزمایش staging برای نقش‌ها، تنظیمات، کپچا، مقالات، نظرات، اطلاعات مطب، رزرو خاموش و سناریوهای پرداخت/پیامک.
 - [ ] بکاپ سازگار DB و رسانه، آزمایش restore، migration/rollback و وضعیت jobs/WebSocket/HTTPS/Nginx.

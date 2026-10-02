@@ -29,7 +29,7 @@ esac
 
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    ca-certificates curl nginx rsync sqlite3 unzip util-linux
+    ca-certificates curl nginx python3 rsync sqlite3 unzip util-linux
 
 export PATH="/root/.local/bin:$PATH"
 if ! command -v uv >/dev/null 2>&1; then
