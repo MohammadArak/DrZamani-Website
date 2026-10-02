@@ -28,6 +28,31 @@ from state_snapshot import RecoveryError, digest_file
 sys.path.pop(0)
 
 
+class ObservedRuntime(Runtime):
+    """Real adapter with fixed diagnostic labels; never emits command payloads."""
+    def __init__(self):
+        self.failures = []
+
+    def run(self, args, **kwargs):
+        try:
+            return super().run(args, **kwargs)
+        except Exception:
+            label = Path(args[0]).name
+            if label == 'runuser':
+                label += '/uv-sync' if 'uv' in args else '/python'
+            elif label == 'systemctl':
+                label += '/' + args[1]
+            self.failures.append(label)
+            raise
+
+    def health(self, expected_version):
+        try:
+            return super().health(expected_version)
+        except Exception:
+            self.failures.append('API-health')
+            raise
+
+
 def require_disposable_runner():
     if (sys.platform != 'linux' or os.geteuid() != 0
             or os.environ.get('GITHUB_ACTIONS') != 'true'
@@ -197,7 +222,7 @@ def fingerprint(layout):
 def verify(report):
     require_disposable_runner()
     report.parent.mkdir(exist_ok=True, mode=0o700)
-    runtime, layout = Runtime(), Layout()
+    runtime, layout = ObservedRuntime(), Layout()
     manager = ReleaseManager(layout, runtime)
     checks = []
     stage = 'fixture setup'
@@ -294,7 +319,14 @@ def verify(report):
                   'scope':'disposable GitHub-hosted VM; fixture data and loopback only; no VPS/production acceptance',
                   'openGates':['actual VPS/DNS/Cloudflare/providers','offsite encrypted backup/retention','host power loss','production artifact identity','live deploy authorization']}
     except Exception as error:
-        result = {'status':'failed','stage':stage,'errorType':type(error).__name__,'checks':checks}
+        diagnostics = {}
+        for unit in (API, JOB):
+            state = subprocess.run(['systemctl','show',unit,'--property=ActiveState,SubState,ExecMainStatus'], capture_output=True, text=True)
+            diagnostics[unit] = state.stdout.strip().splitlines()
+        journal = subprocess.run(['journalctl','-u',API,'--no-pager','-n','100'], capture_output=True, text=True).stdout
+        markers = ['PermissionError', 'ModuleNotFoundError', 'RuntimeError', 'OperationalError', 'No such file or directory', 'Permission denied', 'Failed at step', 'Read-only file system']
+        result = {'status':'failed','stage':stage,'errorType':type(error).__name__,'checks':checks,
+                  'failedCommands':runtime.failures,'unitStatus':diagnostics,'journalErrorTypes':[marker for marker in markers if marker in journal]}
     finally:
         for unit in (TIMER, JOB, API):
             try:
