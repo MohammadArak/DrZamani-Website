@@ -8,7 +8,9 @@
 
 ## وضعیت بررسی
 
-آزمون اولیه Windows: 16 موفق، 13 ویژه Linux اجرا نشده؛ fixture ZIP اولیه نادرست بود، هم fixture و هم کنترل raw filename اصلاح شد. بررسی syntax سه wrapper/install و تطبیق نسخه1.16.0 موفق. پس از اصلاح اعتبارسنجی رسید، آزمون نهایی محلی/CI هنوز در انتظار است. این جمله پس از اجرای واقعی تازه می‌شود.
+آزمون اولیه Windows: 16 موفق،13 ویژه Linux اجرا نشده؛ fixture ZIP اولیه نادرست بود، هم fixture و هم کنترل raw filename اصلاح شد. بررسی syntax سه wrapper/install، Ruffcritical و تطبیق نسخه1.16.0 موفق. lint با صفر warning، build،8 فونت و بودجه bundle موفق. API prerender محلی در دسترس نبود و build از safe defaults استفاده کرد؛ ادعای اتصال آن به backend نیست.
+
+اجرای fullpytest محلی از root:308 موفق،2 خطا،13 skipped؛ دو subprocess به‌علت cwd اشتباه app را پیدا نکردند. تکرار از cwd=api همراه تست‌های جدید:18 موفق،14 ویژه Linux skipped در16.99s. کل suite محلی پس از اصلاح cwd دوباره اجرا نشده؛ CI از cwd درست آن را اجرا می‌کند. CI اولیه aaa5b70/run36967918514 روی Linux تمام323 تست در64.22s موفق بود؛ سه warning قبلی. اصلاح بعدی گروه‌پردازش migration هنگام timeout/interrupt و آزمون نویسنده فرزند، هنوز منتظر CI commit بعدی است. نصب/systemd/Nginx واقعی از این نتیجه استنباط نشود.
 
 سرویس‌های CI fixture هستند؛ Linux filesystem/SQLite/flock واقعی موقت است. هیچ اجرای واقعی systemd/runuser/Nginx روی VPS در این مرحله انجام نشده است. SIGKILL/قطع برق، offsite encrypted backup/retention، source identity بسته انتشار، providers و پذیرش خارجی همچنان بازند. پذیرش ظاهری قبلی حفظ می‌شود؛ فرانت تغییر ندارد، طراحی مرحله۸ deferred.
 

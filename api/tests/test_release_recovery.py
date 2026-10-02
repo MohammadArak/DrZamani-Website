@@ -8,6 +8,7 @@ import json
 import os
 import sqlite3
 import sys
+import time
 import zipfile
 from contextlib import closing
 from pathlib import Path
@@ -465,6 +466,15 @@ def test_wrong_receipt_and_existing_maintenance_refuse_without_touching_state(
     with pytest.raises(snapshot.RecoveryError):
         manager.rollback("old-release", "unknown-receipt")
     assert content(targets) == before and not runtime.events
+    for payload in (
+        "not json",
+        "[]",
+        '{"status":"success","previous_release":"wrong"}',
+    ):
+        (layout.backups / "bad-receipt.json").write_text(payload, encoding="utf8")
+        with pytest.raises(snapshot.RecoveryError):
+            manager.rollback("old-release", "bad-receipt")
+        assert content(targets) == before and not runtime.events
     layout.maintenance.touch()
     with pytest.raises(snapshot.RecoveryError):
         manager.deploy(package)
@@ -481,3 +491,22 @@ def test_deploy_and_rollback_share_nonblocking_installation_lock(tmp_path):
             pytest.fail("second lock acquired")
     with release.installation_lock(path):
         pass
+
+
+@LINUX
+def test_command_timeout_stops_child_writers_before_recovery(tmp_path):
+    marker = tmp_path / "late-writer-marker"
+    ready = tmp_path / "writer-started"
+    child = "import time,pathlib,sys;pathlib.Path(sys.argv[2]).touch();time.sleep(2);pathlib.Path(sys.argv[1]).write_text('unexpected write')"
+    parent = "import subprocess,sys;subprocess.run([sys.executable,'-c',sys.argv[1],sys.argv[2],sys.argv[3]])"
+    with pytest.raises(release.subprocess.TimeoutExpired):
+        release.Runtime().run(
+            [sys.executable, "-c", parent, child, str(marker), str(ready)], timeout=1
+        )
+    assert ready.exists(), (
+        "fixture child never started; timeout test would be inconclusive"
+    )
+    time.sleep(2.1)
+    assert not marker.exists(), (
+        "timed-out child continued writing after its parent was stopped"
+    )

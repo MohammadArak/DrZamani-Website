@@ -101,6 +101,7 @@ print(json.dumps({k:d.get(k) for k in ('DATABASE_URL','UPLOAD_DIR','PUBLIC_MEDIA
         capture_output=True,
         text=True,
         check=False,
+        timeout=60,
     )
     if result.returncode:
         raise RecoveryError("Storage configuration could not be read")
@@ -179,14 +180,30 @@ class Runtime:
     def run(
         self, args: list[str], *, cwd: Path | None = None, timeout: int = 120
     ) -> str:
-        result = subprocess.run(
-            args, cwd=cwd, capture_output=True, text=True, timeout=timeout, check=False
+        process = subprocess.Popen(
+            args,
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            start_new_session=True,
         )
-        if result.returncode:
+        try:
+            stdout, _stderr = process.communicate(timeout=timeout)
+        except (
+            BaseException
+        ):  # Interrupted command descendants must stop before restore.
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.communicate(timeout=15)
+            raise
+        if process.returncode:
             raise RecoveryError(
                 "An infrastructure command failed; maintenance is retained if recovery fails"
             )
-        return result.stdout.strip()
+        return stdout.strip()
 
     def active(self, unit: str) -> bool:
         result = subprocess.run(
