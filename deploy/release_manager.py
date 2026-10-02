@@ -88,7 +88,9 @@ def version(release: Path) -> str:
     return value
 
 
-def read_targets(layout: Layout, python: Path) -> dict[str, Path]:
+def read_targets(
+    layout: Layout, python: Path, *, prefix: tuple[str, ...] = ()
+) -> dict[str, Path]:
     # Use the release's locked dotenv package. stdout contains only storage paths;
     # stderr is suppressed so a configuration error cannot print ENV contents.
     program = """import json,sys
@@ -97,7 +99,7 @@ d=dotenv_values(sys.argv[1],interpolate=False)
 print(json.dumps({k:d.get(k) for k in ('DATABASE_URL','UPLOAD_DIR','PUBLIC_MEDIA_DIR')}))
 """
     result = subprocess.run(
-        [str(python), "-c", program, str(layout.env)],
+        [*prefix, str(python), "-c", program, str(layout.env)],
         capture_output=True,
         text=True,
         check=False,
@@ -176,6 +178,14 @@ def extract_package(archive: Path, destination: Path) -> None:
 
 class Runtime:
     """Production adapter: command output stays private; errors expose no payloads."""
+
+    def storage_targets(self, layout: Layout, release: Path) -> dict[str, Path]:
+        # A service-owned venv must never execute its Python/dependencies as root.
+        return read_targets(
+            layout,
+            release / "api/.venv/bin/python",
+            prefix=("runuser", "-u", "www-data", "--"),
+        )
 
     def run(
         self, args: list[str], *, cwd: Path | None = None, timeout: int = 120
@@ -488,7 +498,7 @@ class ReleaseManager:
                 raise RecoveryError("Installation ENV is missing")
             (release / "api/.env").symlink_to(self.layout.env)
             self.runtime.prepare(release, self.layout)
-            targets = read_targets(self.layout, release / "api/.venv/bin/python")
+            targets = self.runtime.storage_targets(self.layout, release)
             snapshot, digest, states, receipt = self._begin(
                 release, previous, targets, identifier
             )
@@ -551,7 +561,7 @@ class ReleaseManager:
                 self.layout.backups / snapshot_name,
                 snapshot_digest,
             )
-            targets = read_targets(self.layout, previous / "api/.venv/bin/python")
+            targets = self.runtime.storage_targets(self.layout, previous)
             manifest = verify_snapshot(targets, *restore_from)
             if manifest["metadata"].get("release") != str(target):
                 raise RecoveryError("Snapshot and rollback code do not match")

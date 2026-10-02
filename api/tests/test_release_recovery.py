@@ -264,6 +264,9 @@ def test_source_only_package_is_not_a_deployable_build(tmp_path):
 
 
 class FakeRuntime(release.Runtime):
+    def storage_targets(self, layout, target):
+        return release.read_targets(layout, target / "api/.venv/bin/python")
+
     def __init__(self, layout, *, timer=True, job=True, fail=None):
         self.layout = layout
         self.units = {release.API: True, release.TIMER: timer, release.JOB: job}
@@ -510,3 +513,32 @@ def test_command_timeout_stops_child_writers_before_recovery(tmp_path):
     assert not marker.exists(), (
         "timed-out child continued writing after its parent was stopped"
     )
+
+
+def test_production_storage_reader_drops_root_before_release_python(
+    tmp_path, monkeypatch
+):
+    layout = release.Layout(tmp_path)
+    commands = []
+    values = {
+        "DATABASE_URL": "sqlite:///" + str(layout.data / "records.db"),
+        "UPLOAD_DIR": str(layout.data / "private"),
+        "PUBLIC_MEDIA_DIR": str(layout.data / "public"),
+    }
+
+    def run(args, **kwargs):
+        commands.append(args)
+        assert kwargs["capture_output"] and kwargs["timeout"] == 60
+        return release.subprocess.CompletedProcess(args, 0, json.dumps(values))
+
+    monkeypatch.setattr(release.subprocess, "run", run)
+    target = layout.releases / "fixture"
+    paths = release.Runtime().storage_targets(layout, target)
+    assert commands[0][:5] == [
+        "runuser",
+        "-u",
+        "www-data",
+        "--",
+        str(target / "api/.venv/bin/python"),
+    ]
+    assert paths["database"] == layout.data / "records.db"
