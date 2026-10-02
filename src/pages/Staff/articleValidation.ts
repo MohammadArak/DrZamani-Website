@@ -1,4 +1,4 @@
-import type {ArticleContent} from "@/services/contentApi";
+import type { ArticleContent } from "@/services/contentApi";
 
 export function articleValidation(content:ArticleContent):string {
     if(content.title.trim().length<2)return "عنوان مقاله باید دست‌کم دو نویسه داشته باشد.";

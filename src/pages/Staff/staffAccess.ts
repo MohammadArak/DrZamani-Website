@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext } from "react";
+import { createContext,useCallback,useContext } from "react";
 
 export const StaffPermissionsContext = createContext<string[]>([]);
 export const useStaffAccess = () => {

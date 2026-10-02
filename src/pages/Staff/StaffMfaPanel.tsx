@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { appointmentApi, type MfaEnrollment, type MfaStatus } from "@/services/appointmentApi";
+import { appointmentApi,type MfaEnrollment,type MfaStatus } from "@/services/appointmentApi";
+import { useEffect,useState,type FormEvent } from "react";
 
 const input = "mt-2 w-full min-w-0 rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-secondary";
 export default function StaffMfaPanel({ token }: { token: string }) {

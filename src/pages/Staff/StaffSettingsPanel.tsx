@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { appointmentApi, type SystemSettings, type SettingsHistory } from "@/services/appointmentApi";
-import { useStaffAccess } from "./staffAccess";
+import { appointmentApi,type SettingsHistory,type SystemSettings } from "@/services/appointmentApi";
+import { useCallback,useEffect,useState,type FormEvent,type ReactNode } from "react";
 import CaptchaSetupPanel from "./CaptchaSetupPanel";
+import { useStaffAccess } from "./staffAccess";
 import StaffMfaPanel from "./StaffMfaPanel";
 
 const inputClass = "mt-2 w-full min-w-0 rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-secondary";

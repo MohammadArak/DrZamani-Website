@@ -1,9 +1,9 @@
-import {useEffect,useState} from "react";
-import {useEditor,EditorContent} from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import { safeContentHtml,type Media } from "@/services/contentApi";
 import Image from "@tiptap/extension-image";
-import {TableKit} from "@tiptap/extension-table";
-import {safeContentHtml,type Media} from "@/services/contentApi";
+import { TableKit } from "@tiptap/extension-table";
+import { EditorContent,useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { useEffect,useState } from "react";
 import MediaPicker from "./MediaPicker";
 
 const LibraryImage=Image.extend({addNodeView(){return ({node})=>{

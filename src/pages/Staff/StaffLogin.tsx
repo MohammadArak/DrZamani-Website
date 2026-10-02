@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import BotProtection,{ type BotHandle } from "@/components/BotProtection";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
-import BotProtection, { type BotHandle } from "@/components/BotProtection";
-import { appointmentApi, STAFF_COOKIE_SESSION, STAFF_TOKEN_KEY, STAFF_PROFILE_KEY, type BotChallenge, type CaptchaChallenge, type MfaLoginRequired, type StaffIdentity } from "@/services/appointmentApi";
+import { appointmentApi,STAFF_COOKIE_SESSION,STAFF_PROFILE_KEY,STAFF_TOKEN_KEY,type BotChallenge,type CaptchaChallenge,type MfaLoginRequired,type StaffIdentity } from "@/services/appointmentApi";
+import { useCallback,useEffect,useRef,useState,type FormEvent } from "react";
 
 const field = "mt-2 h-12 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 outline-none focus:border-secondary";
 export default function StaffLogin({ onLogin }: { onLogin: (token: string, profile: StaffIdentity) => void }) {

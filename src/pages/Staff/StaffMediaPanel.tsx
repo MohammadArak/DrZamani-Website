@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import {useCallback,useEffect,useState} from "react";
-import {contentApi,type Media} from "@/services/contentApi";
-import {useContentConfirm} from "./useContentConfirm";
+import { contentApi,type Media } from "@/services/contentApi";
+import { useCallback,useEffect,useState } from "react";
+import { useContentConfirm } from "./useContentConfirm";
 const failure=(e:unknown)=>e instanceof Error?e.message:"خطای ارتباط با سرور";
 export default function StaffMediaPanel({token}:{token:string}){
     const [uploadVersion,setUploadVersion]=useState(0);

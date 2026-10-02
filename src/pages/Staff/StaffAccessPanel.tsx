@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { appointmentApi, type AccessPermission, type AccessRole, type StaffIdentity } from "@/services/appointmentApi";
+import { appointmentApi,type AccessPermission,type AccessRole,type StaffIdentity } from "@/services/appointmentApi";
+import { useCallback,useEffect,useState,type FormEvent } from "react";
 
 const input = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800";
 const button = "rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-40";

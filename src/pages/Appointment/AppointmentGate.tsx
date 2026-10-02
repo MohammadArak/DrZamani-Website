@@ -1,7 +1,7 @@
-import {lazy,Suspense} from "react";
 import BookingClosed from "@/components/BookingClosed";
 import Seo from "@/components/SEO";
-import {useClinicInfo} from "@/contexts/ClinicInfoContext";
+import { useClinicInfo } from "@/contexts/ClinicInfoContext";
+import { lazy,Suspense } from "react";
 
 const PatientPortal=lazy(()=>import("./AppointmentPortalV2"));
 

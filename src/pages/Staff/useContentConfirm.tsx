@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState} from "react";
+import { useEffect,useRef,useState } from "react";
 
 /** Content actions use a keyboard-accessible dialog without blocking the browser. */
 export function useContentConfirm(){

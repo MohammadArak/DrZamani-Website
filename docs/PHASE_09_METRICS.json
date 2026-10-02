@@ -1,0 +1,569 @@
+{
+  "bundle_before": [
+    {
+      "name": "AboutUs-CTatXDme.js",
+      "bytes": 6842,
+      "gzip": 2382
+    },
+    {
+      "name": "Appointment-BDpAQpTd.js",
+      "bytes": 1759,
+      "gzip": 875
+    },
+    {
+      "name": "appointmentApi-DI1lKZBG.js",
+      "bytes": 20731,
+      "gzip": 7125
+    },
+    {
+      "name": "AppointmentPortalV2-7tlIN6L9.js",
+      "bytes": 82827,
+      "gzip": 19989
+    },
+    {
+      "name": "BlogPreview-BxCBeuzL.js",
+      "bytes": 3809,
+      "gzip": 1638
+    },
+    {
+      "name": "classNames-Bg-6OsIZ.js",
+      "bytes": 27011,
+      "gzip": 8531
+    },
+    {
+      "name": "commentsApi-BCMVUL9_.js",
+      "bytes": 2050,
+      "gzip": 999
+    },
+    {
+      "name": "contentApi-C_xNlJ9Z.js",
+      "bytes": 30172,
+      "gzip": 11853
+    },
+    {
+      "name": "fa-BzrNwucd.js",
+      "bytes": 3140,
+      "gzip": 1079
+    },
+    {
+      "name": "fa6-DLdtQN0I.js",
+      "bytes": 3481,
+      "gzip": 1382
+    },
+    {
+      "name": "FAQ-CEO1R_y7.js",
+      "bytes": 15845,
+      "gzip": 6343
+    },
+    {
+      "name": "Footer-DT9WEdQO.js",
+      "bytes": 10194,
+      "gzip": 2698
+    },
+    {
+      "name": "gi-DP8i1VjL.js",
+      "bytes": 1672,
+      "gzip": 836
+    },
+    {
+      "name": "GlassCard-CCD1FgkX.js",
+      "bytes": 1122,
+      "gzip": 429
+    },
+    {
+      "name": "index-DcfHRoTp.css",
+      "bytes": 128826,
+      "gzip": 21201
+    },
+    {
+      "name": "index-OTEaRU1g.js",
+      "bytes": 302388,
+      "gzip": 95977
+    },
+    {
+      "name": "Landing-grr3vzHP.js",
+      "bytes": 43943,
+      "gzip": 14199
+    },
+    {
+      "name": "md-Ujdd7Xk4.js",
+      "bytes": 703,
+      "gzip": 274
+    },
+    {
+      "name": "MediaPicker-D2NVJ0rc.js",
+      "bytes": 2066,
+      "gzip": 1023
+    },
+    {
+      "name": "Motion-DsqE5PjR.js",
+      "bytes": 1965,
+      "gzip": 1018
+    },
+    {
+      "name": "NotFound-BiPQq2F-.js",
+      "bytes": 1144,
+      "gzip": 671
+    },
+    {
+      "name": "PatientsComments-Bk1FiquL.js",
+      "bytes": 5758,
+      "gzip": 2340
+    },
+    {
+      "name": "react-QPV1QkYK.js",
+      "bytes": 15043,
+      "gzip": 6119
+    },
+    {
+      "name": "Samples-B-ISMvvL.js",
+      "bytes": 5441,
+      "gzip": 2204
+    },
+    {
+      "name": "SEO-CojX8LYD.js",
+      "bytes": 3145,
+      "gzip": 1295
+    },
+    {
+      "name": "ServiceIcon-DydXDQaP.js",
+      "bytes": 114149,
+      "gzip": 35841
+    },
+    {
+      "name": "Services-BmgKLFBO.js",
+      "bytes": 5430,
+      "gzip": 1804
+    },
+    {
+      "name": "SpaceSignBoard-D5Fxig7M.js",
+      "bytes": 5634,
+      "gzip": 2282
+    },
+    {
+      "name": "Staff-DZJ3y-kR.js",
+      "bytes": 163700,
+      "gzip": 36049
+    },
+    {
+      "name": "staffAccess-BBwfTDaH.js",
+      "bytes": 614,
+      "gzip": 338
+    },
+    {
+      "name": "StaffArticlesPanel-BIr8t-nF.js",
+      "bytes": 470507,
+      "gzip": 146385
+    },
+    {
+      "name": "StaffCommentsPanel-CF-ewK4I.js",
+      "bytes": 10044,
+      "gzip": 3531
+    },
+    {
+      "name": "StaffMediaPanel-DqOCwqad.js",
+      "bytes": 4006,
+      "gzip": 1772
+    },
+    {
+      "name": "useContentConfirm-DVCcKXPf.js",
+      "bytes": 1424,
+      "gzip": 778
+    }
+  ],
+  "bundle_after": {
+    "version": "1.15.0",
+    "measurements": {
+      "main": 96057,
+      "staff": 24680,
+      "patientGate": 875,
+      "patientSession": 1565,
+      "allJs": 434277,
+      "allCss": 20974
+    },
+    "limits": {
+      "main": 102000,
+      "staff": 27000,
+      "patientGate": 1500,
+      "patientSession": 5000,
+      "allJs": 470000,
+      "allCss": 23000
+    },
+    "files": [
+      {
+        "name": "AboutUs-CgI5Qmrx.js",
+        "bytes": 6842,
+        "gzipBytes": 2384
+      },
+      {
+        "name": "Appointment-TRwcLLkG.js",
+        "bytes": 1768,
+        "gzipBytes": 875
+      },
+      {
+        "name": "appointmentApi-DI1lKZBG.js",
+        "bytes": 20731,
+        "gzipBytes": 7125
+      },
+      {
+        "name": "AppointmentPortalV2-B-0rflfA.js",
+        "bytes": 3297,
+        "gzipBytes": 1565
+      },
+      {
+        "name": "AppointmentsPanel-DZcW4WwC.js",
+        "bytes": 6086,
+        "gzipBytes": 2355
+      },
+      {
+        "name": "AvailabilityCalendar-D60T1Pbv.js",
+        "bytes": 4515,
+        "gzipBytes": 1889
+      },
+      {
+        "name": "BlogPreview-DoBhJW1P.js",
+        "bytes": 3809,
+        "gzipBytes": 1638
+      },
+      {
+        "name": "BotProtection-BZgeOYqJ.js",
+        "bytes": 4274,
+        "gzipBytes": 1887
+      },
+      {
+        "name": "classNames-BTfGXH9b.js",
+        "bytes": 27011,
+        "gzipBytes": 8531
+      },
+      {
+        "name": "ClinicInfoPanel-CtEqEsST.js",
+        "bytes": 10726,
+        "gzipBytes": 2754
+      },
+      {
+        "name": "commentsApi-G45SErXq.js",
+        "bytes": 2050,
+        "gzipBytes": 1000
+      },
+      {
+        "name": "contentApi-C_xNlJ9Z.js",
+        "bytes": 30172,
+        "gzipBytes": 11853
+      },
+      {
+        "name": "fa-Cn1dRHvW.js",
+        "bytes": 3140,
+        "gzipBytes": 1076
+      },
+      {
+        "name": "fa6-B92EQMmT.js",
+        "bytes": 3481,
+        "gzipBytes": 1381
+      },
+      {
+        "name": "FAQ-CG_wmUYZ.js",
+        "bytes": 15845,
+        "gzipBytes": 6341
+      },
+      {
+        "name": "Footer-BOSCTkxx.js",
+        "bytes": 10194,
+        "gzipBytes": 2697
+      },
+      {
+        "name": "gi-CbL5lhgE.js",
+        "bytes": 1672,
+        "gzipBytes": 834
+      },
+      {
+        "name": "GlassCard-U7NAXT4J.js",
+        "bytes": 1122,
+        "gzipBytes": 432
+      },
+      {
+        "name": "index-DynnEu8O.css",
+        "bytes": 127254,
+        "gzipBytes": 20974
+      },
+      {
+        "name": "index-OdVg7fLr.js",
+        "bytes": 302539,
+        "gzipBytes": 96057
+      },
+      {
+        "name": "io5-B4IlTHix.js",
+        "bytes": 21367,
+        "gzipBytes": 4519
+      },
+      {
+        "name": "JalaliDatePicker-nUjAvsWw.js",
+        "bytes": 85455,
+        "gzipBytes": 28249
+      },
+      {
+        "name": "Landing-qoh0M33O.js",
+        "bytes": 43943,
+        "gzipBytes": 14204
+      },
+      {
+        "name": "md-DnNG7Ddt.js",
+        "bytes": 703,
+        "gzipBytes": 272
+      },
+      {
+        "name": "MediaPicker-D2NVJ0rc.js",
+        "bytes": 2066,
+        "gzipBytes": 1023
+      },
+      {
+        "name": "Motion-DsqE5PjR.js",
+        "bytes": 1965,
+        "gzipBytes": 1018
+      },
+      {
+        "name": "NotFound-C_bwmCMk.js",
+        "bytes": 1144,
+        "gzipBytes": 668
+      },
+      {
+        "name": "PatientBookingWizard-CM_RKvIS.js",
+        "bytes": 13278,
+        "gzipBytes": 3909
+      },
+      {
+        "name": "PatientIntakeDialog-FiouJDNn.js",
+        "bytes": 5615,
+        "gzipBytes": 2193
+      },
+      {
+        "name": "PatientLogin-BmsSvI0Y.js",
+        "bytes": 5136,
+        "gzipBytes": 2253
+      },
+      {
+        "name": "PatientPortal-BMTN8rpf.js",
+        "bytes": 47886,
+        "gzipBytes": 12019
+      },
+      {
+        "name": "PatientProfileForm-BEzOzRJM.js",
+        "bytes": 4235,
+        "gzipBytes": 1629
+      },
+      {
+        "name": "PatientsComments-CM-gbPck.js",
+        "bytes": 5758,
+        "gzipBytes": 2339
+      },
+      {
+        "name": "PatientShells-DB_UIc3S.js",
+        "bytes": 2363,
+        "gzipBytes": 1166
+      },
+      {
+        "name": "patientUi-CXjRD-dy.js",
+        "bytes": 823,
+        "gzipBytes": 515
+      },
+      {
+        "name": "react-QPV1QkYK.js",
+        "bytes": 15043,
+        "gzipBytes": 6119
+      },
+      {
+        "name": "Samples-bUQa91pw.js",
+        "bytes": 5441,
+        "gzipBytes": 2202
+      },
+      {
+        "name": "SchedulePanel-DV2FkUxk.js",
+        "bytes": 8612,
+        "gzipBytes": 2656
+      },
+      {
+        "name": "SEO-DRea58fs.js",
+        "bytes": 3145,
+        "gzipBytes": 1294
+      },
+      {
+        "name": "Services-BUFpz4vt.js",
+        "bytes": 5430,
+        "gzipBytes": 1805
+      },
+      {
+        "name": "ServicesPanel-CD0-JR9m.js",
+        "bytes": 28853,
+        "gzipBytes": 6458
+      },
+      {
+        "name": "SmsCenterPanel-DQz6xeGR.js",
+        "bytes": 12185,
+        "gzipBytes": 3258
+      },
+      {
+        "name": "SpaceSignBoard-D5Fxig7M.js",
+        "bytes": 5634,
+        "gzipBytes": 2282
+      },
+      {
+        "name": "Staff-CkVDH-53.js",
+        "bytes": 101809,
+        "gzipBytes": 24680
+      },
+      {
+        "name": "staffAccess-BBwfTDaH.js",
+        "bytes": 614,
+        "gzipBytes": 338
+      },
+      {
+        "name": "StaffArticlesPanel-_SYsMZZf.js",
+        "bytes": 470506,
+        "gzipBytes": 146136
+      },
+      {
+        "name": "StaffCommentsPanel-Cktk13u8.js",
+        "bytes": 10044,
+        "gzipBytes": 3532
+      },
+      {
+        "name": "StaffMediaPanel-DqOCwqad.js",
+        "bytes": 4006,
+        "gzipBytes": 1772
+      },
+      {
+        "name": "staffUi-WeMe94hC.js",
+        "bytes": 1388,
+        "gzipBytes": 759
+      },
+      {
+        "name": "useConsultationRealtime-CsXQ1vq_.js",
+        "bytes": 3121,
+        "gzipBytes": 1558
+      },
+      {
+        "name": "useContentConfirm-DVCcKXPf.js",
+        "bytes": 1424,
+        "gzipBytes": 778
+      }
+    ],
+    "failures": []
+  },
+  "queries_before": {
+    "5": {
+      "queries": [
+        15,
+        15,
+        15
+      ],
+      "median_ms": 19.28
+    },
+    "20": {
+      "queries": [
+        30,
+        30,
+        30
+      ],
+      "median_ms": 24.25
+    }
+  },
+  "queries_after": {
+    "5": {
+      "queries": [
+        11,
+        11,
+        11
+      ],
+      "median_ms": 20.23
+    },
+    "20": {
+      "queries": [
+        11,
+        11,
+        11
+      ],
+      "median_ms": 16.63
+    }
+  },
+  "fonts": {
+    "files": 56,
+    "bytes": 3620974,
+    "paths": [
+      "public/fonts/Dana/Dana-Black.ttf",
+      "public/fonts/Dana/Dana-Bold.ttf",
+      "public/fonts/Dana/Dana-DemiBold.ttf",
+      "public/fonts/Dana/Dana-ExtraBlack.ttf",
+      "public/fonts/Dana/Dana-ExtraBold.ttf",
+      "public/fonts/Dana/Dana-Heavy.ttf",
+      "public/fonts/Dana/Dana-Light.ttf",
+      "public/fonts/Dana/Dana-Medium.ttf",
+      "public/fonts/Dana/Dana-Regular.ttf",
+      "public/fonts/Dana/Dana-Thin.ttf",
+      "public/fonts/Dana/Dana-UltraLight.ttf",
+      "public/fonts/Lalezar/Lalezar-Regular.ttf",
+      "public/fonts/Shahab/Shahab-Regular.otf",
+      "public/fonts/Shahab/Shahab-Regular.ttf",
+      "public/fonts/Shahab/Shahab-Regular.woff",
+      "public/fonts/Shahab/Shahab-Regular.woff2",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Bold.eot",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Bold.ttf",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Bold.woff",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Bold.woff2",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Light.eot",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Light.ttf",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Light.woff",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Light.woff2",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Medium.eot",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Medium.ttf",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Medium.woff",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Medium.woff2",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Thin.eot",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Thin.ttf",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Thin.woff",
+      "public/fonts/vazir-font-v16.1.0/Vazir-Thin.woff2",
+      "public/fonts/vazir-font-v16.1.0/Vazir.eot",
+      "public/fonts/vazir-font-v16.1.0/Vazir.ttf",
+      "public/fonts/vazir-font-v16.1.0/Vazir.woff",
+      "public/fonts/vazir-font-v16.1.0/Vazir.woff2",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Bold-FD-WOL.eot",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Bold-FD-WOL.ttf",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Bold-FD-WOL.woff",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Bold-FD-WOL.woff2",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-FD-WOL.eot",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-FD-WOL.ttf",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-FD-WOL.woff",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-FD-WOL.woff2",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Light-FD-WOL.eot",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Light-FD-WOL.ttf",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Light-FD-WOL.woff",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Light-FD-WOL.woff2",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Medium-FD-WOL.eot",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Medium-FD-WOL.ttf",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Medium-FD-WOL.woff",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Medium-FD-WOL.woff2",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Thin-FD-WOL.eot",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Thin-FD-WOL.ttf",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Thin-FD-WOL.woff",
+      "public/fonts/vazir-font-v16.1.0/Farsi-Digits-Without-Latin/Vazir-Thin-FD-WOL.woff2"
+    ]
+  },
+  "migrations": [
+    {
+      "script": "verify-migrations.py",
+      "exit_code": 0,
+      "tail": "PASS: fresh migration, booking forced closed despite legacy ENV=true, SMS queue/claim rollback preservation, disabled MFA defaults, populated MFA rollback/session revocation/overlay cleanup, downgrade/re-upgrade, integrity, foreign keys and payment uniqueness.\n",
+      "error": "ning upgrade 20261001_0018 -> 20261001_0019, Consented testimonials; no legacy quote import and no patient foreign key.\n"
+    },
+    {
+      "script": "verify-editorial-migrations.py",
+      "exit_code": 0,
+      "tail": "PASS: fresh editorial migration, populated draft/public/scheduled/history/alias/media rollback, file preservation, empty re-upgrade, coordinated DB/media restore, integrity and foreign keys.\n",
+      "error": "ning upgrade 20261001_0017 -> 20261001_0018, Editorial schema; downgrade needs backup of DB and separate media storage.\n"
+    },
+    {
+      "script": "verify-comments-migrations.py",
+      "exit_code": 0,
+      "tail": "PASS: empty comments on upgrade, populated draft/public rollback, preserved articles/media, re-upgrade and coordinated DB/media restore, integrity/FK.\n",
+      "error": "ning upgrade 20261001_0018 -> 20261001_0019, Consented testimonials; no legacy quote import and no patient foreign key.\n"
+    }
+  ]
+}

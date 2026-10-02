@@ -16,7 +16,7 @@ import {
     type Service,
     type WaitlistEntry,
 } from "@/services/appointmentApi";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback,useEffect,useMemo,useState,type FormEvent } from "react";
 import {
     IoArrowBackOutline,
     IoArrowForwardOutline,

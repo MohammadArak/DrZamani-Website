@@ -1,0 +1,79 @@
+name: Quality
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.19.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint -- --max-warnings=0
+      - run: npm run build
+      - run: npm run check:fonts
+      - run: npm run check:bundle -- --report .work/bundle-report.json
+      - run: npm audit --audit-level=low
+
+  backend:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install fixed quality tools
+        run: python -m pip install uv==0.11.24 ruff==0.16.9 pip-audit==2.10.1
+      - run: uv sync --frozen --all-groups
+      - run: ruff check app tests ../scripts --select E9,F63,F7,F82
+      - run: uv run --frozen python -m pytest -o addopts='' -q
+      - run: uv run --frozen python ../scripts/verify-migrations.py
+      - run: uv run --frozen python ../scripts/verify-editorial-migrations.py
+      - run: uv run --frozen python ../scripts/verify-comments-migrations.py
+      - run: python -c "from pathlib import Path; Path('../.work').mkdir(exist_ok=True)"
+      - run: uv export --frozen --all-groups --no-hashes --no-emit-project --output-file ../.work/audit-requirements.txt
+      - run: pip-audit --requirement ../.work/audit-requirements.txt --no-deps --disable-pip
+
+  secrets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install verified official Gitleaks binary
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz --output "$RUNNER_TEMP/gitleaks.tar.gz"
+          python -c 'import hashlib,os,pathlib; p=pathlib.Path(os.environ["RUNNER_TEMP"])/"gitleaks.tar.gz"; assert hashlib.sha256(p.read_bytes()).hexdigest()=="551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"'
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+      - name: Scan complete Git history without printing secret values
+        shell: bash
+        run: '"$RUNNER_TEMP/gitleaks" git . --redact=100 --no-banner --log-opts=--all'
