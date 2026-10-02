@@ -1,5 +1,11 @@
 # گزارش پیشرفت
 
+## 2026-10-02 — شروع دوباره مرحله۸، concept-v1
+
+مالک طراحی جدید را خواست و فقط پیشنهاد بصری برای بررسی درخواست کرد. یک تصویر homepage با imagegen و رفرنس عمومی پزشک/لوگو/screenshot مالک ساخته شد؛ navy/gold، hero/header تیره، خدمات ساده، نظرات باعکس/نام/متن درcarousel، کارت مقاله/FAQ/contact/footer. تصویر971×1619/1574700bytes، فایل بازخوانی و بصری دیده شد؛ SHA25659df4e073488c0d81f574be1c6e80b96bb74a3174c410f2c13b6c622b8463a1e. نمونه‌کار در کانسپت اول نیست و باید با محتوای تأییدشده حفظ شود؛ متن و تصاویر مکمل تولیدی داده مرجع واقعی نیستند. کد، mobile، عملکرد، accessibility/contrast و SEO جدید آزموده نشده‌اند؛ مرحله۸ complete نیست. شاخه/PR پیش‌نمایش draft است و source دقیق در handoff کنار تصویر ثبت می‌شود؛ بدون deploy/productionactivation/realpatient/provider/owner.
+
+مبنای این مرحله main db6de0c24a59b3cedf4ac1b4a4be1d6c8eb1238f از PR۱۱، نسخه1.16.0/source40ada26346de67ecdf57665db091fd57ef9103e9؛ CI36969641558 چهارjob موفق،327 Linux و311 Windows/16skip. این تست‌ها کد قبلی‌اند و برای کانسپت تازه PASS عملکرد ثبت نمی‌شود.
+
 ## 2026-10-02 — بازیابی هماهنگ1.16.0، در حال پذیرش
 
 پس از ادغام PR۱۰ با main00dd2802b4ac673cca3afe339af49fedefd7e169، scope بعدی مرحله۱۰ بازیابی DB/publicmedia/privateuploads/ENV/Nginx است. اسکریپت‌های قدیمی با مدیریت هماهنگ، توقف سه writer، قفل مشترک، maintenance، snapshot مستقل از WAL، integrity/hash و rollback با رسید متناظر جایگزین شدند. گروه پردازشی فرمان در timeout/interrupt بسته می‌شود و ENV با Python سرویس تحت www-data خوانده می‌شود. راهنمای deploy/RECOVERY.md حدود rollback و journal/قطع برق/offsite را شفاف می‌کند. فرانت دست‌نخورده است. CI f980cfe/run36968560715 چهارjob موفق:325 Linux و311 Windows/14skipped، هرکدام3warning قبلی. محلی recovery17passed/14skipped؛ fullsuite root308passed/2cwd-fail/13skip بود، دو خطا از cwd=api همراه تست‌های جدید18passed/14skip تکرار و رفع شد؛ fullsuite موفق محلی ادعا نشود.

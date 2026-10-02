@@ -1,4 +1,16 @@
-# وضعیت فعلی — 2026-10-02، بازیابی هماهنگ1.16.0 در حال پذیرش
+# وضعیت فعلی — 2026-10-02، شروع دوباره طراحی مرحله۸ با پیشنهاد بصری
+
+درخواست تازه مالک: «طراحی جدید رو الان انجام بدیم؛ یه طرح بصری بکش». طراحی دیگر برای بررسی بصری deferred نیست؛ فقط مفهوم صفحه اصلی concept-v1 ساخته شده، کد اجرایی/سرور تغییر نکرده و پذیرش طراحی ثبت نشده. docs/PHASE_08_DESIGN_PREVIEW.md و docs/design/homepage-concept-v1.png مرجع‌اند. PNG971×1619، SHA25659df4e073488c0d81f574be1c6e80b96bb74a3174c410f2c13b6c622b8463a1e. تصویر با imagegen از منابع عمومی پزشک/لوگو و screenshot مالک ساخته و دیده شد؛ avatar/photoهای مکمل نمایشی‌اند، داده/نظر واقعی بیمار نیستند. پیاده‌سازی، mobile، contrast/accessibility/SEO/interaction هنوز NOT RUN، مرحله۸ complete نیست.
+
+main مبنا db6de0c24a59b3cedf4ac1b4a4be1d6c8eb1238f؛ نسخه1.16.0، source40ada26346de67ecdf57665db091fd57ef9103e9 و tree3cc4dad989be879f32414960cccec2a2de06ed58. PR۱۱ merged و CI36969641558 چهارjob موفق327 Linux/311 Windows/16skip؛ نتایج اجرا شده مربوط به کد قبلی‌اند. رسید دقیق outputs/AI_HANDOFF-1.16.0.md بر pending تاریخی پایین مقدم است. preview در شاخه codex/phase-08-design-preview با PRdraft جدا ثبت می‌شود، نه پذیرش/ادغام مرحله۸ کامل.
+
+جهت: navy/gold، هدر/هیرو تیره، نام طلایی/متن سفید، کارت خدمات خلوت، درباره پزشک دو ستون، نظراتphoto/name/body درcarousel تیره/شیشه‌ای، کارت مقاله، FAQ/contact وfooterheading سفید. سه کارت حذف‌شده AboutUs بازنگردند؛ وضعیت رزرو رویhomepage نوشته نشود و دیالوگ managertext/closed appointment no-patient-load حفظ شود. صفحه مستقل مقالات در این کانسپت تغییر ندارد. **نمونه‌کار در کانسپت۱ دیده نمی‌شود؛ حذف قابلیت منظور نیست و گالری محتوای تأییدشده در طرح تکمیلی حفظ شود.** متن/عکس/نقشه تولیدی داده مرجع پنل نیست؛ اجرای نهایی با داده backend و عکس واقعی تأییدشده تطبیق یابد.
+
+قدم بعد: دریافت بازخورد بصری مالک، تکمیل desktop/mobile وگالری/صفحاتخدمات، سپس پیاده‌سازی روی همین PR/شاخه طراحی و بررسی مرتبط. stage۱۰/runtime/providers/sourceartifact/productionidentity/offsite/power-loss همچنان ناتمام. merge پس از تکمیل/test/docs از قبل مجاز است؛ deploy، productionbooking، realowner، payment/SMS و patientdata واقعی بدون اجازه صریح ممنوع. فایل ادامه کنار تصویر خروجی تحویل می‌شود.
+
+---
+
+# وضعیت تاریخی — بازیابی هماهنگ1.16.0 پیش از ادغام PR۱۱
 
 شاخه codex/phase-10-recovery از main `00dd2802b4ac673cca3afe339af49fedefd7e169`، tree `451f35a323b91d36ce3432e56c18c60a08a65e2a`. PR۱۰ نسخه1.15 با source `33fb38e2e2e712c010b747fc5b2de3058e164785` ادغام شد؛ CI36963277372 چهار job موفق و294 pytest هر OS. رسید/ZIP/handoff در outputs موجود است؛ قدم‌های pending متن تاریخی پایین دیگر مربوط به PR۱۰ نیستند.
 
