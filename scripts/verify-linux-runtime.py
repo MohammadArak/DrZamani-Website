@@ -355,6 +355,9 @@ def verify(report):
     report.write_text(json.dumps(result, indent=2)+'\n')
     report.chmod(0o644)  # Sanitized status only; no private resources are exported.
     print(json.dumps(result))
+    if result['status'] != 'passed' and os.environ.get('GITHUB_ACTIONS') == 'true':
+        # The sanitized failure summary is also published as an annotation: job logs need a login, annotations do not.
+        print('::error title=linux-runtime failure::' + json.dumps(result).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
     return 0 if result['status'] == 'passed' else 1
 
 
