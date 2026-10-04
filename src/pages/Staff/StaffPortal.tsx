@@ -74,6 +74,7 @@ const SmsCenterPanel = lazy(() => import("./SmsCenterPanel"));
 const StaffArticlesPanel = lazy(() => import("./StaffArticlesPanel"));
 const StaffCommentsPanel = lazy(() => import("./StaffCommentsPanel"));
 const StaffSiteServicesPanel = lazy(() => import("./StaffSiteServicesPanel"));
+const StaffSiteContentPanel = lazy(() => import("./StaffSiteContentPanel"));
 const StaffMediaPanel = lazy(() => import("./StaffMediaPanel"));
 export const StaffDashboard = ({
     token,
@@ -296,6 +297,7 @@ export const StaffDashboard = ({
         { id: "comments", label: "نظرات مراجعین", icon: <IoListOutline /> },
         { id: "articles", label: "مقالات و آموزش", icon: <IoListOutline /> },
         { id: "site-services", label: "صفحه‌های خدمات", icon: <IoListOutline /> },
+        { id: "site-content", label: "متن‌های صفحه اصلی", icon: <IoListOutline /> },
         { id: "media", label: "رسانه عمومی", icon: <IoListOutline /> },
         { id: "access", label: "نقش‌ها و کارکنان", icon: <IoShieldCheckmarkOutline /> },
     ].filter(item => item.id === "account-security" || can(staffTabPermissions[item.id])) as typeof navItems;
@@ -641,6 +643,7 @@ export const StaffDashboard = ({
                     {tab === "articles" && can("articles.view") && <Suspense fallback={<p>در حال آماده‌سازی ویرایشگر…</p>}><StaffArticlesPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {tab === "comments" && can("comments.view") && <Suspense fallback={<p>در حال آماده‌سازی نظرات…</p>}><StaffCommentsPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {tab === "site-services" && can("site_services.view") && <Suspense fallback={<p>در حال آماده‌سازی صفحه‌های خدمات…</p>}><StaffSiteServicesPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
+                    {tab === "site-content" && can("site_content.view") && <Suspense fallback={<p>در حال آماده‌سازی متن‌ها…</p>}><StaffSiteContentPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {tab === "media" && can("media.manage") && <Suspense fallback={<p>در حال آماده‌سازی رسانه…</p>}><StaffMediaPanel token={token} /></Suspense>}
                     {tab === "account-security" && <StaffMfaPanel token={token} />}
                     {tab === "clinic-info" && can("settings.view") && settings && (

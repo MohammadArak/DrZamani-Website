@@ -1,31 +1,17 @@
 import Accordion from "@/components/Accordion/Accordion";
 import { motion } from "@/components/Motion";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
+import { fillText, useSiteContent } from "@/services/siteContentApi";
 import { useState } from "react";
 
 const FAQ = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
     const { clinicInfo } = useClinicInfo();
-    const faqs = [
-        {
-            title: "آیا نتیجه جراحی بینی طبیعی خواهد بود؟",
-            content: `هدف اصلی در جراحی‌های ${clinicInfo.doctorName}، ایجاد تناسب میان بینی و سایر اجزای صورت است. فرم نهایی بینی با توجه به ویژگی‌های چهره، نوع پوست و ساختار بینی هر فرد طراحی می‌شود تا علاوه بر زیبایی، ظاهری طبیعی و هماهنگ ایجاد شود.`,
-        },
-        {
-            title: "آیا جراحی زیبایی بینی بر تنفس تأثیر می‌گذارد؟",
-            content:
-                "در صورت وجود مشکلات تنفسی یا انحراف تیغه بینی، این موارد هم‌زمان با جراحی زیبایی قابل اصلاح هستند. حفظ یا بهبود عملکرد طبیعی تنفس، یکی از اصول مهم در برنامه‌ریزی و انجام جراحی است.",
-        },
-        {
-            title: "دوران نقاهت جراحی بینی چقدر است؟",
-            content:
-                "بیشتر بیماران پس از حدود یک هفته می‌توانند فعالیت‌های روزمره خود را از سر بگیرند. با این حال، کاهش کامل تورم و مشاهده نتیجه نهایی به مرور زمان و طی چند ماه اتفاق می‌افتد.",
-        },
-        {
-            title: "چگونه می‌توان برای مشاوره یا تعیین وقت اقدام کرد؟",
-            content: `برای دریافت مشاوره یا تعیین وقت، دکمه رزرو نوبت را انتخاب کنید یا با شماره‌های ${clinicInfo.phones.office.display} و ${clinicInfo.phones.consultation.display} تماس بگیرید.`,
-        },
-    ];
+    const content = useSiteContent();
+    const faqs = content.faq.items.map((item) => ({
+        title: fillText(item.title, clinicInfo),
+        content: fillText(item.content, clinicInfo),
+    }));
 
     return (
         <section

@@ -1,4 +1,8 @@
-# وضعیت جاری — خدمات از دیتابیس، 2026-10-04
+# وضعیت جاری — متن صفحه اصلی از دیتابیس، 2026-10-04
+
+بلوک‌های hero/about/faq/footer در `site_blocks` (api/app/site_content.py، routers/site_content.py، پنل StaffSiteContentPanel). بعد از این: نمونه‌کارها از دیتابیس، سپس رفع موارد گزارش بررسی (docs/REVIEW_2026-10-04.md). deploy و روشن‌کردن رزرو/پرداخت مجوز جدا می‌خواهد؛ migrationهای 0020 و 0021 هنگام release اجرا شوند.
+
+# وضعیت تاریخی — خدمات از دیتابیس، 2026-10-04
 
 روی `main` (پس از 9bfd9ba) شاخه `feat/services-from-db`: متن صفحه‌های خدمات از جدول `site_services` می‌آید (api/app/site_services.py، routers/site_services.py، پنل `StaffSiteServicesPanel`). seed اولیه از `clinic_services.json` (فقط وقتی جدول خالی است). ظاهر اصلی صفحه اصلی و صفحه‌های مقالات/خدمات (public_chrome.py) روی main ادغام شده‌اند؛ طرح‌های `design/variants-2026-10-04` فقط پیشنهادند. قدم‌های بعد طبق گفتگوی مالک: متن‌های صفحه اصلی (هیرو، درباره، FAQ، فوتر) و نمونه‌کارها هم از دیتابیس، مقاله‌ها و متن واقعی خدمات توسط نویسنده‌ی تعیین‌شده. CI: job `linux-runtime` ناپایدار است (علت نامعلوم؛ fixed گزارش نشود). deploy و روشن‌کردن رزرو/پرداخت مجوز جدا می‌خواهد.
 

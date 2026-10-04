@@ -4,10 +4,12 @@ import { FaCalendar, FaRegImages } from "react-icons/fa";
 import ReserveDialog from "./ReserveDialog";
 import { useState } from "react";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
+import { fillText, useSiteContent } from "@/services/siteContentApi";
 
 const HeroContent = () => {
     const [reserveOpen, setReserveOpen] = useState(false);
     const { clinicInfo } = useClinicInfo();
+    const content = useSiteContent();
     return (
         <section
             id="hero"
@@ -98,12 +100,7 @@ const HeroContent = () => {
                             viewport={{ once: true }}
                         >
                             <motion.p className="mx-auto max-w-200 text-justify text-[#E0E1DD] font-shahab">
-                                {clinicInfo.doctorName} با بیش از دو دهه تجربه تخصصی در
-                                جراحی زیبایی بینی، با تلفیق دانش پزشکی، هنر و
-                                دقت در جزئیات، نتیجه‌ای طبیعی، متناسب با چهره و
-                                هماهنگ با ویژگی‌های منحصربه‌فرد هر فرد خلق
-                                می‌کند؛ نتیجه‌ای که علاوه بر زیبایی، سلامت و
-                                عملکرد صحیح تنفس را نیز حفظ می‌کند.
+                                {fillText(content.hero.description, clinicInfo)}
                             </motion.p>
                         </motion.div>
                         <motion.div

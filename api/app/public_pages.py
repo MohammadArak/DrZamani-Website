@@ -107,6 +107,8 @@ def render(clinic, page, db=None, editorial=None):
         comment_html,comment_data=home_html(db)
         body+=comment_html
         meta+=f'<script id="comment-bootstrap" type="application/json">{safe_json(comment_data)}</script>'
+        from .site_content import public_blocks
+        meta+=f'<script id="site-content-bootstrap" type="application/json">{safe_json({"blocks":public_blocks(db)})}</script>'
     if page == "appointment" and not payload["booking_enabled"]:
         body += f'<p role="status">{esc(payload["booking_disabled_message"])}</p><p><a href="tel:{esc(phone(clinic.office_phone))}">تماس با مطب</a></p>'
     body += '<p><a href="/">صفحه اصلی</a></p></main>'

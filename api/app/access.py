@@ -108,6 +108,9 @@ CATALOG = [
     ("site_services.edit", "ویرایش متن و سئوی صفحه خدمت", "محتوای سایت", ["site_services.view"], False),
     ("site_services.publish", "انتشار و توقف انتشار صفحه خدمت", "محتوای سایت", ["site_services.view"], False),
     ("site_services.delete", "بایگانی صفحه خدمت", "محتوای سایت", ["site_services.view"], False),
+    ("site_content.view", "مشاهده متن‌های صفحه اصلی", "محتوای سایت", [], False),
+    ("site_content.edit", "ویرایش متن‌های صفحه اصلی", "محتوای سایت", ["site_content.view"], False),
+    ("site_content.publish", "انتشار متن‌های صفحه اصلی", "محتوای سایت", ["site_content.view"], False),
     *[
         (
             f"comments.{action}",
@@ -159,6 +162,8 @@ BUILTINS = {
             "site_services.view",
             "site_services.create",
             "site_services.edit",
+            "site_content.view",
+            "site_content.edit",
             "articles.view",
             "articles.create",
             "articles.edit",

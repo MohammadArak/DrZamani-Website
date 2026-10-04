@@ -68,3 +68,16 @@ class SiteService(Base):
     actor_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class SiteBlock(Base):
+    """One editable homepage text block (hero, about, faq, footer); draft and public snapshot."""
+    __tablename__ = "site_blocks"
+    key: Mapped[str] = mapped_column(String(40), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+    content_json: Mapped[str] = mapped_column(Text)
+    published_json: Mapped[str | None] = mapped_column(Text)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime)
+    public_updated_at: Mapped[datetime | None] = mapped_column(DateTime)
+    actor_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id"))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

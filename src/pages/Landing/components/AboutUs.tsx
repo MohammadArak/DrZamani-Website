@@ -4,6 +4,7 @@ import { FaUsers } from "react-icons/fa6";
 import GlassCard from "./GlassCard";
 import { BiSolidCheckShield } from "react-icons/bi";
 import { useSiteServices } from "@/services/siteServicesApi";
+import { fillText, useSiteContent } from "@/services/siteContentApi";
 
 const ServiceMinimalCard = ({
     title,
@@ -41,6 +42,7 @@ const ServiceMinimalCard = ({
 const AboutUs = () => {
     const { clinicInfo } = useClinicInfo();
     const items = useSiteServices();
+    const content = useSiteContent();
     return (
         <section
             id="about-us"
@@ -95,31 +97,14 @@ const AboutUs = () => {
                                 }}
                                 viewport={{ once: true }}
                             >
-                                <motion.p className="mt-6 mx-auto max-w-200 font-light text-justify text-gray-700">
-                                    {clinicInfo.doctorName}، {clinicInfo.specialty} و
-                                    جراح زیبایی بینی، با بیش از دو دهه تجربه
-                                    حرفه‌ای و انجام بیش از ۱۵٬۰۰۰ عمل موفق
-                                    سپتوراینوپلاستی، همواره تلاش کرده‌اند تا
-                                    نتایجی طبیعی، ماندگار و متناسب با ویژگی‌های
-                                    منحصربه‌فرد هر بیمار خلق کنند.
-                                </motion.p>
-                                <motion.p className="mt-6 mx-auto max-w-200 font-light text-justify text-gray-700">
-                                    به‌روزرسانی مستمر دانش تخصصی از طریق حضور در
-                                    کنگره‌های علمی و دوره‌های بین‌المللی، در
-                                    کنار بهره‌گیری از تکنیک‌های نوین جراحی، این
-                                    امکان را فراهم کرده است که هر درمان با
-                                    بالاترین استانداردهای علمی، دقت و ایمنی
-                                    انجام شود.
-                                </motion.p>
-                                <motion.p className="mt-6 mx-auto max-w-200 font-light text-justify leading-8 text-gray-700">
-                                    رویکرد درمانی مطب بر ارزیابی هم‌زمان زیبایی و
-                                    عملکرد تنفسی استوار است. در مسیر مشاوره، تناسب
-                                    اجزای صورت، شرایط بالینی، سوابق پزشکی و انتظار
-                                    واقع‌بینانه بیمار کنار هم بررسی می‌شوند تا
-                                    تصمیم‌گیری نهایی شفاف‌تر و برنامه درمانی متناسب
-                                    با نیاز هر فرد تنظیم شود.
-                                </motion.p>
-
+                                {content.about.paragraphs.map((paragraph, index) => (
+                                    <motion.p
+                                        key={index}
+                                        className={`mt-6 mx-auto max-w-200 font-light text-justify text-gray-700 ${index === 2 ? "leading-8" : ""}`}
+                                    >
+                                        {fillText(paragraph, clinicInfo)}
+                                    </motion.p>
+                                ))}
                             </motion.div>
                             <motion.div
                                 className="grid grid-cols-2 md:grid-cols-4 gap-4"
