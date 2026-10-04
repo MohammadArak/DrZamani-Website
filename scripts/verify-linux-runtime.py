@@ -206,18 +206,23 @@ import json, ssl
 from pathlib import Path
 from websockets.sync.client import connect
 from websockets.exceptions import ConnectionClosed
-context=ssl.create_default_context(cafile='/etc/drzamani/fixture-cert.pem')
-url='wss://127.0.0.1:18443/api/v1/realtime'
-with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
-    socket.send(json.dumps({'audience':'patient','token':Path('/var/lib/drzamani/runtime-token').read_text()}))
-    assert json.loads(socket.recv(timeout=10)) == {'type':'realtime.ready','audience':'patient'}
-with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
-    socket.send(json.dumps({'audience':'patient'}))
-    try:
-        socket.recv(timeout=10)
-        raise AssertionError('Unauthenticated socket was admitted')
-    except ConnectionClosed as error:
-        assert error.rcvd.code == 4401
+try:
+    context=ssl.create_default_context(cafile='/etc/drzamani/fixture-cert.pem')
+    url='wss://127.0.0.1:18443/api/v1/realtime'
+    with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
+        socket.send(json.dumps({'audience':'patient','token':Path('/var/lib/drzamani/runtime-token').read_text()}))
+        assert json.loads(socket.recv(timeout=10)) == {'type':'realtime.ready','audience':'patient'}
+    with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
+        socket.send(json.dumps({'audience':'patient'}))
+        try:
+            socket.recv(timeout=10)
+            raise AssertionError('Unauthenticated socket was admitted')
+        except ConnectionClosed as error:
+            assert error.rcvd.code == 4401
+except BaseException as error:
+    # Only the exception class and a short message (no token is ever part of it) for the failure summary.
+    Path('/var/lib/drzamani/ws-error.txt').write_text(type(error).__name__ + ': ' + str(error)[:300])
+    raise
 ''')
     finally:
         credential.unlink(missing_ok=True)
@@ -343,7 +348,9 @@ def verify(report):
         if log.exists():
             journal += log.read_text(errors='replace')[-32000:]
         markers = ['PermissionError', 'ModuleNotFoundError', 'RuntimeError', 'OperationalError', 'SettingsUnavailable', 'No such file or directory', 'Permission denied', 'Failed at step', 'Read-only file system', 'error while loading shared libraries', 'Application startup complete', 'Uvicorn running']
+        ws_error = layout.data/'ws-error.txt'
         result = {'status':'failed','stage':stage,'errorType':type(error).__name__,'checks':checks,
+                  'websocketError':ws_error.read_text(errors='replace')[:400] if ws_error.exists() else None,
                   'failedCommands':runtime.failures,'healthProbe':runtime.health_failure,'unitStatus':diagnostics,'journalErrorTypes':[marker for marker in markers if marker in journal]}
     finally:
         for unit in (TIMER, JOB, API):
