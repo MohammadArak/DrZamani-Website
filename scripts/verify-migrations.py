@@ -44,6 +44,9 @@ with TemporaryDirectory(prefix="drzamani-migrations-") as directory:
         db.execute("INSERT INTO sms_outbox (event_key,phone,rendered_body,provider_pattern_code,variables_json,status,attempts,created_at,dedupe_key) VALUES ('fixture','+989121234567','synthetic','','{}','pending',0,CURRENT_TIMESTAMP,'fixture:pending')")
         db.execute("INSERT INTO sms_outbox (event_key,phone,rendered_body,provider_pattern_code,variables_json,status,attempts,created_at,claim_token,claim_until) VALUES ('fixture','+989121234567','synthetic','','{}','sending',1,CURRENT_TIMESTAMP,'fixture-claim','2099-01-01')")
         assert db.execute("SELECT revision,seo_title,office_phone FROM clinic_settings WHERE id=1").fetchone() == (2, '', '08633333333')
+        # The default admin role receives the article/comment/media permissions on existing databases too.
+        have = {row[0] for row in db.execute("SELECT permission_code FROM role_permissions JOIN roles ON roles.id = role_id WHERE roles.slug = 'admin'")}
+        assert {"articles.publish", "comments.publish", "media.manage"} <= have, "admin lacks content permissions"
         assert db.execute("SELECT COUNT(*) FROM setting_revisions").fetchone()[0] == 0
         for name in ['staff_mfa','mfa_challenges','bot_challenges','captcha_attestations']:
             assert db.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0] == 0
