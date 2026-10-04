@@ -1,6 +1,7 @@
 import LazyIframe from "@/components/Iframe";
 import { motion } from "@/components/Motion";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
+import { fillText, useSiteContent } from "@/services/siteContentApi";
 import {
     FaCode,
     FaEnvelope,
@@ -12,6 +13,7 @@ import { MdNavigateBefore } from "react-icons/md";
 
 const Footer = () => {
     const { clinicInfo } = useClinicInfo();
+    const content = useSiteContent();
 
     return (
         <footer
@@ -49,11 +51,7 @@ const Footer = () => {
                         </div>
                     </div>
                     <p className="font-shahab text-lg text-justify">
-                        در مطب {clinicInfo.doctorName}، تلفیق تجربه و هنر جراحی،
-                        مسیر دستیابی به زیبایی طبیعی و عملکرد بهتر را هموار
-                        می‌کند. هدف ما ارائه نتایجی ماندگار، متناسب با چهره و
-                        مطابق با بالاترین استانداردهای پزشکی است؛ زیرا اعتماد
-                        شما، ارزشمندترین سرمایه ماست.
+                        {fillText(content.footer.description, clinicInfo)}
                     </p>
                 </motion.div>
                 <div className="col-span-12 lg:col-span-8 grid grid-cols-8 divide-y lg:divide-x lg:divide-y-0 divide-gray-500/40">

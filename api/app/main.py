@@ -30,6 +30,7 @@ from .realtime import router as realtime_router
 from .security import hash_password
 from .sms_automation import seed_sms_rules
 from .site_services import seed as seed_site_services
+from .site_content import seed as seed_site_content
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -57,6 +58,7 @@ def seed_defaults() -> None:
     with SessionLocal.begin() as db:
         seed_access(db)
         seed_site_services(db)
+        seed_site_content(db)
         if not db.get(ClinicSetting, 1):
             from .models import SystemSetting
             system = db.get(SystemSetting, 1)
@@ -228,3 +230,6 @@ app.include_router(comments_router.staff_router, prefix=settings.api_prefix)
 from .routers import site_services as site_services_router
 app.include_router(site_services_router.router, prefix=settings.api_prefix)
 app.include_router(site_services_router.staff_router, prefix=settings.api_prefix)
+from .routers import site_content as site_content_router
+app.include_router(site_content_router.router, prefix=settings.api_prefix)
+app.include_router(site_content_router.staff_router, prefix=settings.api_prefix)

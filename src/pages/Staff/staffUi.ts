@@ -26,6 +26,7 @@ export type StaffTab =
     | "comments"
     | "articles"
     | "site-services"
+    | "site-content"
     | "media"
     | "access";
 
