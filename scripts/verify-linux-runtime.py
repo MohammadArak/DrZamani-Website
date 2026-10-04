@@ -202,22 +202,51 @@ def websocket_check(runtime, current, token):
     credential.chmod(0o600)
     try:
         service_python(runtime, current, '''
-import json, ssl
+import json, ssl, time
 from pathlib import Path
 from websockets.sync.client import connect
 from websockets.exceptions import ConnectionClosed
-context=ssl.create_default_context(cafile='/etc/drzamani/fixture-cert.pem')
-url='wss://127.0.0.1:18443/api/v1/realtime'
-with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
-    socket.send(json.dumps({'audience':'patient','token':Path('/var/lib/drzamani/runtime-token').read_text()}))
-    assert json.loads(socket.recv(timeout=10)) == {'type':'realtime.ready','audience':'patient'}
-with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
-    socket.send(json.dumps({'audience':'patient'}))
-    try:
-        socket.recv(timeout=10)
-        raise AssertionError('Unauthenticated socket was admitted')
-    except ConnectionClosed as error:
-        assert error.rcvd.code == 4401
+began = time.monotonic()
+step = 'start'
+retries = 0
+
+
+def open_socket(url, context):
+    # A handshake that gets no answer is retried (CI VMs stall now and then); a refused or failed
+    # authentication is never retried. The retry count is reported so a flaky pattern stays visible.
+    global retries
+    for attempt in range(3):
+        try:
+            return connect(url, ssl=context, origin='https://127.0.0.1:18443', open_timeout=15)
+        except TimeoutError:
+            if attempt == 2:
+                raise
+            retries += 1
+            time.sleep(3)
+
+
+try:
+    context=ssl.create_default_context(cafile='/etc/drzamani/fixture-cert.pem')
+    url='wss://127.0.0.1:18443/api/v1/realtime'
+    step = 'first-connect'
+    with open_socket(url, context) as socket:
+        step = 'first-recv'
+        socket.send(json.dumps({'audience':'patient','token':Path('/var/lib/drzamani/runtime-token').read_text()}))
+        assert json.loads(socket.recv(timeout=10)) == {'type':'realtime.ready','audience':'patient'}
+    step = 'second-connect'
+    with open_socket(url, context) as socket:
+        step = 'second-recv'
+        socket.send(json.dumps({'audience':'patient'}))
+        try:
+            socket.recv(timeout=10)
+            raise AssertionError('Unauthenticated socket was admitted')
+        except ConnectionClosed as error:
+            assert error.rcvd.code == 4401
+    Path('/var/lib/drzamani/ws-retries.txt').write_text(str(retries))
+except BaseException as error:
+    # Only the exception class and a short message (no token is ever part of it) for the failure summary.
+    Path('/var/lib/drzamani/ws-error.txt').write_text(f'retries={retries} {step} after {time.monotonic() - began:.1f}s: ' + type(error).__name__ + ': ' + str(error)[:300])
+    raise
 ''')
     finally:
         credential.unlink(missing_ok=True)
@@ -260,7 +289,8 @@ def verify(report):
         request('/services/not-a-service/', context, 404)
         request('/uploads/fixture.bin', context, 404)
         websocket_check(runtime, layout.current, token)
-        checks += ['runuser frozen install', 'all Alembic migrations', 'verified HTTPS and SSR', 'closed booking', 'private uploads inaccessible', 'authenticated WSS and unauthenticated rejection']
+        retried = (layout.data/'ws-retries.txt').read_text() if (layout.data/'ws-retries.txt').exists() else '?'
+        checks += ['runuser frozen install', 'all Alembic migrations', 'verified HTTPS and SSR', 'closed booking', 'private uploads inaccessible', f'authenticated WSS and unauthenticated rejection (handshake retries: {retried})']
         stage = 'actual systemd hardening and timer jobs'
         for unit in (API, JOB):
             properties = runtime.run(['systemctl','show',unit,'--property=User,Group,ProtectSystem,ProtectHome,NoNewPrivileges,UMask'])
@@ -343,7 +373,10 @@ def verify(report):
         if log.exists():
             journal += log.read_text(errors='replace')[-32000:]
         markers = ['PermissionError', 'ModuleNotFoundError', 'RuntimeError', 'OperationalError', 'SettingsUnavailable', 'No such file or directory', 'Permission denied', 'Failed at step', 'Read-only file system', 'error while loading shared libraries', 'Application startup complete', 'Uvicorn running']
+        ws_error = layout.data/'ws-error.txt'
         result = {'status':'failed','stage':stage,'errorType':type(error).__name__,'checks':checks,
+                  'websocketError':ws_error.read_text(errors='replace')[:400] if ws_error.exists() else None,
+                  'apiLogTail':journal[-900:] if os.environ.get('GITHUB_ACTIONS') == 'true' else '',
                   'failedCommands':runtime.failures,'healthProbe':runtime.health_failure,'unitStatus':diagnostics,'journalErrorTypes':[marker for marker in markers if marker in journal]}
     finally:
         for unit in (TIMER, JOB, API):
@@ -355,6 +388,11 @@ def verify(report):
     report.write_text(json.dumps(result, indent=2)+'\n')
     report.chmod(0o644)  # Sanitized status only; no private resources are exported.
     print(json.dumps(result))
+    if result['status'] != 'passed' and os.environ.get('GITHUB_ACTIONS') == 'true':
+        # The sanitized failure summary is also published as an annotation: job logs need a login, annotations do not.
+        print('::error title=linux-runtime failure::' + json.dumps(result).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+    if result['status'] == 'passed' and os.environ.get('GITHUB_ACTIONS') == 'true':
+        print('::notice title=linux-runtime checks::' + '; '.join(result['checks']))
     return 0 if result['status'] == 'passed' else 1
 
 
