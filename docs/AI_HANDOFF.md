@@ -1,6 +1,6 @@
-# وضعیت جاری — متن صفحه اصلی از دیتابیس، 2026-10-04
+# وضعیت جاری — نمونه‌کارها از دیتابیس، 2026-10-04
 
-بلوک‌های hero/about/faq/footer در `site_blocks` (api/app/site_content.py، routers/site_content.py، پنل StaffSiteContentPanel). بعد از این: نمونه‌کارها از دیتابیس، سپس رفع موارد گزارش بررسی (docs/REVIEW_2026-10-04.md). deploy و روشن‌کردن رزرو/پرداخت مجوز جدا می‌خواهد؛ migrationهای 0020 و 0021 هنگام release اجرا شوند.
+گالری نمونه‌کارها در `site_gallery` (api/app/site_gallery.py، routers/site_gallery.py، پنل StaffSiteGalleryPanel، مجوزهای site_gallery.*). بعد از این: موارد باقی‌مانده‌ی گزارش بررسی (docs/REVIEW_2026-10-04.md): waitlist، کش get_settings و N+1، متن واقعی خدمات/مقالات/ادعاها با تأیید پزشک، پذیرش VPS. طرح‌های انتخابی (نوار اعتماد B، درباره پزشک B، نوار موبایل C) هنوز وارد سایت نشده‌اند. deploy و روشن‌کردن رزرو/پرداخت مجوز جدا می‌خواهد؛ migrationهای 0020، 0021 و 0022 هنگام release اجرا شوند؛ نقش admin مجوزهای جدید را دستی بگیرد.
 
 # وضعیت تاریخی — خدمات از دیتابیس، 2026-10-04
 

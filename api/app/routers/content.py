@@ -228,6 +228,8 @@ def media_delete(key:str,db:Session=Depends(get_db),staff=Depends(require_permis
         raise HTTPException(409,'رسانه در یک نظر استفاده شده است')
     from ..site_services import media_keys_in_use
     if key in media_keys_in_use(db):raise HTTPException(409,'رسانه در یک صفحه خدمت استفاده شده است')
+    from ..site_gallery import media_keys_in_use as gallery_in_use
+    if key in gallery_in_use(db):raise HTTPException(409,'رسانه در نمونه‌کارها استفاده شده است')
     row.deleted=True
     record_audit(db,action='media.archive',entity_type='public_media',entity_id=key,summary='بایگانی رسانه',actor_staff_id=staff.id)
     db.commit();return {'message':'رسانه بایگانی شد'}

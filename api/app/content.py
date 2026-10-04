@@ -229,4 +229,5 @@ def is_public_media(db,key):
     from .comments import public_rows as public_comments
     if any(row['photo_key']==key for row in public_comments(db)):return True
     from .site_services import public_media_keys
-    return key in public_media_keys(db)
+    from .site_gallery import public_media_keys as gallery_keys
+    return key in public_media_keys(db) or key in gallery_keys(db)

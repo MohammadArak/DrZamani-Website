@@ -1,5 +1,5 @@
 import { motion } from "@/components/Motion";
-import { useClinicInfo } from "@/contexts/ClinicInfoContext";
+import { useSiteGallery } from "@/services/siteGalleryApi";
 
 import { useState } from "react";
 import { RiCameraAiLine } from "react-icons/ri";
@@ -115,7 +115,7 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
 }
 
 const Samples = () => {
-    const { clinicInfo } = useClinicInfo();
+    const gallery = useSiteGallery();
     return (
         <section
             id="samples"
@@ -203,28 +203,20 @@ const Samples = () => {
                 }}
                 viewport={{ once: true }}
             >
-                <Carousel
-                    slides={[...Array(16).keys()].map((number) => {
-                        return (
+                {gallery.length > 0 && (
+                    <Carousel
+                        slides={gallery.map((image) => (
                             <img
-                                key={number + 1}
-                                src={
-                                    "/img/samples/" +
-                                    (number + 1).toString() +
-                                    ".jpg"
-                                }
-                                alt={
-                                    "نمونه کار شماره " +
-                                    (number + 1) +
-                                    ` ${clinicInfo.doctorName}`
-                                }
+                                key={image.id}
+                                src={image.src}
+                                alt={image.alt}
                                 className="max-h-96 h-fit rounded-xl shadow-lg"
                                 loading="lazy"
                                 decoding="async"
                             />
-                        );
-                    })}
-                />
+                        ))}
+                    />
+                )}
             </motion.div>
         </section>
     );
