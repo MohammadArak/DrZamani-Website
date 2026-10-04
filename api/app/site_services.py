@@ -27,6 +27,8 @@ SEED_TEXT = {
     "mentoplasty": ("اصلاح فرم چانه و ایجاد تناسب بهتر در چهره", "(جراحی فک)"),
 }
 SEED_DATE = datetime(2026, 10, 2)
+# The homepage grid is designed for four cards; the /services/ pages list every published service.
+HOME_LIMIT = 4
 
 
 class ServiceContent(BaseModel):

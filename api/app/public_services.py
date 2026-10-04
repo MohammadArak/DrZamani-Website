@@ -7,13 +7,13 @@ from .content import sanitize
 from .database import get_db
 from .public_chrome import service_cards as build_cards, services_page
 from .public_pages import clinic_row, phone, render
-from .site_services import public_items
+from .site_services import HOME_LIMIT, public_items
 
 router = APIRouter(include_in_schema=False)
 
 
 def service_cards(db):
-    return build_cards(public_items(db))
+    return build_cards(public_items(db)[:HOME_LIMIT])  # homepage markup only
 
 
 def page(db, service=None):

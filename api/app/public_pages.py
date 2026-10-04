@@ -100,9 +100,9 @@ def render(clinic, page, db=None, editorial=None):
             body += f'<p><a href="tel:{esc(phone(number))}">{esc(number)}</a></p>'
         body += f'<p><a href="mailto:{esc(clinic.email)}">{esc(clinic.email)}</a></p>'
         from .public_services import service_cards
-        from .site_services import public_items
+        from .site_services import HOME_LIMIT, public_items
         body += '<section id="services"><h2>خدمات تخصصی</h2>' + service_cards(db) + '</section>'
-        meta+=f'<script id="services-bootstrap" type="application/json">{safe_json({"items":[{k:i[k] for k in ("slug","title","summary","tile_label","image","sort_order")} for i in public_items(db)]})}</script>'
+        meta+=f'<script id="services-bootstrap" type="application/json">{safe_json({"items":[{k:i[k] for k in ("slug","title","summary","tile_label","image","sort_order")} for i in public_items(db)[:HOME_LIMIT]]})}</script>'
         from .comments import home_html
         comment_html,comment_data=home_html(db)
         body+=comment_html

@@ -133,3 +133,13 @@ def test_seed_runs_once_even_if_every_page_is_archived(client):
     seed_defaults()
     assert client.get(BASE, headers=access).json()["total"] == 0
     assert json.loads(client.get("/api/v1/public-services").text)["total"] == 0
+
+
+def test_homepage_shows_four_services_but_the_services_page_lists_all(client):
+    access = headers(owner()[2])
+    publish(client, access, create(client, access, slug="fifth-one", title="خدمت پنجم", sort_order=99))
+    home = client.get("/").text
+    assert home.count('class="landing-service-card"') == 4 and "خدمت پنجم" not in home.split('id="services-bootstrap"', 1)[1].split("</script>", 1)[0]
+    listing = client.get("/services/").text
+    assert listing.count('class="landing-service-card"') == 5 and "خدمت پنجم" in listing
+    assert client.get("/api/v1/public-services").json()["total"] == 5  # the SPA slices to four itself

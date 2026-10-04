@@ -60,7 +60,10 @@ const readBootstrap = (): SiteServiceCard[] | null => {
     }
 };
 
-export function useSiteServices(): SiteServiceCard[] {
+/** The homepage layout is built for four cards; extra services live on their own pages. */
+export const HOME_SERVICE_LIMIT = 4;
+
+export function useSiteServices(limit = HOME_SERVICE_LIMIT): SiteServiceCard[] {
     const [items, setItems] = useState<SiteServiceCard[]>(() => readBootstrap() ?? fallbackServices);
     useEffect(() => {
         let active = true;
@@ -73,7 +76,7 @@ export function useSiteServices(): SiteServiceCard[] {
             active = false;
         };
     }, []);
-    return items;
+    return items.slice(0, limit);
 }
 
 export const siteServicesApi = {
