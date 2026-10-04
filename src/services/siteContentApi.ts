@@ -8,6 +8,7 @@ export type SiteBlocks = {
     trust: { items: { title: string; text: string }[] };
     about: { paragraphs: string[]; quote: string; facts: { value: string; label: string }[] };
     faq: { items: { title: string; content: string }[] };
+    privacy: { items: { title: string; content: string }[] };
     footer: { description: string };
 };
 export type BlockKey = keyof SiteBlocks;
@@ -39,6 +40,7 @@ const merge = (incoming: Partial<SiteBlocks> | null | undefined): SiteBlocks => 
                 ? { paragraphs: source.about.paragraphs, quote: typeof source.about.quote === "string" ? source.about.quote : "", facts: Array.isArray(source.about.facts) ? source.about.facts : fallback.about.facts }
                 : fallback.about,
         faq: Array.isArray(source.faq?.items) && source.faq.items.length ? source.faq : fallback.faq,
+        privacy: Array.isArray(source.privacy?.items) && source.privacy.items.length ? source.privacy : fallback.privacy,
         footer: typeof source.footer?.description === "string" ? source.footer : fallback.footer,
     };
 };

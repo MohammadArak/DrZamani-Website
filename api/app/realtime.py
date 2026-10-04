@@ -43,7 +43,7 @@ class ConsultationRealtimeManager:
     async def publish(self, event: dict[str, Any], patient_id: int) -> None:
         stale: list[WebSocket] = []
         for connection in list(self._connections.values()):
-            if _authenticate_hash(connection.token_hash) != (
+            if await asyncio.to_thread(_authenticate_hash, connection.token_hash) != (
                 connection.audience,
                 connection.user_id,
             ):
@@ -125,7 +125,9 @@ async def publish_consultation_event(
 @router.websocket("/realtime")
 async def consultation_realtime(websocket: WebSocket) -> None:
     origin = websocket.headers.get("origin")
-    if origin and not allowed_origin(origin):
+    # Database work runs in a worker thread: a slow query must never freeze the event loop that
+    # answers every other WebSocket handshake.
+    if origin and not await asyncio.to_thread(allowed_origin, origin):
         await websocket.close(code=4403)
         return
     await websocket.accept()
@@ -138,7 +140,7 @@ async def consultation_realtime(websocket: WebSocket) -> None:
         audience_requested = payload.get("audience")
         if not token and origin and audience_requested in {"staff", "patient"}:
             token = websocket.cookies.get(cookie_name(audience_requested), "")
-        identity = _authenticate(token)
+        identity = await asyncio.to_thread(_authenticate, token)
         if audience_requested and identity and identity[0] != audience_requested:
             identity = None
         if not identity:
@@ -159,7 +161,7 @@ async def consultation_realtime(websocket: WebSocket) -> None:
                 await asyncio.wait_for(websocket.receive_text(), timeout=25)
             except TimeoutError:
                 await websocket.send_json({"type": "realtime.ping"})
-            if _authenticate_hash(hash_session_token(token)) != identity:
+            if await asyncio.to_thread(_authenticate_hash, await asyncio.to_thread(hash_session_token, token)) != identity:
                 await websocket.close(code=4401, reason="Session expired or revoked")
                 return
     except (TimeoutError, ValueError, WebSocketDisconnect):

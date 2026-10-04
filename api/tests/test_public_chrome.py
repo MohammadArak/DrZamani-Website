@@ -30,7 +30,9 @@ def test_jalali_dates_match_known_values():
     assert chrome.fa_date(date(2026, 7, 31)) == "۹ مرداد ۱۴۰۵"
     assert chrome.fa_date(date(2026, 3, 21)) == "۱ فروردین ۱۴۰۵"
     assert chrome.fa_date(date(2025, 3, 20)) == "۳۰ اسفند ۱۴۰۳"
-    assert chrome.fa_date(datetime(2026, 7, 31, 23, 0)) == "۹ مرداد ۱۴۰۵"
+    assert chrome.fa_date(datetime(2026, 7, 31, 12, 0)) == "۹ مرداد ۱۴۰۵"
+    # Stored UTC values show in Tehran time (UTC+3:30): 23:00 UTC is already the next day there.
+    assert chrome.fa_date(datetime(2026, 7, 31, 23, 0)) == "۱۰ مرداد ۱۴۰۵"
 
 
 def test_outline_adds_anchors_and_toc_only_when_headings_exist():

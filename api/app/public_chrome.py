@@ -5,7 +5,7 @@ value is escaped here; callers pass plain objects/dicts.
 """
 import html
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from urllib.parse import quote, urlsplit
 
 MONTHS = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
@@ -54,7 +54,10 @@ def _jalali(gy: int, gm: int, gd: int) -> tuple[int, int, int]:
 
 
 def fa_date(value) -> str:
-    """۹ مرداد ۱۴۰۵ for a date/datetime (UTC naive values are treated as the local date)."""
+    """۹ مرداد ۱۴۰۵ for a date/datetime. Naive datetimes are stored UTC and shown in Tehran time (UTC+3:30,
+    no daylight saving since 2022), so the server-rendered date matches the browser-rendered one."""
+    if isinstance(value, datetime):
+        value = (value if value.tzinfo else value.replace(tzinfo=timezone.utc)).astimezone(timezone(timedelta(hours=3, minutes=30)))
     day = value.date() if isinstance(value, datetime) else value
     jy, jm, jd = _jalali(day.year, day.month, day.day)
     return fa_digits(f"{jd} {MONTHS[jm - 1]} {jy}")
@@ -99,7 +102,7 @@ def site_footer(clinic) -> str:
         social += f'<a class="legacy-social legacy-instagram" href="{esc(clinic.instagram_url)}" rel="noopener noreferrer">{icon("insta")} صفحه اینستاگرام</a>'
     if safe_https(clinic.eitaa_url):
         social += f'<a class="legacy-social legacy-eitaa" href="{esc(clinic.eitaa_url)}" rel="noopener noreferrer"><img src="/img/logo/eitaa.png" alt="" width="20" height="20"> صفحه ایتا</a>'
-    links = [("درباره ما", "/#about-us"), ("خدمات ما", "/services/"), ("نمونه کارها", "/#samples"), ("نظرات مراجعین", "/#comments"), ("سوالات متداول", "/#faq"), ("مقالات", "/articles/")]
+    links = [("درباره ما", "/#about-us"), ("خدمات ما", "/services/"), ("نمونه کارها", "/#samples"), ("نظرات مراجعین", "/#comments"), ("سوالات متداول", "/#faq"), ("مقالات", "/articles/"), ("حریم خصوصی", "/privacy/")]
     link_html = "".join(f'<li><a href="{href}">{icon("chevron")}{label}</a></li>' for label, href in links)
     map_html = ""
     embed = safe_https(clinic.map_embed_url)
@@ -286,9 +289,24 @@ def services_page(clinic, services: list[dict], service: dict | None, tel: str) 
             '<h2 class="legacy-service-heading">خدمات دیگر</h2>'
         )
     body += (
-        service_cards(services)
+        '<p class="legacy-disclaimer">این صفحه برای آشنایی است و جایگزین ویزیت و مشاوره‌ی پزشکی نیست؛ نتیجه‌ی درمان برای هر فرد متفاوت است.</p>'
+        + service_cards(services)
         + '<nav class="legacy-service-related" aria-label="مطالب مرتبط"><a href="/articles/">مقالات منتشرشده</a><a href="/#samples">نمونه‌کارها</a><a href="/#footer">ارتباط با مطب</a></nav>'
         + "</section></div></main>"
         + site_footer(clinic)
     )
     return body
+
+
+def privacy_page(clinic, items: list[dict], fill) -> str:
+    """Privacy page; items are {title, content} from the editable block, fill() resolves placeholders."""
+    trail = [("صفحه اصلی", "/"), ("حریم خصوصی", "")]
+    sections = "".join(f'<section class="legacy-privacy-item"><h2>{esc(fill(item["title"]))}</h2><p>{esc(fill(item["content"]))}</p></section>' for item in items)
+    return (
+        site_header(clinic, crumbs=trail)
+        + '<main class="legacy-article-page legacy-article-page--index legacy-service-page legacy-privacy-page" dir="rtl" lang="fa"><div class="legacy-article-index-container"><section class="legacy-article-index">'
+        + '<h1>حریم خصوصی و اطلاعات شما</h1><span class="legacy-gold-rule" aria-hidden="true"><i></i></span>'
+        + f'<div class="legacy-service-body article-body">{sections}</div>'
+        + "</section></div></main>"
+        + site_footer(clinic)
+    )

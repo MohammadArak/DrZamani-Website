@@ -225,9 +225,15 @@ def media_keys(snapshot):
 
 
 def is_public_media(db,key):
-    if any(key in media_keys(r.published_json) for r in public_rows(db)):return True
+    # Cheap SQL prefilter (the key is a validated 32-hex string): only rows that mention it are parsed,
+    # so serving an image no longer re-reads every published article and comment.
+    publish_due(db)
+    candidates=db.scalars(select(Article.published_json).where(Article.deleted.is_(False),Article.published_json.is_not(None),Article.published_json.contains(key,autoescape=True))).all()
+    if any(key in media_keys(snapshot) for snapshot in candidates):return True
     from .comments import public_rows as public_comments
-    if any(row['photo_key']==key for row in public_comments(db)):return True
+    from .comment_models import Comment
+    if db.scalar(select(Comment.id).where(Comment.deleted.is_(False),Comment.published_json.is_not(None),Comment.published_json.contains(key,autoescape=True)).limit(1)) is not None:
+        if any(row['photo_key']==key for row in public_comments(db)):return True
     from .site_services import public_media_keys
     from .site_gallery import public_media_keys as gallery_keys
     return key in public_media_keys(db) or key in gallery_keys(db)

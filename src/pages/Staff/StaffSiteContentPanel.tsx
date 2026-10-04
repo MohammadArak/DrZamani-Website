@@ -104,7 +104,7 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
                     )}
                 </fieldset>
             ))}
-            {!locked && items.length < 20 && <button type="button" onClick={() => set([...items, { title: "", content: "" }])}>+ سوال تازه</button>}
+            {!locked && items.length < (blockKey === "privacy" ? 12 : 20) && <button type="button" onClick={() => set([...items, { title: "", content: "" }])}>+ سوال تازه</button>}
         </>
     );
 }

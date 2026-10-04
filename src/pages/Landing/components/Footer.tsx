@@ -286,6 +286,11 @@ const Footer = () => {
                     می‌باشد و هر گونه کپی برداری از آن بدون ذکر منبع پیگرد
                     قانونی خواهد داشت.
                 </motion.p>
+                <p className="text-sm">
+                    <a href="/privacy/" className="text-secondary">
+                        حریم خصوصی و اطلاعات شما
+                    </a>
+                </p>
                 <motion.p
                     initial={{ opacity: 0, y: -20 }}
                     whileInView={{ opacity: 1, y: 0 }}

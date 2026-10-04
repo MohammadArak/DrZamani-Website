@@ -63,13 +63,13 @@ const AboutUs = () => {
                         <span className="h-2 w-2 rounded-full bg-secondary" />
                         درباره ما
                     </h2>
-                    <h3 className="font-dana text-3xl md:text-5xl">{clinicInfo.doctorName}</h3>
+                    <h3 className="font-dana text-3xl text-white md:text-5xl">{clinicInfo.doctorName}</h3>
                     <p className="flex w-fit items-center gap-2 rounded-full border border-secondary/60 px-5 py-1 font-lalezar text-lg md:text-xl">
                         <span className="h-3 w-3 rounded-full bg-secondary" />
                         {clinicInfo.specialty}
                     </p>
                     {quote && (
-                        <blockquote className="font-dana text-2xl leading-loose md:text-4xl">
+                        <blockquote className="font-dana text-2xl leading-loose text-white md:text-4xl">
                             «{fillText(quote, clinicInfo)}»
                         </blockquote>
                     )}

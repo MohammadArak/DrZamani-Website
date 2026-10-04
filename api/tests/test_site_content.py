@@ -13,7 +13,7 @@ def blocks(client, access):
 
 def test_blocks_are_seeded_with_the_previous_wording(client):
     public = client.get("/api/v1/site-content").json()["blocks"]
-    assert set(public) == {"hero", "trust", "about", "faq", "footer"}
+    assert set(public) == {"hero", "trust", "about", "faq", "privacy", "footer"}
     assert len(public["faq"]["items"]) == 4 and len(public["about"]["paragraphs"]) == 3
     assert "{doctorName}" in public["hero"]["description"]
     assert len(public["trust"]["items"]) == 3 and public["about"]["quote"] == "" and len(public["about"]["facts"]) == 2
@@ -95,3 +95,22 @@ def test_trust_strip_and_about_extras_are_editable_and_can_be_hidden(client):
     assert saved.status_code == 200 and saved.json()["content"]["quote"] == "جمله‌ی آزمایشی"
     too_many_facts = dict(about["content"], facts=[dict(value="۱", label="الف")] * 5)
     assert client.put(f"{BASE}/about", headers=access, json=dict(revision=saved.json()["revision"], content=too_many_facts)).status_code == 422
+
+
+def test_privacy_page_is_served_linked_and_editable(client):
+    page = client.get("/privacy/")
+    assert page.status_code == 200 and "حریم خصوصی و اطلاعات شما" in page.text and "کوکی" in page.text
+    assert client.get("/privacy", follow_redirects=False).status_code == 301
+    assert "/privacy/" in client.get("/sitemap.xml").text
+    assert 'href="/privacy/"' in client.get("/services/").text  # linked from the shared footer
+    access = headers(owner()[2])
+    privacy = blocks(client, access)["privacy"]
+    items = [dict(title="عنوان آزمایشی", content="متن آزمایشی حریم خصوصی؛ تماس: {officePhone}")]
+    saved = client.put(f"{BASE}/privacy", headers=access, json=dict(revision=privacy["revision"], content=dict(items=items)))
+    assert saved.status_code == 200
+    assert "عنوان آزمایشی" not in client.get("/privacy/").text  # drafts are never public
+    assert client.post(f"{BASE}/privacy/transition", headers=access, json=dict(revision=saved.json()["revision"], action="publish")).status_code == 200
+    live = client.get("/privacy/").text
+    assert "عنوان آزمایشی" in live and "{officePhone}" not in live
+    too_many = dict(items=[dict(title="عنوان", content="متن")] * 13)
+    assert client.put(f"{BASE}/privacy", headers=access, json=dict(revision=saved.json()["revision"] + 1, content=too_many)).status_code == 422

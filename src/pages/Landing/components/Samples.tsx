@@ -203,6 +203,9 @@ const Samples = () => {
                 }}
                 viewport={{ once: true }}
             >
+                <p className="mb-4 text-center text-sm text-gray-600">
+                    نتیجه‌ی درمان برای هر فرد متفاوت است و این تصاویر وعده‌ی نتیجه نیستند.
+                </p>
                 {gallery.length > 0 && (
                     <Carousel
                         slides={gallery.map((image) => (
