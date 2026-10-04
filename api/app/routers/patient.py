@@ -792,11 +792,13 @@ def create_appointment(
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="این ساعت هم‌اکنون رزرو شد؛ ساعت دیگری انتخاب کنید") from exc
+    # The callback is built from configured values, never from the client-supplied Host header.
+    runtime = get_settings(db)
     try:
         gateway_result = request_payment(
             amount_toman=amount_toman,
             description=f"رزرو {service.title}",
-            callback_url=str(request.url_for("zarinpal_callback")),
+            callback_url=f"{runtime.frontend_url}{runtime.api_prefix}/payments/zarinpal/callback",
             mobile=patient.phone,
             email=patient.email,
             order_id=hold.id,
