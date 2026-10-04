@@ -209,6 +209,26 @@ from websockets.exceptions import ConnectionClosed
 began = time.monotonic()
 step = 'start'
 retries = 0
+probes = []
+
+
+def probe_after_stall(context):
+    # Where is the time going? Compare the API without Nginx/TLS, plain TLS and the full proxied path.
+    import socket as sock
+    started = time.monotonic()
+    try:
+        with connect('ws://127.0.0.1:8000/api/v1/realtime', origin='https://127.0.0.1:18443', open_timeout=10):
+            direct = 'ok'
+    except BaseException as error:
+        direct = type(error).__name__
+    direct_s = time.monotonic() - started
+    started = time.monotonic()
+    try:
+        with sock.create_connection(('127.0.0.1', 18443), timeout=5) as raw, context.wrap_socket(raw, server_hostname='127.0.0.1'):
+            tls = 'ok'
+    except BaseException as error:
+        tls = type(error).__name__
+    probes.append(f'direct-api={direct} {direct_s:.1f}s; tls={tls} {time.monotonic() - started:.1f}s')
 
 
 def open_socket(url, context):
@@ -221,6 +241,7 @@ def open_socket(url, context):
         except TimeoutError:
             if attempt == 2:
                 raise
+            probe_after_stall(context)
             retries += 1
             time.sleep(3)
 
@@ -242,10 +263,10 @@ try:
             raise AssertionError('Unauthenticated socket was admitted')
         except ConnectionClosed as error:
             assert error.rcvd.code == 4401
-    Path('/var/lib/drzamani/ws-retries.txt').write_text(str(retries))
+    Path('/var/lib/drzamani/ws-retries.txt').write_text(str(retries) + (' [' + ' | '.join(probes) + ']' if probes else ''))
 except BaseException as error:
     # Only the exception class and a short message (no token is ever part of it) for the failure summary.
-    Path('/var/lib/drzamani/ws-error.txt').write_text(f'retries={retries} {step} after {time.monotonic() - began:.1f}s: ' + type(error).__name__ + ': ' + str(error)[:300])
+    Path('/var/lib/drzamani/ws-error.txt').write_text(f'retries={retries} probes={probes} {step} after {time.monotonic() - began:.1f}s: ' + type(error).__name__ + ': ' + str(error)[:300])
     raise
 ''')
     finally:
