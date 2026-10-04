@@ -81,3 +81,18 @@ class SiteBlock(Base):
     public_updated_at: Mapped[datetime | None] = mapped_column(DateTime)
     actor_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id"))
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class SiteGalleryItem(Base):
+    """One photo of the public gallery; draft and approved snapshot are kept apart."""
+    __tablename__ = "site_gallery"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+    content_json: Mapped[str] = mapped_column(Text)
+    published_json: Mapped[str | None] = mapped_column(Text)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime)
+    public_updated_at: Mapped[datetime | None] = mapped_column(DateTime)
+    deleted: Mapped[bool] = mapped_column(Boolean, default=False)
+    actor_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

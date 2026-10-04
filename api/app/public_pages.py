@@ -107,6 +107,8 @@ def render(clinic, page, db=None, editorial=None):
         comment_html,comment_data=home_html(db)
         body+=comment_html
         meta+=f'<script id="comment-bootstrap" type="application/json">{safe_json(comment_data)}</script>'
+        from .site_gallery import public_items as gallery_items
+        meta+=f'<script id="gallery-bootstrap" type="application/json">{safe_json({"items":gallery_items(db)})}</script>'
         from .site_content import public_blocks
         meta+=f'<script id="site-content-bootstrap" type="application/json">{safe_json({"blocks":public_blocks(db)})}</script>'
     if page == "appointment" and not payload["booking_enabled"]:

@@ -111,6 +111,11 @@ CATALOG = [
     ("site_content.view", "مشاهده متن‌های صفحه اصلی", "محتوای سایت", [], False),
     ("site_content.edit", "ویرایش متن‌های صفحه اصلی", "محتوای سایت", ["site_content.view"], False),
     ("site_content.publish", "انتشار متن‌های صفحه اصلی", "محتوای سایت", ["site_content.view"], False),
+    ("site_gallery.view", "مشاهده نمونه‌کارها", "محتوای سایت", [], False),
+    ("site_gallery.create", "افزودن تصویر نمونه‌کار", "محتوای سایت", ["site_gallery.view"], False),
+    ("site_gallery.edit", "ویرایش تصویر و رضایت‌نامه نمونه‌کار", "محتوای سایت", ["site_gallery.view"], False),
+    ("site_gallery.publish", "انتشار و توقف انتشار نمونه‌کار", "محتوای سایت", ["site_gallery.view"], False),
+    ("site_gallery.delete", "بایگانی تصویر نمونه‌کار", "محتوای سایت", ["site_gallery.view"], False),
     *[
         (
             f"comments.{action}",
@@ -164,6 +169,9 @@ BUILTINS = {
             "site_services.edit",
             "site_content.view",
             "site_content.edit",
+            "site_gallery.view",
+            "site_gallery.create",
+            "site_gallery.edit",
             "articles.view",
             "articles.create",
             "articles.edit",
