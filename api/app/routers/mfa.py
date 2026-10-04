@@ -23,10 +23,11 @@ from ..dependencies import get_current_staff
 from ..models import StaffUser, StaffMfa, MfaChallenge, AuthSession
 from ..runtime_settings import get_settings
 from ..schemas import StaffSessionResponse
-from ..security import verify_password, staff_session_expiry, issue_session_token, utcnow
+from ..security import hash_password, verify_password, staff_session_expiry, issue_session_token, utcnow
 from .. import mfa
 
 router = APIRouter(prefix="/staff/auth/mfa", tags=["staff MFA"])
+account_router = APIRouter(prefix="/staff/auth", tags=["staff account"])
 
 
 class Factor(BaseModel):
@@ -50,6 +51,10 @@ class FreshPassword(BaseModel):
     password: str = Field(min_length=8, max_length=200)
     code: str = Field(default="", max_length=80)
     method: Literal["totp", "recovery"] = "totp"
+
+
+class ChangePassword(FreshPassword):
+    new_password: str = Field(min_length=12, max_length=128)
 
 
 def locked_self(db, request, staff):
@@ -186,3 +191,20 @@ def login(payload: LoginFactor, request: Request, response: Response, db: Sessio
     if browser:
         set_session_cookies(response, "staff", token, get_settings().staff_session_hours * 3600)
     return StaffSessionResponse(access_token="" if browser else token, token_type="cookie" if browser else "bearer", expires_at=expiry.isoformat(), **identity(staff))
+
+
+@account_router.post("/password")
+def change_password(payload: ChangePassword, request: Request, staff: StaffUser = Depends(get_current_staff), db: Session = Depends(get_db)):
+    """Self-service password change: needs the current password (and the second factor when enabled)."""
+    staff = locked_self(db, request, staff)
+    fresh_password(db, staff, payload)
+    if payload.new_password == payload.password:
+        raise HTTPException(400, "رمز تازه باید با رمز فعلی فرق داشته باشد")
+    if payload.new_password.casefold() == staff.username.casefold():
+        raise HTTPException(400, "رمز نباید نام کاربری باشد")
+    staff.password_hash = hash_password(payload.new_password)
+    revoke_staff(db, [staff.id])
+    record_audit(db, action="staff.password_changed", entity_type="staff_user", entity_id=staff.id,
+        actor_staff_id=staff.id, summary="تغییر رمز توسط خود کاربر و ابطال نشست‌ها", details={})
+    db.commit()
+    return {"changed": True, "reauthenticate": True}

@@ -670,6 +670,7 @@ export const appointmentApi = {
     captchaSetup: (token: string, provider: "google" | "turnstile") => apiRequest<BotChallenge>(`/staff/system-settings/captcha/setup?provider=${provider}`, {}, token),
     captchaConfirm: (token: string, proof: BotProof) => apiRequest<{verified: boolean; provider: string}>("/staff/system-settings/captcha/confirm", {method: "POST", body: JSON.stringify(proof)}, token),
     mfaStatus: (token: string) => apiRequest<MfaStatus>("/staff/auth/mfa/status", {}, token),
+    changePassword: (token: string, payload: {password: string; new_password: string; code: string; method: "totp" | "recovery"}) => apiRequest<{changed: boolean}>("/staff/auth/password", {method: "POST", body: JSON.stringify(payload)}, token),
     mfaEnroll: (token: string, payload: MfaPassword) => apiRequest<MfaEnrollment>("/staff/auth/mfa/enroll", {method: "POST", body: JSON.stringify(payload)}, token),
     mfaConfirm: (token: string, enrollment_id: string, code: string) => apiRequest<{recovery_codes: string[]}>("/staff/auth/mfa/confirm", {method: "POST", body: JSON.stringify({enrollment_id, code})}, token),
     mfaRecovery: (token: string, payload: MfaPassword) => apiRequest<{recovery_codes: string[]}>("/staff/auth/mfa/recovery-codes", {method: "POST", body: JSON.stringify(payload)}, token),

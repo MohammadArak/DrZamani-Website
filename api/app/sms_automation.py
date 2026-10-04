@@ -143,6 +143,14 @@ def queue_sms_event(
 
 def expire_unpaid_holds(db: Session) -> int:
     db.commit()
+    # Cheap read first: anonymous availability requests call this on every hit, and the write
+    # lock below would otherwise serialize every request behind SQLite's single writer.
+    if not db.scalar(
+        select(BookingHold.id)
+        .where(BookingHold.status == "pending_payment", BookingHold.expires_at <= utcnow())
+        .limit(1)
+    ):
+        return 0
     db.execute(text("BEGIN IMMEDIATE"))
     db.expire_all()
     holds = db.scalars(

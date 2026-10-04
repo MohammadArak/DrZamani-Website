@@ -220,6 +220,7 @@ app.include_router(public_services_router)
 from .routers import bot as bot_router, mfa as mfa_router
 app.include_router(bot_router.router, prefix=settings.api_prefix)
 app.include_router(mfa_router.router, prefix=settings.api_prefix)
+app.include_router(mfa_router.account_router, prefix=settings.api_prefix)
 
 from .routers import content as content_router
 app.include_router(content_router.router, prefix=settings.api_prefix)

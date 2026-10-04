@@ -119,6 +119,15 @@ def patient_record(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="بیمار پیدا نشد"
         )
+    record_audit(
+        db,
+        action="patient.record_viewed",
+        entity_type="patient",
+        entity_id=patient.id,
+        summary="مشاهده پرونده بیمار",
+        actor_staff_id=staff.id,
+    )
+    db.commit()
     return _staff_record(db, patient, staff)
 
 

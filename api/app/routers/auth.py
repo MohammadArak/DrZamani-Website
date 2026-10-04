@@ -132,10 +132,11 @@ def request_otp(
     consume_limit(
         db, "otp-request-ip", client_ip(request), settings.otp_max_per_ip_hour, 3600
     )
+    # Prove a human first: spending a victim's per-phone budget must need a solved challenge.
+    bot.verify(db, request, settings, "otp_request", payload.bot)
     consume_limit(
         db, "otp-request-phone", payload.phone, settings.otp_max_per_phone_hour, 3600
     )
-    bot.verify(db, request, settings, "otp_request", payload.bot)
     consume_limit(db, "otp-resend", payload.phone, 1, settings.otp_resend_seconds)
     now = utcnow()
     db.execute(text("BEGIN IMMEDIATE"))
@@ -187,6 +188,7 @@ def verify_otp(
         settings.otp_verify_max_per_ip_minute,
         60,
     )
+    bot.verify(db, request, settings, "otp_verify", payload.bot)
     consume_limit(
         db,
         "otp-verify-phone",
@@ -194,7 +196,6 @@ def verify_otp(
         settings.otp_verify_max_per_phone_hour,
         3600,
     )
-    bot.verify(db, request, settings, "otp_verify", payload.bot)
     # Serialize consumption and failed-attempt increments, including concurrent valid submissions.
     db.execute(text("BEGIN IMMEDIATE"))
     now = utcnow()
