@@ -85,11 +85,11 @@ def site_header(clinic, *, crumbs=None, banner=True) -> str:
         f'<div class="legacy-nav-links">{links}</div><a class="legacy-header-cta" href="/appointment/">رزرو نوبت</a></nav>'
     )
     if crumbs:
-        parts = []
-        for index, (label, href) in enumerate(crumbs):
-            last = index == len(crumbs) - 1
-            parts.append(f'<span aria-current="page">{esc(label)}</span>' if last else f'<a href="{esc(href)}">{esc(label)}</a>')
-        out += '<nav class="legacy-hero-crumbs" aria-label="مسیر صفحه">' + '<span aria-hidden="true">›</span>'.join(parts) + "</nav>"
+        trail = "<span aria-hidden=\"true\">›</span>".join(f'<a href="{esc(href)}">{esc(label)}</a>' for label, href in crumbs[:-1])
+        out += (
+            '<nav class="legacy-hero-crumbs" aria-label="مسیر صفحه">'
+            f'<div class="legacy-crumb-trail">{trail}</div><span class="legacy-crumb-title" aria-current="page">{esc(crumbs[-1][0])}</span></nav>'
+        )
     return out + "</header>"
 
 

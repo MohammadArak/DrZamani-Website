@@ -94,3 +94,11 @@ def test_services_pages_show_text_phone_and_escape():
     assert "توضیح کامل خدمت" in detail and "tel:+98861111111" in detail and "<script>fixture()" not in detail
     index = chrome.services_page(clinic, services, None, "+98861111111")
     assert 'href="/services/rhino/"' in index and "خدمات مطب" in index
+
+
+def test_header_puts_page_title_on_its_own_line_after_the_trail():
+    header = chrome.site_header(make_clinic(), crumbs=[("صفحه اصلی", "/"), ("مقالات", "/articles/"), ("عنوان مقاله", "")])
+    trail, title = header.split('class="legacy-crumb-trail"', 1)[1].split('class="legacy-crumb-title"', 1)
+    assert 'href="/"' in trail and 'href="/articles/"' in trail and "عنوان مقاله" not in trail
+    assert 'aria-current="page"' in title and "عنوان مقاله" in title
+    assert "legacy-hero-crumbs" not in chrome.site_header(make_clinic())
