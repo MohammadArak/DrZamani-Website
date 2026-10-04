@@ -2,6 +2,7 @@ import PatientComment from "./PatientComment";
 import {useCallback,useEffect,useRef,useState} from "react";
 import {commentsApi,type CommentPage,type PublicComment} from "@/services/commentsApi";
 import { motion } from "@/components/Motion";
+import { useSiteContent } from "@/services/siteContentApi";
 
 import { useKeenSlider } from "keen-slider/react";
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
@@ -85,6 +86,7 @@ function initial():CommentPage<PublicComment>{
     try{return JSON.parse(document.getElementById("comment-bootstrap")?.textContent??"");}catch{return {items:[],total:0,page:1};}
 }
 const PatientsComments = () => {
+    const { facts } = useSiteContent().about;
     const [result,setResult]=useState(initial); const [busy,setBusy]=useState(false); const [error,setError]=useState(false); const generation=useRef({value:0});
     const load=useCallback(async()=>{
         const sequence=++generation.current.value;setBusy(true);
@@ -186,7 +188,7 @@ const PatientsComments = () => {
                     }}
                     viewport={{ once: true }}
                 >
-                    با بیش از ۲۰ سال تجربه و ۱۵۰۰۰ جراحی بینی موفق.
+                    {facts.map((fact) => `${fact.value} ${fact.label}`).join(" و ")}
                 </motion.h6>
             </div>
             {/* <style>
