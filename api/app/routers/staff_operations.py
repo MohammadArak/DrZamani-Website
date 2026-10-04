@@ -151,6 +151,10 @@ def update_refund(
             detail="مبلغ بازپرداخت الزامی است",
         )
     previous = item.refund_status
+    if previous == "refunded":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="بازپرداخت ثبت‌شده نهایی است و تغییر نمی‌کند")
+    if payload.status != "none" and item.status not in {"verified", "verified_conflict"}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="فقط برای پرداخت تأییدشده می‌توان بازپرداخت ثبت کرد")
     item.refund_status = payload.status
     item.refund_amount_toman = payload.amount_toman
     item.refund_reference = payload.reference
@@ -164,6 +168,7 @@ def update_refund(
             patient=item.appointment.patient,
             appointment=item.appointment,
             extra={"amount_toman": payload.amount_toman},
+            dedupe_key=f"refund:{item.id}",
         )
     record_audit(
         db,

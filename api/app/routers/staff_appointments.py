@@ -104,6 +104,16 @@ def export_appointments(
         .unique()
         .all()
     )
+    record_audit(
+        db,
+        action="appointments.exported",
+        entity_type="appointment",
+        entity_id=None,
+        summary="دریافت خروجی اکسل نوبت‌ها",
+        actor_staff_id=_staff.id,
+        details={"count": len(items), "includes_notes": can(_staff, "patients.records.view")},
+    )
+    db.commit()
     clinic = db.get(ClinicSetting, 1)
     content = build_appointments_workbook(
         list(items),

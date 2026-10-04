@@ -7,13 +7,14 @@ from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse, RedirectResponse, Response
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..booking_policy import admission_lock, require_booking, public_clinic
 from ..database import get_db
 from ..activity import record_audit
+from ..auth_limits import consume_limit
 from ..intake import (
     appointment_intake_form,
     appointment_intake_submission,
@@ -651,6 +652,35 @@ def leave_waitlist(
     return ApiMessage(message="درخواست لیست انتظار لغو شد")
 
 
+# Abuse guards: a single account cannot hoard slots or flood a consultation thread.
+MAX_OPEN_HOLDS = 3
+MAX_UPCOMING_APPOINTMENTS = 10
+MESSAGES_PER_HOUR = 40
+IMAGES_PER_HOUR = 20
+
+
+def _enforce_booking_limits(db: Session, patient: Patient, settings: ClinicSetting) -> None:
+    open_holds = db.scalar(
+        select(func.count()).select_from(BookingHold).where(
+            BookingHold.patient_id == patient.id,
+            BookingHold.status == "pending_payment",
+            BookingHold.expires_at > utcnow(),
+        )
+    ) or 0
+    if open_holds >= MAX_OPEN_HOLDS:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="چند پرداخت نیمه‌کاره دارید؛ ابتدا یکی را کامل کنید یا چند دقیقه صبر کنید")
+    today = datetime.now(ZoneInfo(settings.timezone_name)).date()
+    upcoming = db.scalar(
+        select(func.count()).select_from(Appointment).where(
+            Appointment.patient_id == patient.id,
+            Appointment.status.in_(["pending", "confirmed"]),
+            Appointment.appointment_date >= today,
+        )
+    ) or 0
+    if upcoming >= MAX_UPCOMING_APPOINTMENTS:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="سقف نوبت‌های فعال شما پر شده است؛ برای نوبت تازه با مطب هماهنگ کنید")
+
+
 def _price_and_payable(service: Service, is_urgent: bool) -> tuple[int, int, str]:
     urgent_extra = service.urgent_extra_toman if is_urgent else 0
     total = service.price_toman + urgent_extra
@@ -751,6 +781,7 @@ def create_appointment(
     if not matching_slot:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="این ساعت دیگر در دسترس نیست")
     start_time, end_time = matching_slot
+    _enforce_booking_limits(db, patient, settings)
     price_toman, amount_toman, payment_mode = _price_and_payable(service, payload.is_urgent)
     hold = BookingHold(
         id=secrets.token_urlsafe(32),
@@ -970,7 +1001,10 @@ def create_consultation_message(
     patient: Patient = Depends(get_current_patient),
     db: Session = Depends(get_db),
 ) -> ConsultationMessageRead:
-    _patient_consultation_appointment(db, appointment_id, patient)
+    appointment = _patient_consultation_appointment(db, appointment_id, patient)
+    if appointment.status == "cancelled":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="گفت‌وگو برای نوبت لغوشده بسته است")
+    consume_limit(db, "consult-message", str(patient.id), MESSAGES_PER_HOUR, 3600)
     message = ConsultationMessage(
         appointment_id=appointment_id,
         sender_type="patient",
@@ -1003,6 +1037,9 @@ async def upload_consultation_image(
     db: Session = Depends(get_db),
 ) -> ConsultationMessageRead:
     appointment = _patient_consultation_appointment(db, appointment_id, patient)
+    if appointment.status == "cancelled":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="گفت‌وگو برای نوبت لغوشده بسته است")
+    consume_limit(db, "consult-image", str(patient.id), IMAGES_PER_HOUR, 3600)
     requirement = db.scalar(
         select(ServiceImageRequirement).where(
             ServiceImageRequirement.id == image_requirement_id,

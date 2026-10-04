@@ -54,6 +54,7 @@ import StaffAccessPanel from "./StaffAccessPanel";
 import StaffChatWorkspace from "./StaffChatWorkspace";
 import StaffLogin from "./StaffLogin";
 import StaffMfaPanel from "./StaffMfaPanel";
+import StaffPasswordPanel from "./StaffPasswordPanel";
 import {
     StaffAuditPanel,
     StaffCalendarPanel,
@@ -645,7 +646,7 @@ export const StaffDashboard = ({
                     {tab === "site-services" && can("site_services.view") && <Suspense fallback={<p>در حال آماده‌سازی صفحه‌های خدمات…</p>}><StaffSiteServicesPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {tab === "site-content" && can("site_content.view") && <Suspense fallback={<p>در حال آماده‌سازی متن‌ها…</p>}><StaffSiteContentPanel token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {tab === "media" && can("media.manage") && <Suspense fallback={<p>در حال آماده‌سازی رسانه…</p>}><StaffMediaPanel token={token} /></Suspense>}
-                    {tab === "account-security" && <StaffMfaPanel token={token} />}
+                    {tab === "account-security" && <><StaffMfaPanel token={token} /><StaffPasswordPanel token={token} /></>}
                     {tab === "clinic-info" && can("settings.view") && settings && (
                         <StaffSettingsPanel token={token} clinicRevision={settings.revision} onReload={loadAll} clinicPanel={<Suspense fallback={<p role="status">در حال آماده‌سازی بخش…</p>}><ClinicInfoPanel
                             token={token}
