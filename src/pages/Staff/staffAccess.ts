@@ -10,6 +10,6 @@ export const staffTabPermissions: Record<string, string> = {
     dashboard: "dashboard.view", calendar: "appointments.view", appointments: "appointments.view",
     patients: "patients.view", consultations: "consultations.view", waitlist: "waitlist.view",
     "clinic-info": "settings.view", schedule: "schedule.view", services: "services.view",
-    articles: "articles.view", comments: "comments.view", media: "media.manage",
+    articles: "articles.view", "site-services": "site_services.view", comments: "comments.view", media: "media.manage",
     sms: "sms.view", finance: "finance.view", audit: "audit.view", access: "roles.manage",
 };

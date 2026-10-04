@@ -42,7 +42,7 @@ with TemporaryDirectory(prefix='drzamani-comments-') as directory:
         assert db.execute('SELECT COUNT(*) FROM public_comments').fetchone()[0]==2
         assert db.execute('SELECT content_json FROM public_comments LIMIT 1').fetchone()[0]==json.dumps(data)
         assert db.execute('SELECT COUNT(*) FROM articles').fetchone()[0]==1
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='20261001_0019'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='20261004_0020'
         assert db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
         assert db.execute('PRAGMA foreign_key_check').fetchall()==[]
     assert hashlib.sha256(file.read_bytes()).hexdigest()==digest

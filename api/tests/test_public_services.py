@@ -10,7 +10,7 @@ from app import config
 from app.database import SessionLocal
 from app.main import app
 from app.models import ClinicSetting
-from app.public_services import SERVICES
+from app.site_services import SEED_CATALOG as SERVICES
 from test_roles import schema  # noqa: F401
 
 

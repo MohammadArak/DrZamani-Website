@@ -100,7 +100,9 @@ def render(clinic, page, db=None, editorial=None):
             body += f'<p><a href="tel:{esc(phone(number))}">{esc(number)}</a></p>'
         body += f'<p><a href="mailto:{esc(clinic.email)}">{esc(clinic.email)}</a></p>'
         from .public_services import service_cards
-        body += '<section id="services"><h2>خدمات تخصصی</h2>' + service_cards() + '</section>'
+        from .site_services import public_items
+        body += '<section id="services"><h2>خدمات تخصصی</h2>' + service_cards(db) + '</section>'
+        meta+=f'<script id="services-bootstrap" type="application/json">{safe_json({"items":[{k:i[k] for k in ("slug","title","summary","tile_label","image","sort_order")} for i in public_items(db)]})}</script>'
         from .comments import home_html
         comment_html,comment_data=home_html(db)
         body+=comment_html
@@ -156,10 +158,12 @@ def sitemap(db: Session = Depends(get_db)):
     from sqlalchemy import select,func
     from .comment_models import Comment
     last_comment=db.scalar(select(func.max(Comment.public_updated_at)))
-    from .public_services import CONTENT_UPDATED_AT, SERVICES
-    site_updated = max(clinic.updated_at, CONTENT_UPDATED_AT)
-    urls = [("/", max(site_updated,last_comment) if last_comment else site_updated), ("/services/", site_updated)]
-    urls.extend((f'/services/{service["slug"]}/', site_updated) for service in SERVICES)
+    from .site_services import public_items
+    services = public_items(db)
+    stamps = [service['updated_at'] for service in services]
+    site_updated = max([clinic.updated_at, *stamps])
+    urls = [("/", max(site_updated,last_comment) if last_comment else site_updated), ("/services/", max(stamps) if stamps else clinic.updated_at)]
+    urls.extend((f'/services/{service["slug"]}/', service['updated_at']) for service in services)
     if rows:
         latest = max(r.public_updated_at for r in rows)
         urls.append(("/articles/", latest))

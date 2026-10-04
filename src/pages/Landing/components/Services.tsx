@@ -3,9 +3,18 @@ import { FaNotesMedical } from "react-icons/fa";
 import ServiceCard from "./ServiceCard";
 import { BsDiamondFill } from "react-icons/bs";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
+import { useSiteServices } from "@/services/siteServicesApi";
+
+const enterFrom = [
+    { opacity: 0, x: 40 },
+    { opacity: 0, y: -40 },
+    { opacity: 0, y: -40 },
+    { opacity: 0, x: -40 },
+];
 
 const Services = () => {
     const { clinicInfo } = useClinicInfo();
+    const items = useSiteServices();
 
     return (
         <section
@@ -95,74 +104,26 @@ const Services = () => {
                 </motion.div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 items-start justify-center h-full gap-12 md:gap-10 lg:gap-4 z-20">
-                <motion.div
-                    initial={{ opacity: 0, x: 40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{
-                        duration: 1.5,
-                        type: "spring",
-                        bounce: 0.1,
-                    }}
-                    viewport={{ once: true }}
-                >
-                    <ServiceCard
-                        img="/img/services/rhinoplasty.png"
-                        header="رینوپلاستی"
-                        href="/services/rhinoplasty/"
-                        body="افزایش زیبایی چهره با طراحی متناسب بینی"
-                    />
-                </motion.div>
-                <motion.div
-                    initial={{ opacity: 0, y: -40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{
-                        duration: 1.5,
-                        type: "spring",
-                        bounce: 0.1,
-                    }}
-                    viewport={{ once: true }}
-                >
-                    <ServiceCard
-                        img="/img/services/belpharoplasty.png"
-                        header="بلفاروپلاستی"
-                        href="/services/blepharoplasty/"
-                        body="جوانسازی پلک‌ها و ایجاد ظاهری شاداب‌تر"
-                    />
-                </motion.div>
-                <motion.div
-                    initial={{ opacity: 0, y: -40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{
-                        duration: 1.5,
-                        type: "spring",
-                        bounce: 0.1,
-                    }}
-                    viewport={{ once: true }}
-                >
-                    <ServiceCard
-                        img="/img/services/face-lift.png"
-                        header="لیفت صورت"
-                        href="/services/face-lift/"
-                        body="ایجاد ظاهری جوان‌تر با حفظ حالت طبیعی چهره"
-                    />
-                </motion.div>
-                <motion.div
-                    initial={{ opacity: 0, x: -40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{
-                        duration: 1.5,
-                        type: "spring",
-                        bounce: 0.1,
-                    }}
-                    viewport={{ once: true }}
-                >
-                    <ServiceCard
-                        img="/img/services/mentoplasty.png"
-                        header="منتوپلاستی"
-                        href="/services/mentoplasty/"
-                        body="اصلاح فرم چانه و ایجاد تناسب بهتر در چهره"
-                    />
-                </motion.div>
+                {items.map((item, index) => (
+                    <motion.div
+                        key={item.slug}
+                        initial={enterFrom[index] ?? { opacity: 0, y: -40 }}
+                        whileInView={{ opacity: 1, x: 0, y: 0 }}
+                        transition={{
+                            duration: 1.5,
+                            type: "spring",
+                            bounce: 0.1,
+                        }}
+                        viewport={{ once: true }}
+                    >
+                        <ServiceCard
+                            img={`/img/services/${item.image}`}
+                            header={item.title}
+                            body={item.summary}
+                            href={`/services/${item.slug}/`}
+                        />
+                    </motion.div>
+                ))}
             </div>
         </section>
     );

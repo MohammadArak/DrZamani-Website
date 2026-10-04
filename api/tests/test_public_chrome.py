@@ -88,7 +88,7 @@ def test_detail_content_has_structure_and_escapes_text():
 
 
 def test_services_pages_show_text_phone_and_escape():
-    services = [dict(slug="rhino", title="رینو", image="rhinoplasty.png", summary="خلاصه", description="توضیح کامل خدمت")]
+    services = [dict(slug="rhino", title="رینو", image="rhinoplasty.png", summary="خلاصه", description_html="<p>توضیح کامل خدمت</p>")]
     clinic = make_clinic(doctor_name="<script>fixture()</script>")
     detail = chrome.services_page(clinic, services, services[0], "+98861111111")
     assert "توضیح کامل خدمت" in detail and "tel:+98861111111" in detail and "<script>fixture()" not in detail
