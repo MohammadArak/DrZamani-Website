@@ -19,6 +19,7 @@ const navMenu = [
         value: "about-us",
         href: "/#about-us",
     },
+    { title: "خدمات", value: "services", href: "/services/" },
     {
         title: "تماس با ما",
         value: "contact-us",

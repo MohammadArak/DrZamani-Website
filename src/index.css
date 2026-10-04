@@ -1,5 +1,6 @@
 @import "./assets/styles/app.css";
 @import "./assets/styles/global.scss";
+@import "./public-pages.css";
 
 @media (min-width: 768px) {
     .footer-gr-border::after {

@@ -6,9 +6,10 @@ interface Props {
     img: string;
     header: string;
     body: ReactNode;
+    href?: string;
 }
 
-const ServiceCard = ({ img, header, body }: Props) => {
+const ServiceCard = ({ img, header, body, href = "/#footer" }: Props) => {
     return (
         <GlassCard className="p-5 border-none hover:scale-105 transition ease-in-out duration-200">
             <div className="flex flex-col gap-6">
@@ -43,7 +44,7 @@ const ServiceCard = ({ img, header, body }: Props) => {
                 </div>
                 <div className="flex justify-center items-center">
                     <a
-                        href="/#footer"
+                        href={href}
                         className="flex items-center gap-1 text-secondary border border-secondary rounded-full px-5 py-2 hover:bg-secondary hover:scale-105 hover:text-white transition duration-125 ease-in-out"
                     >
                         مشاوره و اطلاعات بیشتر

@@ -8,13 +8,19 @@ const ServiceMinimalCard = ({
     title,
     subtitle,
     img,
+    href,
 }: {
     title: string;
     subtitle: string;
     img: string;
+    href: string;
 }) => {
     return (
-        <motion.div className="bg-white rounded-2xl shadow-xl p-3 flex flex-col items-center justify-center gap-1 hover:scale-105 transition duration-125">
+        <motion.div className="bg-white rounded-2xl shadow-xl hover:scale-105 transition duration-125">
+            <a
+                href={href}
+                className="p-3 flex flex-col items-center justify-center gap-1"
+            >
             <div className="bg-[#fcf9f5] rounded-full p-4">
                 <img
                     src={img}
@@ -26,6 +32,7 @@ const ServiceMinimalCard = ({
             </div>
             <h6 className="text-duskblue text-lg">{title}</h6>
             <span className="font-light text-xs">{subtitle}</span>
+            </a>
         </motion.div>
     );
 };
@@ -125,21 +132,25 @@ const AboutUs = () => {
                             >
                                 <ServiceMinimalCard
                                     title="رینوپلاستی"
+                                    href="/services/rhinoplasty/"
                                     subtitle="(جراحی زیبایی بینی)"
                                     img="/img/about-us/rhinoplasty.png"
                                 />
                                 <ServiceMinimalCard
                                     title="بلفاروپلاستی"
+                                    href="/services/blepharoplasty/"
                                     subtitle="(جراحی پلک)"
                                     img="/img/about-us/belpharoplasty.png"
                                 />
                                 <ServiceMinimalCard
                                     title="منتوپلاستی"
+                                    href="/services/mentoplasty/"
                                     subtitle="(جراحی فک)"
                                     img="/img/about-us/mentoplasty.png"
                                 />
                                 <ServiceMinimalCard
                                     title="لیفت صورت"
+                                    href="/services/face-lift/"
                                     subtitle="(جراحی جوانسازی)"
                                     img="/img/about-us/face-lift.png"
                                 />

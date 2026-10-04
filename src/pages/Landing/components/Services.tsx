@@ -108,6 +108,7 @@ const Services = () => {
                     <ServiceCard
                         img="/img/services/rhinoplasty.png"
                         header="رینوپلاستی"
+                        href="/services/rhinoplasty/"
                         body="افزایش زیبایی چهره با طراحی متناسب بینی"
                     />
                 </motion.div>
@@ -124,6 +125,7 @@ const Services = () => {
                     <ServiceCard
                         img="/img/services/belpharoplasty.png"
                         header="بلفاروپلاستی"
+                        href="/services/blepharoplasty/"
                         body="جوانسازی پلک‌ها و ایجاد ظاهری شاداب‌تر"
                     />
                 </motion.div>
@@ -140,6 +142,7 @@ const Services = () => {
                     <ServiceCard
                         img="/img/services/face-lift.png"
                         header="لیفت صورت"
+                        href="/services/face-lift/"
                         body="ایجاد ظاهری جوان‌تر با حفظ حالت طبیعی چهره"
                     />
                 </motion.div>
@@ -156,6 +159,7 @@ const Services = () => {
                     <ServiceCard
                         img="/img/services/mentoplasty.png"
                         header="منتوپلاستی"
+                        href="/services/mentoplasty/"
                         body="اصلاح فرم چانه و ایجاد تناسب بهتر در چهره"
                     />
                 </motion.div>
