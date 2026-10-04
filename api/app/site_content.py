@@ -17,9 +17,9 @@ from .content_models import SiteBlock
 from .models import utcnow
 
 DEFAULTS = json.loads(Path(__file__).with_name("site_content_defaults.json").read_text(encoding="utf-8"))
-KEYS = ("hero", "about", "faq", "footer")
-BlockKey = Literal["hero", "about", "faq", "footer"]
-TITLES = {"hero": "متن بالای صفحه (هیرو)", "about": "درباره پزشک", "faq": "سوالات متداول", "footer": "متن فوتر"}
+KEYS = ("hero", "trust", "about", "faq", "footer")
+BlockKey = Literal["hero", "trust", "about", "faq", "footer"]
+TITLES = {"hero": "متن بالای صفحه (هیرو)", "trust": "نوار اعتماد زیر هیرو", "about": "درباره پزشک", "faq": "سوالات متداول", "footer": "متن فوتر"}
 
 
 def _plain(value: str) -> str:
@@ -39,9 +39,27 @@ class Hero(BaseModel):
         return _plain(value)
 
 
+class Fact(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    value: str = Field(min_length=1, max_length=30)
+    label: str = Field(min_length=1, max_length=60)
+
+    @field_validator("value", "label")
+    @classmethod
+    def text_ok(cls, value):
+        return _plain(value)
+
+
 class About(BaseModel):
     model_config = ConfigDict(extra="forbid")
     paragraphs: list[str] = Field(min_length=1, max_length=6)
+    quote: str = Field(default="", max_length=300)  # empty hides the quotation on the page
+    facts: list[Fact] = Field(default_factory=list, max_length=4)
+
+    @field_validator("quote")
+    @classmethod
+    def quote_ok(cls, value):
+        return _plain(value)
 
     @field_validator("paragraphs")
     @classmethod
@@ -50,6 +68,22 @@ class About(BaseModel):
         if any(not (10 <= len(value) <= 1500) for value in cleaned):
             raise ValueError("هر بند باید بین ۱۰ تا ۱۵۰۰ نویسه باشد")
         return cleaned
+
+
+class TrustItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    title: str = Field(min_length=2, max_length=80)
+    text: str = Field(default="", max_length=160)
+
+    @field_validator("title", "text")
+    @classmethod
+    def text_ok(cls, value):
+        return _plain(value)
+
+
+class Trust(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    items: list[TrustItem] = Field(default_factory=list, max_length=4)  # none hides the strip
 
 
 class FaqItem(BaseModel):
@@ -78,7 +112,7 @@ class Footer(BaseModel):
         return _plain(value)
 
 
-MODELS = {"hero": Hero, "about": About, "faq": Faq, "footer": Footer}
+MODELS = {"hero": Hero, "trust": Trust, "about": About, "faq": Faq, "footer": Footer}
 
 
 class BlockWrite(BaseModel):

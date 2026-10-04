@@ -898,7 +898,7 @@ def test_operational_capacity_waitlist_reschedule_and_audit() -> None:
         # The offered slot is reserved: hidden from the public list and refused to other patients.
         public_now = client.get(f"/api/v1/availability/{selected_date}", params={"service_id": service["id"]}).json()
         assert selected_slot not in {slot["start_time"] for slot in public_now}
-        stranger_token = _patient_token(client, "09125555555")
+        stranger_token = _patient_token(client, "09127654321")
         stranger_headers = {"Authorization": f"Bearer {stranger_token}"}
         assert client.put("/api/v1/me", headers=stranger_headers, json={
             "first_name": "بیمار", "last_name": "رهگذر", "birth_date_jalali": "1380/02/02", "email": None, "gender": "male",
