@@ -202,17 +202,23 @@ def websocket_check(runtime, current, token):
     credential.chmod(0o600)
     try:
         service_python(runtime, current, '''
-import json, ssl
+import json, ssl, time
 from pathlib import Path
 from websockets.sync.client import connect
 from websockets.exceptions import ConnectionClosed
+began = time.monotonic()
+step = 'start'
 try:
     context=ssl.create_default_context(cafile='/etc/drzamani/fixture-cert.pem')
     url='wss://127.0.0.1:18443/api/v1/realtime'
+    step = 'first-connect'
     with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
+        step = 'first-recv'
         socket.send(json.dumps({'audience':'patient','token':Path('/var/lib/drzamani/runtime-token').read_text()}))
         assert json.loads(socket.recv(timeout=10)) == {'type':'realtime.ready','audience':'patient'}
+    step = 'second-connect'
     with connect(url, ssl=context, origin='https://127.0.0.1:18443') as socket:
+        step = 'second-recv'
         socket.send(json.dumps({'audience':'patient'}))
         try:
             socket.recv(timeout=10)
@@ -221,7 +227,7 @@ try:
             assert error.rcvd.code == 4401
 except BaseException as error:
     # Only the exception class and a short message (no token is ever part of it) for the failure summary.
-    Path('/var/lib/drzamani/ws-error.txt').write_text(type(error).__name__ + ': ' + str(error)[:300])
+    Path('/var/lib/drzamani/ws-error.txt').write_text(f'{step} after {time.monotonic() - began:.1f}s: ' + type(error).__name__ + ': ' + str(error)[:300])
     raise
 ''')
     finally:
@@ -351,6 +357,7 @@ def verify(report):
         ws_error = layout.data/'ws-error.txt'
         result = {'status':'failed','stage':stage,'errorType':type(error).__name__,'checks':checks,
                   'websocketError':ws_error.read_text(errors='replace')[:400] if ws_error.exists() else None,
+                  'apiLogTail':journal[-900:] if os.environ.get('GITHUB_ACTIONS') == 'true' else '',
                   'failedCommands':runtime.failures,'healthProbe':runtime.health_failure,'unitStatus':diagnostics,'journalErrorTypes':[marker for marker in markers if marker in journal]}
     finally:
         for unit in (TIMER, JOB, API):
