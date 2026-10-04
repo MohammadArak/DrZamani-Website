@@ -5,7 +5,7 @@ import { useStaffAccess } from "./staffAccess";
 import { useContentConfirm } from "./useContentConfirm";
 
 const failure = (e: unknown) => (e instanceof Error ? e.message : "خطای ارتباط با سرور");
-const HELP = "می‌توانید در متن از {doctorName} (نام پزشک)، {specialty} (تخصص)، {officePhone} و {consultationPhone} استفاده کنید؛ هنگام نمایش جایگزین می‌شوند.";
+const HELP = "می‌توانید در متن از {doctorName} (نام پزشک)، {specialty} (تخصص)، {medicalCouncilNumber} (شماره نظام پزشکی)، {officePhone} و {consultationPhone} استفاده کنید؛ هنگام نمایش جایگزین می‌شوند.";
 
 type Draft = SiteBlocks[BlockKey];
 
@@ -26,11 +26,48 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
             </label>
         );
     }
-    if (blockKey === "about") {
-        const paragraphs = (draft as { paragraphs: string[] }).paragraphs;
-        const set = (next: string[]) => onChange({ paragraphs: next });
+    if (blockKey === "trust") {
+        const items = (draft as { items: { title: string; text: string }[] }).items;
+        const set = (next: { title: string; text: string }[]) => onChange({ items: next });
         return (
             <>
+                <p className="editor-help">نوار زیر بخش بالای صفحه؛ تا ۴ مورد. اگر همه‌ی موردها حذف شوند نوار نمایش داده نمی‌شود. فقط موردهایی بنویسید که مدرکشان را دارید.</p>
+                {items.map((item, index) => (
+                    <fieldset key={index}>
+                        <legend>مورد {index + 1}</legend>
+                        <label>عنوان<input maxLength={80} value={item.title} readOnly={locked} onChange={(e) => set(items.map((x, i) => (i === index ? { ...x, title: e.target.value } : x)))} /></label>
+                        <label>توضیح کوتاه<input maxLength={160} value={item.text} readOnly={locked} onChange={(e) => set(items.map((x, i) => (i === index ? { ...x, text: e.target.value } : x)))} /></label>
+                        {!locked && (
+                            <div className="article-actions">
+                                <button type="button" aria-label="بالا" onClick={() => set(move(items, index, index - 1))}>↑</button>
+                                <button type="button" aria-label="پایین" onClick={() => set(move(items, index, index + 1))}>↓</button>
+                                <button type="button" onClick={() => set(items.filter((_, i) => i !== index))}>حذف</button>
+                            </div>
+                        )}
+                    </fieldset>
+                ))}
+                {!locked && items.length < 4 && <button type="button" onClick={() => set([...items, { title: "", text: "" }])}>+ مورد تازه</button>}
+            </>
+        );
+    }
+    if (blockKey === "about") {
+        const about = draft as { paragraphs: string[]; quote: string; facts: { value: string; label: string }[] };
+        const { paragraphs, quote, facts } = about;
+        const set = (next: string[]) => onChange({ ...about, paragraphs: next });
+        return (
+            <>
+                <label>جمله‌ی شاخص روی تصویر (اختیاری؛ خالی یعنی نمایش داده نشود)
+                    <textarea rows={2} maxLength={300} value={quote} readOnly={locked} onChange={(e) => onChange({ ...about, quote: e.target.value })} />
+                </label>
+                {facts.map((fact, index) => (
+                    <fieldset key={index}>
+                        <legend>مشخصه {index + 1}</legend>
+                        <label>مقدار (مثلاً 20+)<input maxLength={30} value={fact.value} readOnly={locked} onChange={(e) => onChange({ ...about, facts: facts.map((x, i) => (i === index ? { ...x, value: e.target.value } : x)) })} /></label>
+                        <label>برچسب (مثلاً سال تجربه)<input maxLength={60} value={fact.label} readOnly={locked} onChange={(e) => onChange({ ...about, facts: facts.map((x, i) => (i === index ? { ...x, label: e.target.value } : x)) })} /></label>
+                        {!locked && <button type="button" onClick={() => onChange({ ...about, facts: facts.filter((_, i) => i !== index) })}>حذف مشخصه</button>}
+                    </fieldset>
+                ))}
+                {!locked && facts.length < 4 && <button type="button" onClick={() => onChange({ ...about, facts: [...facts, { value: "", label: "" }] })}>+ مشخصه تازه</button>}
                 {paragraphs.map((text, index) => (
                     <div key={index} className="source-row">
                         <label>بند {index + 1}

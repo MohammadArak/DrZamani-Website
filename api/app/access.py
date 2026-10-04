@@ -187,8 +187,17 @@ BUILTINS = {
 
 def seed_access(db: Session) -> None:
     existing = set(db.scalars(select(Permission.code)))
-    db.add_all(Permission(code=code) for code in sorted(CODES - existing))
+    fresh = CODES - existing
+    db.add_all(Permission(code=code) for code in sorted(fresh))
     db.flush()
+    # A permission introduced by a release reaches the default roles that include it exactly once;
+    # the owner's later removals are respected because only never-seen codes are granted.
+    for slug, (_name, codes) in BUILTINS.items():
+        grant = fresh & set(codes)
+        role = db.scalar(select(Role).where(Role.slug == slug)) if grant else None
+        if role:
+            have = {p.code for p in role.permissions}
+            role.permissions = [*role.permissions, *db.scalars(select(Permission).where(Permission.code.in_(grant - have)))]
     for slug, (name, codes) in BUILTINS.items():
         if not db.scalar(select(Role.id).where(Role.slug == slug)):
             db.add(

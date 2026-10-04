@@ -49,28 +49,41 @@ def consultation_threads(
         .unique()
         .all()
     )
+    chat_ids = select(Appointment.id).join(Appointment.service).where(Service.allows_media_chat.is_(True))
+    unread_by_appointment = dict(
+        db.execute(
+            select(ConsultationMessage.appointment_id, func.count())
+            .where(
+                ConsultationMessage.appointment_id.in_(chat_ids),
+                ConsultationMessage.sender_type == "patient",
+                ConsultationMessage.read_at.is_(None),
+            )
+            .group_by(ConsultationMessage.appointment_id)
+        ).all()
+    )
+    newest = (
+        select(
+            ConsultationMessage.id.label("id"),
+            func.row_number()
+            .over(
+                partition_by=ConsultationMessage.appointment_id,
+                order_by=(ConsultationMessage.created_at.desc(), ConsultationMessage.id.desc()),
+            )
+            .label("position"),
+        )
+        .where(ConsultationMessage.appointment_id.in_(chat_ids))
+        .subquery()
+    )
+    last_by_appointment = {
+        message.appointment_id: message
+        for message in db.scalars(
+            select(ConsultationMessage).join(newest, newest.c.id == ConsultationMessage.id).where(newest.c.position == 1)
+        )
+    }
     result: list[ConsultationThreadRead] = []
     for item in appointments:
-        last_message = db.scalar(
-            select(ConsultationMessage)
-            .where(ConsultationMessage.appointment_id == item.id)
-            .order_by(
-                ConsultationMessage.created_at.desc(), ConsultationMessage.id.desc()
-            )
-            .limit(1)
-        )
-        unread_count = (
-            db.scalar(
-                select(func.count())
-                .select_from(ConsultationMessage)
-                .where(
-                    ConsultationMessage.appointment_id == item.id,
-                    ConsultationMessage.sender_type == "patient",
-                    ConsultationMessage.read_at.is_(None),
-                )
-            )
-            or 0
-        )
+        last_message = last_by_appointment.get(item.id)
+        unread_count = unread_by_appointment.get(item.id, 0)
         result.append(
             ConsultationThreadRead(
                 appointment_id=item.id,

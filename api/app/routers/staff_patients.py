@@ -80,7 +80,7 @@ def patients(
         sorted(
             {
                 tag_value
-                for raw_tags in db.scalars(select(Patient.tags_json)).all()
+                for raw_tags in db.scalars(select(Patient.tags_json).where(Patient.tags_json.is_not(None), Patient.tags_json.not_in(["", "[]"]))).all()
                 for tag_value in (
                     json.loads(raw_tags or "[]") if isinstance(raw_tags, str) else []
                 )

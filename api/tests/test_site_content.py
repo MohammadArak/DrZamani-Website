@@ -13,9 +13,10 @@ def blocks(client, access):
 
 def test_blocks_are_seeded_with_the_previous_wording(client):
     public = client.get("/api/v1/site-content").json()["blocks"]
-    assert set(public) == {"hero", "about", "faq", "footer"}
+    assert set(public) == {"hero", "trust", "about", "faq", "footer"}
     assert len(public["faq"]["items"]) == 4 and len(public["about"]["paragraphs"]) == 3
     assert "{doctorName}" in public["hero"]["description"]
+    assert len(public["trust"]["items"]) == 3 and public["about"]["quote"] == "" and len(public["about"]["facts"]) == 2
     home = client.get("/").text
     bootstrap = home.split('id="site-content-bootstrap" type="application/json">', 1)[1].split("</script>", 1)[0]
     assert json.loads(bootstrap)["blocks"]["footer"]["description"] == public["footer"]["description"]
@@ -78,3 +79,19 @@ def test_seed_never_overwrites_edited_wording(client):
     from app.main import seed_defaults
     seed_defaults()
     assert client.get("/api/v1/site-content").json()["blocks"]["footer"]["description"] == "متن ویرایش‌شده‌ی فوتر برای آزمون"
+
+
+def test_trust_strip_and_about_extras_are_editable_and_can_be_hidden(client):
+    access = headers(owner()[2])
+    current = blocks(client, access)
+    trust = current["trust"]
+    emptied = client.put(f"{BASE}/trust", headers=access, json=dict(revision=trust["revision"], content=dict(items=[])))
+    assert emptied.status_code == 200 and emptied.json()["content"]["items"] == []
+    too_many = dict(items=[dict(title="مورد", text="متن")] * 5)
+    assert client.put(f"{BASE}/trust", headers=access, json=dict(revision=emptied.json()["revision"], content=too_many)).status_code == 422
+    about = current["about"]
+    content = dict(about["content"], quote="جمله‌ی آزمایشی", facts=[dict(value="۱۰", label="آزمون")])
+    saved = client.put(f"{BASE}/about", headers=access, json=dict(revision=about["revision"], content=content))
+    assert saved.status_code == 200 and saved.json()["content"]["quote"] == "جمله‌ی آزمایشی"
+    too_many_facts = dict(about["content"], facts=[dict(value="۱", label="الف")] * 5)
+    assert client.put(f"{BASE}/about", headers=access, json=dict(revision=saved.json()["revision"], content=too_many_facts)).status_code == 422

@@ -146,6 +146,28 @@ const Portal = ({
             setMessage(errorMessage(leaveError));
         }
     };
+    const takeOffer = async (entry: WaitlistEntry) => {
+        if (!entry.offered_date || !entry.offered_start_time) return;
+        try {
+            const result = await appointmentApi.createAppointment(token, {
+                service_id: entry.service_id,
+                appointment_date: entry.offered_date,
+                start_time: entry.offered_start_time,
+                has_previous_visit: appointments.some((item) => item.status === "completed"),
+                is_urgent: entry.is_urgent,
+            });
+            if (result.requires_payment && result.payment_url) {
+                window.location.assign(result.payment_url);
+                return;
+            }
+            setMessageKind("success");
+            setMessage("این زمان برای شما رزرو شد.");
+            await onRefresh();
+        } catch (offerError) {
+            setMessageKind("error");
+            setMessage(errorMessage(offerError));
+        }
+    };
     const addToCalendar = async (item: Appointment) => {
         try {
             const blob = await appointmentApi.appointmentCalendar(token, item.id);
@@ -407,6 +429,9 @@ const Portal = ({
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-3">
+                                                        {entry.status === "notified" && (
+                                                            <button type="button" onClick={() => void takeOffer(entry)} className="rounded-xl bg-secondary px-4 py-2 text-xs font-bold text-white">رزرو همین زمان</button>
+                                                        )}
                                                         {entry.status === "notified" && (
                                                             <a href={`tel:${clinicInfo.phones.office.value}`} className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white">هماهنگی با مطب</a>
                                                         )}
