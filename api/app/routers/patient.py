@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import secrets
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
@@ -693,6 +693,20 @@ def _price_and_payable(service: Service, is_urgent: bool) -> tuple[int, int, str
     return total, 0, "none"
 
 
+def _close_matching_offers(db: Session, patient: Patient, service_id: int, day: date, start: time) -> None:
+    """Booking the slot that was offered to this patient from the waitlist completes that entry."""
+    for entry in db.scalars(
+        select(WaitlistEntry).where(
+            WaitlistEntry.patient_id == patient.id,
+            WaitlistEntry.service_id == service_id,
+            WaitlistEntry.status == "notified",
+            WaitlistEntry.offered_date == day,
+            WaitlistEntry.offered_start_time == start,
+        )
+    ):
+        entry.status = "booked"
+
+
 def _new_appointment(
     *,
     db: Session,
@@ -773,6 +787,7 @@ def create_appointment(
                 service.duration_minutes,
                 service=service,
                 is_urgent=payload.is_urgent,
+                viewer_patient_id=patient.id,
             )
             if start == payload.start_time
         ),
@@ -782,6 +797,7 @@ def create_appointment(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="این ساعت دیگر در دسترس نیست")
     start_time, end_time = matching_slot
     _enforce_booking_limits(db, patient, settings)
+    _close_matching_offers(db, patient, service.id, payload.appointment_date, start_time)
     price_toman, amount_toman, payment_mode = _price_and_payable(service, payload.is_urgent)
     hold = BookingHold(
         id=secrets.token_urlsafe(32),

@@ -15,6 +15,7 @@ from .models import (
     ServiceScheduleException,
     ServiceWeeklySchedule,
     ServiceUrgentSchedule,
+    WaitlistEntry,
     WeeklySchedule,
 )
 from .security import utcnow
@@ -110,6 +111,7 @@ def list_available_slots(
     is_urgent: bool = False,
     exclude_appointment_id: int | None = None,
     exclude_hold_id: str | None = None,
+    viewer_patient_id: int | None = None,
 ) -> list[tuple[time, time]]:
     period = (
         urgent_day_period(db, day, service)
@@ -158,6 +160,26 @@ def list_available_slots(
             (
                 combine_local(day, hold.start_time, settings.timezone_name) - before,
                 combine_local(day, hold.end_time, settings.timezone_name) + after,
+            )
+        )
+
+    # A slot offered to a waitlisted patient stays reserved for them until the offer expires.
+    offer_query = select(WaitlistEntry).where(
+        WaitlistEntry.status == "notified",
+        WaitlistEntry.expires_at > utcnow(),
+        WaitlistEntry.offered_date == day,
+    )
+    if service:
+        offer_query = offer_query.where(WaitlistEntry.service_id == service.id)
+    for offer in db.scalars(offer_query).all():
+        if offer.patient_id == viewer_patient_id or not offer.offered_start_time or not offer.offered_end_time:
+            continue
+        before = timedelta(minutes=offer.service.buffer_before_minutes)
+        after = timedelta(minutes=offer.service.buffer_after_minutes)
+        occupied.append(
+            (
+                combine_local(day, offer.offered_start_time, settings.timezone_name) - before,
+                combine_local(day, offer.offered_end_time, settings.timezone_name) + after,
             )
         )
 

@@ -125,6 +125,9 @@ def decode(overrides: dict) -> dict:
     return {key: unseal(key, value) if key in SECRET_KEYS else value for key, value in overrides.items()}
 
 
+_EFFECTIVE: dict[str, tuple[config.Settings, config.Settings]] = {}
+
+
 def get_settings(db=None) -> config.Settings:
     from .database import SessionLocal
     bootstrap = config.get_settings()
@@ -132,10 +135,19 @@ def get_settings(db=None) -> config.Settings:
         with SessionLocal() as session:
             return get_settings(session)
     row = db.get(SystemSetting, 1)
+    raw = row.overrides_json if row else ""
+    cached = _EFFECTIVE.get(raw)
+    if cached and cached[0] is bootstrap:
+        return cached[1]
     try:
-        values = decode(json.loads(row.overrides_json)) if row else {}
+        values = decode(json.loads(raw)) if row else {}
         effective = replace(bootstrap, **values)
         validate_effective(effective, check_dns=False)
+        # Pure function of (ENV bootstrap, stored JSON): the row is still read on every call, so a changed
+        # value or credential is never served stale; only the decrypt/validate work is skipped.
+        if len(_EFFECTIVE) >= 8:
+            _EFFECTIVE.clear()
+        _EFFECTIVE[raw] = (bootstrap, effective)
         return effective
     except SettingsUnavailable:
         raise

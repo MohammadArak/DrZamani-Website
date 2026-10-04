@@ -895,6 +895,21 @@ def test_operational_capacity_waitlist_reschedule_and_audit() -> None:
         assert waiter_entries[0]["status"] == "notified"
         assert waiter_entries[0]["offered_start_time"].startswith(selected_slot[:5])
 
+        # The offered slot is reserved: hidden from the public list and refused to other patients.
+        public_now = client.get(f"/api/v1/availability/{selected_date}", params={"service_id": service["id"]}).json()
+        assert selected_slot not in {slot["start_time"] for slot in public_now}
+        stranger_token = _patient_token(client, "09125555555")
+        stranger_headers = {"Authorization": f"Bearer {stranger_token}"}
+        assert client.put("/api/v1/me", headers=stranger_headers, json={
+            "first_name": "بیمار", "last_name": "رهگذر", "birth_date_jalali": "1380/02/02", "email": None, "gender": "male",
+            "national_id": None, "is_foreign_national": True, "foreign_identifier": "WAITLIST-STRANGER-1",
+        }).status_code == 200
+        booking_body = {"service_id": service["id"], "appointment_date": selected_date, "start_time": selected_slot, "has_previous_visit": False, "is_urgent": False}
+        assert client.post("/api/v1/appointments", headers=stranger_headers, json=booking_body).status_code == 409
+        taken = client.post("/api/v1/appointments", headers=waiter_headers, json=booking_body)
+        assert taken.status_code == 201, taken.text
+        assert client.get("/api/v1/waitlist", headers=waiter_headers).json()[0]["status"] == "booked"
+
         _second_token, second_appointment = appointments[1]
         available_again = client.get(
             f"/api/v1/availability/{selected_date}",
