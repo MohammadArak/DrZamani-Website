@@ -12,6 +12,7 @@ export default function BookingClosed({ message }: { message: string }) {
                 </svg>
             </div>
             <p>{message}</p>
+            <p className="booking-closed__links"><a href="/">بازگشت به صفحه اصلی</a></p>
         </div>
     </main>;
 }
