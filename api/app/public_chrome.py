@@ -267,7 +267,7 @@ def service_cards(services: list[dict]) -> str:
 def services_page(clinic, services: list[dict], service: dict | None, tel: str) -> str:
     """Services index (service=None) or one service; tel is the already normalised +98 number."""
     name = service["title"] if service else "خدمات مطب"
-    description = service["description"] if service else f"آشنایی با حوزه‌های خدمات مطب {clinic.doctor_name} در {clinic.address_city}"
+    description = service["summary"] if service else f"آشنایی با حوزه‌های خدمات مطب {clinic.doctor_name} در {clinic.address_city}"
     image = service["image"] if service else "rhinoplasty.png"
     trail = [("صفحه اصلی", "/"), ("خدمات", "/services/")] + ([(name, "")] if service else [])
     body = (
@@ -278,6 +278,7 @@ def services_page(clinic, services: list[dict], service: dict | None, tel: str) 
         + f'<p class="legacy-article-lead legacy-service-lead">{esc(description)}</p>'
     )
     if service:
+        body += f'<div class="legacy-service-body article-body">{service["description_html"]}</div>'
         body += (
             '<div class="legacy-service-intro"><h2>هماهنگی مراجعه</h2><p>پرسش‌های خود درباره مراجعه را با مطب مطرح کنید. زمان مراجعه پس از هماهنگی با مطب مشخص می‌شود.</p>'
             f'<ul><li>{esc(clinic.doctor_name)}، {esc(clinic.specialty)}</li><li>{esc(clinic.address_city)}، {esc(clinic.address)}</li><li>{esc(clinic.working_hours)}</li></ul>'

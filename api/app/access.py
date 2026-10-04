@@ -103,6 +103,11 @@ CATALOG = [
         ]
     ],
     ("media.manage", "کتابخانه رسانه عمومی", "مقالات", [], False),
+    ("site_services.view", "مشاهده صفحه‌های خدمات", "محتوای سایت", [], False),
+    ("site_services.create", "افزودن صفحه خدمت", "محتوای سایت", ["site_services.view"], False),
+    ("site_services.edit", "ویرایش متن و سئوی صفحه خدمت", "محتوای سایت", ["site_services.view"], False),
+    ("site_services.publish", "انتشار و توقف انتشار صفحه خدمت", "محتوای سایت", ["site_services.view"], False),
+    ("site_services.delete", "بایگانی صفحه خدمت", "محتوای سایت", ["site_services.view"], False),
     *[
         (
             f"comments.{action}",
@@ -148,6 +153,18 @@ BUILTINS = {
     "admin": ("مدیر", {c for c, _, _, _, future in CATALOG if not future} - ROOT_ONLY),
     "secretary": ("منشی", SECRETARY),
     "accountant": ("حسابدار", {"dashboard.view", "finance.view", "finance.refund"}),
+    "content_editor": (
+        "ویراستار محتوا",
+        {
+            "site_services.view",
+            "site_services.create",
+            "site_services.edit",
+            "articles.view",
+            "articles.create",
+            "articles.edit",
+            "media.manage",
+        },
+    ),
     "author": (
         "نویسنده",
         {"articles.view", "articles.create", "articles.edit", "media.manage"},

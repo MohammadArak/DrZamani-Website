@@ -25,6 +25,7 @@ export type StaffTab =
     | "audit"
     | "comments"
     | "articles"
+    | "site-services"
     | "media"
     | "access";
 

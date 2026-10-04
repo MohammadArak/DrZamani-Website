@@ -226,6 +226,8 @@ def media_delete(key:str,db:Session=Depends(get_db),staff=Depends(require_permis
     comments=db.scalars(select(Comment).where(Comment.deleted.is_(False)))
     if any(json.loads(s).get('photo_key')==key for row in comments for s in (row.content_json,row.published_json) if s):
         raise HTTPException(409,'رسانه در یک نظر استفاده شده است')
+    from ..site_services import media_keys_in_use
+    if key in media_keys_in_use(db):raise HTTPException(409,'رسانه در یک صفحه خدمت استفاده شده است')
     row.deleted=True
     record_audit(db,action='media.archive',entity_type='public_media',entity_id=key,summary='بایگانی رسانه',actor_staff_id=staff.id)
     db.commit();return {'message':'رسانه بایگانی شد'}

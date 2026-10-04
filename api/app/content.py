@@ -227,4 +227,6 @@ def media_keys(snapshot):
 def is_public_media(db,key):
     if any(key in media_keys(r.published_json) for r in public_rows(db)):return True
     from .comments import public_rows as public_comments
-    return any(row['photo_key']==key for row in public_comments(db))
+    if any(row['photo_key']==key for row in public_comments(db)):return True
+    from .site_services import public_media_keys
+    return key in public_media_keys(db)

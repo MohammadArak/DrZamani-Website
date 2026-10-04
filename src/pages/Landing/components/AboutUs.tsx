@@ -3,6 +3,7 @@ import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import { FaUsers } from "react-icons/fa6";
 import GlassCard from "./GlassCard";
 import { BiSolidCheckShield } from "react-icons/bi";
+import { useSiteServices } from "@/services/siteServicesApi";
 
 const ServiceMinimalCard = ({
     title,
@@ -39,6 +40,7 @@ const ServiceMinimalCard = ({
 
 const AboutUs = () => {
     const { clinicInfo } = useClinicInfo();
+    const items = useSiteServices();
     return (
         <section
             id="about-us"
@@ -130,30 +132,15 @@ const AboutUs = () => {
                                 }}
                                 viewport={{ once: true }}
                             >
-                                <ServiceMinimalCard
-                                    title="رینوپلاستی"
-                                    href="/services/rhinoplasty/"
-                                    subtitle="(جراحی زیبایی بینی)"
-                                    img="/img/about-us/rhinoplasty.png"
-                                />
-                                <ServiceMinimalCard
-                                    title="بلفاروپلاستی"
-                                    href="/services/blepharoplasty/"
-                                    subtitle="(جراحی پلک)"
-                                    img="/img/about-us/belpharoplasty.png"
-                                />
-                                <ServiceMinimalCard
-                                    title="منتوپلاستی"
-                                    href="/services/mentoplasty/"
-                                    subtitle="(جراحی فک)"
-                                    img="/img/about-us/mentoplasty.png"
-                                />
-                                <ServiceMinimalCard
-                                    title="لیفت صورت"
-                                    href="/services/face-lift/"
-                                    subtitle="(جراحی جوانسازی)"
-                                    img="/img/about-us/face-lift.png"
-                                />
+                                {items.map((item) => (
+                                    <ServiceMinimalCard
+                                        key={item.slug}
+                                        title={item.title}
+                                        href={`/services/${item.slug}/`}
+                                        subtitle={item.tile_label}
+                                        img={`/img/about-us/${item.image}`}
+                                    />
+                                ))}
                             </motion.div>
                         </div>
                     </div>
