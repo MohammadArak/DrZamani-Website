@@ -1,12 +1,167 @@
-// Shared catalog is packaged with the backend that renders the service pages.
-import services from "../../../../api/app/clinic_services.json";
-import SectionHeading from "./SectionHeading";
+import { motion } from "@/components/Motion";
+import { FaNotesMedical } from "react-icons/fa";
+import ServiceCard from "./ServiceCard";
+import { BsDiamondFill } from "react-icons/bs";
+import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
-export default function Services() {
-    return <section id="services" className="landing-section landing-services"><div className="landing-container">
-        <SectionHeading title="خدمات تخصصی" description="آشنایی با حوزه‌های خدمات مطب" />
-        <div className="landing-services-grid">{services.map(service => <a className="landing-service-card" href={`/services/${service.slug}/`} key={service.slug}>
-            <img src={`/img/services/${service.image}`} alt="" width="72" height="72" loading="lazy" decoding="async" /><h3>{service.title}</h3><p>{service.summary}</p><span>آشنایی با خدمت <span aria-hidden="true">←</span></span>
-        </a>)}</div>
-    </div></section>;
-}
+const Services = () => {
+    const { clinicInfo } = useClinicInfo();
+
+    return (
+        <section
+            id="services"
+            className="relative bg-white pt-14 pb-36 px-10 flex flex-col items-center gap-8"
+        >
+            <motion.img
+                initial={{ opacity: 0, y: -40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{
+                    duration: 1.5,
+                    type: "spring",
+                    bounce: 0.1,
+                }}
+                viewport={{ once: true }}
+                className="absolute left-25 bottom-25 z-10 hidden lg:block blur-xl"
+                src="/img/services/cloud-1.png"
+                alt="بک گراند ابری رنگ آبی"
+            />
+            <motion.img
+                initial={{ opacity: 0, y: -40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{
+                    duration: 1.5,
+                    type: "spring",
+                    bounce: 0.1,
+                }}
+                viewport={{ once: true }}
+                className="absolute right-25 top-25 z-10 hidden lg:block blur-xl"
+                src="/img/services/cloud-2.png"
+                alt="بک گراند ابری رنگ آبی"
+            />
+            <img
+                className="absolute top-0 z-10 hidden lg:block"
+                src="/img/services/dashed-line-up.png"
+                alt="خط خط افقی بالا"
+            />
+            <img
+                className="absolute -bottom-20 left-10 z-10 hidden lg:block"
+                src="/img/services/dashed-line-bottom.png"
+                alt="خط افقی پایین"
+            />
+            <div className="flex flex-col gap-4 items-center z-20">
+                <motion.div
+                    className="rounded-full border border-secondary p-0.5"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{
+                        duration: 1.5,
+                        type: "spring",
+                        bounce: 0.4,
+                    }}
+                    viewport={{ once: true }}
+                >
+                    <div className="bg-linear-to-br from-powderblue to-duskblue rounded-full border border-secondary p-4">
+                        <FaNotesMedical size={32} color="white" />
+                    </div>
+                </motion.div>
+                <motion.h2
+                    className="text-gray-700 font-dana text-2xl md:text-4xl"
+                    initial={{ opacity: 0, y: -40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{
+                        duration: 1.5,
+                        type: "spring",
+                        bounce: 0.5,
+                    }}
+                    viewport={{ once: true }}
+                >
+                    خدمات {clinicInfo.doctorName}
+                </motion.h2>
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{
+                        duration: 1.5,
+                        type: "spring",
+                        bounce: 0.1,
+                    }}
+                    viewport={{ once: true }}
+                    className="flex justify-center items-center"
+                >
+                    <div className="w-72 bg-linear-to-l from-secondary-mild/2 via-secondary to-secondary-mild/2 h-px rounded-full"></div>
+                    <div className="absolute bg-white px-1">
+                        <BsDiamondFill size={12} className="text-secondary" />
+                    </div>
+                </motion.div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 items-start justify-center h-full gap-12 md:gap-10 lg:gap-4 z-20">
+                <motion.div
+                    initial={{ opacity: 0, x: 40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{
+                        duration: 1.5,
+                        type: "spring",
+                        bounce: 0.1,
+                    }}
+                    viewport={{ once: true }}
+                >
+                    <ServiceCard
+                        img="/img/services/rhinoplasty.png"
+                        header="رینوپلاستی"
+                        body="افزایش زیبایی چهره با طراحی متناسب بینی"
+                    />
+                </motion.div>
+                <motion.div
+                    initial={{ opacity: 0, y: -40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{
+                        duration: 1.5,
+                        type: "spring",
+                        bounce: 0.1,
+                    }}
+                    viewport={{ once: true }}
+                >
+                    <ServiceCard
+                        img="/img/services/belpharoplasty.png"
+                        header="بلفاروپلاستی"
+                        body="جوانسازی پلک‌ها و ایجاد ظاهری شاداب‌تر"
+                    />
+                </motion.div>
+                <motion.div
+                    initial={{ opacity: 0, y: -40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{
+                        duration: 1.5,
+                        type: "spring",
+                        bounce: 0.1,
+                    }}
+                    viewport={{ once: true }}
+                >
+                    <ServiceCard
+                        img="/img/services/face-lift.png"
+                        header="لیفت صورت"
+                        body="ایجاد ظاهری جوان‌تر با حفظ حالت طبیعی چهره"
+                    />
+                </motion.div>
+                <motion.div
+                    initial={{ opacity: 0, x: -40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{
+                        duration: 1.5,
+                        type: "spring",
+                        bounce: 0.1,
+                    }}
+                    viewport={{ once: true }}
+                >
+                    <ServiceCard
+                        img="/img/services/mentoplasty.png"
+                        header="منتوپلاستی"
+                        body="اصلاح فرم چانه و ایجاد تناسب بهتر در چهره"
+                    />
+                </motion.div>
+            </div>
+        </section>
+    );
+};
+
+export default Services;
