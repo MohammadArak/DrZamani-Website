@@ -144,12 +144,12 @@ def cover(data: dict, *, lazy: bool = True) -> str:
     return f'<img src="/media/{esc(data["cover_key"])}.webp" alt="{esc(data.get("cover_alt", ""))}" loading="{"lazy" if lazy else "eager"}" decoding="async" width="480" height="300">'
 
 
-def article_card(item: dict) -> str:
-    """item: published content dict plus published_at (datetime)."""
+def article_card(item: dict, order: int = 0) -> str:
+    """item: published content dict plus published_at (datetime). order staggers the entrance animation."""
     category = item["categories"][0] if item.get("categories") else "مقالات"
     stamp = item["published_at"]
     return (
-        f'<article class="legacy-card"><a href="{article_url(item["slug"])}" aria-label="مطالعه مقاله: {esc(item["title"])}">'
+        f'<article class="legacy-card rv" style="--i:{order}"><a href="{article_url(item["slug"])}" aria-label="مطالعه مقاله: {esc(item["title"])}">'
         f'<div class="legacy-card-cover">{cover(item)}</div><div class="legacy-card-body"><div class="legacy-card-meta">'
         f'<span class="legacy-pill">{esc(category)}</span><time datetime="{stamp.isoformat()}">{icon("calendar")}{esc(fa_date(stamp))}</time></div>'
         f'<h2>{esc(item["title"])}</h2><p>{esc(item["summary"])}</p><span class="legacy-card-more">{icon("chevron")} مطالعه مقاله</span></div></a></article>'
@@ -170,7 +170,7 @@ def sidebar(items: list[dict], *, current_slug: str = "", q: str = "") -> str:
         cat = item["categories"][0] if item.get("categories") else "مقالات"
         latest += f'<li><a href="{article_url(item["slug"])}">{cover(item) or "<i></i>"}<span><small>{esc(cat)}</small>{esc(item["title"])}</span></a></li>'
     return (
-        '<aside class="legacy-article-sidebar" aria-label="ابزارهای مقالات">'
+        '<aside class="legacy-article-sidebar rv" style="--i:2" aria-label="ابزارهای مقالات">'
         f'<section><h2>{icon("search")}جست‌وجو</h2><form action="/articles/" method="get"><label for="article-search-static">جست‌وجو در مقالات</label>'
         f'<input id="article-search-static" name="q" type="search" maxlength="120" value="{esc(q)}" placeholder="جست‌وجو در مقاله…"><button type="submit">جست‌وجو</button></form></section>'
         f'<section><h2>{icon("folder")}دسته‌بندی</h2><ul class="legacy-cat-list"><li><a href="/articles/"><span>همه مقالات</span><b>{esc(fa_digits(len(items)))}</b></a></li>{cats}</ul></section>'
@@ -180,8 +180,8 @@ def sidebar(items: list[dict], *, current_slug: str = "", q: str = "") -> str:
 
 def hero_title(title: str, lead: str, glyph: str = "pen") -> str:
     return (
-        f'<div class="legacy-ring">{icon(glyph)}</div><h1>{esc(title)}</h1><p class="legacy-article-lead">{esc(lead)}</p>'
-        '<span class="legacy-gold-rule" aria-hidden="true"><i></i></span>'
+        f'<div class="legacy-ring rv">{icon(glyph)}</div><h1 class="rv" style="--i:1">{esc(title)}</h1><p class="legacy-article-lead rv" style="--i:2">{esc(lead)}</p>'
+        '<span class="legacy-gold-rule rv" style="--i:3" aria-hidden="true"><i></i></span>'
     )
 
 
@@ -189,7 +189,7 @@ def pagination(page: int, total: int, per_page: int, href) -> str:
     pages = max(1, -(-total // per_page))
     if pages == 1:
         return ""
-    out = '<nav class="legacy-pagination" aria-label="صفحات مقالات">'
+    out = '<nav class="legacy-pagination rv" aria-label="صفحات مقالات">'
     if page > 1:
         out += f'<a class="legacy-page-prev" href="{esc(href(page - 1))}">{icon("chevron")} قبلی</a>'
     for number in range(1, pages + 1):
@@ -208,15 +208,15 @@ def list_content(items: list[dict], *, total: int, page: int, per_page: int, q: 
     def href(number: int) -> str:
         return f"?page={number}&q={quote(q)}&category={quote(category)}"
 
-    cards = "".join(article_card(item) for item in items) if items else '<p class="legacy-empty">هنوز مقاله‌ای منتشر نشده است.</p>'
+    cards = "".join(article_card(item, index % 3) for index, item in enumerate(items)) if items else '<p class="legacy-empty">هنوز مقاله‌ای منتشر نشده است.</p>'
     return (
         '<section class="legacy-article-index">'
         + hero_title("مقالات گوش، حلق، بینی و رینوپلاستی", "مطالب علمی با زبان ساده و منابع معتبر برای شناخت بهتر بیماری‌های ENT و مراقبت‌های جراحی بینی")
-        + '<form class="legacy-article-filters" action="/articles/" method="get">'
+        + '<form class="legacy-article-filters rv" style="--i:3" action="/articles/" method="get">'
         f'<label for="blog-search">جست‌وجو در مقالات</label><span class="legacy-search-box">{icon("search")}<input id="blog-search" name="q" type="search" maxlength="120" value="{esc(q)}" placeholder="جست‌وجو در عنوان و متن مقاله…"></span>'
         f'<label for="blog-category">فیلتر دسته‌بندی</label><select id="blog-category" name="category"><option value="">همه دسته‌بندی‌ها</option>{options}</select>'
         '<button type="submit">جست‌وجو</button></form>'
-        f'<div class="legacy-meta-row"><span>{esc(fa_digits(total))} مقاله یافت شد</span><span>صفحه {esc(fa_digits(page))} از {esc(fa_digits(pages))}</span></div>'
+        f'<div class="legacy-meta-row rv" style="--i:4"><span>{esc(fa_digits(total))} مقاله یافت شد</span><span>صفحه {esc(fa_digits(page))} از {esc(fa_digits(pages))}</span></div>'
         f'<div class="legacy-article-grid">{cards}</div>'
         + pagination(page, total, per_page, href)
         + "</section>"
@@ -232,15 +232,15 @@ def detail_content(data: dict, *, published_at, updated_at, body_html: str, toc_
     tags = "".join(f'<a href="/articles/tag/{quote(name)}/">{esc(name)}</a>' for name in data.get("tags", []))
     cover_html = ""
     if data.get("cover_key"):
-        cover_html = f'<img class="article-cover" src="/media/{esc(data["cover_key"])}.webp" alt="{esc(data.get("cover_alt", ""))}" width="960" height="600">'
+        cover_html = f'<img class="article-cover rv" style="--i:1" src="/media/{esc(data["cover_key"])}.webp" alt="{esc(data.get("cover_alt", ""))}" width="960" height="600">'
     return (
-        '<article class="legacy-article-detail"><header class="legacy-detail-head"><div class="legacy-card-meta">'
+        '<article class="legacy-article-detail"><header class="legacy-detail-head rv"><div class="legacy-card-meta">'
         f'<span class="legacy-pill">{esc(category)}</span><span class="legacy-meta-item">{icon("calendar")}انتشار: <time datetime="{published_at.isoformat()}">{esc(fa_date(published_at))}</time></span>'
         f'<span class="legacy-meta-item">{icon("clock")}زمان مطالعه {esc(fa_digits(reading_minutes(body_html)))} دقیقه</span></div>'
         f'<h1>{esc(data["title"])}</h1><p class="legacy-article-summary">{esc(data["summary"])}</p>'
         f'<p class="legacy-byline">نویسنده: {esc(data["author_name"])} · بازبین پزشکی: {esc(data["reviewer"])} · به‌روزرسانی: <time datetime="{updated_at.isoformat()}">{esc(fa_date(updated_at))}</time></p></header>'
-        f'{cover_html}{toc_html}<div class="article-body">{body_html}</div>'
-        f'<footer><h2>منابع</h2><ul class="legacy-sources">{sources}</ul>'
+        f'{cover_html}{toc_html.replace("class=\"legacy-article-outline\"", "class=\"legacy-article-outline rv\" style=\"--i:1\"", 1)}<div class="article-body rv" style="--i:2">{body_html}</div>'
+        f'<footer class="rv"><h2>منابع</h2><ul class="legacy-sources">{sources}</ul>'
         '<p class="legacy-disclaimer">این مطلب برای آموزش است و جایگزین مشاوره و معاینه پزشکی نیست.</p>'
         f'<nav aria-label="دسته‌ها">{cats}</nav><nav aria-label="برچسب‌ها">{tags}</nav></footer></article>'
     )
@@ -250,7 +250,7 @@ def related_section(items: list[dict], current_slug: str) -> str:
     others = [item for item in items if item["slug"] != current_slug][:3]
     if not others:
         return ""
-    return '<section class="legacy-related"><h2 class="legacy-related-title">مطالب مرتبط</h2><div class="legacy-article-grid">' + "".join(article_card(item) for item in others) + "</div></section>"
+    return '<section class="legacy-related rv"><h2 class="legacy-related-title">مطالب مرتبط</h2><div class="legacy-article-grid">' + "".join(article_card(item, index) for index, item in enumerate(others)) + "</div></section>"
 
 
 def outline(body: str):
