@@ -249,3 +249,7 @@
 .svc2-text{padding:40px clamp(24px,4vw,56px) 56px;min-width:0;background:#fff}
 @media(max-width:860px){.svc2{grid-template-columns:minmax(0,1fr)}.svc2-photo{position:relative;height:300px}.svc2-photo-in{padding:22px 18px}.svc2-ring{display:none}.svc2-text{padding:26px 18px 40px}}
 @media(max-width:760px){.legacy-article-header--bar .legacy-site-nav{flex-wrap:wrap}.legacy-article-header--bar .legacy-nav-links{position:static;flex-basis:100%;order:3;background:none;padding:2px 0 6px}}
+.svc2-text .landing-services-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+.svc2-text .landing-service-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"i t m" "i p m";align-items:center;column-gap:18px;row-gap:2px;text-align:start;padding:14px 20px}
+.svc2-text .svc-icon{grid-area:i;padding:12px}.svc2-text .svc-icon img{width:44px;height:44px}.svc2-text .landing-service-card h2{grid-area:t;font-size:20px}.svc2-text .svc-line{display:none}.svc2-text .landing-service-card p{grid-area:p}.svc2-text .svc-more{grid-area:m}
+@media(max-width:560px){.svc2-text .landing-service-card{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i t" "i p" "m m";padding:14px}.svc2-text .svc-more{justify-self:start;margin-top:8px}}

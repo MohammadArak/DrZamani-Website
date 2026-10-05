@@ -288,7 +288,7 @@ def services_page(clinic, services: list[dict], service: dict, tel: str) -> str:
         f'<ul><li>{esc(clinic.doctor_name)}، {esc(clinic.specialty)}</li><li>{esc(clinic.address_city)}، {esc(clinic.address)}</li><li>{esc(clinic.working_hours)}</li></ul>'
         f'<div class="legacy-service-actions"><a class="legacy-header-cta" href="tel:{esc(tel)}">تماس با مطب</a><a class="legacy-outline-button" href="/#footer">راه‌های ارتباطی</a></div></div>'
         '<p class="legacy-disclaimer">این صفحه برای آشنایی است و جایگزین ویزیت و مشاوره‌ی پزشکی نیست؛ نتیجه‌ی درمان برای هر فرد متفاوت است.</p>'
-        '<h2 class="legacy-service-heading">خدمات دیگر</h2>' + service_cards(services)
+        '<h2 class="legacy-service-heading">خدمات دیگر</h2>' + service_cards([item for item in services if item["slug"] != service["slug"]])
         + '<nav class="legacy-service-related" aria-label="مطالب مرتبط"><a href="/articles/">مقالات منتشرشده</a><a href="/#samples">نمونه‌کارها</a><a href="/#footer">ارتباط با مطب</a></nav></div>'
     )
     return (

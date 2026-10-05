@@ -141,5 +141,5 @@ def test_homepage_shows_four_services_but_service_pages_list_all(client):
     home = client.get("/").text
     assert home.count('class="landing-service-card"') == 4 and "خدمت پنجم" not in home.split('id="services-bootstrap"', 1)[1].split("</script>", 1)[0]
     detail = client.get("/services/rhinoplasty/").text  # the "other services" block lists every published service
-    assert detail.count('class="landing-service-card"') == 5 and "خدمت پنجم" in detail
+    assert detail.count('class="landing-service-card"') == 4 and "خدمت پنجم" in detail  # every other published service
     assert client.get("/api/v1/public-services").json()["total"] == 5  # the SPA slices to four itself
