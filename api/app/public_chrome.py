@@ -73,7 +73,7 @@ def safe_https(url: str) -> str:
     return url if parsed.scheme == "https" and parsed.hostname and not parsed.username else ""
 
 
-NAV = [("صفحه اصلی", "/"), ("درباره ما", "/#about-us"), ("خدمات", "/services/"), ("مقالات", "/articles/"), ("تماس با ما", "/#footer")]
+NAV = [("صفحه اصلی", "/"), ("درباره ما", "/#about-us"), ("خدمات", "/#services"), ("مقالات", "/articles/"), ("تماس با ما", "/#footer")]
 
 
 def site_header(clinic, *, crumbs=None, banner=True) -> str:
@@ -102,7 +102,7 @@ def site_footer(clinic) -> str:
         social += f'<a class="legacy-social legacy-instagram" href="{esc(clinic.instagram_url)}" rel="noopener noreferrer">{icon("insta")} صفحه اینستاگرام</a>'
     if safe_https(clinic.eitaa_url):
         social += f'<a class="legacy-social legacy-eitaa" href="{esc(clinic.eitaa_url)}" rel="noopener noreferrer"><img src="/img/logo/eitaa.png" alt="" width="20" height="20"> صفحه ایتا</a>'
-    links = [("درباره ما", "/#about-us"), ("خدمات ما", "/services/"), ("نمونه کارها", "/#samples"), ("نظرات مراجعین", "/#comments"), ("سوالات متداول", "/#faq"), ("مقالات", "/articles/")]
+    links = [("درباره ما", "/#about-us"), ("خدمات ما", "/#services"), ("نمونه کارها", "/#samples"), ("نظرات مراجعین", "/#comments"), ("سوالات متداول", "/#faq"), ("مقالات", "/articles/")]
     link_html = "".join(f'<li><a href="{href}">{icon("chevron")}{label}</a></li>' for label, href in links)
     map_html = ""
     embed = safe_https(clinic.map_embed_url)
@@ -267,29 +267,23 @@ def service_cards(services: list[dict]) -> str:
     ) + "</div>"
 
 
-def services_page(clinic, services: list[dict], service: dict | None, tel: str) -> str:
-    """Services index (service=None) or one service; tel is the already normalised +98 number."""
-    name = service["title"] if service else "خدمات مطب"
-    description = service["summary"] if service else f"آشنایی با حوزه‌های خدمات مطب {clinic.doctor_name} در {clinic.address_city}"
-    image = service["image"] if service else "rhinoplasty.png"
-    trail = [("صفحه اصلی", "/"), ("خدمات", "/services/")] + ([(name, "")] if service else [])
+def services_page(clinic, services: list[dict], service: dict, tel: str) -> str:
+    """One service page; tel is the already normalised +98 number. There is no services index page:
+    the menu and breadcrumbs point at the homepage services section."""
+    name = service["title"]
+    trail = [("صفحه اصلی", "/"), ("خدمات", "/#services"), (name, "")]
     body = (
         site_header(clinic, crumbs=trail)
         + '<main class="legacy-article-page legacy-article-page--index legacy-service-page" dir="rtl" lang="fa"><div class="legacy-article-index-container"><section class="legacy-article-index">'
-        + f'<div class="legacy-ring legacy-ring--service"><img src="/img/services/{esc(image)}" alt="" width="72" height="72"></div>'
+        + f'<div class="legacy-ring legacy-ring--service"><img src="/img/services/{esc(service["image"])}" alt="" width="72" height="72"></div>'
         + f'<h1>{esc(name)}</h1><span class="legacy-gold-rule" aria-hidden="true"><i></i></span>'
-        + f'<p class="legacy-article-lead legacy-service-lead">{esc(description)}</p>'
-    )
-    if service:
-        body += f'<div class="legacy-service-body article-body">{service["description_html"]}</div>'
-        body += (
-            '<div class="legacy-service-intro"><h2>هماهنگی مراجعه</h2><p>پرسش‌های خود درباره مراجعه را با مطب مطرح کنید. زمان مراجعه پس از هماهنگی با مطب مشخص می‌شود.</p>'
-            f'<ul><li>{esc(clinic.doctor_name)}، {esc(clinic.specialty)}</li><li>{esc(clinic.address_city)}، {esc(clinic.address)}</li><li>{esc(clinic.working_hours)}</li></ul>'
-            f'<div class="legacy-service-actions"><a class="legacy-header-cta" href="tel:{esc(tel)}">تماس با مطب</a><a class="legacy-outline-button" href="/#footer">راه‌های ارتباطی</a></div></div>'
-            '<h2 class="legacy-service-heading">خدمات دیگر</h2>'
-        )
-    body += (
-        '<p class="legacy-disclaimer">این صفحه برای آشنایی است و جایگزین ویزیت و مشاوره‌ی پزشکی نیست؛ نتیجه‌ی درمان برای هر فرد متفاوت است.</p>'
+        + f'<p class="legacy-article-lead legacy-service-lead">{esc(service["summary"])}</p>'
+        + f'<div class="legacy-service-body article-body">{service["description_html"]}</div>'
+        + '<div class="legacy-service-intro"><h2>هماهنگی مراجعه</h2><p>پرسش‌های خود درباره مراجعه را با مطب مطرح کنید. زمان مراجعه پس از هماهنگی با مطب مشخص می‌شود.</p>'
+        + f'<ul><li>{esc(clinic.doctor_name)}، {esc(clinic.specialty)}</li><li>{esc(clinic.address_city)}، {esc(clinic.address)}</li><li>{esc(clinic.working_hours)}</li></ul>'
+        + f'<div class="legacy-service-actions"><a class="legacy-header-cta" href="tel:{esc(tel)}">تماس با مطب</a><a class="legacy-outline-button" href="/#footer">راه‌های ارتباطی</a></div></div>'
+        + '<p class="legacy-disclaimer">این صفحه برای آشنایی است و جایگزین ویزیت و مشاوره‌ی پزشکی نیست؛ نتیجه‌ی درمان برای هر فرد متفاوت است.</p>'
+        + '<h2 class="legacy-service-heading">خدمات دیگر</h2>'
         + service_cards(services)
         + '<nav class="legacy-service-related" aria-label="مطالب مرتبط"><a href="/articles/">مقالات منتشرشده</a><a href="/#samples">نمونه‌کارها</a><a href="/#footer">ارتباط با مطب</a></nav>'
         + "</section></div></main>"

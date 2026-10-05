@@ -171,7 +171,7 @@ def sitemap(db: Session = Depends(get_db)):
     services = public_items(db)
     stamps = [service['updated_at'] for service in services]
     site_updated = max([clinic.updated_at, *stamps])
-    urls = [("/", max(site_updated,last_comment) if last_comment else site_updated), ("/services/", max(stamps) if stamps else clinic.updated_at)]
+    urls = [("/", max(site_updated,last_comment) if last_comment else site_updated)]
     urls.extend((f'/services/{service["slug"]}/', service['updated_at']) for service in services)
     if rows:
         latest = max(r.public_updated_at for r in rows)

@@ -26,30 +26,6 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
             </label>
         );
     }
-    if (blockKey === "trust") {
-        const items = (draft as { items: { title: string; text: string }[] }).items;
-        const set = (next: { title: string; text: string }[]) => onChange({ items: next });
-        return (
-            <>
-                <p className="editor-help">نوار زیر بخش بالای صفحه؛ تا ۴ مورد. اگر همه‌ی موردها حذف شوند نوار نمایش داده نمی‌شود. فقط موردهایی بنویسید که مدرکشان را دارید.</p>
-                {items.map((item, index) => (
-                    <fieldset key={index}>
-                        <legend>مورد {index + 1}</legend>
-                        <label>عنوان<input maxLength={80} value={item.title} readOnly={locked} onChange={(e) => set(items.map((x, i) => (i === index ? { ...x, title: e.target.value } : x)))} /></label>
-                        <label>توضیح کوتاه<input maxLength={160} value={item.text} readOnly={locked} onChange={(e) => set(items.map((x, i) => (i === index ? { ...x, text: e.target.value } : x)))} /></label>
-                        {!locked && (
-                            <div className="article-actions">
-                                <button type="button" aria-label="بالا" onClick={() => set(move(items, index, index - 1))}>↑</button>
-                                <button type="button" aria-label="پایین" onClick={() => set(move(items, index, index + 1))}>↓</button>
-                                <button type="button" onClick={() => set(items.filter((_, i) => i !== index))}>حذف</button>
-                            </div>
-                        )}
-                    </fieldset>
-                ))}
-                {!locked && items.length < 4 && <button type="button" onClick={() => set([...items, { title: "", text: "" }])}>+ مورد تازه</button>}
-            </>
-        );
-    }
     if (blockKey === "about") {
         const about = draft as { paragraphs: string[]; facts: { value: string; label: string }[] };
         const { paragraphs, facts } = about;

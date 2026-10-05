@@ -224,7 +224,7 @@ export default function StaffSiteServicesPanel({ token, onDirtyChange, onBusyCha
             <header className="content-header">
                 <div>
                     <h1>صفحه‌های خدمات</h1>
-                    <p>متن این صفحه‌ها در صفحه اصلی، منو و آدرس‌های /services/ نمایش داده می‌شود</p>
+                    <p>متن این صفحه‌ها در صفحه اصلی و آدرس‌های /services/نشانی/ نمایش داده می‌شود</p>
                 </div>
                 {can("site_services.create") && <button onClick={() => void select(null)}>+ خدمت تازه</button>}
             </header>
