@@ -51,14 +51,11 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
         );
     }
     if (blockKey === "about") {
-        const about = draft as { paragraphs: string[]; quote: string; facts: { value: string; label: string }[] };
-        const { paragraphs, quote, facts } = about;
+        const about = draft as { paragraphs: string[]; facts: { value: string; label: string }[] };
+        const { paragraphs, facts } = about;
         const set = (next: string[]) => onChange({ ...about, paragraphs: next });
         return (
             <>
-                <label>جمله‌ی شاخص روی تصویر (اختیاری؛ خالی یعنی نمایش داده نشود)
-                    <textarea rows={2} maxLength={300} value={quote} readOnly={locked} onChange={(e) => onChange({ ...about, quote: e.target.value })} />
-                </label>
                 {facts.map((fact, index) => (
                     <fieldset key={index}>
                         <legend>مشخصه {index + 1}</legend>
@@ -104,7 +101,7 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
                     )}
                 </fieldset>
             ))}
-            {!locked && items.length < (blockKey === "privacy" ? 12 : 20) && <button type="button" onClick={() => set([...items, { title: "", content: "" }])}>+ سوال تازه</button>}
+            {!locked && items.length < 20 && <button type="button" onClick={() => set([...items, { title: "", content: "" }])}>+ سوال تازه</button>}
         </>
     );
 }

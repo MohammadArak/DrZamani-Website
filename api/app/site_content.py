@@ -17,9 +17,9 @@ from .content_models import SiteBlock
 from .models import utcnow
 
 DEFAULTS = json.loads(Path(__file__).with_name("site_content_defaults.json").read_text(encoding="utf-8"))
-KEYS = ("hero", "trust", "about", "faq", "privacy", "footer")
-BlockKey = Literal["hero", "trust", "about", "faq", "privacy", "footer"]
-TITLES = {"hero": "متن بالای صفحه (هیرو)", "trust": "نوار اعتماد زیر هیرو", "about": "درباره پزشک", "faq": "سوالات متداول", "privacy": "صفحه حریم خصوصی", "footer": "متن فوتر"}
+KEYS = ("hero", "trust", "about", "faq", "footer")
+BlockKey = Literal["hero", "trust", "about", "faq", "footer"]
+TITLES = {"hero": "متن بالای صفحه (هیرو)", "trust": "نوار اعتماد زیر هیرو", "about": "درباره پزشک", "faq": "سوالات متداول", "footer": "متن فوتر"}
 
 
 def _plain(value: str) -> str:
@@ -53,13 +53,7 @@ class Fact(BaseModel):
 class About(BaseModel):
     model_config = ConfigDict(extra="forbid")
     paragraphs: list[str] = Field(min_length=1, max_length=6)
-    quote: str = Field(default="", max_length=300)  # empty hides the quotation on the page
     facts: list[Fact] = Field(default_factory=list, max_length=4)
-
-    @field_validator("quote")
-    @classmethod
-    def quote_ok(cls, value):
-        return _plain(value)
 
     @field_validator("paragraphs")
     @classmethod
@@ -102,11 +96,6 @@ class Faq(BaseModel):
     items: list[FaqItem] = Field(min_length=1, max_length=20)
 
 
-class Privacy(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    items: list[FaqItem] = Field(min_length=1, max_length=12)
-
-
 class Footer(BaseModel):
     model_config = ConfigDict(extra="forbid")
     description: str = Field(min_length=10, max_length=900)
@@ -117,7 +106,7 @@ class Footer(BaseModel):
         return _plain(value)
 
 
-MODELS = {"hero": Hero, "trust": Trust, "about": About, "faq": Faq, "privacy": Privacy, "footer": Footer}
+MODELS = {"hero": Hero, "trust": Trust, "about": About, "faq": Faq, "footer": Footer}
 
 
 class BlockWrite(BaseModel):

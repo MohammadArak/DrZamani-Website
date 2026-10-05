@@ -13,10 +13,10 @@ def blocks(client, access):
 
 def test_blocks_are_seeded_with_the_previous_wording(client):
     public = client.get("/api/v1/site-content").json()["blocks"]
-    assert set(public) == {"hero", "trust", "about", "faq", "privacy", "footer"}
+    assert set(public) == {"hero", "trust", "about", "faq", "footer"}
     assert len(public["faq"]["items"]) == 4 and len(public["about"]["paragraphs"]) == 3
     assert "{doctorName}" in public["hero"]["description"]
-    assert len(public["trust"]["items"]) == 3 and public["about"]["quote"] == "" and len(public["about"]["facts"]) == 2
+    assert len(public["trust"]["items"]) == 3 and len(public["about"]["facts"]) == 2
     home = client.get("/").text
     bootstrap = home.split('id="site-content-bootstrap" type="application/json">', 1)[1].split("</script>", 1)[0]
     assert json.loads(bootstrap)["blocks"]["footer"]["description"] == public["footer"]["description"]
@@ -90,27 +90,16 @@ def test_trust_strip_and_about_extras_are_editable_and_can_be_hidden(client):
     too_many = dict(items=[dict(title="مورد", text="متن")] * 5)
     assert client.put(f"{BASE}/trust", headers=access, json=dict(revision=emptied.json()["revision"], content=too_many)).status_code == 422
     about = current["about"]
-    content = dict(about["content"], quote="جمله‌ی آزمایشی", facts=[dict(value="۱۰", label="آزمون")])
+    content = dict(about["content"], facts=[dict(value="۱۰", label="آزمون")])
     saved = client.put(f"{BASE}/about", headers=access, json=dict(revision=about["revision"], content=content))
-    assert saved.status_code == 200 and saved.json()["content"]["quote"] == "جمله‌ی آزمایشی"
+    assert saved.status_code == 200 and saved.json()["content"]["facts"][0]["value"] == "۱۰"
     too_many_facts = dict(about["content"], facts=[dict(value="۱", label="الف")] * 5)
     assert client.put(f"{BASE}/about", headers=access, json=dict(revision=saved.json()["revision"], content=too_many_facts)).status_code == 422
 
 
-def test_privacy_page_is_served_linked_and_editable(client):
-    page = client.get("/privacy/")
-    assert page.status_code == 200 and "حریم خصوصی و اطلاعات شما" in page.text and "کوکی" in page.text
-    assert client.get("/privacy", follow_redirects=False).status_code == 301
-    assert "/privacy/" in client.get("/sitemap.xml").text
-    assert 'href="/privacy/"' in client.get("/services/").text  # linked from the shared footer
-    access = headers(owner()[2])
-    privacy = blocks(client, access)["privacy"]
-    items = [dict(title="عنوان آزمایشی", content="متن آزمایشی حریم خصوصی؛ تماس: {officePhone}")]
-    saved = client.put(f"{BASE}/privacy", headers=access, json=dict(revision=privacy["revision"], content=dict(items=items)))
-    assert saved.status_code == 200
-    assert "عنوان آزمایشی" not in client.get("/privacy/").text  # drafts are never public
-    assert client.post(f"{BASE}/privacy/transition", headers=access, json=dict(revision=saved.json()["revision"], action="publish")).status_code == 200
-    live = client.get("/privacy/").text
-    assert "عنوان آزمایشی" in live and "{officePhone}" not in live
-    too_many = dict(items=[dict(title="عنوان", content="متن")] * 13)
-    assert client.put(f"{BASE}/privacy", headers=access, json=dict(revision=saved.json()["revision"] + 1, content=too_many)).status_code == 422
+def test_server_rendered_pages_have_the_same_reserve_button_and_dialog_as_the_homepage(client):
+    for path in ("/services/", "/services/rhinoplasty/", "/articles/"):
+        page = client.get(path).text
+        assert 'class="legacy-reserve-btn"' in page and "data-reserve-dialog" in page and 'src="/reserve.js"' in page
+        assert 'data-booking="0"' in page and "متوجه شدم" in page  # booking is off by default: the dialog explains it
+    assert "privacy" not in client.get("/sitemap.xml").text and client.get("/privacy/").status_code in {404, 410}

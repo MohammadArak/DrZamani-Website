@@ -1,7 +1,6 @@
 import Modal from "react-modal";
 import classNames from "classnames";
 import CloseButton from "../CloseButton";
-import { motion } from "@/components/Motion";
 import type ReactModal from "react-modal";
 import type { MouseEvent } from "react";
 import useWindowSize from "@/utils/hooks/useWindowSize";
@@ -100,16 +99,10 @@ const Dialog = (props: DialogProps) => {
             closeTimeoutMS={closeTimeoutMS}
             {...rest}
         >
-            <motion.div
-                className={dialogClass}
-                initial={{ transform: "scale(0.9)" }}
-                animate={{
-                    transform: isOpen ? "scale(1)" : "scale(0.9)",
-                }}
-            >
+            <div className={dialogClass}>
                 {closable && renderCloseButton}
                 {children}
-            </motion.div>
+            </div>
         </Modal>
     );
 };

@@ -8,7 +8,6 @@ import ReserveDialog from "./ReserveDialog";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
 const navMenu = [
-    { title: "مقالات", value: "articles", href: "/articles/" },
     {
         title: "صفحه اصلی",
         value: "home",
@@ -20,6 +19,7 @@ const navMenu = [
         href: "/#about-us",
     },
     { title: "خدمات", value: "services", href: "/services/" },
+    { title: "مقالات", value: "articles", href: "/articles/" },
     {
         title: "تماس با ما",
         value: "contact-us",

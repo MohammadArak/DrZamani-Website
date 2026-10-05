@@ -6,9 +6,8 @@ import { apiRequest } from "./appointmentApi";
 export type SiteBlocks = {
     hero: { description: string };
     trust: { items: { title: string; text: string }[] };
-    about: { paragraphs: string[]; quote: string; facts: { value: string; label: string }[] };
+    about: { paragraphs: string[]; facts: { value: string; label: string }[] };
     faq: { items: { title: string; content: string }[] };
-    privacy: { items: { title: string; content: string }[] };
     footer: { description: string };
 };
 export type BlockKey = keyof SiteBlocks;
@@ -37,10 +36,9 @@ const merge = (incoming: Partial<SiteBlocks> | null | undefined): SiteBlocks => 
         trust: Array.isArray(source.trust?.items) ? source.trust : fallback.trust,
         about:
             Array.isArray(source.about?.paragraphs) && source.about.paragraphs.length
-                ? { paragraphs: source.about.paragraphs, quote: typeof source.about.quote === "string" ? source.about.quote : "", facts: Array.isArray(source.about.facts) ? source.about.facts : fallback.about.facts }
+                ? { paragraphs: source.about.paragraphs, facts: Array.isArray(source.about.facts) ? source.about.facts : fallback.about.facts }
                 : fallback.about,
         faq: Array.isArray(source.faq?.items) && source.faq.items.length ? source.faq : fallback.faq,
-        privacy: Array.isArray(source.privacy?.items) && source.privacy.items.length ? source.privacy : fallback.privacy,
         footer: typeof source.footer?.description === "string" ? source.footer : fallback.footer,
     };
 };
