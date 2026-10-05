@@ -1,7 +1,7 @@
 import HeroContent from "./components/HeroContent";
 import NavigationBar from "./components/NavigationBar";
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import Seo from "@/components/SEO";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
@@ -22,8 +22,54 @@ const SectionFallback = () => (
     />
 );
 
-const Landing = () => {
-    const { clinicInfo } = useClinicInfo();
+/**
+ * Mounts a below-the-fold section (and downloads its code and data) only when it is about to be scrolled into view.
+ * Nothing about the page changes for the visitor: the section still plays its own entrance animation when it
+ * appears. The placeholder keeps the section's anchor id and an estimated height, so menu links and the footer
+ * link still land in the right place; with a #hash in the address everything mounts at once.
+ */
+const Deferred = ({ id, minHeight, children }: { id: string; minHeight: string; children: ReactNode }) => {
+    const holder = useRef<HTMLDivElement>(null);
+    const [show, setShow] = useState(() => typeof IntersectionObserver === "undefined" || window.location.hash !== "");
+    useEffect(() => {
+        const node = holder.current;
+        if (show || !node) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) setShow(true);
+            },
+            { rootMargin: "1400px 0px" },
+        );
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, [show]);
+    if (show) return <>{children}</>;
+    return <div ref={holder} id={id} style={{ minHeight }} aria-hidden="true" />;
+};
+
+const Landing = () => {
+    const { clinicInfo } = useClinicInfo();
+
+    // Sections load as you go, so a link like /#footer first lands on a placeholder: settle on the real target once
+    // the page has grown, unless the visitor has already started scrolling by themselves.
+    useEffect(() => {
+        const id = decodeURIComponent(window.location.hash.slice(1));
+        if (!id) return;
+        let touched = false;
+        const stop = () => { touched = true; };
+        window.addEventListener("wheel", stop, { passive: true });
+        window.addEventListener("touchmove", stop, { passive: true });
+        window.addEventListener("keydown", stop);
+        const timers = [900, 2000, 3500].map((delay) =>
+            window.setTimeout(() => { if (!touched) document.getElementById(id)?.scrollIntoView(); }, delay),
+        );
+        return () => {
+            timers.forEach(window.clearTimeout);
+            window.removeEventListener("wheel", stop);
+            window.removeEventListener("touchmove", stop);
+            window.removeEventListener("keydown", stop);
+        };
+    }, []);
 
     return (
         <>
@@ -47,24 +93,36 @@ const Landing = () => {
                 <Suspense fallback={<SectionFallback />}>
                     <AboutUs />
                 </Suspense>
-                <Suspense fallback={<SectionFallback />}>
-                    <Services />
-                </Suspense>
-                <Suspense fallback={<SectionFallback />}>
-                    <PatientsComments />
-                </Suspense>
-                <Suspense fallback={<SectionFallback />}>
-                    <Samples />
-                </Suspense>
-                <Suspense fallback={<SectionFallback />}>
-                    <BlogPreview />
-                </Suspense>
-                <Suspense fallback={<SectionFallback />}>
-                    <FAQ />
-                </Suspense>
-                <Suspense fallback={<SectionFallback />}>
-                    <Footer />
-                </Suspense>
+                <Deferred id="services" minHeight="760px">
+                    <Suspense fallback={<SectionFallback />}>
+                        <Services />
+                    </Suspense>
+                </Deferred>
+                <Deferred id="comments" minHeight="720px">
+                    <Suspense fallback={<SectionFallback />}>
+                        <PatientsComments />
+                    </Suspense>
+                </Deferred>
+                <Deferred id="samples" minHeight="820px">
+                    <Suspense fallback={<SectionFallback />}>
+                        <Samples />
+                    </Suspense>
+                </Deferred>
+                <Deferred id="articles" minHeight="820px">
+                    <Suspense fallback={<SectionFallback />}>
+                        <BlogPreview />
+                    </Suspense>
+                </Deferred>
+                <Deferred id="faq" minHeight="700px">
+                    <Suspense fallback={<SectionFallback />}>
+                        <FAQ />
+                    </Suspense>
+                </Deferred>
+                <Deferred id="footer" minHeight="820px">
+                    <Suspense fallback={<SectionFallback />}>
+                        <Footer />
+                    </Suspense>
+                </Deferred>
             </main>
             <Suspense fallback={null}>
                 <MobileTabBar />
