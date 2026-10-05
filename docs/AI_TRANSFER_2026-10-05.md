@@ -71,7 +71,9 @@ Vite معمولاً localhost:5173؛ API health در 127.0.0.1:8000/api/health. 
 npm run build
 ```
 
-سپس با API روشن صفحات عمومی را از 127.0.0.1:8000 مشاهده کن؛ خروجی `public_html/` توسط build ساخته می‌شود. prerender پیش‌فرض می‌تواند fallback اطلاعات عمومی را مصرف کند؛ DB/رسانه fixture مقاله و خدمت را جدا آماده کن. فایل `clinic-settings.json` محلی snapshot ساخت است و داخل Git/بسته قرار ندارد. رزرو بسته باید دیالوگ پیام مدیر و صفحه بسته `/appointment/` را نشان دهد.
+سپس با API روشن `npm run preview -- --host 127.0.0.1` را از ریشه اجرا کن (معمولاً پورت4173). Vite preview فایل‌های build را ارائه می‌دهد و HTML مقاله/خدمت و API را proxy می‌کند؛ برای آزمون نشست در این حالت FRONTEND_URL محلی را به همین origin تنظیم و API را restart کن. سرور API در8000 HTML را می‌سازد ولی assetهای frontend را به‌تنهایی سرو نمی‌کند؛ بازکردن مستقیم8000 برای بررسی بصری کامل کافی نیست. همچنین proxy فعلی Vite مسیر `/media/` را ندارد؛ برای تصویر آپلودشده‌ی عمومی در preview باید proxy محلی `/media/` به API اضافه شود یا reverse proxy مستقل محلی با static root=`public_html` و routing مطابق Nginx پروژه استفاده شود. این نقص مسیر preview در این تحویل اصلاح اجرایی نشده؛ fallback عکس‌های static در public وجود دارد.
+
+خروجی `public_html/` توسط build ساخته می‌شود. prerender پیش‌فرض می‌تواند fallback اطلاعات عمومی را مصرف کند؛ DB/رسانه fixture مقاله و خدمت را جدا آماده کن. فایل `clinic-settings.json` محلی snapshot ساخت است و داخل Git/بسته قرار ندارد. رزرو بسته باید دیالوگ پیام مدیر و صفحه بسته `/appointment/` را نشان دهد.
 
 نمونه مستقل گالری به API نیاز ندارد: از پوشه `previews/gallery/` داخل بسته `python -m http.server 8094 --bind 127.0.0.1` و سپس localhost:8094. نشان‌ها فقط در حافظه‌اند؛ refresh آن‌ها را پاک می‌کند. کنترل قبل/بعد تعاملی واقعی با دو عکس هم‌تراز پیاده نشده؛ شش عکس composite موجود بدون دست‌کاری استفاده شده‌اند.
 
@@ -90,7 +92,7 @@ npm run build
 2. `scripts/verify-linux-runtime.py` فقط VM موقت GitHub-hosted با guard/marker مجاز است؛ روی VPS مالک اجرا نکن و guard را حذف نکن. پذیرش fixture معادل VPS/قطع برق نیست.
 3. متن seed شامل «۲۰ سال» و «۱۵۰۰۰ جراحی» است؛ داده قابل ویرایش شده ولی مرجع/تأیید پزشکی و رضایت تصاویر قدیمی هنوز باید بررسی شوند. ادعای درمانی و نظر تازه نساز.
 4. README/GO_LIVE و گزارش‌های قدیمی بعضی مسیرها/تصمیم‌های حذف‌شده (privacy، فهرست خدمات، trust) را ذکر می‌کنند؛ وضعیت فعلی این سند و کد مقدم است. `REVIEW_2026-10-04.md` بررسی مبنای bb3cce4 است؛ چند ایرادش بعداً رفع شده‌اند و backlog قطعیِ امروز نیست.
-5. SQLite پشتیبانی‌شده است؛ PostgreSQL کار سازگاری مستقل می‌خواهد. state موجود در DB، فایل‌های upload/public-media، ENV و backup production با این بسته منتقل نمی‌شوند.
+5. SQLite پشتیبانی‌شده است؛ PostgreSQL کار سازگاری مستقل می‌خواهد. state موجود در DB، فایل‌های upload/public-media، ENV و backup production با این بسته منتقل نمی‌شوند. Vite proxy فعلی `/media/` را ندارد و برای preview با عکس‌های CMS به مسیر محلی اضافی نیاز است؛ API تنها static assetهای frontend را سرو نمی‌کند.
 
 ## کارهای باقی‌مانده و قدم بعد
 
