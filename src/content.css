@@ -228,3 +228,8 @@
 .chrome-fallback{visibility:hidden}.legacy-service-heading{text-align:center;font-size:24px;color:#3d5a80;margin:30px 0 22px}
 :root{--nav-h:66px}@media(min-width:640px){:root{--nav-h:76px}}@media(min-width:1024px){:root{--nav-h:86px}}
 #site-header{position:relative}#site-header[data-solid="1"]{min-height:var(--nav-h);background:#0b1828}
+@keyframes rv-rise{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+.rv{animation:rv-rise .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*110ms)}
+.rv.rv-wait{animation:none;opacity:0;transform:translateY(34px)}
+.rv.rv-go{animation:rv-rise .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*110ms)}
+@media(prefers-reduced-motion:reduce){.rv,.rv.rv-wait,.rv.rv-go{animation:none;opacity:1;transform:none}}
