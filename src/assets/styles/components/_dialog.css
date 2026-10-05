@@ -6,14 +6,14 @@
 
   .dialog-content {
     @apply p-6 rounded-2xl shadow-xl mx-4 my-8 sm:mx-0 sm:my-16 relative h-full bg-white dark:bg-gray-800;
-    animation: dialog-pop 0.14s ease-out;
+    animation: dialog-pop 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* No backdrop blur: it repainted the whole animated page and made the dialog feel slow. */
+  /* Soft blurred backdrop and a springy pop-in, but short: the old 0.7 s version felt slow. */
   .dialog-overlay {
     opacity: 0;
-    transition: opacity 0.12s ease-out;
-    @apply inset-0 fixed z-40 bg-black/65 dark:bg-black/80;
+    transition: opacity 0.2s ease-out;
+    @apply inset-0 fixed z-40 bg-black/60 dark:bg-black/80 backdrop-blur-sm;
   }
 
   .dialog-overlay-after-open {
@@ -25,7 +25,7 @@
   }
 
   @keyframes dialog-pop {
-    from { opacity: 0; transform: scale(0.96); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.9); filter: blur(6px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
   }
 }

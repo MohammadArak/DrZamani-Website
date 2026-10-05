@@ -10,14 +10,25 @@ const MobileTabBar = () => {
     const [active, setActive] = useState<Tab>("home");
 
     useEffect(() => {
-        const target = document.getElementById("services");
-        if (!target || typeof IntersectionObserver === "undefined") return;
-        const observer = new IntersectionObserver(
-            ([entry]) => setActive(entry.isIntersecting ? "services" : "home"),
-            { rootMargin: "-40% 0px -40% 0px" },
-        );
-        observer.observe(target);
-        return () => observer.disconnect();
+        let frame = 0;
+        const update = () => {
+            frame = 0;
+            // The section may still be a placeholder or just have been swapped for the real one: look it up each time.
+            const target = document.getElementById("services");
+            if (!target) return;
+            const box = target.getBoundingClientRect();
+            const mid = window.innerHeight / 2;
+            setActive(box.top < mid && box.bottom > mid ? "services" : "home");
+        };
+        const onScroll = () => {
+            if (!frame) frame = requestAnimationFrame(update);
+        };
+        update();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            cancelAnimationFrame(frame);
+        };
     }, []);
 
     const base = "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[11px] transition-colors";
