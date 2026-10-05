@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طرح‌های صفحه خدمات</title>
+<style>
+@font-face{font-family:Vazir;src:url(../../../public/fonts/optimized/vazir-regular.woff2) format("woff2");font-weight:400}
+@font-face{font-family:Vazir;src:url(../../../public/fonts/optimized/vazir-medium.woff2) format("woff2");font-weight:500}
+@font-face{font-family:Vazir;src:url(../../../public/fonts/optimized/vazir-bold.woff2) format("woff2");font-weight:700}
+@font-face{font-family:Dana;src:url(../../../public/fonts/optimized/dana-bold.woff2) format("woff2");font-weight:700}
+@font-face{font-family:Lalezar;src:url(../../../public/fonts/optimized/lalezar-regular.woff2) format("woff2")}
+:root{--n9:#0b1828;--n8:#10223a;--n7:#14273d;--n6:#1b3553;--p:#3d5a80;--pd:#213f65;--g:#d5ab64;--gd:#af8337;--g1:#fddba1;--paper:#f5f7fd;--ink:#1f2f45;--mute:#5d6f86;--line:#dfe6f1}
+*{box-sizing:border-box}
+body{margin:0;background:#e9edf4;font-family:Vazir,sans-serif;color:var(--ink);line-height:1.9}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,h4,p{margin:0}
+.page-head{max-width:1100px;margin:0 auto;padding:36px 20px 8px}
+.page-head h1{font-family:Lalezar;font-weight:400;font-size:36px;color:var(--n7)}
+.page-head p{color:var(--mute);max-width:760px}
+.v{max-width:1100px;margin:28px auto;padding:0 20px}
+.vl{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.vl b{width:32px;height:32px;border-radius:50%;background:var(--n7);color:var(--g);display:grid;place-items:center}
+.vl strong{font-size:17px;color:var(--n7)}
+.vl span{color:var(--mute);font-size:13px}
+.frame{border-radius:18px;overflow:hidden;box-shadow:0 18px 50px #14273d22;background:#fff}
+.banner{position:relative;height:150px;background:linear-gradient(0deg,#0b1828e6 8%,#0b182855 60%),url(../../../public/img/blog/article-header-surgeon.webp) 30% 30%/cover;color:#fff;display:flex;align-items:flex-end;padding:0 40px 18px;gap:10px;font-family:Lalezar;font-size:24px}
+.banner small{font-family:Vazir;font-size:13px;opacity:.85}
+.pad{padding:38px 40px 44px}
+.eyebrow{color:var(--gd);font-size:13px;display:flex;align-items:center;gap:8px}
+.eyebrow:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--g)}
+.t{font-family:Dana;font-weight:700;font-size:30px;color:var(--p);margin:6px 0 8px}
+.sub{color:var(--mute);max-width:620px}
+.ico{width:76px;height:76px;border-radius:50%;background:linear-gradient(145deg,#6a86aa,#3d5a80);display:grid;place-items:center;flex:none;box-shadow:0 8px 18px #3d5a8040}
+.ico img{width:44px;height:44px;object-fit:contain}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:9px 20px;font-weight:700;font-size:14px}
+.btn.g{background:var(--g);color:#fff}.btn.n{background:var(--p);color:#fff}.btn.o{border:1px solid var(--g);color:var(--gd)}
+.sample{font-size:11px;color:#a07a2c;background:#fff6e0;border:1px dashed var(--g);border-radius:6px;padding:0 6px;margin-inline-start:6px}
+
+/* A: tall cards */
+.a-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:26px}
+.a-card{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.a-top{height:150px;background:radial-gradient(ellipse at 50% 35%,#2a4d78,var(--n7));display:grid;place-items:center;position:relative}
+.a-top .ico{background:#ffffff14;border:1px solid #d5ab6477;box-shadow:none}
+.a-top i{position:absolute;top:12px;inset-inline-start:14px;font-style:normal;color:var(--g);font-family:Lalezar;font-size:20px}
+.a-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.a-body h3{font-family:Dana;font-weight:700;font-size:20px;color:var(--p)}
+.a-body p{font-size:14px;color:var(--mute)}
+.a-body ul{margin:4px 0 8px;padding:0;list-style:none;font-size:13px;color:var(--ink)}
+.a-body li:before{content:"◆";color:var(--g);font-size:8px;margin-inline-end:8px}
+.a-body .btn{margin-top:auto;justify-content:center}
+
+/* B: explorer */
+.b-wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center;margin-top:26px;background:var(--paper);border-radius:18px;padding:26px}
+.b-row{display:flex;align-items:center;gap:16px;padding:16px 8px;border-bottom:1px solid var(--line)}
+.b-row b{font-family:Lalezar;font-weight:400;color:var(--g);font-size:22px;width:34px}
+.b-row strong{font-family:Dana;font-size:20px;color:var(--p)}
+.b-row .go{margin-inline-start:auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--g);display:grid;place-items:center;color:var(--gd)}
+.b-row.on{background:#fff;border-radius:14px;border:1px solid var(--g);box-shadow:0 8px 24px #14273d14}
+.b-row.on .go{background:var(--g);color:#fff}
+.b-detail{padding:4px 10px 10px 8px;font-size:14px;color:var(--mute)}
+.b-arch{width:100%;min-height:400px;max-width:340px;margin:auto;border-radius:999px 999px 18px 18px;background:radial-gradient(ellipse at 50% 38%,#2a4d78,var(--n7) 72%);border:1px solid var(--g);display:grid;place-items:center;position:relative}
+.b-arch .ico{width:150px;height:150px;margin-top:-40px;background:#ffffff12;border:1px solid #d5ab6488;box-shadow:none}.b-arch .ico img{width:80px;height:80px}
+.b-arch p{position:absolute;bottom:20px;color:#fff;font-family:Dana;font-size:20px}
+
+/* C: bento */
+.c-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto;gap:16px;margin-top:26px}
+.c-card{border:1px solid var(--line);border-radius:18px;padding:20px;background:#fff;display:flex;flex-direction:column;gap:6px}
+.c-card h3{font-family:Dana;font-size:19px;color:var(--p)}.c-card p{font-size:13px;color:var(--mute)}
+.c-feat{grid-column:span 2;grid-row:span 2;background:linear-gradient(150deg,var(--p),var(--n7) 62%);color:#fff;border:0;padding:30px;justify-content:space-between}
+.c-feat h3{color:#fff;font-size:30px}.c-feat p{color:#cfdcec;font-size:15px}
+.c-feat .ico{background:#ffffff14;border:1px solid #d5ab6488;width:96px;height:96px;box-shadow:none}.c-feat .ico img{width:58px;height:58px}
+.c-cta{background:var(--g1);border:0;justify-content:center;text-align:center;color:var(--n7)}
+
+/* D: path */
+.d-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
+.d-card{border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;background:#fff}
+.d-card .ico{margin:0 auto 8px;width:64px;height:64px}.d-card .ico img{width:36px;height:36px}
+.d-card h3{font-family:Dana;font-size:17px;color:var(--p)}.d-card p{font-size:12.5px;color:var(--mute)}
+.d-path{margin-top:30px;background:var(--n7);color:#fff;border-radius:18px;padding:30px 34px}
+.d-path h3{font-family:Lalezar;font-weight:400;font-size:24px;color:var(--g1);margin-bottom:16px}
+.d-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:s}
+.d-step{position:relative;padding-top:50px;font-size:13px;color:#c4d3e5}
+.d-step:before{counter-increment:s;content:counter(s);position:absolute;top:0;inset-inline-start:0;width:38px;height:38px;border-radius:50%;border:1px solid var(--g);color:var(--g);display:grid;place-items:center;font-family:Lalezar;font-size:18px}
+.d-step b{display:block;color:#fff;font-size:15px}
+
+/* E: list + faq */
+.e-list a{display:flex;align-items:center;gap:18px;padding:18px 6px;border-bottom:1px solid var(--line)}
+.e-list b{font-family:Lalezar;font-weight:400;color:var(--g);font-size:24px;width:40px}
+.e-list strong{font-family:Dana;font-size:21px;color:var(--p);min-width:150px}
+.e-list span{color:var(--mute);font-size:14px;flex:1}
+.e-list i{font-style:normal;color:var(--gd);border:1px solid var(--g);border-radius:50%;width:36px;height:36px;display:grid;place-items:center}
+.e-faq{margin-top:28px;display:grid;gap:10px}
+.e-faq div{background:var(--paper);border-radius:12px;padding:12px 18px;font-size:14px;display:flex;justify-content:space-between}
+.e-band{margin-top:26px;background:linear-gradient(120deg,var(--n8),var(--n6));border-radius:16px;color:#fff;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.e-band h3{font-family:Lalezar;font-weight:400;font-size:24px}.e-band p{color:#c4d3e5;font-size:14px}
+
+/* detail pages */
+.dt{display:grid;grid-template-columns:2fr 1fr;gap:34px}
+.dt h2{font-family:Dana;font-size:23px;color:var(--p);margin:26px 0 8px;display:flex;align-items:center;gap:10px}
+.dt h2:before{content:"";width:4px;height:24px;background:var(--g);border-radius:2px}
+.dt p,.dt li{font-size:15px;color:#33465e}
+.dt ul{padding-inline-start:20px}
+.side{align-self:start;position:sticky;top:10px;border:1px solid var(--g);border-radius:18px;padding:22px;background:linear-gradient(180deg,#fffaf0,#fff)}
+.side h3{font-family:Dana;font-size:19px;color:var(--p);margin-bottom:6px}.side p{font-size:13px;color:var(--mute);margin-bottom:12px}
+.side .btn{width:100%;justify-content:center;margin-top:8px}
+.side dl{margin:10px 0 0;font-size:13px}.side dt{color:var(--mute)}.side dd{margin:0 0 8px;font-weight:700}
+.rel{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.rel div{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--p)}
+.rel img{width:34px;height:34px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
+.steps div{background:var(--paper);border-radius:12px;padding:12px;font-size:13px}.steps b{color:var(--gd);display:block}
+.faq-d div{border-bottom:1px solid var(--line);padding:10px 0;font-size:14px;display:flex;justify-content:space-between}
+.hero-d{background:linear-gradient(0deg,#0b1828f2 6%,#0b182866 70%),url(../../../public/img/zamani/dr-zamani-op-2.webp) 30% 40%/cover;color:#fff;padding:60px 40px 28px;display:flex;align-items:flex-end;gap:20px}
+.hero-d h2{font-family:Dana;font-size:38px;margin:0}.hero-d p{color:#d6e1ef}
+.note{max-width:1100px;margin:30px auto 60px;padding:0 20px;color:var(--mute);font-size:13px}
+@media(max-width:900px){.a-grid,.c-grid,.d-cards,.d-steps,.steps{grid-template-columns:1fr 1fr}.b-wrap,.dt{grid-template-columns:1fr}.c-feat{grid-column:span 2}}
+</style>
+</head>
+<body>
+<div class="page-head">
+<h1>طرح‌های صفحه «خدمات»</h1>
+<p>پنج طرح برای فهرست خدمات (/services/) و دو طرح برای صفحه‌ی هر خدمت. رنگ، فونت و عکس‌ها از خود سایت‌اند. متن‌ها نمایشی‌اند و برچسب «نمایشی» دارند؛ متن واقعی را پزشک تأیید می‌کند. بر پایه‌ی بررسی الگوهای سایت‌های برتر پزشکی و جراحی زیبایی: فهرست قابل‌انتخاب خدمات، ساختار «چیست / برای چه کسی / مراحل / دوران نقاهت / پرسش‌ها»، کارت تماس همیشه در دسترس، و فضای خالی زیاد.</p>
+</div>
+
+<!-- A -->
+<section class="v"><div class="vl"><b>۱</b><strong>کارت‌های بلند با سربرگ سرمه‌ای</strong><span>چهار کارت هم‌قد؛ هر کدام عدد، عنوان، خلاصه، دو نکته و دکمه. ساده‌ترین و نزدیک‌ترین به ظاهر فعلی.</span></div>
+<div class="frame"><div class="banner">صفحه اصلی › خدمات</div><div class="pad"><div class="eyebrow">خدمات مطب</div><h1 class="t">خدمات تخصصی دکتر فرزاد زمانی</h1><p class="sub">با هر خدمت آشنا شوید و برای ارزیابی با مطب هماهنگ کنید. <span class="sample">متن نمایشی</span></p>
+<div class="a-grid">
+<div class="a-card"><div class="a-top"><i>۰۱</i><div class="ico"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div></div><div class="a-body"><h3>رینوپلاستی</h3><p>افزایش زیبایی چهره با طراحی متناسب بینی</p><ul><li>ارزیابی زیبایی و تنفس</li><li>برنامه‌ی متناسب با چهره</li></ul><a class="btn o">اطلاعات بیشتر ←</a></div></div>
+<div class="a-card"><div class="a-top"><i>۰۲</i><div class="ico"><img src="../../../public/img/services/belpharoplasty.png" alt=""></div></div><div class="a-body"><h3>بلفاروپلاستی</h3><p>جوانسازی پلک‌ها و ظاهری شاداب‌تر</p><ul><li>پلک بالا و پایین</li><li>نتیجه‌ی طبیعی</li></ul><a class="btn o">اطلاعات بیشتر ←</a></div></div>
+<div class="a-card"><div class="a-top"><i>۰۳</i><div class="ico"><img src="../../../public/img/services/face-lift.png" alt=""></div></div><div class="a-body"><h3>لیفت صورت</h3><p>ظاهری جوان‌تر با حفظ حالت طبیعی</p><ul><li>بازسازی خطوط صورت</li><li>پیگیری پس از درمان</li></ul><a class="btn o">اطلاعات بیشتر ←</a></div></div>
+<div class="a-card"><div class="a-top"><i>۰۴</i><div class="ico"><img src="../../../public/img/services/mentoplasty.png" alt=""></div></div><div class="a-body"><h3>منتوپلاستی</h3><p>اصلاح فرم چانه و تناسب بهتر چهره</p><ul><li>ارزیابی تناسب فک</li><li>برنامه‌ی شخصی</li></ul><a class="btn o">اطلاعات بیشتر ←</a></div></div>
+</div></div></div></section>
+
+<!-- B -->
+<section class="v"><div class="vl"><b>۲</b><strong>کاوشگر: فهرست و پیش‌نمایش بزرگ</strong><span>فهرست در یک سمت، قاب طاقی بزرگ در سمت دیگر؛ انتخاب خدمت، پیش‌نمایش را عوض می‌کند. لوکس و کم‌شلوغ.</span></div>
+<div class="frame"><div class="banner">صفحه اصلی › خدمات</div><div class="pad"><div class="eyebrow">خدمات مطب</div><h1 class="t">خدمات تخصصی</h1>
+<div class="b-wrap"><div>
+<div class="b-row on"><b>۰۱</b><strong>رینوپلاستی</strong><span class="go">←</span></div>
+<div class="b-detail">افزایش زیبایی چهره با طراحی متناسب بینی؛ برای ارزیابی و پاسخ به پرسش‌ها با مطب هماهنگ کنید. <span class="sample">متن نمایشی</span></div>
+<div class="b-row"><b>۰۲</b><strong>بلفاروپلاستی</strong><span class="go">←</span></div>
+<div class="b-row"><b>۰۳</b><strong>لیفت صورت</strong><span class="go">←</span></div>
+<div class="b-row"><b>۰۴</b><strong>منتوپلاستی</strong><span class="go">←</span></div></div>
+<div class="b-arch"><div class="ico"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><p>رینوپلاستی</p></div></div></div></div></section>
+
+<!-- C -->
+<section class="v"><div class="vl"><b>۳</b><strong>بنتو: خدمت شاخص بزرگ‌تر</strong><span>رینوپلاستی به‌عنوان خدمت اصلی بزرگ‌تر دیده می‌شود، بقیه کوچک‌تر کنارش. مناسب وقتی یک خدمت پررنگ‌تر است.</span></div>
+<div class="frame"><div class="banner">صفحه اصلی › خدمات</div><div class="pad"><div class="eyebrow">خدمات مطب</div><h1 class="t">همه‌ی خدمات یک‌جا</h1>
+<div class="c-grid">
+<div class="c-card c-feat"><div class="ico"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><div><h3>رینوپلاستی</h3><p>افزایش زیبایی چهره با طراحی متناسب بینی و توجه به عملکرد تنفس. <span class="sample">متن نمایشی</span></p></div><a class="btn g" style="align-self:flex-start">آشنایی با خدمت ←</a></div>
+<div class="c-card"><h3>بلفاروپلاستی</h3><p>جوانسازی پلک‌ها</p></div>
+<div class="c-card"><h3>لیفت صورت</h3><p>ظاهری جوان‌تر و طبیعی</p></div>
+<div class="c-card"><h3>منتوپلاستی</h3><p>اصلاح فرم چانه</p></div>
+<div class="c-card c-cta"><h3 style="color:var(--n7)">مشاوره</h3><p style="color:#5b4a22">برای هماهنگی تماس بگیرید</p></div>
+</div></div></div></section>
+
+<!-- D -->
+<section class="v"><div class="vl"><b>۴</b><strong>خدمات + «مسیر مراجعه»</strong><span>کارت‌های جمع‌وجور بالا و یک نوار سرمه‌ای که مسیر مراجعه را در چهار قدم می‌گوید؛ اضطراب بیمار را کم می‌کند.</span></div>
+<div class="frame"><div class="banner">صفحه اصلی › خدمات</div><div class="pad"><div class="eyebrow">خدمات مطب</div><h1 class="t">خدمات و مسیر مراجعه</h1>
+<div class="d-cards">
+<div class="d-card"><div class="ico"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><h3>رینوپلاستی</h3><p>طراحی متناسب بینی</p></div>
+<div class="d-card"><div class="ico"><img src="../../../public/img/services/belpharoplasty.png" alt=""></div><h3>بلفاروپلاستی</h3><p>جوانسازی پلک‌ها</p></div>
+<div class="d-card"><div class="ico"><img src="../../../public/img/services/face-lift.png" alt=""></div><h3>لیفت صورت</h3><p>ظاهر جوان‌تر</p></div>
+<div class="d-card"><div class="ico"><img src="../../../public/img/services/mentoplasty.png" alt=""></div><h3>منتوپلاستی</h3><p>اصلاح فرم چانه</p></div></div>
+<div class="d-path"><h3>مسیر مراجعه <span class="sample" style="color:#7a5a1a">نمایشی؛ پزشک تأیید کند</span></h3><div class="d-steps"><div class="d-step"><b>تماس و هماهنگی</b>تماس با مطب و تعیین زمان</div><div class="d-step"><b>مشاوره و ارزیابی</b>بررسی وضعیت و گزینه‌ها</div><div class="d-step"><b>برنامه‌ی درمان</b>توضیح شفاف و رضایت آگاهانه</div><div class="d-step"><b>پیگیری</b>کنترل و پاسخ‌گویی پس از درمان</div></div></div>
+</div></div></section>
+
+<!-- E -->
+<section class="v"><div class="vl"><b>۵</b><strong>فهرست خطی + پرسش‌ها + نوار تماس</strong><span>هر خدمت یک ردیف خوانا، زیرش پرسش‌های رایج و نوار دعوت به تماس. مینیمال و کم‌هزینه‌ی نگه‌داری.</span></div>
+<div class="frame"><div class="banner">صفحه اصلی › خدمات</div><div class="pad"><div class="eyebrow">خدمات مطب</div><h1 class="t">همه‌ی خدمات</h1>
+<div class="e-list"><a><b>۰۱</b><strong>رینوپلاستی</strong><span>افزایش زیبایی چهره با طراحی متناسب بینی</span><i>←</i></a><a><b>۰۲</b><strong>بلفاروپلاستی</strong><span>جوانسازی پلک‌ها و ظاهری شاداب‌تر</span><i>←</i></a><a><b>۰۳</b><strong>لیفت صورت</strong><span>ظاهری جوان‌تر با حفظ حالت طبیعی</span><i>←</i></a><a><b>۰۴</b><strong>منتوپلاستی</strong><span>اصلاح فرم چانه و تناسب بهتر چهره</span><i>←</i></a></div>
+<div class="e-faq"><div><span>اولین قدم برای دریافت مشاوره چیست؟</span><span>＋</span></div><div><span>آیا هر خدمت نیاز به معاینه‌ی حضوری دارد؟</span><span>＋</span></div><div><span>پیگیری پس از درمان چگونه است؟</span><span>＋</span></div></div>
+<div class="e-band"><div><h3>برای هماهنگی با مطب تماس بگیرید</h3><p>پاسخ‌گویی در ساعات کاری مطب</p></div><a class="btn g">تماس با مطب</a></div>
+</div></div></section>
+
+<!-- Detail 1 -->
+<section class="v"><div class="vl"><b>الف</b><strong>صفحه‌ی هر خدمت: ساختار پزشکی با کارت کناری ثابت</strong><span>متن اصلی در ستون راست با عنوان‌های ثابت؛ کارت تماس و اطلاعات کلیدی همیشه کنار صفحه می‌ماند. شبیه سایت‌های بیمارستانی معتبر.</span></div>
+<div class="frame"><div class="hero-d"><div class="ico" style="width:84px;height:84px"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><div><h2>رینوپلاستی</h2><p>افزایش زیبایی چهره با طراحی متناسب بینی</p></div></div>
+<div class="pad"><div class="dt"><div>
+<h2>رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن درباره‌ی این خدمت و هدف آن. <span class="sample">متن نمایشی</span></p>
+<h2>برای چه کسانی مناسب است؟</h2><ul><li>مواردی که پزشک پس از معاینه تشخیص می‌دهد</li><li>انتظار واقع‌بینانه از نتیجه</li></ul>
+<h2>مراحل مراجعه</h2><div class="steps"><div><b>۱</b>مشاوره</div><div><b>۲</b>ارزیابی</div><div><b>۳</b>اقدام</div><div><b>۴</b>پیگیری</div></div>
+<h2>دوران نقاهت</h2><p>توضیح کلی دوران بهبودی؛ زمان دقیق را پزشک می‌گوید.</p>
+<h2>پرسش‌های رایج</h2><div class="faq-d"><div><span>آیا نتیجه طبیعی خواهد بود؟</span><span>＋</span></div><div><span>تنفس چه تغییری می‌کند؟</span><span>＋</span></div></div>
+<h2>خدمات دیگر</h2><div class="rel"><div><img src="../../../public/img/services/belpharoplasty.png" alt="">بلفاروپلاستی</div><div><img src="../../../public/img/services/face-lift.png" alt="">لیفت صورت</div><div><img src="../../../public/img/services/mentoplasty.png" alt="">منتوپلاستی</div></div>
+</div><aside class="side"><h3>هماهنگی مراجعه</h3><p>پرسش‌هایتان را با مطب مطرح کنید.</p><dl><dt>پزشک</dt><dd>دکتر فرزاد زمانی</dd><dt>شهر</dt><dd>اراک</dd></dl><a class="btn g">تماس با مطب</a><a class="btn o">راه‌های ارتباطی</a></aside></div></div></div></section>
+
+<!-- Detail 2 -->
+<section class="v"><div class="vl"><b>ب</b><strong>صفحه‌ی هر خدمت: تک‌ستونه مجله‌ای با نوار تماس پایین</strong><span>تصویر تمام‌عرض، متن در یک ستون راحت‌خوان، و یک نوار تماس که پایین صفحه می‌چسبد. ساده‌تر و موبایل‌پسند.</span></div>
+<div class="frame"><div class="hero-d" style="padding-top:90px"><div><h2>رینوپلاستی</h2><p>افزایش زیبایی چهره با طراحی متناسب بینی</p></div></div>
+<div class="pad" style="max-width:760px;margin:auto"><div class="dt" style="display:block"><h2>رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن؛ هر پاراگراف یک ایده. <span class="sample">متن نمایشی</span></p><h2>چه چیزی انتظار داشته باشید؟</h2><ul><li>مشاوره و ارزیابی اولیه</li><li>توضیح شفاف گزینه‌ها</li><li>پیگیری پس از درمان</li></ul><h2>پرسش‌های رایج</h2><div class="faq-d"><div><span>آیا نتیجه طبیعی خواهد بود؟</span><span>＋</span></div><div><span>تنفس چه تغییری می‌کند؟</span><span>＋</span></div></div></div></div>
+<div class="e-band" style="border-radius:0;margin:0"><div><h3>برای هماهنگی با مطب تماس بگیرید</h3><p>ساعات کاری مطب</p></div><a class="btn g">تماس با مطب</a></div></div></section>
+
+<p class="note">همه‌ی تصاویر و رنگ‌ها از خود سایت‌اند. بعد از انتخاب شما، طرح برگزیده با متن‌های قابل‌ویرایش از پنل (همان سیستم فعلی خدمات) وارد سایت می‌شود.</p>
+</body>
+</html>

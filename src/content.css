@@ -223,4 +223,18 @@
 @media(max-width:600px){.legacy-article-page{padding-inline:16px}.legacy-article-page .legacy-article-grid,.landing-services-grid{grid-template-columns:minmax(0,1fr)}.legacy-meta-row{flex-direction:column;gap:4px}.legacy-article-page .legacy-article-detail{padding:22px 18px;border-radius:22px}}
 
 .legacy-service-body{margin:26px 0 8px;text-align:start}
-.legacy-privacy-page h1{margin-top:56px}.legacy-privacy-item{margin-bottom:6px}
+.legacy-reserve-btn{display:block;background:#d5ab64;color:#fff!important;border-radius:8px;padding:4px 8px;font:500 16px/24px Vazir,sans-serif;text-decoration:none;box-shadow:0 4px 6px -1px #0000001a,0 2px 4px -2px #0000001a;white-space:nowrap}
+.legacy-reserve-btn:hover{background:#af8337}
+.drz-dialog-overlay{position:fixed;inset:0;z-index:100;background:#000000a6;opacity:0;animation:drz-fade .12s ease-out forwards;font-family:Vazir,sans-serif}
+.drz-dialog-overlay[hidden]{display:none}
+.drz-dialog{position:relative;width:min(520px,calc(100% - 32px));margin:10vh auto 0;background:#fff;border-radius:16px;padding:24px 0 0;box-shadow:0 20px 25px -5px #0000001a,0 8px 10px -6px #0000001a;outline:none;animation:drz-pop .14s ease-out}
+.drz-dialog-close{position:absolute;top:18px;left:24px;border:0;border-radius:9999px;padding:6px;font-size:18px;line-height:1;background:#f3f4f6;color:#4b5563;cursor:pointer}
+.drz-dialog-close:hover{background:#e5e7eb;color:#1f2937}
+.drz-dialog-body{padding:0 24px 24px}
+.drz-dialog-body h5{margin:0 0 16px;font-size:18px;font-weight:700;color:#0f172a}
+.drz-dialog-body p{margin:0;font-size:18px;line-height:32px;color:#1e293b;white-space:pre-line}
+.drz-dialog-footer{padding:12px 24px;background:#f3f4f6;border-radius:0 0 8px 8px;text-align:right}
+.drz-dialog-ok{height:48px;padding:8px 20px;border:0;border-radius:12px;background:#3d5a80;color:#fff;font:700 14px Vazir,sans-serif;cursor:pointer}
+.drz-dialog-ok:hover{background:#607a9a}
+@keyframes drz-fade{to{opacity:1}}@keyframes drz-pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@media(max-width:760px){.legacy-nav-links{display:flex!important;justify-content:center!important;flex-wrap:wrap;position:absolute;top:100%;inset-inline:0;gap:4px 12px;padding:8px 12px;background:#0b1828cc;font-size:12.5px}}

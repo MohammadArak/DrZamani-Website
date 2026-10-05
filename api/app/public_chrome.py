@@ -85,7 +85,7 @@ def site_header(clinic, *, crumbs=None, banner=True) -> str:
     out += (
         f'<nav class="legacy-site-nav" aria-label="منوی اصلی"><a class="legacy-brand" href="/" aria-label="صفحه اصلی">'
         f'<img src="/img/logo/logo-dark-full.webp" alt="{esc(clinic.doctor_name)}" width="250" height="78"></a>'
-        f'<div class="legacy-nav-links">{links}</div><a class="legacy-header-cta" href="/appointment/">رزرو نوبت</a></nav>'
+        f'<div class="legacy-nav-links">{links}</div><a class="legacy-reserve-btn" href="/appointment/" data-reserve aria-label="رزرو نوبت">رزرو نوبت</a></nav>'
     )
     if crumbs:
         trail = "<span aria-hidden=\"true\">›</span>".join(f'<a href="{esc(href)}">{esc(label)}</a>' for label, href in crumbs[:-1])
@@ -102,7 +102,7 @@ def site_footer(clinic) -> str:
         social += f'<a class="legacy-social legacy-instagram" href="{esc(clinic.instagram_url)}" rel="noopener noreferrer">{icon("insta")} صفحه اینستاگرام</a>'
     if safe_https(clinic.eitaa_url):
         social += f'<a class="legacy-social legacy-eitaa" href="{esc(clinic.eitaa_url)}" rel="noopener noreferrer"><img src="/img/logo/eitaa.png" alt="" width="20" height="20"> صفحه ایتا</a>'
-    links = [("درباره ما", "/#about-us"), ("خدمات ما", "/services/"), ("نمونه کارها", "/#samples"), ("نظرات مراجعین", "/#comments"), ("سوالات متداول", "/#faq"), ("مقالات", "/articles/"), ("حریم خصوصی", "/privacy/")]
+    links = [("درباره ما", "/#about-us"), ("خدمات ما", "/services/"), ("نمونه کارها", "/#samples"), ("نظرات مراجعین", "/#comments"), ("سوالات متداول", "/#faq"), ("مقالات", "/articles/")]
     link_html = "".join(f'<li><a href="{href}">{icon("chevron")}{label}</a></li>' for label, href in links)
     map_html = ""
     embed = safe_https(clinic.map_embed_url)
@@ -298,15 +298,15 @@ def services_page(clinic, services: list[dict], service: dict | None, tel: str) 
     return body
 
 
-def privacy_page(clinic, items: list[dict], fill) -> str:
-    """Privacy page; items are {title, content} from the editable block, fill() resolves placeholders."""
-    trail = [("صفحه اصلی", "/"), ("حریم خصوصی", "")]
-    sections = "".join(f'<section class="legacy-privacy-item"><h2>{esc(fill(item["title"]))}</h2><p>{esc(fill(item["content"]))}</p></section>' for item in items)
+def reserve_dialog(message: str) -> str:
+    """Hidden twin of the homepage reserve dialog (shown by /reserve.js when online booking is off)."""
     return (
-        site_header(clinic, crumbs=trail)
-        + '<main class="legacy-article-page legacy-article-page--index legacy-service-page legacy-privacy-page" dir="rtl" lang="fa"><div class="legacy-article-index-container"><section class="legacy-article-index">'
-        + '<h1>حریم خصوصی و اطلاعات شما</h1><span class="legacy-gold-rule" aria-hidden="true"><i></i></span>'
-        + f'<div class="legacy-service-body article-body">{sections}</div>'
-        + "</section></div></main>"
-        + site_footer(clinic)
+        '<div class="drz-dialog-overlay" data-reserve-dialog hidden>'
+        '<div class="drz-dialog" role="dialog" aria-modal="true" aria-label="رزرو نوبت" tabindex="-1" dir="rtl">'
+        '<button type="button" class="drz-dialog-close" data-reserve-close aria-label="بستن">'
+        '<svg viewBox="0 0 20 20" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" '
+        'd="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></button>'
+        f'<div class="drz-dialog-body"><h5>رزرو نوبت</h5><p>{esc(message)}</p></div>'
+        '<div class="drz-dialog-footer"><button type="button" class="drz-dialog-ok" data-reserve-close>متوجه شدم</button></div>'
+        '</div></div>'
     )
