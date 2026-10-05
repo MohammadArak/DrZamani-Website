@@ -73,6 +73,8 @@ def safe_https(url: str) -> str:
     return url if parsed.scheme == "https" and parsed.hostname and not parsed.username else ""
 
 
+DEFAULT_HERO = "/img/zamani/dr-zamani-op-2.webp"
+DEFAULT_HERO_SMALL = "/img/zamani/dr-zamani-op-2-960.webp"
 NAV = [("صفحه اصلی", "/"), ("درباره ما", "/#about-us"), ("خدمات", "/#services"), ("مقالات", "/articles/"), ("تماس با ما", "#footer")]
 
 
@@ -279,13 +281,16 @@ def services_page(clinic, services: list[dict], service: dict, tel: str) -> str:
     Everything in the text column is the rich text edited in the staff panel; tel is the normalised +98 number.
     The photo is the one chosen for this service (public media) or a default. There is no services index page."""
     name = service["title"]
-    hero = f'/media/{esc(service["hero_key"])}.webp' if service.get("hero_key") else "/img/zamani/dr-zamani-op-2.webp"
+    if service.get("hero_key"):
+        hero_attrs = f'src="/media/{esc(service["hero_key"])}.webp"'
+    else:  # the default photo comes in two sizes so phones do not download the 1920 px one
+        hero_attrs = f'src="{DEFAULT_HERO_SMALL}" srcset="{DEFAULT_HERO_SMALL} 960w, {DEFAULT_HERO} 1920w" sizes="(max-width:860px) 100vw, 45vw"'
     crumb = (
         '<nav class="svc2-crumb" aria-label="مسیر صفحه"><a href="/">صفحه اصلی</a><span aria-hidden="true">›</span>'
         f'<a href="/#services">خدمات</a><span aria-hidden="true">›</span><span aria-current="page">{esc(name)}</span></nav>'
     )
     photo = (
-        f'<aside class="svc2-photo"><img src="{hero}" alt="" width="1920" height="1281" fetchpriority="high">'
+        f'<aside class="svc2-photo"><img {hero_attrs} alt="" width="1920" height="1281" fetchpriority="high">'
         f'<div class="svc2-photo-in">{crumb}<div class="svc2-ring"><img src="/img/services/{esc(service["image"])}" alt="" width="52" height="52"></div>'
         f'<h1>{esc(name)}</h1><p>{esc(service["summary"])}</p>'
         f'<div class="svc2-glass"><span>برای هماهنگی با مطب</span><a href="tel:{esc(tel)}">تماس</a></div></div></aside>'

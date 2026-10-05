@@ -144,9 +144,10 @@ const AboutUs = () => {
                                 className="z-10"
                                 src="/img/about-us/dr-zamani-op.webp"
                                 alt={`اتاق عمل ${clinicInfo.doctorName}`}
-                                loading="eager"
-                                fetchPriority="high"
-                                decoding="sync"
+                                width={1216}
+                                height={919}
+                                loading="lazy"
+                                decoding="async"
                             />
                             <motion.div
                                 className="relative hidden md:block"
@@ -159,7 +160,7 @@ const AboutUs = () => {
                                 }}
                                 viewport={{ once: true }}
                             >
-                                <div className="absolute inset-0 -z-10 rounded-full bg-lightcyan/90 blur-[120px] scale-100" />
+                                <div className="absolute inset-0 -z-10 rounded-full opacity-90 [background:radial-gradient(closest-side,var(--lightcyan),transparent)] scale-125" />
                                 <div className="absolute -left-8 -bottom-8 md:left-4 md:bottom-4 lg:left-2 lg:bottom-6 z-30">
                                     {content.about.facts.length > 0 && (
                                         <GlassCard className="p-5 bg-linear-to-bl to-[#98C1D9] border-none">

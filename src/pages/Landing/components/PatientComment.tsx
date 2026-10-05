@@ -23,7 +23,7 @@ const PatientComment = ({ img, imageAlt, body, name, age }: Props) => {
                         loading="lazy"
                         decoding="async"
                     /> : <svg className="h-32 w-32 rounded-full bg-slate-600 p-7 text-slate-300" role="img" aria-label="بدون تصویر" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="20" r="12" stroke="currentColor" strokeWidth="3"/><path d="M8 58c0-16 10-24 24-24s24 8 24 24" stroke="currentColor" strokeWidth="3"/></svg>}
-                    <div className="absolute inset-0 -z-10 rounded-full bg-secondary/40 blur-[80px] scale-100" />
+                    <div className="absolute inset-0 -z-10 rounded-full opacity-40 [background:radial-gradient(closest-side,var(--secondary),transparent)] scale-110 scale-100" />
                 </div>
                 <h6 className="text-wrap max-w-3/4 text-justify text-white whitespace-pre-line">{body}</h6>
                 <div className="flex flex-col gap-1 justify-center items-center">

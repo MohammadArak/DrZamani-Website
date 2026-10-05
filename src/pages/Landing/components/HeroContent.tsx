@@ -30,10 +30,12 @@ const HeroContent = () => {
                             bounce: 0.1,
                         }}
                     >
-                        <div className="absolute inset-0 rounded-full -z-10 bg-lightcyan/35 blur-[120px] scale-80" />
+                        <div className="absolute inset-0 rounded-full -z-10 opacity-35 [background:radial-gradient(closest-side,var(--lightcyan),transparent)] scale-110" />
                         <img
                             className="max-h-100 lg:max-h-125 z-20"
                             src="/img/zamani/dr-zamani-hero.webp"
+                            srcSet="/img/zamani/dr-zamani-hero-560.webp 560w, /img/zamani/dr-zamani-hero.webp 1018w"
+                            sizes="(max-width: 1024px) 400px, 500px"
                             alt={`${clinicInfo.doctorName}، ${clinicInfo.specialty}`}
                             loading="eager"
                             fetchPriority="high"

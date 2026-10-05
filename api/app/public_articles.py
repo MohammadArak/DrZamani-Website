@@ -30,7 +30,7 @@ def list_html(db,q='',category='',page=1,tag=''):
     body=list_content(page_items,total=len(items),page=page,per_page=12,q=q,category=category,categories=categories)
     body=layout(db,clinic,body,q=q,index=True)
     if page>1:path+=f'?page={page}'
-    return render(clinic,'articles',db,editorial=dict(title=title,description='مقالات آموزشی مطب با نویسنده، بازبین و منابع قابل بررسی.',path=path,body=body,robots='noindex, follow' if q or not items else 'index, follow',schemas=[]))
+    return render(clinic,'articles',db,editorial=dict(preload='/img/blog/article-header-surgeon.webp',title=title,description='مقالات آموزشی مطب با نویسنده، بازبین و منابع قابل بررسی.',path=path,body=body,robots='noindex, follow' if q or not items else 'index, follow',schemas=[]))
 
 
 @router.get('/articles')
@@ -70,7 +70,7 @@ def article_detail(slug:str,db:Session=Depends(get_db)):
     schema={'@context':'https://schema.org','@type':'Article','headline':data['title'],'description':data['summary'],'mainEntityOfPage':canonical,'datePublished':row.published_at.isoformat()+'Z','dateModified':row.public_updated_at.isoformat()+'Z','author':{'@type':'Person','name':data['author_name']},'reviewedBy':{'@type':'Person','name':data['reviewer']},'publisher':{'@type':'Organization','name':clinic.doctor_name,'url':site},'citation':[s['url'] for s in data['sources']],'keywords':data['tags']}
     if image:schema['image']=image
     breadcrumbs={'@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i,'name':name,'item':url} for i,(name,url) in enumerate([('صفحه اصلی',site+'/'),('مقالات',site+'/articles/'),(data['title'],canonical)],1)]}
-    return render(clinic,'articles',db,editorial=dict(title=data['seo_title'] or data['title'],description=data['seo_description'] or data['summary'],path=article_url(slug),body=body,image=image,article=True,schemas=[schema,breadcrumbs]))
+    return render(clinic,'articles',db,editorial=dict(preload='/img/blog/article-header-surgeon.webp',title=data['seo_title'] or data['title'],description=data['seo_description'] or data['summary'],path=article_url(slug),body=body,image=image,article=True,schemas=[schema,breadcrumbs]))
 
 
 @router.get('/articles/{slug}')
