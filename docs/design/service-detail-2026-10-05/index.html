@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طرح‌های صفحه‌ی هر خدمت</title>
+<style>
+@font-face{font-family:Vazir;src:url(../../../public/fonts/optimized/vazir-regular.woff2) format("woff2");font-weight:400}
+@font-face{font-family:Vazir;src:url(../../../public/fonts/optimized/vazir-medium.woff2) format("woff2");font-weight:500}
+@font-face{font-family:Vazir;src:url(../../../public/fonts/optimized/vazir-bold.woff2) format("woff2");font-weight:700}
+@font-face{font-family:Dana;src:url(../../../public/fonts/optimized/dana-bold.woff2) format("woff2");font-weight:700}
+@font-face{font-family:Lalezar;src:url(../../../public/fonts/optimized/lalezar-regular.woff2) format("woff2")}
+:root{--n9:#0b1828;--n8:#10223a;--n7:#14273d;--n6:#1b3553;--p:#3d5a80;--g:#d5ab64;--gd:#af8337;--g1:#fddba1;--paper:#f5f7fd;--ink:#1f2f45;--mute:#5d6f86;--line:#dfe6f1}
+*{box-sizing:border-box}
+body{margin:0;background:#e9edf4;font-family:Vazir,sans-serif;color:var(--ink);line-height:1.9}
+a{color:inherit;text-decoration:none}h1,h2,h3,h4,p{margin:0}
+.head{max-width:1100px;margin:0 auto;padding:36px 20px 8px}.head h1{font-family:Lalezar;font-weight:400;font-size:36px;color:var(--n7)}.head p{color:var(--mute);max-width:780px}
+.v{max-width:1100px;margin:30px auto;padding:0 20px}
+.vl{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}.vl b{width:32px;height:32px;border-radius:50%;background:var(--n7);color:var(--g);display:grid;place-items:center}.vl strong{font-size:17px;color:var(--n7)}.vl span{color:var(--mute);font-size:13px;flex-basis:100%}
+.frame{border-radius:18px;overflow:hidden;box-shadow:0 18px 50px #14273d22;background:#fff}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;background:#0b1828;color:#fff;font-size:13px}
+.nav .logo{font-family:Lalezar;font-size:20px;color:var(--g)}.nav .links{display:flex;gap:22px}.nav .cta{background:var(--g);color:#fff;border-radius:8px;padding:2px 10px;font-size:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:9px 20px;font-weight:700;font-size:14px}.btn.g{background:var(--g);color:#fff}.btn.n{background:var(--p);color:#fff}.btn.o{border:1px solid var(--g);color:var(--gd)}.btn.w{border:1px solid #fff9;color:#fff}
+.ico{width:76px;height:76px;border-radius:50%;background:linear-gradient(145deg,#6a86aa,#3d5a80);display:grid;place-items:center;flex:none}.ico img{width:44px;height:44px}
+.ph{background:linear-gradient(0deg,#0b1828f0 6%,#0b182866 72%),url(../../../public/img/zamani/dr-zamani-op-2.webp) 30% 38%/cover;color:#fff}
+.rt h2{font-family:Dana;font-size:23px;color:var(--p);margin:26px 0 8px;display:flex;align-items:center;gap:10px}.rt h2:before{content:"";width:4px;height:24px;background:var(--g);border-radius:2px}
+.rt p,.rt li{font-size:15px;color:#33465e}.rt ul{padding-inline-start:20px;margin:6px 0}
+.tag{font-size:11px;color:#a07a2c;background:#fff6e0;border:1px dashed var(--g);border-radius:6px;padding:0 6px;margin-inline-start:6px;white-space:nowrap}
+.opt{font-size:11px;color:#2e6a4a;background:#e7f6ee;border:1px dashed #5fb48a;border-radius:6px;padding:0 6px;margin-inline-start:6px;white-space:nowrap}
+.faq div{border-bottom:1px solid var(--line);padding:10px 0;font-size:14px;display:flex;justify-content:space-between}
+.others{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.others div{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--p)}.others img{width:34px;height:34px}
+.band{background:linear-gradient(120deg,var(--n8),var(--n6));color:#fff;padding:22px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px}.band h3{font-family:Lalezar;font-weight:400;font-size:24px}.band p{color:#c4d3e5;font-size:14px}
+
+/* 1 magazine + toc */
+.m-hero{padding:46px 44px 30px;display:flex;align-items:center;gap:20px}.m-hero h1{font-family:Dana;font-size:38px}.m-hero p{color:#d6e1ef}
+.m-body{display:grid;grid-template-columns:1fr 260px;gap:40px;padding:34px 44px 44px}
+.toc{position:sticky;top:10px;align-self:start}.toc h4{font-family:Dana;color:var(--p);margin-bottom:6px}.toc a{display:block;padding:5px 12px;border-inline-start:2px solid var(--line);font-size:14px;color:var(--mute)}.toc a.on{border-color:var(--g);color:var(--n7);font-weight:700}
+.toc .box{margin-top:18px;border:1px solid var(--g);border-radius:16px;padding:16px;background:linear-gradient(180deg,#fffaf0,#fff)}.toc .box p{font-size:13px;color:var(--mute);margin:4px 0 10px}.toc .box .btn{width:100%;justify-content:center}
+
+/* 2 showcase */
+.s-hero{padding:90px 44px 34px;display:flex;flex-direction:column;gap:10px;min-height:320px;justify-content:flex-end}.s-hero h1{font-family:Dana;font-size:46px}.s-hero p{max-width:560px;color:#d6e1ef;font-size:17px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--line)}.facts div{padding:18px 26px;border-inline-start:1px solid var(--line);font-size:13px;color:var(--mute)}.facts div:first-child{border:0}.facts b{display:block;color:var(--p);font-family:Dana;font-size:18px}
+.s-body{max-width:740px;margin:auto;padding:30px 24px 36px}
+
+/* 3 tabs */
+.t-hero{padding:34px 44px;display:flex;align-items:center;gap:18px;background:var(--n7);color:#fff}.t-hero h1{font-family:Dana;font-size:34px}.t-hero p{color:#c4d3e5}
+.tabs{display:flex;gap:6px;padding:0 44px;background:var(--n7)}.tabs a{padding:12px 18px;border-radius:12px 12px 0 0;color:#c4d3e5;font-size:14px}.tabs a.on{background:#fff;color:var(--p);font-weight:700}
+.t-body{padding:30px 44px 40px;display:grid;grid-template-columns:1fr 300px;gap:34px}
+.qa{background:var(--paper);border-radius:14px;padding:16px 18px;align-self:start}.qa h4{font-family:Dana;color:var(--p);margin-bottom:6px}.qa li{font-size:13.5px}
+
+/* 4 timeline */
+.l-hero{padding:50px 44px 26px;text-align:center}.l-hero .ico{margin:0 auto 10px;width:84px;height:84px}.l-hero h1{font-family:Dana;font-size:38px;color:var(--p)}.l-hero p{color:var(--mute);max-width:560px;margin:6px auto 0}
+.lead{max-width:720px;margin:10px auto 0;padding:0 24px;font-size:18px;color:#33465e;text-align:center}
+.tl{max-width:720px;margin:28px auto;padding:0 24px;position:relative}.tl:before{content:"";position:absolute;inset-block:10px;inset-inline-start:48px;width:2px;background:var(--line)}
+.tl .st{display:flex;gap:20px;padding:12px 0}.tl .n{width:50px;height:50px;border-radius:50%;background:#fff;border:2px solid var(--g);color:var(--gd);display:grid;place-items:center;font-family:Lalezar;font-size:22px;flex:none;position:relative}
+.tl h3{font-family:Dana;color:var(--p);font-size:19px}.tl p{font-size:14px;color:var(--mute)}
+
+/* 5 split */
+.x-split{display:grid;grid-template-columns:1fr 1.2fr;min-height:560px}
+.x-photo{background:linear-gradient(0deg,#0b1828f2 4%,#0b182833 60%),url(../../../public/img/zamani/dr-zamani-op-2.webp) 34% center/cover;color:#fff;padding:36px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px}
+.x-photo h1{font-family:Dana;font-size:40px}.x-photo p{color:#d6e1ef}
+.glass{background:#ffffff1c;border:1px solid #ffffff44;border-radius:16px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;backdrop-filter:blur(4px)}
+.x-text{padding:40px 44px}
+
+/* phones */
+.phones{display:flex;gap:26px;justify-content:center;flex-wrap:wrap}
+.phone{width:300px;border-radius:30px;border:8px solid #14273d;overflow:hidden;background:#fff;box-shadow:0 14px 34px #14273d33;position:relative}
+.phone .pn{background:#0b1828;color:#fff;padding:8px 14px;display:flex;justify-content:space-between;font-size:12px}.phone .pn b{font-family:Lalezar;font-weight:400;color:var(--g);font-size:16px}
+.phone .pb{padding:14px 16px 70px}.phone h1{font-family:Dana;font-size:24px;color:var(--p)}.phone p{font-size:13px;color:var(--mute)}
+.phone .tab{position:absolute;inset-inline:0;bottom:0;background:#0b1828;color:#fff;display:flex;justify-content:space-around;padding:8px 0;font-size:11px}.phone .tab b{color:var(--g)}
+.phone .sticky{position:absolute;inset-inline:10px;bottom:10px;display:flex;gap:8px}.phone .sticky .btn{flex:1;justify-content:center;padding:8px}
+.note{max-width:1100px;margin:30px auto 60px;padding:0 20px;color:var(--mute);font-size:13px}
+@media(max-width:900px){.m-body,.t-body,.x-split{grid-template-columns:1fr}.others{grid-template-columns:1fr}.facts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="head"><h1>طرح‌های صفحه‌ی هر خدمت</h1>
+<p>این همان صفحه‌ای است که با زدن «مشاوره و اطلاعات بیشتر» روی کارت صفحه اصلی باز می‌شود. صفحه‌ی فهرست خدمات حذف شده است. پنج طرح می‌بینید؛ همه با رنگ، فونت و عکس خود سایت. متن اصلی همان متن غنی‌ای است که ادمین از پنل می‌نویسد. برچسب <span class="opt">اختیاری</span> یعنی آن بخش فقط با افزودن فیلد جداگانه در پنل ممکن است (مثلاً «اطلاعات کلیدی» یا «مراحل»)، و بدون آن، طرح بدون آن بخش هم کامل است. متن‌ها <span class="tag">نمایشی</span>‌اند و متن واقعی را پزشک تأیید می‌کند.</p></div>
+
+<section class="v"><div class="vl"><b>۱</b><strong>مجله‌ای با فهرست مطالب کنار صفحه</strong><span>عنوان‌های متن به‌طور خودکار فهرست کنار صفحه می‌شوند و کارت تماس همراه اسکرول می‌ماند. بدون هیچ فیلد جدید؛ فقط با متن غنی کار می‌کند.</span></div>
+<div class="frame"><div class="nav"><span class="cta">رزرو نوبت</span><div class="links"><span>تماس با ما</span><span>مقالات</span><span>خدمات</span><span>درباره ما</span><span>صفحه اصلی</span></div><span class="logo">دکتر فرزاد زمانی</span></div>
+<div class="ph m-hero"><div class="ico"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><div><h1>رینوپلاستی</h1><p>افزایش زیبایی چهره با طراحی متناسب بینی</p></div></div>
+<div class="m-body"><div class="rt"><h2>رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن درباره‌ی این خدمت. <span class="tag">نمایشی</span></p><h2>برای چه کسانی مناسب است؟</h2><ul><li>مواردی که پزشک پس از معاینه تشخیص می‌دهد</li><li>انتظار واقع‌بینانه از نتیجه</li></ul><h2>دوران بهبودی</h2><p>توضیح کلی؛ زمان دقیق را پزشک می‌گوید.</p><h2>خدمات دیگر</h2><div class="others"><div><img src="../../../public/img/services/belpharoplasty.png" alt="">بلفاروپلاستی</div><div><img src="../../../public/img/services/face-lift.png" alt="">لیفت صورت</div><div><img src="../../../public/img/services/mentoplasty.png" alt="">منتوپلاستی</div></div></div>
+<aside class="toc"><h4>در این صفحه</h4><a class="on">رینوپلاستی چیست؟</a><a>برای چه کسانی مناسب است؟</a><a>دوران بهبودی</a><a>خدمات دیگر</a><div class="box"><b>هماهنگی مراجعه</b><p>پرسش‌هایتان را با مطب مطرح کنید.</p><a class="btn g">تماس با مطب</a></div></aside></div></div></section>
+
+<section class="v"><div class="vl"><b>۲</b><strong>ویترین تمام‌عرض با نوار اطلاعات کلیدی</strong><span>تصویر بزرگ و عنوان درشت، زیرش سه اطلاعات کلیدی، سپس متن در یک ستون راحت‌خوان و نوار تماس. حس لوکس و کم‌شلوغ.</span></div>
+<div class="frame"><div class="nav"><span class="cta">رزرو نوبت</span><div class="links"><span>تماس با ما</span><span>مقالات</span><span>خدمات</span><span>درباره ما</span><span>صفحه اصلی</span></div><span class="logo">دکتر فرزاد زمانی</span></div>
+<div class="ph s-hero"><h1>رینوپلاستی</h1><p>افزایش زیبایی چهره با طراحی متناسب بینی</p><div style="display:flex;gap:10px;margin-top:6px"><a class="btn g">تماس با مطب</a><a class="btn w">راه‌های ارتباطی</a></div></div>
+<div class="facts"><div><b>مشاوره حضوری</b>پیش از هر اقدام <span class="opt">اختیاری</span></div><div><b>پیگیری پس از درمان</b>کنترل و پاسخ‌گویی <span class="opt">اختیاری</span></div><div><b>اراک</b>مطب دکتر زمانی</div></div>
+<div class="s-body rt"><h2>رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن؛ هر پاراگراف یک ایده. <span class="tag">نمایشی</span></p><h2>چه چیزی انتظار داشته باشید؟</h2><ul><li>مشاوره و ارزیابی اولیه</li><li>توضیح شفاف گزینه‌ها</li><li>پیگیری پس از درمان</li></ul><h2>خدمات دیگر</h2><div class="others"><div><img src="../../../public/img/services/belpharoplasty.png" alt="">بلفاروپلاستی</div><div><img src="../../../public/img/services/face-lift.png" alt="">لیفت صورت</div><div><img src="../../../public/img/services/mentoplasty.png" alt="">منتوپلاستی</div></div></div>
+<div class="band"><div><h3>برای هماهنگی با مطب تماس بگیرید</h3><p>پاسخ‌گویی در ساعات کاری</p></div><a class="btn g">تماس با مطب</a></div></div></section>
+
+<section class="v"><div class="vl"><b>۳</b><strong>سربرگ + تب‌ها + کارت پرسش سریع</strong><span>بخش‌ها در تب‌های جدا، پس صفحه کوتاه می‌ماند و کاربر سریع به «نقاهت» یا «پرسش‌ها» می‌رود. <span class="opt">نیاز به بخش‌بندی در پنل</span></span></div>
+<div class="frame"><div class="nav"><span class="cta">رزرو نوبت</span><div class="links"><span>تماس با ما</span><span>مقالات</span><span>خدمات</span><span>درباره ما</span><span>صفحه اصلی</span></div><span class="logo">دکتر فرزاد زمانی</span></div>
+<div class="t-hero"><div class="ico"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><div><h1>رینوپلاستی</h1><p>افزایش زیبایی چهره با طراحی متناسب بینی</p></div></div>
+<div class="tabs"><a class="on">معرفی</a><a>مناسب چه کسانی</a><a>مراحل</a><a>دوران نقاهت</a><a>پرسش‌ها</a></div>
+<div class="t-body"><div class="rt"><h2>رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن درباره‌ی این خدمت و هدف آن. <span class="tag">نمایشی</span></p><p style="margin-top:10px">برای ارزیابی و پاسخ به پرسش‌ها با مطب هماهنگ کنید.</p></div>
+<div><div class="qa"><h4>پرسش سریع دارید؟</h4><ul><li>ساعات کاری مطب</li><li>آدرس و نقشه</li><li>تماس تلفنی</li></ul><a class="btn g" style="width:100%;justify-content:center;margin-top:8px">تماس با مطب</a></div></div></div></div></section>
+
+<section class="v"><div class="vl"><b>۴</b><strong>روایت عمودی با «مسیر مراجعه»</strong><span>مثل یک داستان: جمله‌ی معرفی درشت، بعد مراحل مراجعه روی یک خط عمودی. اضطراب بیمار را کم می‌کند. <span class="opt">مراحل: فیلد اختیاری</span></span></div>
+<div class="frame"><div class="nav"><span class="cta">رزرو نوبت</span><div class="links"><span>تماس با ما</span><span>مقالات</span><span>خدمات</span><span>درباره ما</span><span>صفحه اصلی</span></div><span class="logo">دکتر فرزاد زمانی</span></div>
+<div class="l-hero"><div class="ico"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><h1>رینوپلاستی</h1><p>افزایش زیبایی چهره با طراحی متناسب بینی</p></div>
+<p class="lead">یک جمله‌ی معرفی روشن که اصل ماجرا را می‌گوید. <span class="tag">نمایشی</span></p>
+<div class="tl"><div class="st"><div class="n">۱</div><div><h3>تماس و هماهنگی</h3><p>تماس با مطب و تعیین زمان</p></div></div><div class="st"><div class="n">۲</div><div><h3>مشاوره و ارزیابی</h3><p>بررسی وضعیت و گزینه‌ها</p></div></div><div class="st"><div class="n">۳</div><div><h3>برنامه‌ی درمان</h3><p>توضیح شفاف و رضایت آگاهانه</p></div></div><div class="st"><div class="n">۴</div><div><h3>پیگیری</h3><p>کنترل و پاسخ‌گویی پس از درمان</p></div></div></div>
+<div class="band"><div><h3>آماده‌اید؟ با مطب هماهنگ کنید</h3><p>پاسخ‌گویی در ساعات کاری</p></div><a class="btn g">تماس با مطب</a></div></div></section>
+
+<section class="v"><div class="vl"><b>۵</b><strong>صفحه‌ی دوبخشی: عکس ثابت + متن</strong><span>عکس سینمایی در یک سمت با عنوان و دکمه‌ی تماس روی آن، متن در سمت دیگر اسکرول می‌شود. بسیار ویترینی؛ بدون فیلد جدید.</span></div>
+<div class="frame"><div class="nav"><span class="cta">رزرو نوبت</span><div class="links"><span>تماس با ما</span><span>مقالات</span><span>خدمات</span><span>درباره ما</span><span>صفحه اصلی</span></div><span class="logo">دکتر فرزاد زمانی</span></div>
+<div class="x-split"><div class="x-photo"><h1>رینوپلاستی</h1><p>افزایش زیبایی چهره با طراحی متناسب بینی</p><div class="glass"><span>برای هماهنگی با مطب</span><a class="btn g">تماس</a></div></div>
+<div class="x-text rt"><h2>رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن. <span class="tag">نمایشی</span></p><h2>برای چه کسانی مناسب است؟</h2><ul><li>مواردی که پزشک پس از معاینه تشخیص می‌دهد</li><li>انتظار واقع‌بینانه از نتیجه</li></ul><h2>پرسش‌های رایج <span class="opt">اختیاری</span></h2><div class="faq"><div><span>آیا نتیجه طبیعی خواهد بود؟</span><span>＋</span></div><div><span>تنفس چه تغییری می‌کند؟</span><span>＋</span></div></div><h2>خدمات دیگر</h2><div class="others"><div><img src="../../../public/img/services/belpharoplasty.png" alt="">بلفاروپلاستی</div><div><img src="../../../public/img/services/face-lift.png" alt="">لیفت صورت</div></div></div></div></div></section>
+
+<section class="v"><div class="vl"><b>📱</b><strong>موبایل (سه نمونه)</strong><span>در موبایل همه‌ی طرح‌ها تک‌ستونه می‌شوند. فهرست کنار صفحه به یک کارت بالای متن، و کارت تماس به دکمه‌های چسبان پایین صفحه تبدیل می‌شود.</span></div>
+<div class="phones">
+<div class="phone"><div class="pn"><span>رزرو نوبت</span><b>دکتر زمانی</b></div><div class="ph" style="padding:26px 16px"><h1 style="color:#fff">رینوپلاستی</h1><p style="color:#d6e1ef">طراحی متناسب بینی</p></div><div class="pb rt"><h2 style="font-size:18px">رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن. <span class="tag">نمایشی</span></p><h2 style="font-size:18px">برای چه کسانی؟</h2><p>موارد تشخیص پزشک.</p></div><div class="sticky"><a class="btn g">تماس با مطب</a><a class="btn o" style="background:#fff">رزرو</a></div></div>
+<div class="phone"><div class="pn"><span>رزرو نوبت</span><b>دکتر زمانی</b></div><div class="pb" style="text-align:center"><div class="ico" style="margin:6px auto;width:64px;height:64px"><img src="../../../public/img/services/rhinoplasty.png" alt=""></div><h1>رینوپلاستی</h1><p>طراحی متناسب بینی</p><div class="tl" style="padding:0;margin:12px 0"><div class="st" style="padding:6px 0;text-align:right"><div class="n" style="width:36px;height:36px;font-size:16px">۱</div><div><h3 style="font-size:15px">تماس و هماهنگی</h3></div></div><div class="st" style="padding:6px 0;text-align:right"><div class="n" style="width:36px;height:36px;font-size:16px">۲</div><div><h3 style="font-size:15px">مشاوره و ارزیابی</h3></div></div><div class="st" style="padding:6px 0;text-align:right"><div class="n" style="width:36px;height:36px;font-size:16px">۳</div><div><h3 style="font-size:15px">پیگیری</h3></div></div></div></div><div class="sticky"><a class="btn g">تماس با مطب</a></div></div>
+<div class="phone"><div class="pn"><span>رزرو نوبت</span><b>دکتر زمانی</b></div><div class="x-photo" style="min-height:220px;padding:18px"><h1 style="font-size:28px">رینوپلاستی</h1><div class="glass"><span style="font-size:12px">هماهنگی با مطب</span><a class="btn g" style="padding:4px 12px">تماس</a></div></div><div class="pb rt"><h2 style="font-size:18px">رینوپلاستی چیست؟</h2><p>توضیح کوتاه و روشن.</p></div></div>
+</div></section>
+
+<p class="note">پس از انتخاب شما، طرح برگزیده با همان متن غنی فعلی (ادمین از پنل می‌نویسد) پیاده می‌شود. بخش‌های «اختیاری» فقط اگر بخواهید فیلد جدا در پنل اضافه می‌شود.</p>
+</body>
+</html>
