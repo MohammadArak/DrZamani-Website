@@ -79,7 +79,7 @@ NAV = [("صفحه اصلی", "/"), ("درباره ما", "/#about-us"), ("خدم
 def site_header(clinic, *, crumbs=None, banner=True) -> str:
     """Photo banner with the site menu laid over it (same look as the homepage header)."""
     links = "".join(f'<a href="{href}">{label}</a>' for label, href in NAV)
-    out = f'<header class="legacy-article-header" dir="rtl" lang="fa">'
+    out = f'<header class="legacy-article-header{"" if banner else " legacy-article-header--bar"}" dir="rtl" lang="fa">'
     if banner:
         out += f'<img class="legacy-article-banner" src="/img/blog/article-header-surgeon.webp" alt="{esc(clinic.doctor_name)} در اتاق عمل" fetchpriority="high" width="2048" height="706">'
     out += (
@@ -268,28 +268,34 @@ def service_cards(services: list[dict]) -> str:
 
 
 def services_page(clinic, services: list[dict], service: dict, tel: str) -> str:
-    """One service page; tel is the already normalised +98 number. There is no services index page:
-    the menu and breadcrumbs point at the homepage services section."""
+    """Two-part service page: a fixed photo panel with the title and a call button, and the text beside it.
+    tel is the already normalised +98 number. There is no services index page: the menu and the breadcrumb
+    point at the homepage services section."""
     name = service["title"]
-    trail = [("صفحه اصلی", "/"), ("خدمات", "/#services"), (name, "")]
-    body = (
-        site_header(clinic, crumbs=trail)
-        + '<main class="legacy-article-page legacy-article-page--index legacy-service-page" dir="rtl" lang="fa"><div class="legacy-article-index-container"><section class="legacy-article-index">'
-        + f'<div class="legacy-ring legacy-ring--service"><img src="/img/services/{esc(service["image"])}" alt="" width="72" height="72"></div>'
-        + f'<h1>{esc(name)}</h1><span class="legacy-gold-rule" aria-hidden="true"><i></i></span>'
-        + f'<p class="legacy-article-lead legacy-service-lead">{esc(service["summary"])}</p>'
-        + f'<div class="legacy-service-body article-body">{service["description_html"]}</div>'
-        + '<div class="legacy-service-intro"><h2>هماهنگی مراجعه</h2><p>پرسش‌های خود درباره مراجعه را با مطب مطرح کنید. زمان مراجعه پس از هماهنگی با مطب مشخص می‌شود.</p>'
-        + f'<ul><li>{esc(clinic.doctor_name)}، {esc(clinic.specialty)}</li><li>{esc(clinic.address_city)}، {esc(clinic.address)}</li><li>{esc(clinic.working_hours)}</li></ul>'
-        + f'<div class="legacy-service-actions"><a class="legacy-header-cta" href="tel:{esc(tel)}">تماس با مطب</a><a class="legacy-outline-button" href="/#footer">راه‌های ارتباطی</a></div></div>'
-        + '<p class="legacy-disclaimer">این صفحه برای آشنایی است و جایگزین ویزیت و مشاوره‌ی پزشکی نیست؛ نتیجه‌ی درمان برای هر فرد متفاوت است.</p>'
-        + '<h2 class="legacy-service-heading">خدمات دیگر</h2>'
-        + service_cards(services)
-        + '<nav class="legacy-service-related" aria-label="مطالب مرتبط"><a href="/articles/">مقالات منتشرشده</a><a href="/#samples">نمونه‌کارها</a><a href="/#footer">ارتباط با مطب</a></nav>'
-        + "</section></div></main>"
+    crumb = (
+        '<nav class="svc2-crumb" aria-label="مسیر صفحه"><a href="/">صفحه اصلی</a><span aria-hidden="true">›</span>'
+        f'<a href="/#services">خدمات</a><span aria-hidden="true">›</span><span aria-current="page">{esc(name)}</span></nav>'
+    )
+    photo = (
+        '<aside class="svc2-photo"><img src="/img/zamani/dr-zamani-op-2.webp" alt="" width="1920" height="1281" fetchpriority="high">'
+        f'<div class="svc2-photo-in">{crumb}<div class="svc2-ring"><img src="/img/services/{esc(service["image"])}" alt="" width="52" height="52"></div>'
+        f'<h1>{esc(name)}</h1><p>{esc(service["summary"])}</p>'
+        f'<div class="svc2-glass"><span>برای هماهنگی با مطب</span><a href="tel:{esc(tel)}">تماس</a></div></div></aside>'
+    )
+    text = (
+        '<div class="svc2-text"><div class="legacy-service-body article-body">' + service["description_html"] + '</div>'
+        '<div class="legacy-service-intro"><h2>هماهنگی مراجعه</h2><p>پرسش‌های خود درباره مراجعه را با مطب مطرح کنید. زمان مراجعه پس از هماهنگی با مطب مشخص می‌شود.</p>'
+        f'<ul><li>{esc(clinic.doctor_name)}، {esc(clinic.specialty)}</li><li>{esc(clinic.address_city)}، {esc(clinic.address)}</li><li>{esc(clinic.working_hours)}</li></ul>'
+        f'<div class="legacy-service-actions"><a class="legacy-header-cta" href="tel:{esc(tel)}">تماس با مطب</a><a class="legacy-outline-button" href="/#footer">راه‌های ارتباطی</a></div></div>'
+        '<p class="legacy-disclaimer">این صفحه برای آشنایی است و جایگزین ویزیت و مشاوره‌ی پزشکی نیست؛ نتیجه‌ی درمان برای هر فرد متفاوت است.</p>'
+        '<h2 class="legacy-service-heading">خدمات دیگر</h2>' + service_cards([item for item in services if item["slug"] != service["slug"]])
+        + '<nav class="legacy-service-related" aria-label="مطالب مرتبط"><a href="/articles/">مقالات منتشرشده</a><a href="/#samples">نمونه‌کارها</a><a href="/#footer">ارتباط با مطب</a></nav></div>'
+    )
+    return (
+        site_header(clinic, banner=False)
+        + f'<main class="svc2 legacy-article-page legacy-service-page" dir="rtl" lang="fa">{photo}{text}</main>'
         + site_footer(clinic)
     )
-    return body
 
 
 def reserve_dialog(message: str) -> str:

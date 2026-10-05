@@ -16,8 +16,8 @@ const totalCss=files.filter(r=>r.name.endsWith(".css")).reduce((sum,r)=>sum+r.gz
 const entry=prefix=>files.filter(r=>r.name.startsWith(prefix+"-")&&r.name.endsWith(".js")).reduce((sum,r)=>sum+r.gzipBytes,0);
 const measurements={main:entry("index"),staff:entry("Staff"),patientGate:entry("Appointment"),patientSession:entry("AppointmentPortalV2"),allJs:totalJs,allCss:totalCss};
 // Compressed artifact limits; these do not represent LCP, INP or field performance.
-// allCss was raised from 23000 to 24500 for the server-rendered article/service page styles (content.css).
-const limits={main:102000,staff:27000,patientGate:1500,patientSession:5000,allJs:470000,allCss:24500};
+// allCss was raised from 23000 to 24500 for the server-rendered article/service page styles (content.css), then to 25000 for the split service page and the reserve-dialog twin.
+const limits={main:102000,staff:27000,patientGate:1500,patientSession:5000,allJs:470000,allCss:25000};
 if(!measurements.main||!measurements.staff||!measurements.patientGate||!measurements.patientSession||!totalCss)throw new Error("Required build entries are missing");
 const failures=Object.keys(limits).filter(key=>measurements[key]>limits[key]);
 const report={version:(await readFile("VERSION","utf8")).trim(),measurements,limits,files,failures};
