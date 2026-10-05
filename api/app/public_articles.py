@@ -2,7 +2,7 @@
 import html
 import json
 from urllib.parse import quote
-from fastapi import Depends, Query, HTTPException
+from fastapi import Depends, Query, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -78,4 +78,4 @@ def detail_slash(slug:str):return RedirectResponse(article_url(slug),status_code
 
 
 @router.get('/media/{key}.webp')
-def media(key:str,db:Session=Depends(get_db)):return public_file(key,db)
+def media(key:str,request:Request,w:int|None=Query(None),db:Session=Depends(get_db)):return public_file(key,db,request,w)
