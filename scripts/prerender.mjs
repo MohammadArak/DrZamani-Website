@@ -252,8 +252,8 @@ const setImagePreloads = (html, images = []) => {
     );
     const tags = images
         .map(
-            ({ href, type }) =>
-                `    <link rel="preload" as="image" href="${escapeHtml(href)}" type="${escapeHtml(type)}" fetchpriority="high" />`,
+            ({ href, type, srcset, sizes }) =>
+                `    <link rel="preload" as="image" href="${escapeHtml(href)}"${srcset ? ` imagesrcset="${escapeHtml(srcset)}" imagesizes="${escapeHtml(sizes ?? "100vw")}"` : ""} type="${escapeHtml(type)}" fetchpriority="high" />`,
         )
         .join("\n");
 
@@ -539,6 +539,8 @@ const homeDocument = prepareDocument({
         {
             href: "/img/zamani/dr-zamani-hero.webp",
             type: "image/webp",
+            srcset: "/img/zamani/dr-zamani-hero-560.webp 560w, /img/zamani/dr-zamani-hero.webp 1018w",
+            sizes: "(max-width: 1024px) 400px, 500px",
         },
     ],
     schema: [

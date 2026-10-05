@@ -16,16 +16,40 @@ const LazyIframe = ({
     timeout = 5000,
     fallbackHref = "",
 }: LazyIframeProps) => {
+    const [active, setActive] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
+        if (!active) return;
         const timer = setTimeout(() => {
             setFailed(true);
         }, timeout);
 
         return () => clearTimeout(timer);
-    }, [src, timeout]);
+    }, [active, src, timeout]);
+
+    // The third-party map (cookies, tracking, ~1 MB) only loads when the visitor asks for it.
+    if (!active) {
+        return (
+            <div className={`relative overflow-hidden ${className}`}>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/5 text-center">
+                    <button
+                        type="button"
+                        onClick={() => setActive(true)}
+                        className="rounded-xl bg-secondary px-5 py-2 text-sm font-bold text-white hover:bg-secondary-deep"
+                    >
+                        نمایش نقشه
+                    </button>
+                    {fallbackHref && (
+                        <a href={fallbackHref} target="_blank" rel="noreferrer noopener" className="text-sm text-secondary underline">
+                            مشاهده آدرس روی نقشه
+                        </a>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`relative overflow-hidden ${className}`}>

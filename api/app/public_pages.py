@@ -51,6 +51,15 @@ def render(clinic, page, db=None, editorial=None):
         # Do not mount the homepage SPA over the indexable article body.
         # Module scripts stay: they only mount the shared header/footer into #site-header / #site-footer (data-shell).
         head = re.sub(r'<script\b(?![^>]*type=["\']module["\'])[^>]*>.*?</script>', '', head, flags=re.S | re.I)
+    if editorial:
+        # The template preloads the homepage hero photo; inner pages preload their own largest image instead.
+        head = re.sub(r'<link\b[^>]*rel=["\']preload["\'][^>]*as=["\']image["\'][^>]*>', '', head, flags=re.I)
+        preload = editorial.get('preload')
+        if isinstance(preload, dict):
+            head += (f'<link rel="preload" as="image" href="{html.escape(preload["href"])}" imagesrcset="{html.escape(preload["srcset"])}" '
+                     f'imagesizes="{html.escape(preload["sizes"])}" fetchpriority="high">')
+        elif preload:
+            head += f'<link rel="preload" as="image" href="{html.escape(preload)}" fetchpriority="high">'
     head = re.sub(r"<title\b[^>]*>.*?</title>|<script\b(?=[^>]*type=[\"']application/(?:ld\+json|json)[\"'])[^>]*>.*?</script>", "", head, flags=re.S | re.I)
     head = re.sub(r"<meta\b[^>]*>|<link\b(?=[^>]*rel=[\"']canonical[\"'])[^>]*>", "", head, flags=re.I)
     esc = html.escape

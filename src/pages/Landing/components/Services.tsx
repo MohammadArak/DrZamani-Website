@@ -31,8 +31,13 @@ const Services = () => {
                 }}
                 viewport={{ once: true }}
                 className="absolute left-25 bottom-25 z-10 hidden lg:block blur-xl"
-                src="/img/services/cloud-1.png"
-                alt="بک گراند ابری رنگ آبی"
+                src="/img/services/cloud-1.webp"
+                alt=""
+                aria-hidden="true"
+                width={510}
+                height={353}
+                loading="lazy"
+                decoding="async"
             />
             <motion.img
                 initial={{ opacity: 0, y: -40 }}
@@ -44,18 +49,29 @@ const Services = () => {
                 }}
                 viewport={{ once: true }}
                 className="absolute right-25 top-25 z-10 hidden lg:block blur-xl"
-                src="/img/services/cloud-2.png"
-                alt="بک گراند ابری رنگ آبی"
+                src="/img/services/cloud-2.webp"
+                alt=""
+                aria-hidden="true"
+                width={443}
+                height={390}
+                loading="lazy"
+                decoding="async"
             />
             <img
                 className="absolute top-0 z-10 hidden lg:block"
                 src="/img/services/dashed-line-up.png"
-                alt="خط خط افقی بالا"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
             />
             <img
                 className="absolute -bottom-20 left-10 z-10 hidden lg:block"
                 src="/img/services/dashed-line-bottom.png"
-                alt="خط افقی پایین"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
             />
             <div className="flex flex-col gap-4 items-center z-20">
                 <motion.div

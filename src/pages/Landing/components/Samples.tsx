@@ -88,6 +88,8 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
                     <button
                         key={idx}
                         onClick={() => instanceRef.current?.moveToIdx(idx)}
+                        aria-label={`نمایش تصویر ${idx + 1}`}
+                        aria-current={current === idx ? "true" : undefined}
                         className={`h-2 rounded-full transition-all duration-300 ${
                             current === idx
                                 ? "w-6 bg-secondary"

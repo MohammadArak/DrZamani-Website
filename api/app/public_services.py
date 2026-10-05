@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from .content import sanitize
 from .database import get_db
-from .public_chrome import service_cards as build_cards, services_page
+from .public_chrome import DEFAULT_HERO, DEFAULT_HERO_SMALL, service_cards as build_cards, services_page
 from .public_pages import clinic_row, phone, render
 from .site_services import HOME_LIMIT, public_items
 
@@ -30,8 +30,12 @@ def page(db, service):
         {"@type": "ListItem", "position": 1, "name": "صفحه اصلی", "item": site + '/'},
         {"@type": "ListItem", "position": 2, "name": name, "item": site + path},
     ]
+    if service.get("hero_key"):
+        hero = f'/media/{service["hero_key"]}.webp'
+    else:
+        hero = {"href": DEFAULT_HERO_SMALL, "srcset": f"{DEFAULT_HERO_SMALL} 960w, {DEFAULT_HERO} 1920w", "sizes": "(max-width:860px) 100vw, 45vw"}
     return render(clinic, "services", db, editorial={
-        "title": title, "description": description, "path": path, "body": body,
+        "title": title, "description": description, "path": path, "body": body, "preload": hero,
         "schemas": [{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": crumbs}],
     })
 
