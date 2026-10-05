@@ -73,27 +73,34 @@ def safe_https(url: str) -> str:
     return url if parsed.scheme == "https" and parsed.hostname and not parsed.username else ""
 
 
-NAV = [("صفحه اصلی", "/"), ("درباره ما", "/#about-us"), ("خدمات", "/#services"), ("مقالات", "/articles/"), ("تماس با ما", "/#footer")]
+NAV = [("صفحه اصلی", "/"), ("درباره ما", "/#about-us"), ("خدمات", "/#services"), ("مقالات", "/articles/"), ("تماس با ما", "#footer")]
 
 
 def site_header(clinic, *, crumbs=None, banner=True) -> str:
-    """Photo banner with the site menu laid over it (same look as the homepage header)."""
+    """Header area of a server-rendered page.
+
+    #site-header receives the same React header the homepage uses (see src/islands.tsx). The plain nav inside it is
+    the fallback for crawlers and no-JS visitors: hidden by CSS and shown again in <noscript>. With banner=True the
+    React header floats transparently over the photo banner like on the homepage hero; otherwise it is a solid bar.
+    """
     links = "".join(f'<a href="{href}">{label}</a>' for label, href in NAV)
-    out = f'<header class="legacy-article-header{"" if banner else " legacy-article-header--bar"}" dir="rtl" lang="fa">'
-    if banner:
-        out += f'<img class="legacy-article-banner" src="/img/blog/article-header-surgeon.webp" alt="{esc(clinic.doctor_name)} در اتاق عمل" fetchpriority="high" width="2048" height="706">'
-    out += (
-        f'<nav class="legacy-site-nav" aria-label="منوی اصلی"><a class="legacy-brand" href="/" aria-label="صفحه اصلی">'
-        f'<img src="/img/logo/logo-dark-full.webp" alt="{esc(clinic.doctor_name)}" width="250" height="78"></a>'
-        f'<div class="legacy-nav-links">{links}</div><a class="legacy-reserve-btn" href="/appointment/" data-reserve aria-label="رزرو نوبت">رزرو نوبت</a></nav>'
+    out = (
+        f'<div id="site-header" data-solid="{0 if banner else 1}"><nav class="legacy-site-nav chrome-fallback" aria-label="منوی اصلی">'
+        f'<a class="legacy-brand" href="/" aria-label="صفحه اصلی"><img src="/img/logo/logo-dark-full.webp" alt="{esc(clinic.doctor_name)}" width="250" height="78"></a>'
+        f'<div class="legacy-nav-links">{links}</div><a class="legacy-header-cta" href="/appointment/">رزرو نوبت</a></nav>'
+        '<noscript><style>.chrome-fallback{visibility:visible!important}</style></noscript></div>'
     )
-    if crumbs:
-        trail = "<span aria-hidden=\"true\">›</span>".join(f'<a href="{esc(href)}">{esc(label)}</a>' for label, href in crumbs[:-1])
-        out += (
-            '<nav class="legacy-hero-crumbs" aria-label="مسیر صفحه">'
-            f'<div class="legacy-crumb-trail">{trail}</div><span class="legacy-crumb-title" aria-current="page">{esc(crumbs[-1][0])}</span></nav>'
-        )
-    return out + "</header>"
+    if banner:
+        out += '<header class="legacy-article-header" dir="rtl" lang="fa">'
+        out += f'<img class="legacy-article-banner" src="/img/blog/article-header-surgeon.webp" alt="{esc(clinic.doctor_name)} در اتاق عمل" fetchpriority="high" width="2048" height="706">'
+        if crumbs:
+            trail = "<span aria-hidden=\"true\">›</span>".join(f'<a href="{esc(href)}">{esc(label)}</a>' for label, href in crumbs[:-1])
+            out += (
+                '<nav class="legacy-hero-crumbs" aria-label="مسیر صفحه">'
+                f'<div class="legacy-crumb-trail">{trail}</div><span class="legacy-crumb-title" aria-current="page">{esc(crumbs[-1][0])}</span></nav>'
+            )
+        out += "</header>"
+    return out
 
 
 def site_footer(clinic) -> str:
@@ -111,7 +118,7 @@ def site_footer(clinic) -> str:
     if safe_https(clinic.map_page_url):
         map_html += f'<a class="legacy-map-link" href="{esc(clinic.map_page_url)}" rel="noopener noreferrer">{icon("pin")} مشاهده آدرس روی نقشه</a>'
     return (
-        '<footer class="legacy-article-footer" dir="rtl"><div class="legacy-footer-columns">'
+        '<div id="site-footer"><footer id="footer" class="legacy-article-footer chrome-fallback" dir="rtl"><div class="legacy-footer-columns">'
         f'<section class="legacy-footer-brand"><a href="/"><img src="/img/logo/logo-dark-full.webp" alt="{esc(clinic.doctor_name)}" width="250" height="78" loading="lazy"></a><span class="legacy-diamond-rule" aria-hidden="true"><i></i></span>'
         f'<p>در مطب {esc(clinic.doctor_name)}، تلفیق تجربه و هنر جراحی، مسیر دستیابی به زیبایی طبیعی و عملکرد بهتر را هموار می‌کند. هدف ما ارائه نتایجی ماندگار، متناسب با چهره و مطابق با بالاترین استانداردهای پزشکی است؛ زیرا اعتماد شما، ارزشمندترین سرمایه ماست.</p></section>'
         f'<section><h2>لینک ها</h2><ul class="legacy-footer-links">{link_html}</ul></section>'
@@ -121,7 +128,7 @@ def site_footer(clinic) -> str:
         f'<div class="legacy-socials">{social}</div></section>'
         f'<section><h2>آدرس ما روی نقشه</h2><p>{esc(clinic.address)}</p>{map_html}</section>'
         '</div><div class="legacy-footer-bottom"><span class="legacy-diamond-rule" aria-hidden="true"><i></i></span>'
-        f'<p>تمامی حقوق این وبسایت متعلق به <a href="/">{esc(clinic.doctor_name)}</a> می‌باشد و هر گونه کپی برداری از آن بدون ذکر منبع پیگرد قانونی خواهد داشت.</p></div></footer>'
+        f'<p>تمامی حقوق این وبسایت متعلق به <a href="/">{esc(clinic.doctor_name)}</a> می‌باشد و هر گونه کپی برداری از آن بدون ذکر منبع پیگرد قانونی خواهد داشت.</p></div></footer></div>'
     )
 
 
@@ -268,45 +275,29 @@ def service_cards(services: list[dict]) -> str:
 
 
 def services_page(clinic, services: list[dict], service: dict, tel: str) -> str:
-    """Two-part service page: a fixed photo panel with the title and a call button, and the text beside it.
-    tel is the already normalised +98 number. There is no services index page: the menu and the breadcrumb
-    point at the homepage services section."""
+    """Two-part service page: a fixed photo panel (title, summary, call button) and the text beside it.
+    Everything in the text column is the rich text edited in the staff panel; tel is the normalised +98 number.
+    The photo is the one chosen for this service (public media) or a default. There is no services index page."""
     name = service["title"]
+    hero = f'/media/{esc(service["hero_key"])}.webp' if service.get("hero_key") else "/img/zamani/dr-zamani-op-2.webp"
     crumb = (
         '<nav class="svc2-crumb" aria-label="مسیر صفحه"><a href="/">صفحه اصلی</a><span aria-hidden="true">›</span>'
         f'<a href="/#services">خدمات</a><span aria-hidden="true">›</span><span aria-current="page">{esc(name)}</span></nav>'
     )
     photo = (
-        '<aside class="svc2-photo"><img src="/img/zamani/dr-zamani-op-2.webp" alt="" width="1920" height="1281" fetchpriority="high">'
+        f'<aside class="svc2-photo"><img src="{hero}" alt="" width="1920" height="1281" fetchpriority="high">'
         f'<div class="svc2-photo-in">{crumb}<div class="svc2-ring"><img src="/img/services/{esc(service["image"])}" alt="" width="52" height="52"></div>'
         f'<h1>{esc(name)}</h1><p>{esc(service["summary"])}</p>'
         f'<div class="svc2-glass"><span>برای هماهنگی با مطب</span><a href="tel:{esc(tel)}">تماس</a></div></div></aside>'
     )
+    others = [item for item in services if item["slug"] != service["slug"]]
     text = (
         '<div class="svc2-text"><div class="legacy-service-body article-body">' + service["description_html"] + '</div>'
-        '<div class="legacy-service-intro"><h2>هماهنگی مراجعه</h2><p>پرسش‌های خود درباره مراجعه را با مطب مطرح کنید. زمان مراجعه پس از هماهنگی با مطب مشخص می‌شود.</p>'
-        f'<ul><li>{esc(clinic.doctor_name)}، {esc(clinic.specialty)}</li><li>{esc(clinic.address_city)}، {esc(clinic.address)}</li><li>{esc(clinic.working_hours)}</li></ul>'
-        f'<div class="legacy-service-actions"><a class="legacy-header-cta" href="tel:{esc(tel)}">تماس با مطب</a><a class="legacy-outline-button" href="/#footer">راه‌های ارتباطی</a></div></div>'
-        '<p class="legacy-disclaimer">این صفحه برای آشنایی است و جایگزین ویزیت و مشاوره‌ی پزشکی نیست؛ نتیجه‌ی درمان برای هر فرد متفاوت است.</p>'
-        '<h2 class="legacy-service-heading">خدمات دیگر</h2>' + service_cards([item for item in services if item["slug"] != service["slug"]])
-        + '<nav class="legacy-service-related" aria-label="مطالب مرتبط"><a href="/articles/">مقالات منتشرشده</a><a href="/#samples">نمونه‌کارها</a><a href="/#footer">ارتباط با مطب</a></nav></div>'
+        + ('<h2 class="legacy-service-heading">خدمات دیگر</h2>' + service_cards(others) if others else "")
+        + '</div>'
     )
     return (
         site_header(clinic, banner=False)
         + f'<main class="svc2 legacy-article-page legacy-service-page" dir="rtl" lang="fa">{photo}{text}</main>'
         + site_footer(clinic)
-    )
-
-
-def reserve_dialog(message: str) -> str:
-    """Hidden twin of the homepage reserve dialog (shown by /reserve.js when online booking is off)."""
-    return (
-        '<div class="drz-dialog-overlay" data-reserve-dialog hidden>'
-        '<div class="drz-dialog" role="dialog" aria-modal="true" aria-label="رزرو نوبت" tabindex="-1" dir="rtl">'
-        '<button type="button" class="drz-dialog-close" data-reserve-close aria-label="بستن">'
-        '<svg viewBox="0 0 20 20" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" '
-        'd="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></button>'
-        f'<div class="drz-dialog-body"><h5>رزرو نوبت</h5><p>{esc(message)}</p></div>'
-        '<div class="drz-dialog-footer"><button type="button" class="drz-dialog-ok" data-reserve-close>متوجه شدم</button></div>'
-        '</div></div>'
     )

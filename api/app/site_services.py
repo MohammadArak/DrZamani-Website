@@ -39,6 +39,7 @@ class ServiceContent(BaseModel):
     tile_label: str = Field(default="", max_length=60)
     description_html: str = Field(default="", max_length=100000)
     image: str = Field(default=IMAGES[0], max_length=40)
+    hero_key: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}$")  # public-media photo on the page's side panel
     seo_title: str = Field(default="", max_length=200)
     seo_description: str = Field(default="", max_length=400)
     sort_order: int = Field(default=0, ge=0, le=10000)
@@ -81,6 +82,8 @@ def clean(db: Session, content: ServiceContent) -> dict:
     if len(parser.images) > 40:
         raise HTTPException(422, "هر صفحه خدمت حداکثر ۴۰ تصویر می‌پذیرد")
     keys = {m.group(1) for image in parser.images if (m := c.MEDIA_RE.fullmatch(image.get("src", "")))}
+    if data["hero_key"]:
+        keys.add(data["hero_key"])
     if keys and set(db.scalars(select(PublicMedia.key).where(PublicMedia.key.in_(keys), PublicMedia.deleted.is_(False)))) != keys:
         raise HTTPException(422, "تصویر باید از کتابخانه رسانه عمومی فعال انتخاب شود")
     return data
@@ -100,9 +103,14 @@ def slug_taken(db: Session, slug: str, service_id: int | None = None) -> bool:
     return other is not None and other != service_id
 
 
+def _norm(raw: dict) -> dict:
+    """Rows saved before a field existed get its default, so drafts and published copies compare cleanly."""
+    return {"hero_key": None, **raw}
+
+
 def read(row: SiteService) -> dict:
-    content = json.loads(row.content_json)
-    published = json.loads(row.published_json) if row.published_json else None
+    content = _norm(json.loads(row.content_json))
+    published = _norm(json.loads(row.published_json)) if row.published_json else None
     return dict(
         id=row.id, revision=row.revision, content=content, published=published is not None,
         unpublished_changes=bool(published is not None and published != content),
@@ -115,7 +123,7 @@ def public_items(db: Session) -> list[dict]:
     rows = db.scalars(select(SiteService).where(SiteService.deleted.is_(False), SiteService.published_json.is_not(None))).all()
     items = []
     for row in rows:
-        data = json.loads(row.published_json)
+        data = _norm(json.loads(row.published_json))
         data["id"] = row.id
         data["updated_at"] = row.public_updated_at or row.updated_at
         items.append(data)
@@ -125,7 +133,8 @@ def public_items(db: Session) -> list[dict]:
 def public_media_keys(db: Session) -> set[str]:
     keys: set[str] = set()
     for row in db.scalars(select(SiteService).where(SiteService.deleted.is_(False), SiteService.published_json.is_not(None))):
-        keys |= c.media_keys(json.dumps({"body_html": json.loads(row.published_json)["description_html"], "cover_key": None}))
+        published = _norm(json.loads(row.published_json))
+        keys |= c.media_keys(json.dumps({"body_html": published["description_html"], "cover_key": published["hero_key"]}))
     return keys
 
 
@@ -134,7 +143,8 @@ def media_keys_in_use(db: Session) -> set[str]:
     for row in db.scalars(select(SiteService).where(SiteService.deleted.is_(False))):
         for snapshot in (row.content_json, row.published_json):
             if snapshot:
-                keys |= c.media_keys(json.dumps({"body_html": json.loads(snapshot)["description_html"], "cover_key": None}))
+                stored = _norm(json.loads(snapshot))
+                keys |= c.media_keys(json.dumps({"body_html": stored["description_html"], "cover_key": stored["hero_key"]}))
     return keys
 
 

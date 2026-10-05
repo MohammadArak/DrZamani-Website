@@ -95,7 +95,7 @@ def test_services_pages_show_text_phone_and_escape():
     detail = chrome.services_page(clinic, services, services[0], "+98861111111")
     assert "توضیح کامل خدمت" in detail and "tel:+98861111111" in detail and "<script>fixture()" not in detail
     assert 'href="/#services"' in detail and 'href="/services/"' not in detail  # no services index page any more
-    assert 'class="svc2' in detail and 'class="svc2-photo"' in detail and 'legacy-article-header--bar' in detail  # two-part layout with a solid header bar
+    assert 'class="svc2' in detail and 'class="svc2-photo"' in detail and 'id="site-header" data-solid="1"' in detail  # two-part layout with a solid header bar
 
 
 def test_header_puts_page_title_on_its_own_line_after_the_trail():
