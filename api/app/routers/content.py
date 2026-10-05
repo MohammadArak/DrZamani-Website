@@ -1,11 +1,13 @@
 import json
+import os
 import secrets
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
-from fastapi.responses import FileResponse
+from fastapi import Request
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy import select, func
@@ -235,7 +237,36 @@ def media_delete(key:str,db:Session=Depends(get_db),staff=Depends(require_permis
     db.commit();return {'message':'رسانه بایگانی شد'}
 
 
-def public_file(key,db):
+MEDIA_WIDTHS=(320,480,640,960,1280)
+
+
+def media_variant(original,width):
+    """A smaller copy of a public photo (made once, next to the original); photos narrower than the request are served as they are."""
+    target=original.with_name(f'{original.stem}.w{width}.webp')
+    if target.is_file() and target.stat().st_mtime>=original.stat().st_mtime:return target
+    try:
+        with Image.open(original) as source:
+            if source.width<=width:return original
+            image=source.copy()
+    except (OSError,ValueError,Image.DecompressionBombError):raise HTTPException(404,'رسانه پیدا نشد') from None
+    image.thumbnail((width,width*8),Image.Resampling.LANCZOS)
+    temporary=original.with_name(f'{original.stem}.{secrets.token_hex(6)}.tmp')
+    try:
+        image.save(temporary,format='WEBP',quality=80,method=6);os.replace(temporary,target)
+    finally:temporary.unlink(missing_ok=True)
+    return target
+
+
+def public_file(key,db,request=None,width=None):
     media_row(db,key)
     if not c.is_public_media(db,key):raise HTTPException(404,'رسانه عمومی پیدا نشد')
-    return FileResponse(media_path(key),media_type='image/webp',headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
+    path=media_path(key)
+    if width is not None:
+        if width not in MEDIA_WIDTHS:raise HTTPException(400,'اندازه تصویر مجاز نیست')
+        path=media_variant(path,width)
+    # no-cache = the browser may keep the file but must ask first, so an unpublished photo stops being served at once.
+    headers={'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'}
+    response=FileResponse(path,media_type='image/webp',stat_result=os.stat(path),headers=headers)
+    if request is not None and request.headers.get('if-none-match')==response.headers['etag']:
+        return Response(status_code=304,headers={'ETag':response.headers['etag'],**headers})
+    return response

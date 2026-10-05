@@ -138,10 +138,21 @@ def article_url(slug: str) -> str:
     return "/articles/" + quote(slug) + "/"
 
 
-def cover(data: dict, *, lazy: bool = True) -> str:
+CARD_SIZES = "(min-width:1000px) 33vw, (min-width:601px) 50vw, 100vw"
+
+
+def cover_srcset(key: str, widths=(320, 480, 640, 960)) -> str:
+    return ", ".join(f"/media/{esc(key)}.webp?w={width} {width}w" for width in widths)
+
+
+def cover(data: dict, *, lazy: bool = True, sizes: str = CARD_SIZES, widths=(320, 480, 640, 960)) -> str:
     if not data.get("cover_key"):
         return ""
-    return f'<img src="/media/{esc(data["cover_key"])}.webp" alt="{esc(data.get("cover_alt", ""))}" loading="{"lazy" if lazy else "eager"}" decoding="async" width="480" height="300">'
+    key = data["cover_key"]
+    return (
+        f'<img src="/media/{esc(key)}.webp" srcset="{cover_srcset(key, widths)}" sizes="{sizes}" alt="{esc(data.get("cover_alt", ""))}" '
+        f'loading="{"lazy" if lazy else "eager"}" decoding="async" width="480" height="300">'
+    )
 
 
 def article_card(item: dict, order: int = 0) -> str:
@@ -168,7 +179,7 @@ def sidebar(items: list[dict], *, current_slug: str = "", q: str = "") -> str:
     latest = ""
     for item in [i for i in items if i["slug"] != current_slug][:4]:
         cat = item["categories"][0] if item.get("categories") else "مقالات"
-        latest += f'<li><a href="{article_url(item["slug"])}">{cover(item) or "<i></i>"}<span><small>{esc(cat)}</small>{esc(item["title"])}</span></a></li>'
+        latest += f'<li><a href="{article_url(item["slug"])}">{cover(item, sizes="96px", widths=(320,)) or "<i></i>"}<span><small>{esc(cat)}</small>{esc(item["title"])}</span></a></li>'
     return (
         '<aside class="legacy-article-sidebar rv" style="--i:2" aria-label="ابزارهای مقالات">'
         f'<section><h2>{icon("search")}جست‌وجو</h2><form action="/articles/" method="get"><label for="article-search-static">جست‌وجو در مقالات</label>'
@@ -232,7 +243,7 @@ def detail_content(data: dict, *, published_at, updated_at, body_html: str, toc_
     tags = "".join(f'<a href="/articles/tag/{quote(name)}/">{esc(name)}</a>' for name in data.get("tags", []))
     cover_html = ""
     if data.get("cover_key"):
-        cover_html = f'<img class="article-cover rv" style="--i:1" src="/media/{esc(data["cover_key"])}.webp" alt="{esc(data.get("cover_alt", ""))}" width="960" height="600">'
+        cover_html = f'<img class="article-cover rv" style="--i:1" src="/media/{esc(data["cover_key"])}.webp" srcset="{cover_srcset(data["cover_key"], (640, 960, 1280))}" sizes="(min-width:1000px) 830px, 100vw" alt="{esc(data.get("cover_alt", ""))}" width="960" height="600">'
     return (
         '<article class="legacy-article-detail"><header class="legacy-detail-head rv"><div class="legacy-card-meta">'
         f'<span class="legacy-pill">{esc(category)}</span><span class="legacy-meta-item">{icon("calendar")}انتشار: <time datetime="{published_at.isoformat()}">{esc(fa_date(published_at))}</time></span>'
@@ -282,7 +293,7 @@ def services_page(clinic, services: list[dict], service: dict, tel: str) -> str:
     The photo is the one chosen for this service (public media) or a default. There is no services index page."""
     name = service["title"]
     if service.get("hero_key"):
-        hero_attrs = f'src="/media/{esc(service["hero_key"])}.webp"'
+        hero_attrs = f'src="/media/{esc(service["hero_key"])}.webp" srcset="{cover_srcset(service["hero_key"], (640, 960, 1280))}" sizes="(max-width:860px) 100vw, 45vw"'
     else:  # the default photo comes in two sizes so phones do not download the 1920 px one
         hero_attrs = f'src="{DEFAULT_HERO_SMALL}" srcset="{DEFAULT_HERO_SMALL} 960w, {DEFAULT_HERO} 1920w" sizes="(max-width:860px) 100vw, 45vw"'
     crumb = (
