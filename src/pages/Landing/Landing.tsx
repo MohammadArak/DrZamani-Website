@@ -6,7 +6,6 @@ import Seo from "@/components/SEO";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
 const AboutUs = lazy(() => import("./components/AboutUs"));
-const TrustStrip = lazy(() => import("./components/TrustStrip"));
 const MobileTabBar = lazy(() => import("./components/MobileTabBar"));
 const Services = lazy(() => import("./components/Services"));
 const PatientsComments = lazy(() => import("./components/PatientsComments"));
@@ -45,9 +44,6 @@ const Landing = () => {
             <main className="text-base pb-16 md:pb-0">
                 <NavigationBar />
                 <HeroContent />
-                <Suspense fallback={null}>
-                    <TrustStrip />
-                </Suspense>
                 <Suspense fallback={<SectionFallback />}>
                     <AboutUs />
                 </Suspense>

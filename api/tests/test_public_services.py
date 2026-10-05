@@ -41,7 +41,9 @@ def test_all_services_have_initial_html_canonical_and_breadcrumb(service_client)
 
 
 def test_aliases_and_unknown_service_are_real_redirect_or_404(service_client):
-    assert service_client.get('/services', follow_redirects=False).headers['location'] == '/services/'
+    for path in ['/services', '/services/']:  # the index page is gone: old links land on the homepage section
+        moved = service_client.get(path, follow_redirects=False)
+        assert moved.status_code == 301 and moved.headers['location'] == '/#services'
     assert service_client.get('/services/rhinoplasty', follow_redirects=False).status_code == 301
     for path in ['/services/not-a-service', '/services/not-a-service/']:
         response = service_client.get(path)

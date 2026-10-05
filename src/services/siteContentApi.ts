@@ -5,7 +5,6 @@ import { apiRequest } from "./appointmentApi";
 
 export type SiteBlocks = {
     hero: { description: string };
-    trust: { items: { title: string; text: string }[] };
     about: { paragraphs: string[]; facts: { value: string; label: string }[] };
     faq: { items: { title: string; content: string }[] };
     footer: { description: string };
@@ -32,8 +31,6 @@ const merge = (incoming: Partial<SiteBlocks> | null | undefined): SiteBlocks => 
     const source = valid(incoming) ? incoming : {};
     return {
         hero: typeof source.hero?.description === "string" ? source.hero : fallback.hero,
-        // An empty list is a deliberate choice (the strip is hidden), so only a missing block falls back.
-        trust: Array.isArray(source.trust?.items) ? source.trust : fallback.trust,
         about:
             Array.isArray(source.about?.paragraphs) && source.about.paragraphs.length
                 ? { paragraphs: source.about.paragraphs, facts: Array.isArray(source.about.facts) ? source.about.facts : fallback.about.facts }
