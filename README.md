@@ -4,7 +4,7 @@
 
 ریپوی مرجع توسعه همین `MohammadArak/DrZamani-Website` است. برنامه مرحله‌ای و وضعیت هر مرحله در [نقشه‌راه](ROADMAP.md)، کارهای انجام‌شده در [گزارش پیشرفت](docs/PROGRESS_LOG.md)، بررسی اولیه و محدودیت‌ها در [بررسی مبنا](docs/BASELINE_REVIEW.md)، تنظیمات قابل انتقال به پنل در [فهرست تنظیمات](docs/SETTINGS_INVENTORY.md) و اطلاعات ادامه توسط AI دیگر در [راهنمای ادامه کار](docs/AI_HANDOFF.md) ثبت می‌شوند.
 
-نسخه جاری `1.16.0` شامل مقالات و رسانه (مرحله۶، ادغام PR۷)، مدیریت نظرات از پنل با قالب قبلی (مرحله۷، ادغام PR۸)، نگهداری/CI (PR۹) و آماده‌سازی پذیرش (PR۱۰) است. بازیابی هماهنگ دیتابیس و رسانه مرحله۱۰ در [گزارش بازیابی](docs/PHASE_10_RECOVERY.md) و [راهنمای اپراتور](deploy/RECOVERY.md) ثبت شده است؛ اجرای واقعی VPS هنوز پذیرش نشده و مرحله۱۰ کامل نیست. وضعیت دقیق ارسال/ادغام و SHA در گزارش تحویل کنار outputs ثبت می‌شود. بازطراحی مرحله۸ به درخواست مالک به تعویق افتاده؛ ظاهر قبلی مقالات و نظرات، رنگ هیرو/هدر/فوتر و رفتار رزرو حفظ شده‌اند. سایت زنده deploy نشده و نوبت‌دهی و پرداخت production خاموش‌اند.
+نسخه جاری `1.18.0` است. CMS مقالات/نظرات/رسانه، خدمات، متن صفحه اصلی و گالری با رضایت انتشار، امنیت/RBAC، پنل‌ها، runtime fixture و بهبود سرعت در main موجودند. وضعیت دقیق و محدودیت‌ها در [تحویل کامل2026-10-05](docs/AI_TRANSFER_2026-10-05.md) و [متن شروع AI بعدی](docs/PROMPT_FOR_NEXT_AI.md) آمده‌اند. ظاهر اصلی آبی/طلایی حفظ شده؛ صفحه خدمت دوبخشی و پوسته مشترک SSR پیاده‌اند. `/services/` به بخش خدمات صفحه اصلی می‌رود؛ صفحه privacy و نوار trust حذف شده‌اند. نمونه مستقل گالری هنوز تأیید نهایی ندارد. بازیابی هماهنگ در [گزارش بازیابی](docs/PHASE_10_RECOVERY.md) و [راهنمای اپراتور](deploy/RECOVERY.md) ثبت است؛ پذیرش VPS/production و مراحل۸/۱۰ کامل نیستند. سایت زنده در این کار deploy نشده و رزرو/پرداخت production خاموش‌اند.
 
 وب‌سایت فارسی مطب به‌همراه سامانه نوبت‌دهی، پرداخت، گفت‌وگوی بیمار و پنل مدیریت. فرانت‌اند با React، TypeScript، Vite و Tailwind CSS ساخته شده و بک‌اند FastAPI داخل پوشه `api/` با `uv` مدیریت می‌شود.
 
@@ -202,11 +202,11 @@ VITE_API_PROXY_TARGET=http://127.0.0.1:8001
 
 ```bash
 cd api
-uv sync
+uv sync --frozen --all-groups
 cp .env.example .env
 uv run python -c "import secrets; print(secrets.token_hex(32))"
 uv run alembic upgrade head
-uv run python -m app.create_admin --username admin --name "Clinic Admin"
+uv run python -m app.setup_owner --username local_owner --name "Clinic Admin"
 uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
