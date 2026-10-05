@@ -9,6 +9,7 @@ import {
 } from "@/services/siteServicesApi";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ArticleEditor from "./ArticleEditor";
+import MediaPicker from "./MediaPicker";
 import { useStaffAccess } from "./staffAccess";
 import { useContentConfirm } from "./useContentConfirm";
 
@@ -102,6 +103,7 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
     };
 
     const locked = !editable || busy;
+    const [source, setSource] = useState(false);
     return (
         <section className="article-compose">
             {confirmation}
@@ -135,8 +137,19 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
                     <input type="number" min={0} max={10000} value={content.sort_order} readOnly={locked} onChange={(e) => patch("sort_order", Number(e.target.value))} />
                 </label>
             </div>
+            {can("media.manage") && (
+                <MediaPicker token={token} label="عکس سمت راست صفحه (اختیاری؛ بدون انتخاب، عکس پیش‌فرض نمایش داده می‌شود)" value={content.hero_key ?? ""} disabled={locked} onSelect={(media) => patch("hero_key", media?.key ?? null)} />
+            )}
             <h3>متن کامل صفحه</h3>
-            <ArticleEditor html={content.description_html} onChange={(value) => patch("description_html", value)} token={token} editable={!locked} canUseMedia={can("media.manage")} />
+            <p className="editor-help">متن دقیق این صفحه همین است؛ چیز دیگری خودکار به آن اضافه نمی‌شود. می‌توانید با ویرایشگر یا مستقیم با کد HTML بنویسید.</p>
+            <div className="article-actions">
+                <button type="button" onClick={() => setSource(!source)}>{source ? "بازگشت به ویرایشگر" : "ویرایش کد HTML"}</button>
+            </div>
+            {source ? (
+                <textarea dir="ltr" rows={16} spellCheck={false} aria-label="کد HTML متن صفحه" value={content.description_html} readOnly={locked} onChange={(e) => patch("description_html", e.target.value)} />
+            ) : (
+                <ArticleEditor html={content.description_html} onChange={(value) => patch("description_html", value)} token={token} editable={!locked} canUseMedia={can("media.manage")} />
+            )}
             <fieldset>
                 <legend>سئو (اختیاری)</legend>
                 <label>عنوان نتیجه جست‌وجو<input maxLength={200} value={content.seo_title} readOnly={locked} onChange={(e) => patch("seo_title", e.target.value)} /></label>

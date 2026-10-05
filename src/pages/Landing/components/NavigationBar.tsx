@@ -21,9 +21,10 @@ const navMenu = [
     { title: "خدمات", value: "services", href: "/#services" },
     { title: "مقالات", value: "articles", href: "/articles/" },
     {
+        // The footer exists on every page, so this scrolls on the page you are on.
         title: "تماس با ما",
         value: "contact-us",
-        href: "/#footer",
+        href: "#footer",
     },
     // {
     //     title: 'مستندات',
@@ -32,7 +33,7 @@ const navMenu = [
     // },
 ];
 
-const Navigation = () => {
+const Navigation = ({ solid = false }: { solid?: boolean }) => {
     const { isSticky } = useScrollTop();
     const { clinicInfo } = useClinicInfo();
 
@@ -64,7 +65,7 @@ const Navigation = () => {
             <div
                 className={classNames(
                     "flex flex-row self-start items-center justify-between py-2 px-4 relative z-60 w-full transition duration-175",
-                    isSticky
+                    isSticky || solid
                         ? "bg-[#0E192C]/95 shadow-lg"
                         : "bg-transparent dark:bg-transparent",
                 )}

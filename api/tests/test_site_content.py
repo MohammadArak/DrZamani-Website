@@ -92,9 +92,11 @@ def test_about_facts_are_editable_and_limited(client):
     assert client.put(f"{BASE}/about", headers=access, json=dict(revision=saved.json()["revision"], content=too_many_facts)).status_code == 422
 
 
-def test_server_rendered_pages_have_the_same_reserve_button_and_dialog_as_the_homepage(client):
+def test_server_rendered_pages_share_the_homepage_header_and_footer(client):
     for path in ("/services/rhinoplasty/", "/articles/"):
         page = client.get(path).text
-        assert 'class="legacy-reserve-btn"' in page and "data-reserve-dialog" in page and 'src="/reserve.js"' in page
-        assert 'data-booking="0"' in page and "متوجه شدم" in page  # booking is off by default: the dialog explains it
+        # React header/footer are mounted into these hosts; the plain HTML inside is only the crawler / no-JS fallback.
+        assert 'data-shell="island"' in page and 'id="site-header"' in page and 'id="site-footer"' in page and 'id="footer"' in page
+        assert 'href="#footer"' in page and 'href="/#footer"' not in page  # "contact us" scrolls on the same page
+        assert "legacy-reserve-btn" not in page and "reserve.js" not in page
     assert "privacy" not in client.get("/sitemap.xml").text and client.get("/privacy/").status_code in {404, 410}

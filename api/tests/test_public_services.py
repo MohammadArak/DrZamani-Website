@@ -33,7 +33,8 @@ def test_all_services_have_initial_html_canonical_and_breadcrumb(service_client)
         assert service['title'] in response.text
         assert service['description'] in response.text
         assert f'/services/{service["slug"]}/' in response.text
-        assert 'type="module"' not in response.text  # Homepage SPA cannot replace service content.
+        # The module script only mounts the shared header/footer into the islands; the page body stays server HTML.
+        assert 'data-shell="island"' in response.text and 'id="site-header"' in response.text and 'id="site-footer"' in response.text
         schemas = [json.loads(v) for v in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', response.text)]
         breadcrumb = next(s for s in schemas if s['@type'] == 'BreadcrumbList')
         assert breadcrumb['itemListElement'][-1]['name'] == service['title']

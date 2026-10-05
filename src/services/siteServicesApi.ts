@@ -12,6 +12,7 @@ export type SiteServiceCard = {
 
 export type SiteServiceContent = SiteServiceCard & {
     description_html: string;
+    hero_key: string | null;
     seo_title: string;
     seo_description: string;
 };
@@ -43,7 +44,7 @@ export const fallbackServices: SiteServiceCard[] = [
 
 export const emptyService = (): SiteServiceContent => ({
     slug: "", title: "", summary: "", tile_label: "", image: SERVICE_IMAGES[0].value,
-    description_html: "<p></p>", seo_title: "", seo_description: "", sort_order: 50,
+    description_html: "<p></p>", hero_key: null, seo_title: "", seo_description: "", sort_order: 50,
 });
 
 const isCard = (value: unknown): value is SiteServiceCard =>

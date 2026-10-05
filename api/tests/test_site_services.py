@@ -143,3 +143,21 @@ def test_homepage_shows_four_services_but_service_pages_list_all(client):
     detail = client.get("/services/rhinoplasty/").text  # the "other services" block lists every published service
     assert detail.count('class="landing-service-card"') == 4 and "خدمت پنجم" in detail  # every other published service
     assert client.get("/api/v1/public-services").json()["total"] == 5  # the SPA slices to four itself
+
+
+def test_side_photo_is_chosen_from_the_media_library_and_protected(client):
+    access = headers(owner()[2])
+    assert client.post(BASE, headers=access, json=payload("bad-photo", hero_key="a" * 32)).status_code == 422  # not in the library
+    assert client.post(BASE, headers=access, json=payload("bad-photo", hero_key="not-a-key")).status_code == 422
+    _, media = upload(client, access)
+    row = create(client, access, slug="with-photo", hero_key=media["key"])
+    assert client.get(media["url"]).status_code == 404  # private until the page is published
+    publish(client, access, row)
+    page = client.get("/services/with-photo/").text
+    assert f'src="{media["url"]}"' in page and "dr-zamani-op-2.webp" not in page.split('class="svc2-text"', 1)[0]
+    assert client.get(media["url"]).status_code == 200
+    assert client.delete("/api/v1/staff/media/" + media["key"], headers=access).status_code == 409  # used by a page
+    default = create(client, access, slug="no-photo")
+    publish(client, access, default)
+    assert "dr-zamani-op-2.webp" in client.get("/services/no-photo/").text  # no choice: the default photo
+    assert "هماهنگی مراجعه" not in client.get("/services/no-photo/").text  # no hard-coded text besides the editor's

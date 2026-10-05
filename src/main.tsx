@@ -13,14 +13,19 @@ if (!rootElement) {
     throw new Error("Root element was not found.");
 }
 
-if (rootElement.hasChildNodes()) {
-    rootElement.replaceChildren();
-}
+if (rootElement.dataset.shell === "island") {
+    // Server-rendered page: keep its HTML, only mount the shared header and footer.
+    void import("./islands").then((module) => module.mountChrome());
+} else {
+    if (rootElement.hasChildNodes()) {
+        rootElement.replaceChildren();
+    }
 
-createRoot(rootElement).render(
-    <StrictMode>
-        <HelmetProvider>
-            <App />
-        </HelmetProvider>
-    </StrictMode>,
-);
+    createRoot(rootElement).render(
+        <StrictMode>
+            <HelmetProvider>
+                <App />
+            </HelmetProvider>
+        </StrictMode>,
+    );
+}

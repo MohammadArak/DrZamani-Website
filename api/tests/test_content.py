@@ -110,7 +110,7 @@ def test_live_publication_and_seo_html(client):
     access,row=create(client);response=transition(client,access,row);assert response.status_code==200,response.text
     page=client.get('/articles/test-article/');assert page.status_code==200
     assert 'تیتر آزمایشی' in page.text and 'نویسنده آزمایشی' in page.text and 'بازبین آزمایشی' in page.text
-    assert '<script type="module"' not in page.text and 'BreadcrumbList' in page.text and 'datePublished' in page.text
+    assert 'data-shell="island"' in page.text and 'id="site-header"' in page.text and 'id="site-footer"' in page.text and 'BreadcrumbList' in page.text and 'datePublished' in page.text
     assert 'rel="canonical"' in page.text and 'og:type" content="article"' in page.text
     assert '/articles/test-article/' in client.get('/sitemap.xml').text
     assert '/articles/category/' in client.get('/sitemap.xml').text

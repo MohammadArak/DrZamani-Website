@@ -49,7 +49,8 @@ def render(clinic, page, db=None, editorial=None):
     if editorial:
         # Public articles are complete server HTML with native navigation/search.
         # Do not mount the homepage SPA over the indexable article body.
-        head = re.sub(r'<script\b[^>]*>.*?</script>', '', head, flags=re.S | re.I)
+        # Module scripts stay: they only mount the shared header/footer into #site-header / #site-footer (data-shell).
+        head = re.sub(r'<script\b(?![^>]*type=["\']module["\'])[^>]*>.*?</script>', '', head, flags=re.S | re.I)
     head = re.sub(r"<title\b[^>]*>.*?</title>|<script\b(?=[^>]*type=[\"']application/(?:ld\+json|json)[\"'])[^>]*>.*?</script>", "", head, flags=re.S | re.I)
     head = re.sub(r"<meta\b[^>]*>|<link\b(?=[^>]*rel=[\"']canonical[\"'])[^>]*>", "", head, flags=re.I)
     esc = html.escape
@@ -119,10 +120,7 @@ def render(clinic, page, db=None, editorial=None):
     root_attrs = ''
     if editorial:
         body = editorial['body']
-        # Server-rendered pages ship without the SPA, so the reserve button gets the same behaviour from a tiny script.
-        from .public_chrome import reserve_dialog
-        body += reserve_dialog(payload["booking_disabled_message"]) + '<script src="/reserve.js" defer></script>'
-        root_attrs = f' data-booking="{1 if payload["booking_enabled"] else 0}"'
+        root_attrs = ' data-shell="island"'
     return HTMLResponse(f'<!doctype html><html lang="fa" dir="rtl"><head>{head}{meta}</head><body><div id="root"{root_attrs}>{body}</div></body></html>', status_code=status,
                         headers={"Cache-Control": "no-store", **({"X-Robots-Tag": robots} if page not in {"home","articles"} or editorial and editorial.get("robots", "").startswith("noindex") else {})})
 
