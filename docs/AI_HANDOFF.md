@@ -344,3 +344,5 @@ SMSoutboxdedupe160/claimtoken64/claimuntil2min/nextattemptat؛ workerclaim1job �
 
 
 اصلاح dependency در همین ممیزی: CI38161232961/front-end در audit یک high برایsource-map-js1.2.1 یافت؛ فقط نسخهٔ غیرمستقیم lock به1.2.2 اصلاح شد، ممیزی رسمی دوباره صفر و frontend checks تکرار شدند. گزارش اولیهٔ صفر audit محلی را مقدم بر نتیجهٔ جدید CI ندان؛ آستانهٔ CI کم نشد.
+
+بازبینی نهایی anchor: scroll-margin-top برابر ارتفاع منوی ثابت برای شش بخش اصلی افزوده شد تا عنوان هدف زیر منو پنهان نشود. اسکرول دستی واقعی با hashcomments y2668→1768 بدون برگشت تأیید شد. CI نسخه نهایی از receipt خوانده شود.

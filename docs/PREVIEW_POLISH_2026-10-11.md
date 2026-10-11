@@ -25,3 +25,5 @@ anchor فقط یک بار بعد از mount شدن بخش‌های lazy تصحی
 deploy زنده و فعال‌سازی رزرو/پرداخت/SMS انجام نشده و مجوز جدا می‌خواهند. گیت‌های VPS/production/رضایت legacy و اندازه‌گیری واقعی ممیزی قبلی همچنان بازند. قدم بعد: CI همین HEAD، ادغام طبق AGENTS، receipt دقیق و بستهٔ canonical همراه AI_HANDOFF؛ سپس نمایش مالک و تغییرات بعدی با درخواست او.
 
 اعتبارسنجی تکمیل فوتر: build/lint/proxy و10تست public_chrome وRuff موفق. معیار check:bundle پس از prerender: main67760/staff25707/allJS422651/allCSS24777bytes، همه زیر سقف قبلی؛ معیار نهایی پروژه gzipSync در check:bundle است؛ مقدار نمایشی Vite با آن تفاوت دارد و جایگزین آن نیست. مرورگر واقعی320px: عرض سند305 برابر client، دکمه‌های اجتماعی با y یکسان، نقشه واقعی نشان خودکار با slot200px و opacity1/aria-busy=false، Raviel target_blank/relnoopener noreferrer/بدونSVG و gradient4s؛ screenshot کنار خروجی. نمونه‌های3نظر/6مقاله و FAQ پنل حفظ شدند.
+
+بازبینی نهایی anchor: scroll-margin-top برابر ارتفاع منوی ثابت برای شش بخش اصلی افزوده شد تا عنوان هدف زیر منو پنهان نشود. اسکرول دستی واقعی با hashcomments y2668→1768 بدون برگشت تأیید شد. CI نسخه نهایی از receipt خوانده شود.

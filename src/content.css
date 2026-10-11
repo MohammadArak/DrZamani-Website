@@ -245,3 +245,5 @@
 @keyframes empty-float{50%{transform:translateY(-7px)}}
 @media(prefers-reduced-motion:reduce){.article-empty img,.raviel-credit{animation:none}}
 #main-content{overflow-anchor:none}
+
+#about-us,#services,#comments,#samples,#faq,#footer{scroll-margin-top:var(--nav-h)}

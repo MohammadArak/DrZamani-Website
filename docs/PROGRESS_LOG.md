@@ -328,3 +328,5 @@ initial loadAll پنل از۱۳ درخواست حوزه‌ای به۲ درخوا
 اعتبارسنجی نهایی این تکمیل:368pass/16skip/4warning در205.94s؛95targeted،frontend lint/build/proxy/budget وRuff موفق. CI/merge exactSHA در receipt خروجی ثبت می‌شود.
 
 اعتبارسنجی تکمیل فوتر: build/lint/proxy و10تست public_chrome وRuff موفق. معیار check:bundle پس از prerender: main67760/staff25707/allJS422651/allCSS24777bytes، همه زیر سقف قبلی؛ معیار نهایی پروژه gzipSync در check:bundle است؛ مقدار نمایشی Vite با آن تفاوت دارد و جایگزین آن نیست. مرورگر واقعی320px: عرض سند305 برابر client، دکمه‌های اجتماعی با y یکسان، نقشه واقعی نشان خودکار با slot200px و opacity1/aria-busy=false، Raviel target_blank/relnoopener noreferrer/بدونSVG و gradient4s؛ screenshot کنار خروجی. نمونه‌های3نظر/6مقاله و FAQ پنل حفظ شدند.
+
+بازبینی نهایی anchor: scroll-margin-top برابر ارتفاع منوی ثابت برای شش بخش اصلی افزوده شد تا عنوان هدف زیر منو پنهان نشود. اسکرول دستی واقعی با hashcomments y2668→1768 بدون برگشت تأیید شد. CI نسخه نهایی از receipt خوانده شود.
