@@ -1,0 +1,191 @@
+{
+  "baseline": {
+    "environment": "local Python3.13 SQLite TestClient; no network/provider/real data",
+    "articleBodyCharacters": 18007,
+    "results": [
+      {
+        "recordsPerCollection": 20,
+        "route": "/api/v1/comments?page=1",
+        "medianMs": 12.68,
+        "queries": [
+          21,
+          21,
+          21
+        ],
+        "responseBytes": 3758
+      },
+      {
+        "recordsPerCollection": 20,
+        "route": "/api/v1/articles?page=1",
+        "medianMs": 11.95,
+        "queries": [
+          2,
+          2,
+          2
+        ],
+        "responseBytes": 4398
+      },
+      {
+        "recordsPerCollection": 20,
+        "route": "/articles/",
+        "medianMs": 13.81,
+        "queries": [
+          4,
+          4,
+          4
+        ],
+        "responseBytes": 20773
+      },
+      {
+        "recordsPerCollection": 20,
+        "route": "/articles/benchmark-0/",
+        "medianMs": 22.09,
+        "queries": [
+          6,
+          6,
+          6
+        ],
+        "responseBytes": 48715
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/api/v1/comments?page=1",
+        "medianMs": 307.08,
+        "queries": [
+          1001,
+          1001,
+          1001
+        ],
+        "responseBytes": 3760
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/api/v1/articles?page=1",
+        "medianMs": 857.91,
+        "queries": [
+          2,
+          2,
+          2
+        ],
+        "responseBytes": 4442
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/articles/",
+        "medianMs": 815.05,
+        "queries": [
+          4,
+          4,
+          4
+        ],
+        "responseBytes": 24736
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/articles/benchmark-0/",
+        "medianMs": 811.33,
+        "queries": [
+          6,
+          6,
+          6
+        ],
+        "responseBytes": 48736
+      }
+    ]
+  },
+  "after": {
+    "environment": "local Python3.13 SQLite TestClient; no network/provider/real data",
+    "articleBodyCharacters": 18007,
+    "results": [
+      {
+        "recordsPerCollection": 20,
+        "route": "/api/v1/comments?page=1",
+        "medianMs": 4.89,
+        "queries": [
+          2,
+          2,
+          2
+        ],
+        "responseBytes": 3758
+      },
+      {
+        "recordsPerCollection": 20,
+        "route": "/api/v1/articles?page=1",
+        "medianMs": 6.5,
+        "queries": [
+          2,
+          2,
+          2
+        ],
+        "responseBytes": 4398
+      },
+      {
+        "recordsPerCollection": 20,
+        "route": "/articles/",
+        "medianMs": 7.04,
+        "queries": [
+          4,
+          4,
+          4
+        ],
+        "responseBytes": 20773
+      },
+      {
+        "recordsPerCollection": 20,
+        "route": "/articles/benchmark-0/",
+        "medianMs": 15.94,
+        "queries": [
+          6,
+          6,
+          6
+        ],
+        "responseBytes": 48715
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/api/v1/comments?page=1",
+        "medianMs": 31.69,
+        "queries": [
+          2,
+          2,
+          2
+        ],
+        "responseBytes": 3760
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/api/v1/articles?page=1",
+        "medianMs": 109.29,
+        "queries": [
+          2,
+          2,
+          2
+        ],
+        "responseBytes": 4442
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/articles/",
+        "medianMs": 107.82,
+        "queries": [
+          4,
+          4,
+          4
+        ],
+        "responseBytes": 24736
+      },
+      {
+        "recordsPerCollection": 1000,
+        "route": "/articles/benchmark-0/",
+        "medianMs": 108.23,
+        "queries": [
+          6,
+          6,
+          6
+        ],
+        "responseBytes": 48736
+      }
+    ]
+  },
+  "limits": "Synthetic local sequential HTTP only; no real data/provider/concurrent load or production latency guarantee."
+}

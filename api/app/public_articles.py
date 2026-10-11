@@ -19,7 +19,7 @@ def article_url(slug):return '/articles/'+quote(slug)+'/'
 
 
 def list_html(db,q='',category='',page=1,tag=''):
-    clinic=clinic_row(db);rows=public_rows(db);items=listing(rows,q,category,tag)
+    clinic=clinic_row(db);rows=public_rows(db,metadata=not q);items=listing(rows,q,category,tag)
     categories=sorted({v for r in rows for v in json.loads(r.published_json)['categories']})
     if category and category not in categories:raise HTTPException(404,'دسته پیدا نشد')
     if tag and tag not in {v for r in rows for v in json.loads(r.published_json)['tags']}:raise HTTPException(404,'برچسب پیدا نشد')

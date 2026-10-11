@@ -1,6 +1,6 @@
 # ممیزی و اصلاح سایت — 2026-10-11
 
-**اصلاحات مرحلهٔ اول اعتبارسنجی محلی شده‌اند؛ ممیزی دادهٔ حجیم و پذیرش بیرونی باز است.** نتیجهٔ Git/PR/CI و هویت بسته در رسید همراه خروجی ثبت می‌شود. آزمون اجرا نشده PASS نیست؛ این گزارش گواهی امنیت یا آمادگی production نیست.
+**ممیزی و اصلاحات محلی، از جمله دادهٔ حجیم، اعتبارسنجی شده‌اند؛ پذیرش بیرونی باز است.** نتیجهٔ Git/PR/CI و هویت بسته در رسید همراه خروجی ثبت می‌شود. آزمون اجرا نشده PASS نیست؛ این گزارش گواهی امنیت یا آمادگی production نیست.
 
 ## درخواست، مبنا و مرز اجرا
 
@@ -60,9 +60,9 @@
 ## اعتبارسنجی دقیق محلی
 
 - `npm ci` موفق؛ `lint --max-warnings=0`، build/version، check:proxy، check:fonts، check:bundle موفق.
-- build1.18.1: main67788 / staff25502 / patientGate934 / patientSession1564 / allJS422817 / allCSS24543 gzip bytes، زیر حدود موجود؛ CSS فقط۴۵۷bytes حاشیه دارد. هشت WOFF2 جمع206004bytes.
-- full pytest نهایی: **366 passed / 16 skipped / 5 warnings، 202.05s**؛ JUnit و log در task root. چهار deprecation موجود و یک cache ACL محیط؛ skippedهای زیرساختی Windows نتیجهٔ PASS نیستند. نسخهٔ قبلی365pass بود؛ آخرین test خواندن تکراری مقاله افزوده شد.
-- targeted آخرین SSR/editorial:70 passed /1warning؛ Ruff E9/F63/F7/F82 موفق؛ diff check با CR-at-EOL صحیح موفق.
+- build1.18.1: main67786 / staff25649 / patientGate931 / patientSession1563 / allJS422936 / allCSS24543 gzip bytes، زیر حدود موجود؛ CSS فقط۴۵۷bytes حاشیه دارد. هشت WOFF2 جمع206004bytes.
+- full pytest نهایی: **368 passed / 16 skipped / 4 warnings، 205.94s**؛ JUnit و log در task root. چهار deprecation موجود؛ cache در اجرای نهایی خاموش شد؛ skippedهای زیرساختی Windows نتیجهٔ PASS نیستند. نسخهٔ قبل دادهٔ حجیم366pass بود؛ دو regression مربوط به query و metadata/Unicode افزوده شدند.
+- targeted آخرین SSR/editorial/comments:95 passed /1warning؛ Ruff E9/F63/F7/F82 موفق؛ diff check با CR-at-EOL صحیح موفق.
 - npm audit اولیه محلی صفر بود ولی CI38161232961 یک high درsource-map-js گزارش کرد؛ پس از ارتقا به1.2.2 ممیزی registry رسمی صفر شد. pip-audit تازه هم صفر آسیب‌پذیری شناخته‌شده؛ Python۴۷ dependency دقیق export lock با mirror نصب شده، frozen sync محلی از index اصلی موفق اعلام نمی‌شود. Gitleaks و frozen install واقعی آخرین commit برعهده CI و receipt است.
 - سه verifier migration عمومی/editorial/comments و coordinated restore موفق؛ health1.18.1. این fixtureها backup مطب نیستند.
 
@@ -71,7 +71,7 @@
 ## خطاها و نکات ادامه
 
 - apply_patch در checkout خطای reparse-point و نوشتن sandbox/Temp خطای ACL داشت؛ اسکریپت قابل‌بررسی کنار checkout و اجرای مجاز استفاده شد. safe.directory فقط همین checkout. این‌ها خطای سایت نیستند.
-- PyPI files host DNS/timeout داشت؛ همان نسخه‌های lock از mirror نصب شدند، dependency تغییر نکرد.
+- PyPI files host DNS/timeout داشت؛ همان نسخه‌های lock از mirror نصب شدند، dependencyهای Python تغییر نکردند؛ source-map-js جداگانه اصلاح شد.
 - pytest اول Temp مشترک دسترسی نداشت؛ TEMP/TMP و basetemp مستقل حل کرد؛ cache آخرین اجرا ACL warning داشت. برای اجرای بعد `-p no:cacheprovider` یا cache تازه استفاده شود.
 - Landing تاریخی Git CRLF خاص دارد؛ `.git/info/attributes` محلی `-text` همین فایل دارد. `git -c core.whitespace=trailing-space,space-before-tab,cr-at-eol diff --check`؛ بهانه‌ای برای normalize کل checkout نیست.
 - فایل‌های قطع‌شدهٔ کنترل‌شده فوراً بازگردانده شدند؛ پیش از handoff هیچ `*.audit-disabled` باقی نماند. fixtureهای مقاله/نظر/عکس پس از QA پاک شوند تا مشاهدهٔ مالک گمراه‌کننده نباشد.
@@ -79,8 +79,24 @@
 ## ادامهٔ دقیق، به ترتیب
 
 1. CI آخرین SHA: frontend، backend Linux/Windows، secrets و linux-runtime. هر شکست واقعی رفع، نتیجهٔ دقیق خوانده شود؛ طبق AGENTS پس از سبزشدن همین SHA ادغام شود. PR همیشه attach شود؛ deploy جداست.
-2. بررسی دادهٔ حجیم برای public article list/search و initial loadAll پنل: materialization همهٔ مقاله‌ها و batch سیزده درخواست پنل هنوز وجود دارند. با fixture و اندازه‌گیری واقعی تصمیم بگیر؛ cache بدون invalidation یا تغییر semantics جست‌وجوی Unicode/رضایت مجاز نیست.
+2. بهینه‌سازی دادهٔ حجیم زیر انجام و آزموده شد. بهبودهای بعدی وابسته به حجم واقعی: index جست‌وجوی متن کامل Unicode و صفحه‌بندی فهرست‌های عملیاتی بسیار بزرگ. search همچنان اصل Python casefold را نگه می‌دارد و متن کامل را می‌خواند؛ بدون شواهد حجم/نیاز، semantics یا cache رضایت عوض نشود.
 3. آزمون چشمی/کیبورد با کاهش‌حرکت و فرم‌های ویرایش بلند/تعارض409؛ UI حساب با نقش محدود در صورت مجوز CAPTCHA جدا. مسیر patient booking فعال فقط fixture و سیاست دوباره false؛ provider واقعی ممنوع.
 4. تحویل receipt دقیق commit/merge/tree/CI و فایل ادامهٔ AI کنار بستهٔ canonical، screenshot نهایی و browser باز. بستهٔ source شامل همه trackedها و manifest/hash باشد، هیچ ENV/DB/session/media خصوصی/build/dependency نصب‌شده.
 
 گیت‌های بیرونی: محتوای پزشکی و ادعای۱۵هزار/دودهه، رضایت عکس‌های legacy، real CAPTCHA/payment/SMS، VPS/TLS/offsite/قطع برق و اندازه‌گیری Lighthouse/Core Web Vitals واقعی نیازمند داده/شبکه/دسترسی/مجوزند. fixture قبول‌شده جای این پذیرش‌ها نیست. تغییر طراحی مستقل گالری قدیمی هم تأیید نهایی مالک نگرفته است.
+
+
+## دادهٔ حجیم و بارگیری پنل — اصلاحات تکمیلی همین مرحله
+
+fixture مستقل۲۰ و۱۰۰۰ مقاله/نظر، body هر مقاله۱۸۰۰۷کاراکتر، سه تکرار؛ Python3.13/SQLite/TestClient روی همان میزبان. payload پاسخ‌ها در دو اجرا هم‌اندازه‌اند. این آزمایش بار هم‌زمان یا تضمین latency production نیست. دادهٔ خام/credential منتقل نمی‌شود؛ [شاهد قابل‌ماشین](SITE_AUDIT_PERFORMANCE_2026-10-11.json).
+
+| مسیر در۱۰۰۰رکورد | median پیش از اصلاح ms | پس از اصلاح ms | query پیش→پس |
+|---|---:|---:|---:|
+| comments page1 |307.08|31.69|1001→2|
+| articles API page1 |857.91|109.29|2→2|
+| articles HTML index |815.05|107.82|4→4|
+| article HTML detail |811.33|108.23|6→6|
+
+خدمت نظرات گروهی و با IN محدود۵۰۰ خوانده می‌شود؛ رضایت جاری، عنوان تازه و فعال‌بودن خدمت همچنان authoritative است. public article metadata در SQL با json_remove تولید می‌شود؛ فهرست/sidebar/related/sitemap متن draft/approved body و منابع کامل را materialize نمی‌کنند. جست‌وجوی body با casefold اصلی محفوظ است؛ regression عبارت Straße با STRASSE و detail کامل موفق. هیچ cache انتشار/رضایت اضافه نشده.
+
+initial loadAll پنل از۱۳ درخواست حوزه‌ای به۲ درخواست داشبورد/نوبت‌ها کاهش یافت (profile me و clinic مشترک جدا هستند). دادهٔ schedule/services/SMS/finance/waitlist/audit هنگام بازشدن بخش مربوط می‌آید؛ پاسخ دیررس تب قبلی کنار گذاشته می‌شود. لاگ API پس از reload browser فقط me+appointments+dashboard را نشان داد. تقویم/انتظار/مالی/پیامک/مرکز تنظیمات/برنامه دوباره در browser بدون alert بارگیری شدند؛ lint/build/budget پس از این تغییر موفق.

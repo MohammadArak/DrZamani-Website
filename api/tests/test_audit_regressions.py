@@ -122,9 +122,9 @@ def test_article_pages_materialize_published_collection_only_once(client, monkey
     assert transition(client, access, row, 'publish').status_code == 200
     calls = []
     original = content.public_rows
-    def observe(db):
+    def observe(db, **options):
         calls.append(1)
-        return original(db)
+        return original(db, **options)
     monkeypatch.setattr(public_articles, 'public_rows', observe)
     monkeypatch.setattr(article_layout, 'public_rows', observe)
     for path in ['/articles/', '/articles/test-article/']:
@@ -133,3 +133,47 @@ def test_article_pages_materialize_published_collection_only_once(client, monkey
         assert response.status_code == 200
         assert row['content']['title'] in response.text
         assert len(calls) == 1, 'Index/detail must not reload the published article collection for layout/related content'
+
+
+def test_comment_service_queries_are_bounded_and_current_state_remains_authoritative(client):
+    from sqlalchemy import event
+    from app.database import get_engine
+    from app.models import Service
+    actor=owner()[0]
+    with SessionLocal.begin() as db:
+        ids=list(db.scalars(select(Service.id)))
+        for i in range(100):
+            data=dict(photo_key=None,body='Synthetic only',display_name=f'Fixture {i}',consent_received=True,privacy_reviewed=True,consent_reference='fixture',service_id=ids[i%len(ids)],sort_order=i,service_title='old title')
+            snapshot=json.dumps(data)
+            db.add(Comment(actor_id=actor,content_json=snapshot,published_json=snapshot))
+    statements=[]
+    def observe(_c,_cursor,statement,_params,_ctx,_many):
+        statements.append(statement.lower())
+    event.listen(get_engine(),'before_cursor_execute',observe)
+    try:
+        response=client.get('/api/v1/comments')
+        assert response.status_code==200 and response.json()['total']==100
+        assert len(response.json()['items'])==12
+        assert len([s for s in statements if 'from services' in s])==1
+    finally:
+        event.remove(get_engine(),'before_cursor_execute',observe)
+    with SessionLocal.begin() as db:
+        for item in db.scalars(select(Service)):
+            item.is_active=False
+    assert client.get('/api/v1/comments').json()['total']==0
+
+
+def test_article_metadata_omits_bodies_but_unicode_body_search_and_detail_are_preserved(client):
+    from test_content import create, transition
+    access,row=create(client,body_html='<h2>Fixture</h2><p>Straße unique-body-token</p>')
+    assert transition(client,access,row,'publish').status_code==200
+    with SessionLocal() as db:
+        rows=content.public_rows(db,metadata=True)
+        assert len(rows)==1
+        assert 'body_html' not in json.loads(rows[0].published_json)
+        assert 'sources' not in json.loads(rows[0].published_json)
+        assert not hasattr(rows[0],'content_json')
+    response=client.get('/api/v1/articles',params={'q':'STRASSE'})
+    assert response.status_code==200 and response.json()['total']==1
+    assert 'body_html' not in response.json()['items'][0]['content']
+    assert 'unique-body-token' in client.get('/articles/test-article/').text

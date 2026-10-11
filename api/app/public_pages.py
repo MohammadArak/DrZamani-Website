@@ -170,7 +170,7 @@ def old_index():
 def sitemap(db: Session = Depends(get_db)):
     clinic = clinic_row(db)
     from .content import public_rows
-    rows = public_rows(db)
+    rows = public_rows(db,metadata=True)
     from sqlalchemy import select,func
     from .comment_models import Comment
     last_comment=db.scalar(select(func.max(Comment.public_updated_at)))

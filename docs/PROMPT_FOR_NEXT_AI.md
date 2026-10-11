@@ -2,6 +2,8 @@
 
 این پروژه را در همان مخزن MohammadArak/DrZamani-Website ادامه بده. ابتدا docs/AI_HANDOFF.md، docs/SITE_AUDIT_2026-10-11.md و PROJECT_STATUS.json/receipt کنار خروجی را بخوان. نسخه1.18.1 و وضعیت commit/CI را واقعاً تأیید کن. اصلاحات مرحلهٔ اول را دوباره اجرا نکن؛ به ترتیب به دادهٔ حجیم article list/search و loadAll پنل، QA فرم/تعارض و گیت‌های باقی بپرداز. اطلاعات پزشکی/نظر/رضایت را نساز. هیچ deploy یا رزرو/پرداخت/SMS واقعی مجاز نیست. هر مرحله با تست واقعی، docs، commit/PR/CI و merge طبق AGENTS تحویل شود؛ receipt دقیق و فایل ادامه AI کنار خروجی بساز. متن‌های تاریخی پایین اولویت تازه نیستند.
 
+تکمیل ممیزی دادهٔ حجیم در همین مرحله: lookup خدمت نظرات۱۰۰۱→۲query، median محلی۳۰۷→۳۲ms؛ مقاله‌هاmetadata projection و median۸۰۰→۱۰۸ms؛ داشبورد۱۳→۲درخواست حوزه‌ای. تست نهایی368pass/16skip/4warning،95targeted،lint/build/proxy/budget/Ruff موفق. regression رضایت جاری/active service و جست‌وجویUnicode حفظ شدند. گلوگاه‌های ذکرشده در checkpoint اولیه اصلاح شده‌اند؛ دوباره اجرا نکن. نتیجه PR۱۸/CI آخرینSHA و merge از receipt خوانده شود؛ پس از آن ادامهٔ لازم فقط گیت‌های تأیید/زیرساخت واقعی یا بهبود مبتنی بر حجم واقعی است.
+
 ---
 
 # متن آماده برای AI بعدی

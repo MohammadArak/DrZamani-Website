@@ -211,9 +211,13 @@ def publish_due(db):
     db.commit();return len(rows)
 
 
-def public_rows(db):
+def public_rows(db, *, metadata=False):
     publish_due(db)
-    return db.scalars(select(Article).where(Article.deleted.is_(False),Article.published_json.is_not(None)).order_by(Article.published_at.desc(),Article.id.desc())).all()
+    # Lists/sidebar/sitemap do not need draft bodies or the full approved article body.
+    # Full-text searches retain the original Python Unicode casefold behavior.
+    columns = (Article.id, func.json_remove(Article.published_json, '$.body_html', '$.sources').label('published_json'), Article.published_at, Article.public_updated_at, Article.published_slug) if metadata else (Article,)
+    query = select(*columns).where(Article.deleted.is_(False),Article.published_json.is_not(None)).order_by(Article.published_at.desc(),Article.id.desc())
+    return db.execute(query).all() if metadata else db.scalars(query).all()
 
 
 def media_keys(snapshot):

@@ -181,7 +181,9 @@ export const StaffDashboard = ({
         ]);
         setWaitlist(nextWaitlist); if (nextSummary) setFinanceSummary(nextSummary); setPayments(nextPayments); setAuditLogs(nextAudit);
     }, [can, token]);
+    const loadSequence = useRef({ value: 0 });
     const loadAll = useCallback(async () => {
+        const sequence = ++loadSequence.current.value;
         setLoading(true);
         setError("");
         try {
@@ -201,47 +203,35 @@ export const StaffDashboard = ({
                 nextAuditLogs,
             ] = await Promise.all([
                 can("dashboard.view") ? appointmentApi.staffStats(token) : Promise.resolve({ today_total: 0, pending_total: 0, confirmed_total: 0, patients_total: 0, unread_conversations: 0, waitlist_total: 0, refund_attention_total: 0, daily_appointments: [] }),
-                can("settings.view") ? appointmentApi.staffSettings(token) : Promise.resolve(null),
-                can("schedule.view") ? appointmentApi.staffExceptions(token) : Promise.resolve([] as ScheduleException[]),
-                can("services.view") ? appointmentApi.staffServices(token) : Promise.resolve([] as Service[]),
-                can("appointments.view") ? appointmentApi.staffAppointments(token) : Promise.resolve({ items: [], total: 0, page: 1, page_size: 20, total_pages: 1 }),
-                can("consultations.view") ? appointmentApi.staffConsultations(token) : Promise.resolve([] as ConsultationThread[]),
-                can("sms.view") ? appointmentApi.staffSmsRules(token) : Promise.resolve([] as SmsAutomationRule[]),
-                can("sms.view") ? appointmentApi.staffSmsCampaigns(token) : Promise.resolve([] as SmsCampaign[]),
-                can("sms.view") ? appointmentApi.staffSmsOutbox(token) : Promise.resolve([] as SmsOutboxItem[]),
-                can("waitlist.view") ? appointmentApi.staffWaitlist(token) : Promise.resolve([] as WaitlistEntry[]),
-                can("finance.view")
-                    ? appointmentApi.staffFinanceSummary(token)
-                    : Promise.resolve({
-                          verified_count: 0,
-                          collected_toman: 0,
-                          refund_pending_count: 0,
-                          refund_pending_toman: 0,
-                          refunded_count: 0,
-                          refunded_toman: 0,
-                          failed_count: 0,
-                      }),
-                can("finance.view")
-                    ? appointmentApi.staffPayments(token)
-                    : Promise.resolve([] as PaymentItem[]),
-                can("audit.view")
-                    ? appointmentApi.staffAuditLogs(token)
-                    : Promise.resolve([] as AuditLogItem[]),
+                can("settings.view") && ["clinic-info", "schedule"].includes(tab) ? appointmentApi.staffSettings(token) : Promise.resolve(null),
+                can("schedule.view") && tab === "schedule" ? appointmentApi.staffExceptions(token) : Promise.resolve(null),
+                can("services.view") && ["calendar", "services", "sms"].includes(tab) ? appointmentApi.staffServices(token) : Promise.resolve(null),
+                can("appointments.view") && ["dashboard", "appointments"].includes(tab) ? appointmentApi.staffAppointments(token) : Promise.resolve(null),
+                can("consultations.view") && tab === "consultations" ? appointmentApi.staffConsultations(token) : Promise.resolve(null),
+                can("sms.view") && tab === "sms" ? appointmentApi.staffSmsRules(token) : Promise.resolve(null),
+                can("sms.view") && tab === "sms" ? appointmentApi.staffSmsCampaigns(token) : Promise.resolve(null),
+                can("sms.view") && tab === "sms" ? appointmentApi.staffSmsOutbox(token) : Promise.resolve(null),
+                can("waitlist.view") && tab === "waitlist" ? appointmentApi.staffWaitlist(token) : Promise.resolve(null),
+                can("finance.view") && tab === "finance" ? appointmentApi.staffFinanceSummary(token) : Promise.resolve(null),
+                can("finance.view") && tab === "finance" ? appointmentApi.staffPayments(token) : Promise.resolve(null),
+                can("audit.view") && tab === "audit" ? appointmentApi.staffAuditLogs(token) : Promise.resolve(null),
             ]);
+            if (sequence !== loadSequence.current.value) return;
             setStats(nextStats);
-            setSettings(nextSettings);
-            setExceptions(nextExceptions);
-            setServices(nextServices);
-            setAppointmentPage(nextAppointments);
-            setConsultations(nextConsultations);
-            setSmsRules(nextSmsRules);
-            setSmsCampaigns(nextSmsCampaigns);
-            setSmsOutbox(nextSmsOutbox);
-            setWaitlist(nextWaitlist);
-            setFinanceSummary(nextFinanceSummary);
-            setPayments(nextPayments);
-            setAuditLogs(nextAuditLogs);
+            if (nextSettings) setSettings(nextSettings);
+            if (nextExceptions) setExceptions(nextExceptions);
+            if (nextServices) setServices(nextServices);
+            if (nextAppointments) setAppointmentPage(nextAppointments);
+            if (nextConsultations) setConsultations(nextConsultations);
+            if (nextSmsRules) setSmsRules(nextSmsRules);
+            if (nextSmsCampaigns) setSmsCampaigns(nextSmsCampaigns);
+            if (nextSmsOutbox) setSmsOutbox(nextSmsOutbox);
+            if (nextWaitlist) setWaitlist(nextWaitlist);
+            if (nextFinanceSummary) setFinanceSummary(nextFinanceSummary);
+            if (nextPayments) setPayments(nextPayments);
+            if (nextAuditLogs) setAuditLogs(nextAuditLogs);
         } catch (loadError) {
+            if (sequence !== loadSequence.current.value) return;
             if (
                 loadError instanceof AppointmentApiError &&
                 loadError.status === 401
@@ -249,11 +239,13 @@ export const StaffDashboard = ({
                 onLogout();
             else setError(errorMessage(loadError));
         } finally {
-            setLoading(false);
+            if (sequence === loadSequence.current.value) setLoading(false);
         }
-    }, [can, onLogout, token]);
+    }, [can, onLogout, tab, token]);
     useEffect(() => {
+        const pending = loadSequence.current;
         void loadAll();
+        return () => { pending.value++; };
     }, [loadAll]);
 
     const navItems: Array<{

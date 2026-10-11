@@ -300,3 +300,21 @@ PR۹ merge913a43d1c6e69a4749a8aa3e38625b7de5692252/source9b75629732e48c2ee2bde45
 
 
 اصلاح dependency در همین ممیزی: CI38161232961/front-end در audit یک high برایsource-map-js1.2.1 یافت؛ فقط نسخهٔ غیرمستقیم lock به1.2.2 اصلاح شد، ممیزی رسمی دوباره صفر و frontend checks تکرار شدند. گزارش اولیهٔ صفر audit محلی را مقدم بر نتیجهٔ جدید CI ندان؛ آستانهٔ CI کم نشد.
+
+
+## دادهٔ حجیم و بارگیری پنل — اصلاحات تکمیلی همین مرحله
+
+fixture مستقل۲۰ و۱۰۰۰ مقاله/نظر، body هر مقاله۱۸۰۰۷کاراکتر، سه تکرار؛ Python3.13/SQLite/TestClient روی همان میزبان. payload پاسخ‌ها در دو اجرا هم‌اندازه‌اند. این آزمایش بار هم‌زمان یا تضمین latency production نیست. دادهٔ خام/credential منتقل نمی‌شود؛ [شاهد قابل‌ماشین](SITE_AUDIT_PERFORMANCE_2026-10-11.json).
+
+| مسیر در۱۰۰۰رکورد | median پیش از اصلاح ms | پس از اصلاح ms | query پیش→پس |
+|---|---:|---:|---:|
+| comments page1 |307.08|31.69|1001→2|
+| articles API page1 |857.91|109.29|2→2|
+| articles HTML index |815.05|107.82|4→4|
+| article HTML detail |811.33|108.23|6→6|
+
+خدمت نظرات گروهی و با IN محدود۵۰۰ خوانده می‌شود؛ رضایت جاری، عنوان تازه و فعال‌بودن خدمت همچنان authoritative است. public article metadata در SQL با json_remove تولید می‌شود؛ فهرست/sidebar/related/sitemap متن draft/approved body و منابع کامل را materialize نمی‌کنند. جست‌وجوی body با casefold اصلی محفوظ است؛ regression عبارت Straße با STRASSE و detail کامل موفق. هیچ cache انتشار/رضایت اضافه نشده.
+
+initial loadAll پنل از۱۳ درخواست حوزه‌ای به۲ درخواست داشبورد/نوبت‌ها کاهش یافت (profile me و clinic مشترک جدا هستند). دادهٔ schedule/services/SMS/finance/waitlist/audit هنگام بازشدن بخش مربوط می‌آید؛ پاسخ دیررس تب قبلی کنار گذاشته می‌شود. لاگ API پس از reload browser فقط me+appointments+dashboard را نشان داد. تقویم/انتظار/مالی/پیامک/مرکز تنظیمات/برنامه دوباره در browser بدون alert بارگیری شدند؛ lint/build/budget پس از این تغییر موفق.
+
+اعتبارسنجی نهایی این تکمیل:368pass/16skip/4warning در205.94s؛95targeted،frontend lint/build/proxy/budget وRuff موفق. CI/merge exactSHA در receipt خروجی ثبت می‌شود.
