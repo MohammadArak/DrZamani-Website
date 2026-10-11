@@ -7,7 +7,7 @@
 مالک خواست سایت از ابتدا تا انتها از نظر امنیت، عملکرد، راحتی، ظاهر و دسترس‌پذیری بررسی و ایرادها اصلاح شوند و کار هنگام نبودن او ادامه یابد. هویت آبی/طلایی و تصمیم‌های قبلی مالک حفظ شدند. deploy زنده و فعال‌سازی رزرو/پرداخت/SMS واقعی مجاز نیستند؛ همهٔ داده‌های این نوبت مستقل و مصنوعی‌اند.
 
 - مخزن: https://github.com/MohammadArak/DrZamani-Website ؛ مبنای main: `38e44e5fe59e6a53c9e6fd7204c590885da1109b`.
-- شاخه: `fix/site-audit-20261011`؛ نسخه `1.18.1`؛ dependency یا migration تازه اضافه نشد.
+- شاخه: `fix/site-audit-20261011`؛ نسخه `1.18.1`؛ migration یا dependency مستقیم تازه اضافه نشد؛ dependency غیرمستقیم source-map-js از1.2.1 به1.2.2 ارتقا یافت.
 - checkout: `D:\AI\Chatgpt\DrZamani\DrZamani-Website`؛ Python3.13.14 / Node24.15.0.
 - API محلی8000، dev5173، preview4173؛ DB/media/session مستقل در `D:\AI\Chatgpt\DrZamani\.local\runtime` بیرون Git.
 - اجرا: `START_LOCAL_API.ps1` کنار checkout؛ venv در `.local/api-venv`. credential، کلید و DB فقط محلی‌اند؛ وارد گزارش، commit یا بسته نشوند.
@@ -18,6 +18,7 @@
 
 | اولویت | مشکل مشاهده‌شده | اصلاح و شاهد |
 |---|---|---|
+| P1 | dependency غیرمستقیم source-map-js1.2.1 آسیب‌پذیر بود؛ CI برخلاف auditمحلی اولیه آن را گزارش کرد | ارتقای فقط lock entry به1.2.2 طبق [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)؛ npm registry رسمی دوباره صفر یافته، lint/build/proxy/budget تکرار شد؛ ریسک DoS ابزار source-map، اثبات exploit عمومی سایت ادعا نشده |
 | P1 | صفحهٔ سفید dev: proxy کلی `/api` import فایل JSON source را به API می‌فرستاد | جداکردن `/api/app/`، محدودکردن proxy خدمات؛ dev واقعی بارگذاری شد؛ check:proxy روی Vite dev/preview در CI اضافه شد |
 | P1 | گالری هنگام خطا عکس‌های hardcoded را برمی‌گرداند؛ توقف انتشار قابل‌اتکا نبود | fallback قدیمی حذف؛ loading/empty/error/retry؛ قطع API واقعی: صفر عکس و پیام خطا؛ بازیابی:۱۶ عکس؛ unpublish fixture: آدرس مستقیم404 |
 | P1 | شکست chunk/render صفحه را سفید می‌کرد | ErrorBoundary فارسی با reload/home؛ فایل Landing خروجی موقتاً قطع و فوراً برگردانده شد؛ خطا و بازیابی در مرورگر موفق |
@@ -62,7 +63,7 @@
 - build1.18.1: main67788 / staff25502 / patientGate934 / patientSession1564 / allJS422817 / allCSS24543 gzip bytes، زیر حدود موجود؛ CSS فقط۴۵۷bytes حاشیه دارد. هشت WOFF2 جمع206004bytes.
 - full pytest نهایی: **366 passed / 16 skipped / 5 warnings، 202.05s**؛ JUnit و log در task root. چهار deprecation موجود و یک cache ACL محیط؛ skippedهای زیرساختی Windows نتیجهٔ PASS نیستند. نسخهٔ قبلی365pass بود؛ آخرین test خواندن تکراری مقاله افزوده شد.
 - targeted آخرین SSR/editorial:70 passed /1warning؛ Ruff E9/F63/F7/F82 موفق؛ diff check با CR-at-EOL صحیح موفق.
-- npm audit و pip-audit تازه: صفر آسیب‌پذیری شناخته‌شده؛ Python۴۷ dependency دقیق export lock با mirror نصب شده، frozen sync محلی از index اصلی موفق اعلام نمی‌شود. Gitleaks و frozen install واقعی آخرین commit برعهده CI و receipt است.
+- npm audit اولیه محلی صفر بود ولی CI38161232961 یک high درsource-map-js گزارش کرد؛ پس از ارتقا به1.2.2 ممیزی registry رسمی صفر شد. pip-audit تازه هم صفر آسیب‌پذیری شناخته‌شده؛ Python۴۷ dependency دقیق export lock با mirror نصب شده، frozen sync محلی از index اصلی موفق اعلام نمی‌شود. Gitleaks و frozen install واقعی آخرین commit برعهده CI و receipt است.
 - سه verifier migration عمومی/editorial/comments و coordinated restore موفق؛ health1.18.1. این fixtureها backup مطب نیستند.
 
 فایل‌های شواهد بیرون Git: pytest-final-2026-10-11.{txt,xml}، bundle-final-2026-10-11.json، npm-audit-2026-10-11.json، pip-audit-2026-10-11.json و migration-{core,editorial,comments}-2026-10-11.txt. credential/DB/upload/session همراه شواهد منتقل نشوند.

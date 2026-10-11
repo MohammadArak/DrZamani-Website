@@ -297,3 +297,6 @@ PR۹ merge913a43d1c6e69a4749a8aa3e38625b7de5692252/source9b75629732e48c2ee2bde45
 رفع dev سفید/proxy/media، عدم احیای fallback گالری، recovery chunk/SSR، hash/deferred و دسترس‌پذیری اسلایدر/FAQ/فرم، بارگیری نظرات به درخواست، جست‌وجوی تلفن نقش محدود، پیش‌فیلتر انتشار رسانه با حفظ رضایت و خواندن یک‌باره مجموعه مقاله. خطای مقاله HTML فارسی و noindex است و API/private JSON مانده. افزودن تماس به رزرو بسته به‌دلیل قرارداد صریح مالک و آزمون شکست‌خورده پس گرفته شد.
 
 366pass/16skip/5warning در202.05s (۴deprecation و۱cacheACLمحیط)،۷۰targeted،lint/build/version/proxy/fonts/budgets/Ruff و سهmigration/restore موفق. audits تازه صفر یافتهٔ شناخته‌شده. مرورگر عمومی و همه حوزه‌های پنل،۴خدمتSSR320،صفحه اصلی390/1280/1440،تصویرCMS480،unpublish404،APIقطع/error/retry،chunkقطع/reload،SSRfallback،نظر۱۲→۱۳ و ArrowLeft/Right واقعی دیده شدند. fixture مستقل و هیچ live/provider/real patient تغییر نکرد. Git/CI/merge/source/tree/بسته در receipt خروجی ثبت شوند. ادامهٔ دادهٔ حجیم و گیت‌های بیرونی در SITE_AUDIT_2026-10-11 است؛ ممیزی کامل یا production-ready ادعا نشود.
+
+
+اصلاح dependency در همین ممیزی: CI38161232961/front-end در audit یک high برایsource-map-js1.2.1 یافت؛ فقط نسخهٔ غیرمستقیم lock به1.2.2 اصلاح شد، ممیزی رسمی دوباره صفر و frontend checks تکرار شدند. گزارش اولیهٔ صفر audit محلی را مقدم بر نتیجهٔ جدید CI ندان؛ آستانهٔ CI کم نشد.
