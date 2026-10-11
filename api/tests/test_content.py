@@ -79,7 +79,7 @@ def test_drafts_not_public_api_html_sitemap(client):
     assert client.get('/articles/test-article/').status_code==404
     assert 'test-article' not in client.get('/sitemap.xml').text
     assert client.get('/articles/').status_code==200
-    assert 'هنوز مقاله‌ای' in client.get('/articles/').text
+    assert 'مقاله‌ها در راه‌اند' in client.get('/articles/').text
     assert client.get('/articles/ancient-unreviewed/').status_code==410
 
 

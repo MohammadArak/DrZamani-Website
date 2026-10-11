@@ -130,7 +130,7 @@ def site_footer(clinic) -> str:
         f'<div class="legacy-socials">{social}</div></section>'
         f'<section><h2>آدرس ما روی نقشه</h2><p>{esc(clinic.address)}</p>{map_html}</section>'
         '</div><div class="legacy-footer-bottom"><span class="legacy-diamond-rule" aria-hidden="true"><i></i></span>'
-        f'<p>تمامی حقوق این وبسایت متعلق به <a href="/">{esc(clinic.doctor_name)}</a> می‌باشد و هر گونه کپی برداری از آن بدون ذکر منبع پیگرد قانونی خواهد داشت.</p></div></footer></div>'
+        f'<p>تمامی حقوق این وبسایت متعلق به <a href="/">{esc(clinic.doctor_name)}</a> می‌باشد و هر گونه کپی برداری از آن بدون ذکر منبع پیگرد قانونی خواهد داشت.</p><a class="raviel-credit" href="https://raviel.ir">طراحی و توسعه توسط Raviel</a></div></footer></div>'
     )
 
 
@@ -219,8 +219,8 @@ def list_content(items: list[dict], *, total: int, page: int, per_page: int, q: 
     def href(number: int) -> str:
         return f"?page={number}&q={quote(q)}&category={quote(category)}"
 
-    empty_message = "برای این جست‌وجو نتیجه‌ای پیدا نشد. واژهٔ دیگری را امتحان کنید." if q else "مقاله‌ای در این دسته‌بندی پیدا نشد." if category else "هنوز مقاله‌ای منتشر نشده است."
-    cards = "".join(article_card(item, index % 3) for index, item in enumerate(items)) if items else f'<p class="legacy-empty">{empty_message}</p>'
+    empty_message = "برای این جست‌وجو نتیجه‌ای پیدا نشد. واژهٔ دیگری را امتحان کنید." if q else "مقاله‌ای در این دسته‌بندی پیدا نشد." if category else "مقاله‌ها در راه‌اند"
+    cards = "".join(article_card(item, index % 3) for index, item in enumerate(items)) if items else (f'<p class="legacy-empty">{empty_message}</p>' if q or category else '<div class="article-empty" role="status"><img src="/img/ui/article-empty.svg" width="160" height="120" alt="" aria-hidden="true"><h2>مقاله‌ها در راه‌اند</h2><p>به‌زودی مطالب تازه را اینجا می‌خوانید.</p></div>')
     return (
         '<section class="legacy-article-index">'
         + hero_title("مقالات گوش، حلق، بینی و رینوپلاستی", "مطالب علمی با زبان ساده و منابع معتبر برای شناخت بهتر بیماری‌های ENT و مراقبت‌های جراحی بینی")

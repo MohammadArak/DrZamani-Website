@@ -233,3 +233,15 @@
 .rv.rv-wait{animation:none;opacity:0;transform:translateY(34px)}
 .rv.rv-go{animation:rv-rise .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*110ms)}
 @media(prefers-reduced-motion:reduce){.rv,.rv.rv-wait,.rv.rv-go{animation:none;opacity:1;transform:none}}
+
+.gallery-photo{height:auto;width:auto;max-height:24rem;max-width:100%;object-fit:contain;align-self:center;flex:none}
+.gallery-dots{display:flex;flex-wrap:wrap;justify-content:center;gap:0}
+.raviel-credit{display:inline-flex;color:#fddba1!important;background:linear-gradient(110deg,#fddba1,#b7d5ed,#f4c675,#fddba1);background-size:250%;background-clip:text;-webkit-text-fill-color:transparent;animation:credit-flow 7s ease-in-out infinite}
+@keyframes credit-flow{50%{background-position:100%}}
+.article-empty{grid-column:1/-1;text-align:center;padding:28px 12px;color:#3d5a80}
+.article-empty img{display:block;margin:auto;animation:empty-float 4s ease-in-out infinite}
+.article-empty h2,.article-empty h3{font-size:1.4rem;margin:12px 0 6px}
+.article-empty p{color:#64748b}
+@keyframes empty-float{50%{transform:translateY(-7px)}}
+@media(prefers-reduced-motion:reduce){.article-empty img,.raviel-credit{animation:none}}
+#main-content{overflow-anchor:none}

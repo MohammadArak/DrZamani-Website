@@ -58,33 +58,35 @@ const Landing = () => {
 
 
 
-    // Sections load as you go, so a link like /#footer first lands on a placeholder: settle on the real target once
-    // the page has grown, unless the visitor has already started scrolling by themselves.
+    // Correct the anchor once after lazy sections mount. User input cancels it;
+    // keeping a hash in the URL never schedules another scroll.
     useEffect(() => {
-        let touched = false;
-        let timers: number[] = [];
-        const stop = () => { touched = true; };
-        const settleHash = () => {
-            timers.forEach(window.clearTimeout);
-            touched = false;
+        let frame = 0;
+        const cancel = () => { cancelAnimationFrame(frame); frame = 0; };
+        const navigate = () => {
+            cancel();
             let id = window.location.hash.slice(1);
             try { id = decodeURIComponent(id); } catch { return; }
             if (!id) return;
-            timers = [200, 900, 2000, 3500].map(delay =>
-                window.setTimeout(() => { if (!touched) document.getElementById(id)?.scrollIntoView(); }, delay),
-            );
+            const deadline = performance.now() + 3000;
+            const ready = () => {
+                const target = document.getElementById(id);
+                const pending = document.querySelector('[aria-label="در حال آماده‌سازی بخش بعدی"]');
+                if (target && !target.hasAttribute("aria-hidden") && !pending) {
+                    frame = 0;
+                    target.scrollIntoView({ behavior: "instant" });
+                } else if (performance.now() < deadline) frame = requestAnimationFrame(ready);
+            };
+            frame = requestAnimationFrame(ready);
         };
-        window.addEventListener("wheel", stop, { passive: true });
-        window.addEventListener("touchmove", stop, { passive: true });
-        window.addEventListener("keydown", stop);
-        window.addEventListener("hashchange", settleHash);
-        settleHash();
+        const events = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
+        events.forEach(event => window.addEventListener(event, cancel, { passive: true, capture: true }));
+        window.addEventListener("hashchange", navigate);
+        navigate();
         return () => {
-            timers.forEach(window.clearTimeout);
-            window.removeEventListener("wheel", stop);
-            window.removeEventListener("touchmove", stop);
-            window.removeEventListener("keydown", stop);
-            window.removeEventListener("hashchange", settleHash);
+            cancel();
+            events.forEach(event => window.removeEventListener(event, cancel, true));
+            window.removeEventListener("hashchange", navigate);
         };
     }, []);
 

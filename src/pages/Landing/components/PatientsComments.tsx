@@ -41,14 +41,6 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
                     </div>
                 ))}
             </div>
-
-            {slides.length > 1 && (
-                <div className="mt-4 flex justify-center">
-                    <button type="button" onClick={autoplay.toggle} aria-pressed={autoplay.paused} className="rounded-lg border border-secondary px-4 py-2 text-secondary focus-visible:outline-2 focus-visible:outline-offset-4">
-                        {autoplay.paused ? "ادامه نمایش خودکار" : "توقف نمایش خودکار"}
-                    </button>
-                </div>
-            )}
             <button
                 aria-label="نظر قبلی" onClick={() => instanceRef.current?.prev()}
                 className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-linear-to-b from-[#182435] to-[#2e3d51] border border-primary-subtle rounded-full text-secondary shadow hover:shadow-lg hover:scale-105 transition duration-150 ease-in-out"

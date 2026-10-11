@@ -18,7 +18,7 @@ const Footer = () => {
     return (
         <footer
             id="footer"
-            className="relative z-20 bg-jetblack dark:bg-jetblack pt-16 pb-10 flex flex-col"
+            className="relative z-20 bg-jetblack dark:bg-jetblack pt-16 pb-4 flex flex-col"
         >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 px-10 items-start">
                 <motion.div
@@ -298,10 +298,10 @@ const Footer = () => {
                     className="text-sm"
                 >
                     <a
-                        className="text-secondary items-center flex gap-1 p-3"
-                        href="tg://resolve?domain=EMahdi593"
+                        className="raviel-credit items-center flex gap-2 px-3 py-2"
+                        href="https://raviel.ir"
                     >
-                        Designer
+                        طراحی و توسعه توسط Raviel
                         <FaCode />
                     </a>
                 </motion.p>
