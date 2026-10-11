@@ -3,7 +3,6 @@ import { motion } from "@/components/Motion";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import { fillText, useSiteContent } from "@/services/siteContentApi";
 import {
-    FaCode,
     FaEnvelope,
     FaInstagram,
     FaPhoneVolume,
@@ -191,21 +190,23 @@ const Footer = () => {
                                 </div>
                             </li>
                             {(clinicInfo.social.instagram || clinicInfo.social.eitaa) && (
-                                <li className="flex flex-col gap-2 px-8">
+                                <li className="flex gap-2">
                                     {clinicInfo.social.instagram && (
                                         <a
-                                            className="hover:opacity-90 shadow-lg instagram-btn flex gap-2 text-white justify-center items-center rounded-md font-shahab"
+                                            className="hover:opacity-90 shadow-lg instagram-btn flex flex-1 gap-2 text-white justify-center items-center rounded-md font-shahab"
+                                            style={{ padding: "8px", whiteSpace: "nowrap", minWidth: 0 }}
                                             href={clinicInfo.social.instagram}
                                             target="_blank"
                                             rel="noreferrer noopener"
                                         >
                                             <FaInstagram size={22} />
-                                            صفحه اینستاگرام
+                                            اینستاگرام
                                         </a>
                                     )}
                                     {clinicInfo.social.eitaa && (
                                         <a
-                                            className="hover:opacity-90 shadow-lg px-4 py-2 bg-linear-to-r from-[#ef7f1a] to-[#FFB472] flex gap-2 text-white justify-center items-center rounded-md font-shahab"
+                                            className="hover:opacity-90 shadow-lg px-2 py-2 flex-1 bg-linear-to-r from-[#ef7f1a] to-[#FFB472] flex gap-2 text-white justify-center items-center rounded-md font-shahab"
+                                            style={{ whiteSpace: "nowrap", minWidth: 0 }}
                                             href={clinicInfo.social.eitaa}
                                             target="_blank"
                                             rel="noreferrer noopener"
@@ -215,7 +216,7 @@ const Footer = () => {
                                                 className="w-6"
                                                 alt="لوگوی ایتا"
                                             />
-                                            صفحه ایتا
+                                            ایتا
                                         </a>
                                     )}
                                 </li>
@@ -300,9 +301,10 @@ const Footer = () => {
                     <a
                         className="raviel-credit items-center flex gap-2 px-3 py-2"
                         href="https://raviel.ir"
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
                         طراحی و توسعه توسط Raviel
-                        <FaCode />
                     </a>
                 </motion.p>
             </div>

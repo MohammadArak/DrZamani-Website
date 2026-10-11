@@ -1,3 +1,5 @@
+تکمیل درخواست نهایی مالک (2026-10-12): نقشه جای ثابت200px و loading تا onLoad دارد، با تغییر URL وضعیت نو می‌شود؛ بارگذاری خودکار lazy بدون دکمه است. آیکون کد حذف، گرادیان طلایی/آبی واضح‌تر با دوره4s، لینک Raviel در تب جدید با noopener/noreferrer. اینستاگرام و ایتا با همین متن کوتاه در یک ردیف‌اند؛ padding پایین16px حفظ شد. بررسی نهایی و شاهد حجم بسته در receipt همراه خروجی ثبت می‌شود.
+
 # آخرین درخواست مالک — پیش‌نمایش1.18.2، 2026-10-11
 
 [تغییرات، شاهد محلی و ادامهٔ مرحله](PREVIEW_POLISH_2026-10-11.md). گالری/اسکرول hash، نقشه خودکار، Raviel، حالت خالی مقاله و ورودی مستقل FAQ پنل اصلاح شدند. نمونه‌های درخواست‌شدهٔ مالک (3نظر اصل سایت و6مقاله) در DB محلی باقی بمانند؛ پاک‌سازی fixture قبلی را دوباره اجرا نکن. تست368pass/16skip،lint/build/proxy/Ruff/budget موفق؛ نتیجه PR/CI/merge و viewport نهایی از receipt کنار خروجی خوانده شود. deploy واقعی مجاز نیست. اطلاعات قبلی زیر تاریخی‌اند و این checkpoint مقدم است.
@@ -324,3 +326,5 @@ fixture مستقل۲۰ و۱۰۰۰ مقاله/نظر، body هر مقاله۱۸۰
 initial loadAll پنل از۱۳ درخواست حوزه‌ای به۲ درخواست داشبورد/نوبت‌ها کاهش یافت (profile me و clinic مشترک جدا هستند). دادهٔ schedule/services/SMS/finance/waitlist/audit هنگام بازشدن بخش مربوط می‌آید؛ پاسخ دیررس تب قبلی کنار گذاشته می‌شود. لاگ API پس از reload browser فقط me+appointments+dashboard را نشان داد. تقویم/انتظار/مالی/پیامک/مرکز تنظیمات/برنامه دوباره در browser بدون alert بارگیری شدند؛ lint/build/budget پس از این تغییر موفق.
 
 اعتبارسنجی نهایی این تکمیل:368pass/16skip/4warning در205.94s؛95targeted،frontend lint/build/proxy/budget وRuff موفق. CI/merge exactSHA در receipt خروجی ثبت می‌شود.
+
+اعتبارسنجی تکمیل فوتر: build/lint/proxy و10تست public_chrome وRuff موفق. معیار check:bundle پس از prerender: main67760/staff25707/allJS422651/allCSS24777bytes، همه زیر سقف قبلی؛ معیار نهایی پروژه gzipSync در check:bundle است؛ مقدار نمایشی Vite با آن تفاوت دارد و جایگزین آن نیست. مرورگر واقعی320px: عرض سند305 برابر client، دکمه‌های اجتماعی با y یکسان، نقشه واقعی نشان خودکار با slot200px و opacity1/aria-busy=false، Raviel target_blank/relnoopener noreferrer/بدونSVG و gradient4s؛ screenshot کنار خروجی. نمونه‌های3نظر/6مقاله و FAQ پنل حفظ شدند.

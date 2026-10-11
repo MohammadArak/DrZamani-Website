@@ -182,7 +182,7 @@
 .legacy-contact-item h3{margin:0 0 2px;font-family:Lalezar,Vazir,sans-serif;font-weight:400;font-size:19px;color:#fddba1}
 .legacy-contact-item a{display:block;color:#e5e9f0;text-decoration:none}
 .legacy-contact-item a:hover{color:#fddba1}
-.legacy-socials{display:grid;gap:10px;max-width:220px}
+.legacy-socials{display:flex;gap:8px}.legacy-socials a{flex:1;white-space:nowrap;padding:8px}
 .legacy-social{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-radius:8px;color:#fff!important;text-decoration:none;font-size:14px;box-shadow:0 6px 16px #0003}
 .legacy-instagram{background:linear-gradient(115deg,#f9ce34,#ee2a7b,#6228d7)}
 .legacy-eitaa{background:#f58220}
@@ -236,7 +236,7 @@
 
 .gallery-photo{height:auto;width:auto;max-height:24rem;max-width:100%;object-fit:contain;align-self:center;flex:none}
 .gallery-dots{display:flex;flex-wrap:wrap;justify-content:center;gap:0}
-.raviel-credit{display:inline-flex;color:#fddba1!important;background:linear-gradient(110deg,#fddba1,#b7d5ed,#f4c675,#fddba1);background-size:250%;background-clip:text;-webkit-text-fill-color:transparent;animation:credit-flow 7s ease-in-out infinite}
+.raviel-credit{display:inline-flex;color:#fddba1!important;font-weight:700;background:linear-gradient(110deg,#ffe4a8 15%,#7ecaff 40%,#f3b654 65%,#ffe4a8 90%);background-size:300%;background-clip:text;-webkit-text-fill-color:transparent;animation:credit-flow 4s ease-in-out infinite}
 @keyframes credit-flow{50%{background-position:100%}}
 .article-empty{grid-column:1/-1;text-align:center;padding:28px 12px;color:#3d5a80}
 .article-empty img{display:block;margin:auto;animation:empty-float 4s ease-in-out infinite}

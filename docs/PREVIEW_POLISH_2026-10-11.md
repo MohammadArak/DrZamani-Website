@@ -1,3 +1,5 @@
+تکمیل درخواست نهایی مالک (2026-10-12): نقشه جای ثابت200px و loading تا onLoad دارد، با تغییر URL وضعیت نو می‌شود؛ بارگذاری خودکار lazy بدون دکمه است. آیکون کد حذف، گرادیان طلایی/آبی واضح‌تر با دوره4s، لینک Raviel در تب جدید با noopener/noreferrer. اینستاگرام و ایتا با همین متن کوتاه در یک ردیف‌اند؛ padding پایین16px حفظ شد. بررسی نهایی و شاهد حجم بسته در receipt همراه خروجی ثبت می‌شود.
+
 # بهبود پیش‌نمایش و درخواست‌های جدید مالک — 2026-10-11، نسخه1.18.2
 
 مرجع قبلی1.18.1 با PR18 در main946d19f412b7bbe09bde1f0f0153019d0a2fa0fc ادغام شد؛ CI38162461558 هر پنج job موفق، Linux384pass و Windows368pass/16skip. آن ممیزی را تکرار نکنید. این مرحله از همان main روی fix/preview-polish-20261011 است؛ نتیجهٔ نهایی PR/CI/merge در receipt و فایل AI کنار خروجی ثبت می‌شود.
@@ -8,7 +10,7 @@
 
 anchor فقط یک بار بعد از mount شدن بخش‌های lazy تصحیح می‌شود؛ چهار timer تکرارشونده حذف شدند. wheel/touchstart/pointerdown/keydown آن را لغو می‌کنند؛ باقی‌ماندن hash باعث scroll مجدد نیست. overflow-anchor خودکار main خاموش است. این منطق برای تمام hashها مشترک است، نه فقطFAQ.
 
-نقشه iframe واقعی به‌صورت خودکار lazy بارگذاری می‌شود؛ دکمه نمایش و overlay timeout قبل از viewport حذف شدند. Raviel در فوتر React و fallbackSSR لینک HTTPS با گرادیان روشن طلایی/آبی و animation7s دارد؛ در reduced-motion ثابت می‌ماند. footer padding پایین40→16px. حالت خالی مقالات از SVG کتاب و float4s استفاده می‌کند؛ search/category-empty همچنان پیام دقیق خود را دارند و loading/error با نبود مقاله اشتباه نمی‌شوند.
+نقشه iframe واقعی به‌صورت خودکار lazy بارگذاری می‌شود؛ دکمه نمایش و overlay timeout قبل از viewport حذف شدند. Raviel در فوتر React و fallbackSSR لینک HTTPS با گرادیان روشن طلایی/آبی و animation4s دارد؛ در reduced-motion ثابت می‌ماند. footer padding پایین40→16px. حالت خالی مقالات از SVG کتاب و float4s استفاده می‌کند؛ search/category-empty همچنان پیام دقیق خود را دارند و loading/error با نبود مقاله اشتباه نمی‌شوند.
 
 «سوالات متداول» ورودی مستقل پنل است و همان CMS معتبر با مجوز site_content.view/edit/publish، revision/CAS و پیش‌نویس/انتشار جدا را به‌کار می‌گیرد. سوال تازه، حذف، ویرایش، ترتیب و سقف20سوال موجودند؛ بخش مستقل فقط FAQ را می‌خواند/نمایش می‌دهد و guard تغییرات ذخیره‌نشده حفظ شده.
 
@@ -21,3 +23,5 @@ anchor فقط یک بار بعد از mount شدن بخش‌های lazy تصحی
 خطاهای رفع‌شدهٔ محیط/اجرا: مرور وب/CDP سایت اصلی timeout داشت ولی دریافت HTTPS عمومی با Python و TLSverify موفق شد؛ DNS گذرا با اجرای مجاز حل شد. console cp1252 متن فارسی را چاپ نمی‌کرد، فایل دریافت‌شده سالم بود و PYTHONUTF8 حل کرد. seed نخست به PublicMedia.id ناموجود اشاره داشت، transaction برگشت؛ key صحیح و اجرای بعد موفق شد. build اولیه cacheEPERM و نوع FAQ ناقص داشت؛ نوع واقعی StaffTab اصلاح و build با مجوز لازم موفق شد. خروجی budget قبل از build موفق شاهد نسخه تازه نیست؛ فقط report نهایی بالا معتبر است.
 
 deploy زنده و فعال‌سازی رزرو/پرداخت/SMS انجام نشده و مجوز جدا می‌خواهند. گیت‌های VPS/production/رضایت legacy و اندازه‌گیری واقعی ممیزی قبلی همچنان بازند. قدم بعد: CI همین HEAD، ادغام طبق AGENTS، receipt دقیق و بستهٔ canonical همراه AI_HANDOFF؛ سپس نمایش مالک و تغییرات بعدی با درخواست او.
+
+اعتبارسنجی تکمیل فوتر: build/lint/proxy و10تست public_chrome وRuff موفق. معیار check:bundle پس از prerender: main67760/staff25707/allJS422651/allCSS24777bytes، همه زیر سقف قبلی؛ معیار نهایی پروژه gzipSync در check:bundle است؛ مقدار نمایشی Vite با آن تفاوت دارد و جایگزین آن نیست. مرورگر واقعی320px: عرض سند305 برابر client، دکمه‌های اجتماعی با y یکسان، نقشه واقعی نشان خودکار با slot200px و opacity1/aria-busy=false، Raviel target_blank/relnoopener noreferrer/بدونSVG و gradient4s؛ screenshot کنار خروجی. نمونه‌های3نظر/6مقاله و FAQ پنل حفظ شدند.
