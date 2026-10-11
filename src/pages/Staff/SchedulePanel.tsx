@@ -357,6 +357,7 @@ const SchedulePanel = ({
                             onChange={(e) => setExceptionNote(e.target.value)}
                             className={inputClass}
                             placeholder="توضیح اختیاری؛ مثلاً تعطیلی رسمی"
+                            aria-label="توضیح تعطیلی (اختیاری)"
                         />
                         <button
                             disabled={busy}

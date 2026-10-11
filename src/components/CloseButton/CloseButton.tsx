@@ -27,6 +27,7 @@ const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>(
                 ref={ref}
                 className={closeButtonClass}
                 type="button"
+                aria-label="بستن"
                 {...rest}
             >
                 <HiX />

@@ -8,6 +8,8 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exception_handlers import http_exception_handler
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import select
 
 from .config import get_settings
@@ -163,13 +165,24 @@ app = FastAPI(
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(_request, _exc: RequestValidationError) -> JSONResponse:
+async def validation_exception_handler(_request, _exc: RequestValidationError):
+    if _request.url.path.startswith(("/articles/", "/services/")):
+        from .public_pages import public_error
+        return public_error(422)
     return JSONResponse(
         status_code=422,
         content={
             "detail": "اطلاعات واردشده معتبر نیست؛ لطفاً فیلدهای فرم را بررسی کنید"
         },
     )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def public_http_exception_handler(request, exc):
+    if request.url.path.startswith(("/articles/", "/services/")) and exc.status_code in {404, 410}:
+        from .public_pages import public_error
+        return public_error(exc.status_code)
+    return await http_exception_handler(request, exc)
 
 if settings.allowed_origins:
     app.add_middleware(

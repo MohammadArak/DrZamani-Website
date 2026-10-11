@@ -1,3 +1,15 @@
+# وضعیت جاری — ممیزی و اصلاح جامع، 2026-10-11
+
+اولویت جدید مالک بررسی همهٔ سایت و رفع ایرادهاست، مقدم بر طرح‌های تاریخی. نسخه1.18.1 روی شاخهfix/site-audit-20261011 ازmain38e44e5؛ [گزارش دقیق و قدم بعد](SITE_AUDIT_2026-10-11.md) را اول بخوان. مرحلهٔ اول محلی:368pass/16skip، lint/build/proxy/fonts/budgets/Ruff/migrations/audits موفق؛ PR/CI/merge در receipt کنار خروجی، بدون حدس. ممیزی دادهٔ حجیم و گیت‌های production هنوز بازند؛ مرحله۸/۱۰ را complete نکن.
+
+محیط فعلی: D:\AI\Chatgpt\DrZamani\DrZamani-Website، API8000/dev5173/preview4173؛ START_LOCAL_API.ps1 و venv و DB/media/session مصنوعی بیرون checkout هستند. credential یا DB را چاپ/commit/بسته نکن. ورود local_audit با اجازهٔ CAPTCHA موردی انجام شد؛ حل مجدد CAPTCHA مجوز جدا می‌خواهد. heartbeat ساعتی automation-2 ادامهٔ همین audit را پیگیری می‌کند؛ پس از اتمام محلی طبق prompt متوقف شود. deploy زنده یا فعال‌سازی رزرو/پرداخت/SMS واقعی مجاز نیست. صفحهٔ رزرو بسته طبق تصمیم مالک فقط پیام و بازگشت دارد؛ دوباره لینک تماس اضافه نکن.
+
+خطاهای محیط: reparse-point/ACL برای edit و pytest Temp، DNS/timeout PyPI؛ اسکریپت بیرون repo با اجرای مجاز، temp مستقل و همان dependencyهای lock از mirror. frozen sync محلی از PyPI یا systemd/Nginx روی Windows PASS نیست. فایل‌های موقت chunk برگردانده شده‌اند؛ fixtureهای browser پس از QA پاک شوند. قدم بعد CI exact SHA و merge، سپس آزمایش دادهٔ حجیم/public article list و initial loadAll پنل؛ receipt و handoff همراه خروجی به‌روز شوند.
+
+تکمیل ممیزی دادهٔ حجیم در همین مرحله: lookup خدمت نظرات۱۰۰۱→۲query، median محلی۳۰۷→۳۲ms؛ مقاله‌هاmetadata projection و median۸۰۰→۱۰۸ms؛ داشبورد۱۳→۲درخواست حوزه‌ای. تست نهایی368pass/16skip/4warning،95targeted،lint/build/proxy/budget/Ruff موفق. regression رضایت جاری/active service و جست‌وجویUnicode حفظ شدند. گلوگاه‌های ذکرشده در checkpoint اولیه اصلاح شده‌اند؛ دوباره اجرا نکن. نتیجه PR۱۸/CI آخرینSHA و merge از receipt خوانده شود؛ پس از آن ادامهٔ لازم فقط گیت‌های تأیید/زیرساخت واقعی یا بهبود مبتنی بر حجم واقعی است.
+
+---
+
 # وضعیت جاری — تحویل کامل به AI دیگر، 2026-10-05
 
 مرجع فشرده و مقدم بر تمام یادداشت‌های تاریخی پایین: [AI_TRANSFER_2026-10-05.md](AI_TRANSFER_2026-10-05.md). متن آماده شروع: [PROMPT_FOR_NEXT_AI.md](PROMPT_FOR_NEXT_AI.md). نسخه محصول 1.18.0؛ آخرین مبنای اجرایی دریافت‌شده از main `92474f437b3bc46805e59e88c92d843fd3038dbf`، tree `e7a98cf4ec879d8dbc4c82b8ad98cec3aa79a7c2` است. CI همان SHA در run37310351306/attempt1 هر پنج job success دارد (واقعاً خوانده شد، اجرای محلی تازه نیست). SHA نهایی تحویل مستندات/PR/CI/hash بسته در PROJECT_STATUS.json و MANIFEST.json داخل خروجی ثبت می‌شود.
@@ -321,3 +333,6 @@ SMSoutboxdedupe160/claimtoken64/claimuntil2min/nextattemptat؛ workerclaim1job �
 طبق اصلاح صریح مالک، /appointment/ در حالت خاموش فقط پیام تنظیم‌شده و تقویم متوقف با انیمیشن تنفس آرام دارد؛ فرم ورود و پنل بیمار اصلاً mount نمی‌شوند، حتی با cookie قبلی. CSS عمومی و HTML اولیه بدون JavaScript هم همین پیام را دارند. prefers-reduced-motion انیمیشن را خاموش می‌کند. برچسب صفحه اصلی وضعیت نوبت‌دهی است؛ ادعای دسترسی UI ورود در خاموشی حذف شد. API پرونده و callback پرداخت شروع‌شده برای سازگاری و رسیدگی قبلی حفظ شده‌اند؛ این تصمیم درباره نمایش عمومی است. بررسی تازه سیاست قبل از mount فرم لازم است و شکست API رزرو را بسته نگه می‌دارد. متن سیاست قدیمی حفظ ورود UI در این اسناد، با همین درخواست تازه مالک جایگزین شد.
 
 ادامه: مرحله۶ مقالات/رسانه/بازخوردSEO؛ حدود مجوز و شواهد تحویل مطابق گزارش خروجی. هیچ deploy یا فعال‌سازی production مجاز نشده است.
+
+
+اصلاح dependency در همین ممیزی: CI38161232961/front-end در audit یک high برایsource-map-js1.2.1 یافت؛ فقط نسخهٔ غیرمستقیم lock به1.2.2 اصلاح شد، ممیزی رسمی دوباره صفر و frontend checks تکرار شدند. گزارش اولیهٔ صفر audit محلی را مقدم بر نتیجهٔ جدید CI ندان؛ آستانهٔ CI کم نشد.

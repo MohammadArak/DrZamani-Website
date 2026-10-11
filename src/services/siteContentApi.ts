@@ -49,11 +49,19 @@ const readBootstrap = (): SiteBlocks => {
     }
 };
 
+// All homepage sections share one request instead of downloading the same blocks five times.
+let blockRequest: Promise<{ blocks: Partial<SiteBlocks> }> | null = null;
+const loadBlocks = () => {
+    blockRequest ??= apiRequest<{ blocks: Partial<SiteBlocks> }>("/site-content")
+        .catch((error: unknown) => { blockRequest = null; throw error; });
+    return blockRequest;
+};
+
 export function useSiteContent(): SiteBlocks {
     const [blocks, setBlocks] = useState<SiteBlocks>(readBootstrap);
     useEffect(() => {
         let active = true;
-        void apiRequest<{ blocks: Partial<SiteBlocks> }>("/site-content")
+        void loadBlocks()
             .then((result) => { if (active) setBlocks(merge(result.blocks)); })
             .catch(() => undefined);
         return () => { active = false; };

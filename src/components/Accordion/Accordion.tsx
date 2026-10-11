@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { FaChevronUp } from "react-icons/fa";
 
 export interface AccordionProps {
@@ -19,21 +19,18 @@ const Accordion = ({
     active,
     onToggle,
 }: AccordionProps) => {
-    const [height, setHeight] = useState("0px");
-    const contentSpace = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (contentSpace.current) {
-            setHeight(
-                active ? `${contentSpace.current.scrollHeight}px` : "0px",
-            );
-        }
-    }, [active]);
+    const id = useId();
+    const buttonId = `accordion-button-${id}`;
+    const panelId = `accordion-panel-${id}`;
 
     return (
         <div className={`shadow-lg flex flex-col rounded-md ${titleBGColor}`}>
             <button
-                className="py-3 px-4 cursor-pointer focus:outline-none flex items-center justify-between gap-2"
+                type="button"
+                id={buttonId}
+                aria-expanded={active}
+                aria-controls={panelId}
+                className="py-3 px-4 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 flex items-center justify-between gap-2"
                 onClick={onToggle}
             >
                 <p className="font-dana text-white text-lg text-right">
@@ -51,11 +48,15 @@ const Accordion = ({
             </button>
 
             <div
-                ref={contentSpace}
-                style={{ maxHeight: height }}
-                className={`overflow-hidden transition-all duration-300 rounded-b-md px-5 text-justify ${contentBGColor}`}
+                id={panelId}
+                role="region"
+                aria-labelledby={buttonId}
+                aria-hidden={!active}
+                inert={!active}
+                style={{ gridTemplateRows: active ? "1fr" : "0fr" }}
+                className={`grid transition-all duration-300 rounded-b-md text-justify ${contentBGColor}`}
             >
-                <div className="py-4 pb-6 text-jetblack">{content}</div>
+                <div className="min-h-0 overflow-hidden"><div className="px-5 py-4 pb-6 text-jetblack">{content}</div></div>
             </div>
         </div>
     );

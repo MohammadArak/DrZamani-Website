@@ -130,10 +130,13 @@ def public_items(db: Session) -> list[dict]:
     return sorted(items, key=lambda item: (item["sort_order"], item["id"]))
 
 
-def public_media_keys(db: Session) -> set[str]:
+def public_media_keys(db: Session, *, key: str | None = None) -> set[str]:
     keys: set[str] = set()
-    for row in db.scalars(select(SiteService).where(SiteService.deleted.is_(False), SiteService.published_json.is_not(None))):
-        published = _norm(json.loads(row.published_json))
+    query = select(SiteService.published_json).where(SiteService.deleted.is_(False), SiteService.published_json.is_not(None))
+    if key is not None:
+        query = query.where(SiteService.published_json.contains(key, autoescape=True))
+    for snapshot in db.scalars(query):
+        published = _norm(json.loads(snapshot))
         keys |= c.media_keys(json.dumps({"body_html": published["description_html"], "cover_key": published["hero_key"]}))
     return keys
 

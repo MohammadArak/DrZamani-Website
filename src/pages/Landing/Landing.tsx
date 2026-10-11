@@ -32,6 +32,11 @@ const Deferred = ({ id, minHeight, children }: { id: string; minHeight: string; 
     const holder = useRef<HTMLDivElement>(null);
     const [show, setShow] = useState(() => typeof IntersectionObserver === "undefined" || window.location.hash !== "");
     useEffect(() => {
+        const revealHashTarget = () => { if (window.location.hash) setShow(true); };
+        window.addEventListener("hashchange", revealHashTarget);
+        return () => window.removeEventListener("hashchange", revealHashTarget);
+    }, []);
+    useEffect(() => {
         const node = holder.current;
         if (show || !node) return;
         const observer = new IntersectionObserver(
@@ -47,27 +52,39 @@ const Deferred = ({ id, minHeight, children }: { id: string; minHeight: string; 
     return <div ref={holder} id={id} style={{ minHeight }} aria-hidden="true" />;
 };
 
-const Landing = () => {
-    const { clinicInfo } = useClinicInfo();
-
+const Landing = () => {
+
+    const { clinicInfo } = useClinicInfo();
+
+
+
     // Sections load as you go, so a link like /#footer first lands on a placeholder: settle on the real target once
     // the page has grown, unless the visitor has already started scrolling by themselves.
     useEffect(() => {
-        const id = decodeURIComponent(window.location.hash.slice(1));
-        if (!id) return;
         let touched = false;
+        let timers: number[] = [];
         const stop = () => { touched = true; };
+        const settleHash = () => {
+            timers.forEach(window.clearTimeout);
+            touched = false;
+            let id = window.location.hash.slice(1);
+            try { id = decodeURIComponent(id); } catch { return; }
+            if (!id) return;
+            timers = [200, 900, 2000, 3500].map(delay =>
+                window.setTimeout(() => { if (!touched) document.getElementById(id)?.scrollIntoView(); }, delay),
+            );
+        };
         window.addEventListener("wheel", stop, { passive: true });
         window.addEventListener("touchmove", stop, { passive: true });
         window.addEventListener("keydown", stop);
-        const timers = [900, 2000, 3500].map((delay) =>
-            window.setTimeout(() => { if (!touched) document.getElementById(id)?.scrollIntoView(); }, delay),
-        );
+        window.addEventListener("hashchange", settleHash);
+        settleHash();
         return () => {
             timers.forEach(window.clearTimeout);
             window.removeEventListener("wheel", stop);
             window.removeEventListener("touchmove", stop);
             window.removeEventListener("keydown", stop);
+            window.removeEventListener("hashchange", settleHash);
         };
     }, []);
 
@@ -87,7 +104,8 @@ const Landing = () => {
                 ]}
             />
 
-            <main className="text-base pb-16 md:pb-0">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:right-2 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-5 focus:py-3 focus:text-primary">رفتن به محتوای اصلی</a>
+            <main id="main-content" tabIndex={-1} className="text-base pb-16 md:pb-0">
                 <NavigationBar />
                 <HeroContent />
                 <Suspense fallback={<SectionFallback />}>

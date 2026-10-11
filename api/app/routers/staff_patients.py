@@ -30,8 +30,8 @@ router = APIRouter()
 
 @router.get("/patients", response_model=PatientPage)
 def patients(
-    search: str | None = None,
-    tag: str | None = None,
+    search: str | None = Query(default=None, max_length=120),
+    tag: str | None = Query(default=None, max_length=120),
     needs_follow_up: bool = False,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=5, le=100),
@@ -44,22 +44,23 @@ def patients(
     if search:
         normalized = normalize_digits(search).strip()
         predicates = [
-            Patient.first_name.contains(normalized),
-            Patient.last_name.contains(normalized),
-            Patient.phone.contains(normalized),
-            Patient.national_id.contains(normalized),
-            Patient.foreign_identifier.contains(normalized),
+            Patient.first_name.contains(normalized, autoescape=True),
+            Patient.last_name.contains(normalized, autoescape=True),
+            Patient.phone.contains(normalized, autoescape=True),
         ]
         try:
             predicates.append(Patient.phone == normalize_phone(normalized))
         except ValueError:
             pass
-        if not can(_staff, "patients.records.view"):
-            predicates = predicates[:3]
+        if can(_staff, "patients.records.view"):
+            predicates.extend([
+                Patient.national_id.contains(normalized, autoescape=True),
+                Patient.foreign_identifier.contains(normalized, autoescape=True),
+            ])
         query = query.where(or_(*predicates))
     if tag:
         query = query.where(
-            Patient.tags_json.contains(json.dumps(tag, ensure_ascii=False))
+            Patient.tags_json.contains(json.dumps(tag, ensure_ascii=False), autoescape=True)
         )
     if needs_follow_up:
         query = query.where(Patient.needs_follow_up.is_(True))

@@ -39,16 +39,16 @@ def listing(rows,q='',category='',tag=''):
     result=[]
     for row in rows:
         data=json.loads(row.published_json)
-        if q and q.casefold() not in (data['title']+' '+data['summary']+' '+data['body_html']).casefold():continue
+        if q and q.casefold() not in (data['title']+' '+data['summary']+' '+data.get('body_html','')).casefold():continue
         if category and category not in data['categories']:continue
         if tag and tag not in data['tags']:continue
-        item=c.read(row,public=True);item['content']={k:v for k,v in data.items() if k not in {'body_html','sources'}};result.append(item)
+        result.append(dict(id=row.id,content={k:v for k,v in data.items() if k not in {'body_html','sources'}},published_at=row.published_at,updated_at=row.public_updated_at))
     return result
 
 
 @router.get('/articles')
 def public_list(q:str=Query('',max_length=120),category:str=Query('',max_length=80),tag:str=Query('',max_length=80),page:int=Query(1,ge=1,le=10000),db:Session=Depends(get_db)):
-    rows=c.public_rows(db);items=listing(rows,q,category,tag)
+    rows=c.public_rows(db,metadata=not q);items=listing(rows,q,category,tag)
     return dict(items=items[(page-1)*12:page*12],total=len(items),page=page,categories=sorted({v for r in rows for v in json.loads(r.published_json)['categories']}))
 
 

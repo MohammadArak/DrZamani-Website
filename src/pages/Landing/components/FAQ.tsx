@@ -198,9 +198,9 @@ const FAQ = () => {
             >
                 <div className="flex justify-between items-center relative pb-4 pt-2 md:py-2 px-12 md:px-8">
                     <div className="flex flex-col">
-                        <h6 className="text-2xl text-white font-lalezar">
+                        <p className="text-2xl text-white font-lalezar">
                             آدرس مطب:
-                        </h6>
+                        </p>
                         <p className="font-shahab text-white text-lg">
                             {clinicInfo.address.full}
                         </p>
@@ -211,9 +211,9 @@ const FAQ = () => {
                 </div>
                 <div className="flex justify-between items-center relative pb-4 pt-2 md:py-2 px-12 md:px-8">
                     <div className="flex flex-col">
-                        <h6 className="text-2xl text-white font-lalezar">
+                        <p className="text-2xl text-white font-lalezar">
                             شماره تماس:
-                        </h6>
+                        </p>
                         <p className="font-shahab text-white text-lg">
                             {clinicInfo.phones.office.display}
                         </p>
@@ -224,9 +224,9 @@ const FAQ = () => {
                 </div>
                 <div className="flex justify-between items-center relative pb-4 pt-2 md:py-2 px-12 md:px-8">
                     <div className="flex flex-col">
-                        <h6 className="text-2xl text-white font-lalezar">
+                        <p className="text-2xl text-white font-lalezar">
                             ساعت کاری:
-                        </h6>
+                        </p>
                         <p className="font-shahab text-white text-lg">
                             {clinicInfo.workingHours}
                         </p>

@@ -84,13 +84,13 @@ def main() -> int:
               "trackedFileCount": len(source), "gitHistoryIncluded": False,
               "runtimeDataIncluded": False, "deploymentArtifact": False, "receipt": receipt}
     payload["PROJECT_STATUS.json"] = (json.dumps(status, ensure_ascii=False, indent=2) + "\n").encode()
-    payload["AI_HANDOFF.md"] = source["docs/AI_TRANSFER_2026-10-05.md"]
+    payload["AI_HANDOFF.md"] = source["docs/AI_HANDOFF.md"]
     payload["PROMPT_FOR_NEXT_AI.md"] = source["docs/PROMPT_FOR_NEXT_AI.md"]
     payload["START_HERE.md"] = (
         "# بسته کامل ادامه پروژه دکتر زمانی\n\n"
         f"نسخه {version}؛ کامیت دقیق `{commit}`؛ tree `{tree}`.\n\n"
         "ابتدا AI_HANDOFF.md و PROJECT_STATUS.json را بخوانید. سورس کامل در project/ است؛ "
-        "راهنمای اجرا در project/README.md و project/docs/AI_TRANSFER_2026-10-05.md آمده است. "
+        "راهنمای اجرا در project/README.md و project/docs/AI_HANDOFF.md آمده است. "
         "متن PROMPT_FOR_NEXT_AI.md را به AI بعدی بدهید.\n\n"
         "پیش‌نمایش مستقل گالری در previews/gallery/ (اگر همراه شده باشد) است. طرح‌های قدیمی "
         "مطالعه و motion تأیید نشده‌اند. شواهد تاریخی فقط برای SHA گزارش‌شده معتبرند.\n\n"

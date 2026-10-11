@@ -285,3 +285,36 @@ PR۹ merge913a43d1c6e69a4749a8aa3e38625b7de5692252/source9b75629732e48c2ee2bde45
 
 
 بررسی نهایی هیرو: سرریز افقی۱۴px درdesktop دیده شد؛ فقط overflow-x-clip روی همانsection افزوده شد، ساختار/رنگ/چیدمان تغییر نکرد. مرورگر نهایی desktop clientWidth=scrollWidth=1265؛ lint/build/نسخه1.15.0 وbundlebudget نهایی موفق. screenshotهای phase10-hero-final.jpg وphase10-comments-final.jpg (کارت عکس هندسی/نام/متن/سن۲۹) بیرونGit ثبت شدند.
+
+
+## 2026-10-11 — شروع ممیزی و اصلاح جامع
+
+مبنای main38e44e5 دریافت و محیط مستقل محلی آماده شد. ایراد dev proxy/صفحهٔ سفید، مسیر media preview، fallback گالری، خطای render، پیمایش بخش‌های lazy، درخواست تکراری محتوا، بار همهٔ نظرات و دسترس‌پذیری carousel/close/link بررسی و اصلاحات اولیه اعمال شدند. fullpytest مبنا با پوشهٔ temp مستقل exit0، lint/build/audit/budget/font و بخشی از مرورگر موفق؛ بازآزمایی و ممیزی باقی هنوز در حال اجرا است. مرجع وضعیت/خطا/ادامه SITE_AUDIT_2026-10-11 است. کار کامل، ادغام یا پذیرش production گزارش نشود.
+
+
+## 2026-10-11 — اعتبارسنجی اصلاحات ممیزی1.18.1
+
+رفع dev سفید/proxy/media، عدم احیای fallback گالری، recovery chunk/SSR، hash/deferred و دسترس‌پذیری اسلایدر/FAQ/فرم، بارگیری نظرات به درخواست، جست‌وجوی تلفن نقش محدود، پیش‌فیلتر انتشار رسانه با حفظ رضایت و خواندن یک‌باره مجموعه مقاله. خطای مقاله HTML فارسی و noindex است و API/private JSON مانده. افزودن تماس به رزرو بسته به‌دلیل قرارداد صریح مالک و آزمون شکست‌خورده پس گرفته شد.
+
+366pass/16skip/5warning در202.05s (۴deprecation و۱cacheACLمحیط)،۷۰targeted،lint/build/version/proxy/fonts/budgets/Ruff و سهmigration/restore موفق. audits تازه صفر یافتهٔ شناخته‌شده. مرورگر عمومی و همه حوزه‌های پنل،۴خدمتSSR320،صفحه اصلی390/1280/1440،تصویرCMS480،unpublish404،APIقطع/error/retry،chunkقطع/reload،SSRfallback،نظر۱۲→۱۳ و ArrowLeft/Right واقعی دیده شدند. fixture مستقل و هیچ live/provider/real patient تغییر نکرد. Git/CI/merge/source/tree/بسته در receipt خروجی ثبت شوند. ادامهٔ دادهٔ حجیم و گیت‌های بیرونی در SITE_AUDIT_2026-10-11 است؛ ممیزی کامل یا production-ready ادعا نشود.
+
+
+اصلاح dependency در همین ممیزی: CI38161232961/front-end در audit یک high برایsource-map-js1.2.1 یافت؛ فقط نسخهٔ غیرمستقیم lock به1.2.2 اصلاح شد، ممیزی رسمی دوباره صفر و frontend checks تکرار شدند. گزارش اولیهٔ صفر audit محلی را مقدم بر نتیجهٔ جدید CI ندان؛ آستانهٔ CI کم نشد.
+
+
+## دادهٔ حجیم و بارگیری پنل — اصلاحات تکمیلی همین مرحله
+
+fixture مستقل۲۰ و۱۰۰۰ مقاله/نظر، body هر مقاله۱۸۰۰۷کاراکتر، سه تکرار؛ Python3.13/SQLite/TestClient روی همان میزبان. payload پاسخ‌ها در دو اجرا هم‌اندازه‌اند. این آزمایش بار هم‌زمان یا تضمین latency production نیست. دادهٔ خام/credential منتقل نمی‌شود؛ [شاهد قابل‌ماشین](SITE_AUDIT_PERFORMANCE_2026-10-11.json).
+
+| مسیر در۱۰۰۰رکورد | median پیش از اصلاح ms | پس از اصلاح ms | query پیش→پس |
+|---|---:|---:|---:|
+| comments page1 |307.08|31.69|1001→2|
+| articles API page1 |857.91|109.29|2→2|
+| articles HTML index |815.05|107.82|4→4|
+| article HTML detail |811.33|108.23|6→6|
+
+خدمت نظرات گروهی و با IN محدود۵۰۰ خوانده می‌شود؛ رضایت جاری، عنوان تازه و فعال‌بودن خدمت همچنان authoritative است. public article metadata در SQL با json_remove تولید می‌شود؛ فهرست/sidebar/related/sitemap متن draft/approved body و منابع کامل را materialize نمی‌کنند. جست‌وجوی body با casefold اصلی محفوظ است؛ regression عبارت Straße با STRASSE و detail کامل موفق. هیچ cache انتشار/رضایت اضافه نشده.
+
+initial loadAll پنل از۱۳ درخواست حوزه‌ای به۲ درخواست داشبورد/نوبت‌ها کاهش یافت (profile me و clinic مشترک جدا هستند). دادهٔ schedule/services/SMS/finance/waitlist/audit هنگام بازشدن بخش مربوط می‌آید؛ پاسخ دیررس تب قبلی کنار گذاشته می‌شود. لاگ API پس از reload browser فقط me+appointments+dashboard را نشان داد. تقویم/انتظار/مالی/پیامک/مرکز تنظیمات/برنامه دوباره در browser بدون alert بارگیری شدند؛ lint/build/budget پس از این تغییر موفق.
+
+اعتبارسنجی نهایی این تکمیل:368pass/16skip/4warning در205.94s؛95targeted،frontend lint/build/proxy/budget وRuff موفق. CI/merge exactSHA در receipt خروجی ثبت می‌شود.

@@ -9,8 +9,10 @@ export default defineConfig(({ mode }) => {
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || "http://127.0.0.1:8000";
   const proxy = {
     "/articles/": { target: apiProxyTarget, changeOrigin: true },
-    "/services": { target: apiProxyTarget, changeOrigin: true },
-    "/api": {
+    "^/services(?:/|$|\\?)": { target: apiProxyTarget, changeOrigin: true },
+    "/media/": { target: apiProxyTarget, changeOrigin: true },
+    // Source JSON imports under api/app must be transformed by Vite.
+    "^/api/(?!app/)": {
       target: apiProxyTarget,
       changeOrigin: true,
       ws: true,

@@ -170,7 +170,7 @@ def old_index():
 def sitemap(db: Session = Depends(get_db)):
     clinic = clinic_row(db)
     from .content import public_rows
-    rows = public_rows(db)
+    rows = public_rows(db,metadata=True)
     from sqlalchemy import select,func
     from .comment_models import Comment
     last_comment=db.scalar(select(func.max(Comment.public_updated_at)))
@@ -196,3 +196,13 @@ def sitemap(db: Session = Depends(get_db)):
 def robots(db: Session = Depends(get_db)):
     clinic = clinic_row(db)
     return Response(f'User-agent: *\nAllow: /\n\nSitemap: {clinic.site_url.rstrip("/")}/sitemap.xml\nHost: {urlsplit(clinic.site_url).hostname}\n', media_type="text/plain", headers={"Cache-Control": "no-store"})
+
+
+def public_error(status: int):
+    """Document routes receive readable HTML; API and private media errors retain JSON."""
+    title, message = {
+        404: ("صفحه پیدا نشد", "نشانی این صفحه را بررسی کنید یا از فهرست مقالات به مطلب موردنظر برسید."),
+        410: ("این صفحه دیگر در دسترس نیست", "این نشانی قدیمی است یا مطلب آن دیگر منتشر نمی‌شود. می‌توانید مقالات در دسترس را ببینید."),
+        422: ("نشانی واردشده معتبر نیست", "عبارت جست‌وجو یا شمارهٔ صفحه را بررسی کنید و دوباره تلاش کنید."),
+    }[status]
+    return HTMLResponse(f'''<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,follow"><title>{title}</title><style>body{{margin:0;background:#182435;color:#fff;font-family:Tahoma,sans-serif;line-height:2}}main{{max-width:36rem;margin:12vh auto;padding:2rem}}h1{{font-size:1.7rem}}nav{{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2rem}}a{{color:#fddba1;padding:.5rem 1rem;border:1px solid #d5ab64;border-radius:.5rem}}a:focus-visible{{outline:3px solid white;outline-offset:4px}}</style></head><body><main><h1>{title}</h1><p>{message}</p><nav aria-label="ادامهٔ مسیر"><a href="/articles/">مشاهدهٔ مقالات</a><a href="/">بازگشت به صفحه اصلی</a></nav></main></body></html>''',status_code=status,headers={"Cache-Control":"no-store","X-Robots-Tag":"noindex, follow"})

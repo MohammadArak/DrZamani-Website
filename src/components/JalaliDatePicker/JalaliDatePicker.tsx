@@ -86,6 +86,7 @@ const JalaliDatePicker = ({
             containerClassName={`w-full ${className}`}
             inputClass="h-13 w-full cursor-pointer rounded-2xl border border-slate-200 bg-white px-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-secondary focus:ring-4 focus:ring-secondary/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             placeholder={placeholder}
+            title={placeholder}
             editable={false}
             required={required}
             disabled={disabled}

@@ -23,14 +23,6 @@ export type GalleryRow = {
     updated_at: string;
 };
 
-/** The sixteen photos shown before the database existed; used only if the API cannot be reached. */
-export const fallbackGallery: GalleryImage[] = Array.from({ length: 16 }, (_, index) => ({
-    id: index + 1,
-    src: `/img/samples/${index + 1}.jpg`,
-    alt: `نمونه کار شماره ${index + 1}`,
-    sort_order: index + 1,
-}));
-
 const isImage = (value: unknown): value is GalleryImage =>
     !!value && typeof value === "object" && typeof (value as GalleryImage).src === "string" && typeof (value as GalleryImage).alt === "string";
 
@@ -44,20 +36,24 @@ const readBootstrap = (): GalleryImage[] | null => {
     }
 };
 
-export function useSiteGallery(): GalleryImage[] {
-    const [items, setItems] = useState<GalleryImage[]>(() => readBootstrap() ?? fallbackGallery);
+export function useSiteGallery() {
+    const [state, setState] = useState(() => ({ items: readBootstrap() ?? [], loading: true, error: false }));
+    const [attempt, setAttempt] = useState(0);
     useEffect(() => {
         let active = true;
-        void apiRequest<{ items: GalleryImage[] }>("/public-gallery")
+        const controller = new AbortController();
+        void apiRequest<{ items: GalleryImage[] }>("/public-gallery", { signal: controller.signal })
             .then((result) => {
-                if (active && Array.isArray(result.items) && result.items.every(isImage)) setItems(result.items);
+                if (!Array.isArray(result.items) || !result.items.every(isImage)) throw new Error("Invalid gallery response");
+                if (active) setState({ items: result.items, loading: false, error: false });
             })
-            .catch(() => undefined);
-        return () => {
-            active = false;
-        };
-    }, []);
-    return items;
+            .catch(() => {
+                // Never revive legacy photographs or retain stale publication after a failed policy read.
+                if (active) setState({ items: [], loading: false, error: true });
+            });
+        return () => { active = false; controller.abort(); };
+    }, [attempt]);
+    return { ...state, retry: () => { setState(value => ({ ...value, loading: true, error: false })); setAttempt(value => value + 1); } };
 }
 
 export const emptyGalleryItem = (): GalleryContent => ({
