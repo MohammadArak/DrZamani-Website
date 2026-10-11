@@ -27,13 +27,13 @@ const ServiceCard = ({ img, header, body, href = "/#footer" }: Props) => {
                     </div>
                 </div>
                 <div className="flex flex-col justify-center items-center gap-5 ">
-                    <h6 className="text-duskblue font-dana text-2xl">
+                    <h3 className="text-duskblue font-dana text-2xl">
                         {header}
-                    </h6>
+                    </h3>
                     <img
                         className="w-32"
                         src="/img/services/line.png"
-                        alt="خط افقی"
+                        alt="" aria-hidden="true"
                         width="128"
                         height="10"
                         loading="lazy"
@@ -45,6 +45,7 @@ const ServiceCard = ({ img, header, body, href = "/#footer" }: Props) => {
                 <div className="flex justify-center items-center">
                     <a
                         href={href}
+                        aria-label={`مشاوره و اطلاعات بیشتر درباره ${header}`}
                         className="flex items-center gap-1 text-secondary border border-secondary rounded-full px-5 py-2 hover:bg-secondary hover:scale-105 hover:text-white transition duration-125 ease-in-out"
                     >
                         مشاوره و اطلاعات بیشتر

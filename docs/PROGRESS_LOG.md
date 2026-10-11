@@ -285,3 +285,15 @@ PR۹ merge913a43d1c6e69a4749a8aa3e38625b7de5692252/source9b75629732e48c2ee2bde45
 
 
 بررسی نهایی هیرو: سرریز افقی۱۴px درdesktop دیده شد؛ فقط overflow-x-clip روی همانsection افزوده شد، ساختار/رنگ/چیدمان تغییر نکرد. مرورگر نهایی desktop clientWidth=scrollWidth=1265؛ lint/build/نسخه1.15.0 وbundlebudget نهایی موفق. screenshotهای phase10-hero-final.jpg وphase10-comments-final.jpg (کارت عکس هندسی/نام/متن/سن۲۹) بیرونGit ثبت شدند.
+
+
+## 2026-10-11 — شروع ممیزی و اصلاح جامع
+
+مبنای main38e44e5 دریافت و محیط مستقل محلی آماده شد. ایراد dev proxy/صفحهٔ سفید، مسیر media preview، fallback گالری، خطای render، پیمایش بخش‌های lazy، درخواست تکراری محتوا، بار همهٔ نظرات و دسترس‌پذیری carousel/close/link بررسی و اصلاحات اولیه اعمال شدند. fullpytest مبنا با پوشهٔ temp مستقل exit0، lint/build/audit/budget/font و بخشی از مرورگر موفق؛ بازآزمایی و ممیزی باقی هنوز در حال اجرا است. مرجع وضعیت/خطا/ادامه SITE_AUDIT_2026-10-11 است. کار کامل، ادغام یا پذیرش production گزارش نشود.
+
+
+## 2026-10-11 — اعتبارسنجی اصلاحات ممیزی1.18.1
+
+رفع dev سفید/proxy/media، عدم احیای fallback گالری، recovery chunk/SSR، hash/deferred و دسترس‌پذیری اسلایدر/FAQ/فرم، بارگیری نظرات به درخواست، جست‌وجوی تلفن نقش محدود، پیش‌فیلتر انتشار رسانه با حفظ رضایت و خواندن یک‌باره مجموعه مقاله. خطای مقاله HTML فارسی و noindex است و API/private JSON مانده. افزودن تماس به رزرو بسته به‌دلیل قرارداد صریح مالک و آزمون شکست‌خورده پس گرفته شد.
+
+366pass/16skip/5warning در202.05s (۴deprecation و۱cacheACLمحیط)،۷۰targeted،lint/build/version/proxy/fonts/budgets/Ruff و سهmigration/restore موفق. audits تازه صفر یافتهٔ شناخته‌شده. مرورگر عمومی و همه حوزه‌های پنل،۴خدمتSSR320،صفحه اصلی390/1280/1440،تصویرCMS480،unpublish404،APIقطع/error/retry،chunkقطع/reload،SSRfallback،نظر۱۲→۱۳ و ArrowLeft/Right واقعی دیده شدند. fixture مستقل و هیچ live/provider/real patient تغییر نکرد. Git/CI/merge/source/tree/بسته در receipt خروجی ثبت شوند. ادامهٔ دادهٔ حجیم و گیت‌های بیرونی در SITE_AUDIT_2026-10-11 است؛ ممیزی کامل یا production-ready ادعا نشود.

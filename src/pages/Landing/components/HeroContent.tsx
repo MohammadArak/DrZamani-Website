@@ -85,10 +85,10 @@ const HeroContent = () => {
                             }}
                             viewport={{ once: true }}
                         >
-                            <motion.h3 className="shadow-xl bg-[#0f253e] text-white font-lalezar font-light mt-8 text-lg md:text-xl border border-duskblue w-fit rounded-full px-4 py-1 flex justify-center items-center gap-2">
+                            <motion.p className="shadow-xl bg-[#0f253e] text-white font-lalezar font-light mt-8 text-lg md:text-xl border border-duskblue w-fit rounded-full px-4 py-1 flex justify-center items-center gap-2">
                                 <div className="bg-secondary rounded-full w-4 h-4"></div>
                                 {clinicInfo.specialty}
-                            </motion.h3>
+                            </motion.p>
                         </motion.div>
                         <motion.div
                             className="flex flex-col gap-4 mt-8 md:pl-16"
@@ -132,21 +132,14 @@ const HeroContent = () => {
                                 <FaCalendar />
                                 رزرو نوبت مشاوره
                             </button> */}
-                            <button
-                                onClick={() => {
-                                    document
-                                        .getElementById("samples")
-                                        ?.scrollIntoView({
-                                            behavior: "smooth",
-                                            block: "start",
-                                        });
-                                }}
+                            <a
+                                href="#samples"
                                 className="flex gap-2 px-2 py-1 md:px-5 md:py-3 text-sm md:text-base text-neutral justify-center items-center border border-secondary hover:scale-105 transition rounded-md shadow-md"
                                 aria-label="رفتن به بخش نمونه‌کارها"
                             >
                                 <FaRegImages />
                                 مشاهده نمونه کارها
-                            </button>
+                            </a>
                         </motion.div>
                     </div>
                 </div>

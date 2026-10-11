@@ -1,3 +1,9 @@
+# اولویت جاری — ممیزی2026-10-11
+
+این پروژه را در همان مخزن MohammadArak/DrZamani-Website ادامه بده. ابتدا docs/AI_HANDOFF.md، docs/SITE_AUDIT_2026-10-11.md و PROJECT_STATUS.json/receipt کنار خروجی را بخوان. نسخه1.18.1 و وضعیت commit/CI را واقعاً تأیید کن. اصلاحات مرحلهٔ اول را دوباره اجرا نکن؛ به ترتیب به دادهٔ حجیم article list/search و loadAll پنل، QA فرم/تعارض و گیت‌های باقی بپرداز. اطلاعات پزشکی/نظر/رضایت را نساز. هیچ deploy یا رزرو/پرداخت/SMS واقعی مجاز نیست. هر مرحله با تست واقعی، docs، commit/PR/CI و merge طبق AGENTS تحویل شود؛ receipt دقیق و فایل ادامه AI کنار خروجی بساز. متن‌های تاریخی پایین اولویت تازه نیستند.
+
+---
+
 # متن آماده برای AI بعدی
 
 پروژه سایت فارسی دکتر فرزاد زمانی را ادامه بده. بسته کامل را باز کن؛ ابتدا START_HERE.md، PROJECT_STATUS.json و MANIFEST.json، سپس project/AGENTS.md، project/docs/AI_TRANSFER_2026-10-05.md، ابتدای AI_HANDOFF، ROADMAP و PROGRESS_LOG را بخوان. آخرین نسخه دقیق از رسید تحویل تعیین شود؛ نسخه محصول 1.18.0 است. گزارش‌های تاریخی را وضعیت جاری فرض نکن.

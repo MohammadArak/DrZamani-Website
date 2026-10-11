@@ -32,7 +32,7 @@ const ServiceMinimalCard = ({
                     decoding="async"
                 />
             </div>
-            <h6 className="text-duskblue text-lg">{title}</h6>
+            <p className="text-duskblue text-lg">{title}</p>
             <span className="font-light text-xs">{subtitle}</span>
             </a>
         </motion.div>

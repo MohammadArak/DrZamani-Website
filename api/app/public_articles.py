@@ -66,7 +66,8 @@ def article_detail(slug:str,db:Session=Depends(get_db)):
     image=site+'/media/'+data['cover_key']+'.webp' if data['cover_key'] else None
     article_body,toc=outline(sanitize(data['body_html']))
     body=detail_content(data,published_at=row.published_at,updated_at=row.public_updated_at,body_html=article_body,toc_html=toc)
-    body=layout(db,clinic,body,current_slug=slug,crumbs=[('صفحه اصلی','/'),('مقالات','/articles/'),(data['title'],'')],after=related_section(published_items(db),slug))
+    items=published_items(db)
+    body=layout(db,clinic,body,current_slug=slug,items=items,crumbs=[('صفحه اصلی','/'),('مقالات','/articles/'),(data['title'],'')],after=related_section(items,slug))
     schema={'@context':'https://schema.org','@type':'Article','headline':data['title'],'description':data['summary'],'mainEntityOfPage':canonical,'datePublished':row.published_at.isoformat()+'Z','dateModified':row.public_updated_at.isoformat()+'Z','author':{'@type':'Person','name':data['author_name']},'reviewedBy':{'@type':'Person','name':data['reviewer']},'publisher':{'@type':'Organization','name':clinic.doctor_name,'url':site},'citation':[s['url'] for s in data['sources']],'keywords':data['tags']}
     if image:schema['image']=image
     breadcrumbs={'@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i,'name':name,'item':url} for i,(name,url) in enumerate([('صفحه اصلی',site+'/'),('مقالات',site+'/articles/'),(data['title'],canonical)],1)]}

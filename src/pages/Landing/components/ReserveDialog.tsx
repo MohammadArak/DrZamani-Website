@@ -25,7 +25,7 @@ const ReserveDialog = ({
             onRequestClose={onClose}
         >
             <div className="px-6 pb-6">
-                <h5 className="mb-4 text-slate-900 dark:text-white">رزرو نوبت</h5>
+                <h2 className="mb-4 text-slate-900 dark:text-white">رزرو نوبت</h2>
                 <p className="text-lg leading-8 whitespace-pre-line text-slate-800 dark:text-slate-100">{clinicInfo.bookingDisabledMessage}</p>
             </div>
             <div className="text-right px-6 py-3 bg-gray-100 dark:bg-gray-700 rounded-bl-lg rounded-br-lg">

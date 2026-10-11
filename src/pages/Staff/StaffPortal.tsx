@@ -321,6 +321,7 @@ export const StaffDashboard = ({
                 {navItems.map((item) => (
                     <button
                         key={item.id}
+                        aria-current={tab === item.id ? "page" : undefined}
                         onClick={async() => {
                             if(item.id!==tab&&!await leaveArticle())return;
                             setTab(item.id);

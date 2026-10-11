@@ -230,10 +230,8 @@ def is_public_media(db,key):
     publish_due(db)
     candidates=db.scalars(select(Article.published_json).where(Article.deleted.is_(False),Article.published_json.is_not(None),Article.published_json.contains(key,autoescape=True))).all()
     if any(key in media_keys(snapshot) for snapshot in candidates):return True
-    from .comments import public_rows as public_comments
-    from .comment_models import Comment
-    if db.scalar(select(Comment.id).where(Comment.deleted.is_(False),Comment.published_json.is_not(None),Comment.published_json.contains(key,autoescape=True)).limit(1)) is not None:
-        if any(row['photo_key']==key for row in public_comments(db)):return True
+    from .comments import is_public_photo
+    if is_public_photo(db, key):return True
     from .site_services import public_media_keys
     from .site_gallery import public_media_keys as gallery_keys
-    return key in public_media_keys(db) or key in gallery_keys(db)
+    return key in public_media_keys(db, key=key) or key in gallery_keys(db, key=key)

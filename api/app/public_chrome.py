@@ -219,7 +219,8 @@ def list_content(items: list[dict], *, total: int, page: int, per_page: int, q: 
     def href(number: int) -> str:
         return f"?page={number}&q={quote(q)}&category={quote(category)}"
 
-    cards = "".join(article_card(item, index % 3) for index, item in enumerate(items)) if items else '<p class="legacy-empty">هنوز مقاله‌ای منتشر نشده است.</p>'
+    empty_message = "برای این جست‌وجو نتیجه‌ای پیدا نشد. واژهٔ دیگری را امتحان کنید." if q else "مقاله‌ای در این دسته‌بندی پیدا نشد." if category else "هنوز مقاله‌ای منتشر نشده است."
+    cards = "".join(article_card(item, index % 3) for index, item in enumerate(items)) if items else f'<p class="legacy-empty">{empty_message}</p>'
     return (
         '<section class="legacy-article-index">'
         + hero_title("مقالات گوش، حلق، بینی و رینوپلاستی", "مطالب علمی با زبان ساده و منابع معتبر برای شناخت بهتر بیماری‌های ENT و مراقبت‌های جراحی بینی")

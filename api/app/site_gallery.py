@@ -104,13 +104,15 @@ def public_items(db: Session) -> list[dict]:
     return sorted(items, key=lambda item: (item["sort_order"], item["id"]))
 
 
-def public_media_keys(db: Session) -> set[str]:
-    keys = set()
-    for row in _live(db):
-        if row.published_json:
-            data = json.loads(row.published_json)
-            if data["kind"] == "media":
-                keys.add(data["ref"])
+def public_media_keys(db: Session, *, key: str | None = None) -> set[str]:
+    keys: set[str] = set()
+    query = select(SiteGalleryItem.published_json).where(SiteGalleryItem.deleted.is_(False), SiteGalleryItem.published_json.is_not(None))
+    if key is not None:
+        query = query.where(SiteGalleryItem.published_json.contains(key, autoescape=True))
+    for snapshot in db.scalars(query):
+        data = json.loads(snapshot)
+        if data["kind"] == "media":
+            keys.add(data["ref"])
     return keys
 
 

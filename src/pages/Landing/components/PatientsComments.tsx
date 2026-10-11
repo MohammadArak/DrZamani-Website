@@ -1,3 +1,4 @@
+import { useCarouselAutoplay } from "@/hooks/useCarouselAutoplay";
 import PatientComment from "./PatientComment";
 import {useCallback,useEffect,useRef,useState} from "react";
 import {commentsApi,type CommentPage,type PublicComment} from "@/services/commentsApi";
@@ -8,50 +9,26 @@ import { useKeenSlider } from "keen-slider/react";
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 
 function Carousel({ slides }: { slides: React.ReactNode[] }) {
+    const autoplay = useCarouselAutoplay(slides.length);
     const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>(
         {
             loop: true,
         },
-        [
-            (slider) => {
-                let timeout: ReturnType<typeof setTimeout>;
-                let paused = false;
-                const interaction = slider.container.parentElement ?? slider.container;
-                const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-                const clear = () => clearTimeout(timeout);
-                const next = () => {
-                    clear();
-                    if (paused || reduced.matches || slides.length < 2) return;
-                    timeout = setTimeout(() => slider.next(), 3000);
-                };
-                const enter = () => { paused = true; clear(); };
-                const leave = () => { paused = false; next(); };
-                slider.on("created", () => {
-                    interaction.addEventListener("mouseenter", enter);
-                    interaction.addEventListener("mouseleave", leave);
-                    interaction.addEventListener("focusin", enter);
-                    interaction.addEventListener("focusout", leave);
-                    reduced.addEventListener("change", next);
-                    next();
-                });
-                slider.on("destroyed", () => {
-                    clear();
-                    interaction.removeEventListener("mouseenter", enter);
-                    interaction.removeEventListener("mouseleave", leave);
-                    interaction.removeEventListener("focusin", enter);
-                    interaction.removeEventListener("focusout", leave);
-                    reduced.removeEventListener("change", next);
-                });
-                slider.on("dragStarted", clear);
-                slider.on("animationEnded", next);
-                slider.on("updated", next);
-            },
-        ],
+        [autoplay.plugin],
     );
 
     return (
         <div className="relative ">
             <div
+                role="region"
+                aria-label="نظرات مراجعین"
+                aria-roledescription="اسلایدر"
+                tabIndex={0}
+                onKeyDown={event => {
+                    if (event.target !== event.currentTarget) return;
+                    if (event.key === "ArrowLeft") { event.preventDefault(); instanceRef.current?.next(); }
+                    if (event.key === "ArrowRight") { event.preventDefault(); instanceRef.current?.prev(); }
+                }}
                 ref={sliderRef}
                 className="keen-slider cursor-grab active:cursor-grabbing"
             >
@@ -65,6 +42,13 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
                 ))}
             </div>
 
+            {slides.length > 1 && (
+                <div className="mt-4 flex justify-center">
+                    <button type="button" onClick={autoplay.toggle} aria-pressed={autoplay.paused} className="rounded-lg border border-secondary px-4 py-2 text-secondary focus-visible:outline-2 focus-visible:outline-offset-4">
+                        {autoplay.paused ? "ادامه نمایش خودکار" : "توقف نمایش خودکار"}
+                    </button>
+                </div>
+            )}
             <button
                 aria-label="نظر قبلی" onClick={() => instanceRef.current?.prev()}
                 className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-linear-to-b from-[#182435] to-[#2e3d51] border border-primary-subtle rounded-full text-secondary shadow hover:shadow-lg hover:scale-105 transition duration-150 ease-in-out"
@@ -87,12 +71,12 @@ function initial():CommentPage<PublicComment>{
 }
 const PatientsComments = () => {
     const { facts } = useSiteContent().about;
-    const [result,setResult]=useState(initial); const [busy,setBusy]=useState(false); const [error,setError]=useState(false); const generation=useRef({value:0});
+    const [result,setResult]=useState(initial); const [busy,setBusy]=useState(false); const [error,setError]=useState(false); const generation=useRef({value:0}); const requestedPages=useRef(1);
     const load=useCallback(async()=>{
         const sequence=++generation.current.value;setBusy(true);
         try{
             let next=await commentsApi.publicList(); const items=[...next.items];
-            while(next.page*12<next.total && next.items.length){
+            while(next.page < requestedPages.current && next.page*12<next.total && next.items.length){
                 if(sequence!==generation.current.value)return;
                 next=await commentsApi.publicList(next.page+1);items.push(...next.items);
             }
@@ -164,7 +148,7 @@ const PatientsComments = () => {
                 </motion.div>
             </div>
             <div className="flex flex-col gap-3 items-center">
-                <motion.h5
+                <motion.p
                     className="text-lg md:text-2xl text-secondary font-dana font-bold"
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -176,8 +160,8 @@ const PatientsComments = () => {
                     viewport={{ once: true }}
                 >
                     رضایت بیماران مهمترین دستاورد ماست.
-                </motion.h5>
-                <motion.h6
+                </motion.p>
+                <motion.p
                     className="md:text-lg font-shahab text-white"
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -189,7 +173,7 @@ const PatientsComments = () => {
                     viewport={{ once: true }}
                 >
                     {facts.map((fact) => `${fact.value} ${fact.label}`).join(" و ")}
-                </motion.h6>
+                </motion.p>
             </div>
             {/* <style>
                 {`                    
@@ -225,6 +209,7 @@ const PatientsComments = () => {
                 {!result.items.length&&!error&&<p className="text-center text-white">{busy?"در حال دریافت نظرات…":"هنوز نظری برای نمایش منتشر نشده است."}</p>}
                 {result.items.length>0&&<Carousel key={result.items.map(r=>r.id).join(",")} slides={result.items.map(item=><PatientComment key={item.id} img={item.photo_key?`/media/${item.photo_key}.webp`:undefined} imageAlt={item.photo_alt} name={item.display_name} age={item.age??undefined} body={item.body}/>)}/>}
 
+                {result.items.length < result.total && !error && <div className="mt-5 text-center"><button type="button" disabled={busy} onClick={() => { requestedPages.current++; void load(); }} className="rounded-lg border border-secondary px-5 py-3 text-secondary disabled:opacity-50">{busy ? "در حال دریافت…" : "نمایش نظرات بیشتر"}</button></div>}
             </motion.div>
         </section>
     );

@@ -69,9 +69,9 @@ def read(row):
     return dict(id=row.id,revision=row.revision,content={'age':None,**content},published=bool(public),unpublished_changes=bool(public and any(public.get(k)!=content.get(k) for k in ['display_name','body','age','photo_key','photo_alt','service_id','sort_order'])))
 
 
-def public_rows(db):
+def _visible_rows(db, query):
     result=[]
-    for row in db.scalars(select(Comment).where(Comment.deleted.is_(False),Comment.published_json.is_not(None))):
+    for row in db.scalars(query):
         current=json.loads(row.content_json)
         if not current['consent_received'] or not current['privacy_reviewed'] or not current['consent_reference'].strip():continue
         data=json.loads(row.published_json)
@@ -82,6 +82,17 @@ def public_rows(db):
             data['service_title']=service.title
         result.append(dict(id=row.id,**data))
     return sorted(result,key=lambda r:(r['sort_order'],r['id']))
+
+
+def public_rows(db):
+    query=select(Comment).where(Comment.deleted.is_(False),Comment.published_json.is_not(None))
+    return _visible_rows(db, query)
+
+
+def is_public_photo(db, key):
+    # Keep current consent and active-service checks even when the published snapshot remains.
+    query=select(Comment).where(Comment.deleted.is_(False),Comment.published_json.is_not(None),Comment.published_json.contains(key,autoescape=True))
+    return any(row['photo_key'] == key for row in _visible_rows(db, query))
 
 
 def approve(data):
