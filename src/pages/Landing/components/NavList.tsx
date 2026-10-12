@@ -1,20 +1,23 @@
-import { useRef, useState, type CSSProperties } from "react";
+import { useRef, useState, type ReactNode, type CSSProperties } from "react";
 import classNames from "@/utils/classNames";
 
 type LinkTab = {
     title: string;
     value: string;
     href: string;
+    icon?: ReactNode;
 };
 
 const NavList = ({
     tabs: propTabs,
     tabClassName,
     onTabClick,
+    vertical = false,
 }: {
     tabs: LinkTab[];
     tabClassName?: string;
     onTabClick?: () => void;
+    vertical?: boolean;
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -44,7 +47,7 @@ const NavList = ({
     return (
         <div
             ref={containerRef}
-            className="relative flex flex-col lg:flex-row"
+            className={classNames("relative flex flex-col", !vertical && "lg:flex-row")}
             onMouseLeave={() =>
                 setHighlightStyle((style) => ({ ...style, opacity: 0 }))
             }
@@ -75,8 +78,8 @@ const NavList = ({
                         }))
                     }
                 >
-                    <span className="heading-text relative z-10 block text-inherit">
-                        {tab.title}
+                    <span className="heading-text relative z-10 flex items-center gap-1 text-inherit">
+                        {tab.icon}{tab.title}
                     </span>
                 </a>
             ))}

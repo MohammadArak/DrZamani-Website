@@ -1,3 +1,4 @@
+import NavList from "./NavList";
 import LazyIframe from "@/components/Iframe";
 import { motion } from "@/components/Motion";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
@@ -10,6 +11,14 @@ import {
 import { GiDiamonds } from "react-icons/gi";
 import { MdNavigateBefore } from "react-icons/md";
 
+const footerLinks = [
+    { title: "درباره ما", value: "about-us", href: "/#about-us" },
+    { title: "خدمات ما", value: "services", href: "/#services" },
+    { title: "نمونه کارها", value: "samples", href: "/#samples" },
+    { title: "نظرات مراجعین", value: "comments", href: "/#comments" },
+    { title: "سوالات متداول", value: "faq", href: "/#faq" },
+].map(link => ({ ...link, icon: <MdNavigateBefore size={28} className="text-secondary" /> }));
+
 const Footer = () => {
     const { clinicInfo } = useClinicInfo();
     const content = useSiteContent();
@@ -17,7 +26,7 @@ const Footer = () => {
     return (
         <footer
             id="footer"
-            className="relative z-20 bg-jetblack dark:bg-jetblack pt-16 pb-4 flex flex-col"
+            className="relative z-20 bg-jetblack dark:bg-jetblack pt-16 pb-8 flex flex-col"
         >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 px-10 items-start">
                 <motion.div
@@ -69,67 +78,8 @@ const Footer = () => {
                             <h2 className="text-2xl font-lalezar text-white">لینک ها</h2>
                             <div className="w-20 bg-linear-to-l from-secondary to-secondary-mild/10 h-px rounded-full"></div>
                         </div>
-                        <div className="w-full flex flex-col gap-3">
-                            <a
-                                href="/#about-us"
-                                className="transition duration-75 ease-in-out w-full flex flex-col gap-2 hover:bg-primary rounded"
-                            >
-                                <div className="flex gap-1 items-center">
-                                    <MdNavigateBefore
-                                        size={28}
-                                        className="text-secondary"
-                                    />
-                                    درباره ما
-                                </div>
-                            </a>
-                            <a
-                                href="/#services"
-                                className="transition duration-75 ease-in-out w-full flex flex-col gap-2 hover:bg-primary rounded"
-                            >
-                                <div className="flex gap-1 items-center">
-                                    <MdNavigateBefore
-                                        size={28}
-                                        className="text-secondary"
-                                    />
-                                    خدمات ما
-                                </div>
-                            </a>
-                            <a
-                                href="/#samples"
-                                className="transition duration-75 ease-in-out w-full flex flex-col gap-2 hover:bg-primary rounded"
-                            >
-                                <div className="flex gap-1 items-center">
-                                    <MdNavigateBefore
-                                        size={28}
-                                        className="text-secondary"
-                                    />
-                                    نمونه کارها
-                                </div>
-                            </a>
-                            <a
-                                href="/#comments"
-                                className="transition duration-75 ease-in-out w-full flex flex-col gap-2 hover:bg-primary rounded"
-                            >
-                                <div className="flex gap-1 items-center">
-                                    <MdNavigateBefore
-                                        size={28}
-                                        className="text-secondary"
-                                    />
-                                    نظرات مراجعین
-                                </div>
-                            </a>
-                            <a
-                                href="/#faq"
-                                className="transition duration-75 ease-in-out w-full flex flex-col gap-2 hover:bg-primary rounded"
-                            >
-                                <div className="flex gap-1 items-center">
-                                    <MdNavigateBefore
-                                        size={28}
-                                        className="text-secondary"
-                                    />
-                                    سوالات متداول
-                                </div>
-                            </a>
+                        <div className="w-full">
+                            <NavList tabs={footerLinks} vertical tabClassName="footer-nav-link" />
                         </div>
                     </motion.div>
                     <motion.div
@@ -154,10 +104,10 @@ const Footer = () => {
                                         <p className="text-2xl text-secondary font-lalezar text-white">
                                             شماره تلفن:
                                         </p>
-                                        <a href={`tel:${clinicInfo.phones.office.value}`}>
+                                        <a className="footer-contact" href={`tel:${clinicInfo.phones.office.value}`}>
                                             {clinicInfo.phones.office.display}
                                         </a>
-                                        <a href={`tel:${clinicInfo.phones.consultation.value}`}>
+                                        <a className="footer-contact" href={`tel:${clinicInfo.phones.consultation.value}`}>
                                             {clinicInfo.phones.consultation.display}
                                         </a>
                                     </div>
@@ -176,7 +126,7 @@ const Footer = () => {
                                             آدرس ایمیل:
                                         </p>
                                         <p>
-                                            <a href={`mailto:${clinicInfo.email}`}>
+                                            <a className="footer-contact" href={`mailto:${clinicInfo.email}`}>
                                                 {clinicInfo.email}
                                             </a>
                                         </p>
@@ -193,7 +143,7 @@ const Footer = () => {
                                 <li className="flex gap-2">
                                     {clinicInfo.social.instagram && (
                                         <a
-                                            className="hover:opacity-90 shadow-lg instagram-btn flex flex-1 gap-2 text-white justify-center items-center rounded-md font-shahab"
+                                            className="hover:opacity-90 shadow-lg footer-social instagram-btn flex flex-1 gap-2 text-white justify-center items-center rounded-md font-shahab"
                                             style={{ padding: "8px", whiteSpace: "nowrap", minWidth: 0 }}
                                             href={clinicInfo.social.instagram}
                                             target="_blank"
@@ -205,7 +155,7 @@ const Footer = () => {
                                     )}
                                     {clinicInfo.social.eitaa && (
                                         <a
-                                            className="hover:opacity-90 shadow-lg px-2 py-2 flex-1 bg-linear-to-r from-[#ef7f1a] to-[#FFB472] flex gap-2 text-white justify-center items-center rounded-md font-shahab"
+                                            className="hover:opacity-90 shadow-lg footer-social px-2 py-2 flex-1 bg-linear-to-r from-[#ef7f1a] to-[#FFB472] flex gap-2 text-white justify-center items-center rounded-md font-shahab"
                                             style={{ whiteSpace: "nowrap", minWidth: 0 }}
                                             href={clinicInfo.social.eitaa}
                                             target="_blank"

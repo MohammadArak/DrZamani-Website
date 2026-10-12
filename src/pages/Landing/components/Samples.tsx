@@ -66,11 +66,8 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
                         onClick={() => instanceRef.current?.moveToIdx(idx)}
                         aria-label={`نمایش تصویر ${idx + 1}`}
                         aria-current={current === idx ? "true" : undefined}
-                        className={`h-6 shrink-0 rounded-full border-8 border-transparent bg-clip-padding transition-all duration-300 p-0 ${
-                            current === idx
-                                ? "w-8 bg-secondary-deep"
-                                : "w-6 bg-gray-500"
-                        }`}
+                        style={{ width: current === idx ? 24 : 18, borderWidth: "8px 5px", padding: 0, minWidth: 0 }}
+                        className={`h-6 shrink-0 rounded-full border-transparent bg-clip-padding transition-all duration-300 ${current === idx ? "bg-secondary-deep" : "bg-gray-500"}`}
                     />
                 ))}
             </div>

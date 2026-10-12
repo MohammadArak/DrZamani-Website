@@ -181,7 +181,7 @@
 .legacy-contact-mark{display:grid;place-items:center;flex:none;width:40px;height:40px;border:1px solid #6b768a;border-radius:50%;color:#d5ab64}
 .legacy-contact-item h3{margin:0 0 2px;font-family:Lalezar,Vazir,sans-serif;font-weight:400;font-size:19px;color:#fddba1}
 .legacy-contact-item a{display:block;color:#e5e9f0;text-decoration:none}
-.legacy-contact-item a:hover{color:#fddba1}
+.legacy-contact-item a:hover,.legacy-contact-item a:focus-visible{color:#fddba1}
 .legacy-socials{display:flex;gap:8px}.legacy-socials a{flex:1;white-space:nowrap;padding:8px}
 .legacy-social{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-radius:8px;color:#fff!important;text-decoration:none;font-size:14px;box-shadow:0 6px 16px #0003}
 .legacy-instagram{background:linear-gradient(115deg,#f9ce34,#ee2a7b,#6228d7)}
@@ -247,3 +247,9 @@
 #main-content{overflow-anchor:none}
 
 #about-us,#services,#comments,#samples,#faq,#footer{scroll-margin-top:var(--nav-h)}
+
+.footer-social,.legacy-social{background-size:220%;animation:credit-flow 5s ease-in-out infinite}
+.footer-contact:hover,.footer-contact:focus-visible{color:#d5ab64}
+.footer-nav-link{padding:6px 4px;font-weight:400}
+.reservation-dialog .dialog-content{animation:none}.reservation-overlay{transition:none;backdrop-filter:none;z-index:100}
+@media(prefers-reduced-motion:reduce){.footer-social,.legacy-social{animation:none}}
