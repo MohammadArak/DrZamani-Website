@@ -38,6 +38,8 @@ export type PatientProfilePayload = {
     foreign_identifier: string | null;
 };
 
+export type BusinessHours = { day_of_week: "Saturday" | "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday"; opens: string; closes: string };
+
 export type ClinicSettings = {
     booking_enabled?: boolean;
     booking_disabled_message?: string;
@@ -55,6 +57,8 @@ export type ClinicSettings = {
     address_city: string;
     address: string;
     working_hours: string;
+    postal_code?: string;
+    business_hours?: BusinessHours[];
     site_url: string;
     map_embed_url: string;
     map_page_url: string;

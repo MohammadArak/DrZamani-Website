@@ -1,7 +1,7 @@
 import HeroContent from "./components/HeroContent";
 import NavigationBar from "./components/NavigationBar";
 
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import Seo from "@/components/SEO";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
@@ -14,43 +14,12 @@ const BlogPreview = lazy(() => import("./components/BlogPreview"));
 const FAQ = lazy(() => import("./components/FAQ"));
 const Footer = lazy(() => import("./components/Footer"));
 
-const SectionFallback = () => (
-    <div
-        className="min-h-32 bg-white"
-        role="status"
-        aria-label="در حال آماده‌سازی بخش بعدی"
-    />
+const SectionFallback = ({ id, minHeight = "760px" }: { id?: string; minHeight?: string }) => (
+    <div id={id} style={{ minHeight }} className="bg-white flex flex-col items-center justify-center gap-4" role="status" aria-label="در حال آماده‌سازی بخش بعدی">
+        <img src="/img/logo/logo-loading.png" width={64} height={64} alt="" decoding="async" />
+        <span className="text-primary">در حال آماده‌سازی این بخش…</span>
+    </div>
 );
-
-/**
- * Mounts a below-the-fold section (and downloads its code and data) only when it is about to be scrolled into view.
- * Nothing about the page changes for the visitor: the section still plays its own entrance animation when it
- * appears. The placeholder keeps the section's anchor id and an estimated height, so menu links and the footer
- * link still land in the right place; with a #hash in the address everything mounts at once.
- */
-const Deferred = ({ id, minHeight, children }: { id: string; minHeight: string; children: ReactNode }) => {
-    const holder = useRef<HTMLDivElement>(null);
-    const [show, setShow] = useState(() => typeof IntersectionObserver === "undefined" || window.location.hash !== "");
-    useEffect(() => {
-        const revealHashTarget = () => { if (window.location.hash) setShow(true); };
-        window.addEventListener("hashchange", revealHashTarget);
-        return () => window.removeEventListener("hashchange", revealHashTarget);
-    }, []);
-    useEffect(() => {
-        const node = holder.current;
-        if (show || !node) return;
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries.some((entry) => entry.isIntersecting)) setShow(true);
-            },
-            { rootMargin: "1400px 0px" },
-        );
-        observer.observe(node);
-        return () => observer.disconnect();
-    }, [show]);
-    if (show) return <>{children}</>;
-    return <div ref={holder} id={id} style={{ minHeight }} aria-hidden="true" />;
-};
 
 const Landing = () => {
 
@@ -105,7 +74,7 @@ const Landing = () => {
     return (
         <>
             <Seo
-                title={clinicInfo.seoTitle || `${clinicInfo.doctorName} | ${clinicInfo.specialty}`}
+                title={clinicInfo.seoTitle || `وبسایت رسمی ${clinicInfo.doctorName}`}
                 description={clinicInfo.seoDescription || `وب‌سایت رسمی ${clinicInfo.doctorName}، ${clinicInfo.specialty} در ${clinicInfo.address.city}؛ معرفی خدمات و راه‌های ارتباطی.`}
                 image={clinicInfo.seoImageUrl || `${clinicInfo.siteUrl}/og-cover.jpg`}
                 canonical={`${clinicInfo.siteUrl}/`}
@@ -125,36 +94,24 @@ const Landing = () => {
                 <Suspense fallback={<SectionFallback />}>
                     <AboutUs />
                 </Suspense>
-                <Deferred id="services" minHeight="760px">
-                    <Suspense fallback={<SectionFallback />}>
-                        <Services />
-                    </Suspense>
-                </Deferred>
-                <Deferred id="comments" minHeight="720px">
-                    <Suspense fallback={<SectionFallback />}>
-                        <PatientsComments />
-                    </Suspense>
-                </Deferred>
-                <Deferred id="samples" minHeight="820px">
-                    <Suspense fallback={<SectionFallback />}>
-                        <Samples />
-                    </Suspense>
-                </Deferred>
-                <Deferred id="articles" minHeight="820px">
-                    <Suspense fallback={<SectionFallback />}>
-                        <BlogPreview />
-                    </Suspense>
-                </Deferred>
-                <Deferred id="faq" minHeight="700px">
-                    <Suspense fallback={<SectionFallback />}>
-                        <FAQ />
-                    </Suspense>
-                </Deferred>
-                <Deferred id="footer" minHeight="820px">
-                    <Suspense fallback={<SectionFallback />}>
-                        <Footer />
-                    </Suspense>
-                </Deferred>
+                <Suspense fallback={<SectionFallback id="services" minHeight="760px" />}>
+                    <Services />
+                </Suspense>
+                <Suspense fallback={<SectionFallback id="comments" minHeight="720px" />}>
+                    <PatientsComments />
+                </Suspense>
+                <Suspense fallback={<SectionFallback id="samples" minHeight="820px" />}>
+                    <Samples />
+                </Suspense>
+                <Suspense fallback={<SectionFallback id="articles" minHeight="820px" />}>
+                    <BlogPreview />
+                </Suspense>
+                <Suspense fallback={<SectionFallback id="faq" minHeight="700px" />}>
+                    <FAQ />
+                </Suspense>
+                <Suspense fallback={<SectionFallback id="footer" minHeight="820px" />}>
+                    <Footer />
+                </Suspense>
             </main>
             <Suspense fallback={null}>
                 <MobileTabBar />

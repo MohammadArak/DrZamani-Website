@@ -1,4 +1,4 @@
-import type { ClinicSettings } from "@/services/appointmentApi";
+import type { BusinessHours, ClinicSettings } from "@/services/appointmentApi";
 
 export type ClinicPhone = {
     value: string;
@@ -29,6 +29,8 @@ export type ClinicInfo = {
         full: string;
     };
     workingHours: string;
+    postalCode: string;
+    businessHours: BusinessHours[];
     mapEmbedUrl: string;
     mapPageUrl: string;
     mapCoordinates: {
@@ -81,6 +83,8 @@ const phoneDetails = (rawValue: string): ClinicPhone => {
 };
 
 export const fallbackClinicInfo: ClinicInfo = {
+    postalCode: "",
+    businessHours: [],
     bookingEnabled: false,
     bookingDisabledMessage: "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید.",
     doctorName: "دکتر فرزاد زمانی",
@@ -122,6 +126,8 @@ const textOrFallback = (value: string | null | undefined, fallback: string) =>
 export const buildClinicInfo = (settings: ClinicSettings): ClinicInfo => ({
     bookingEnabled: settings.booking_enabled === true,
     bookingDisabledMessage: settings.booking_disabled_message?.trim() || fallbackClinicInfo.bookingDisabledMessage,
+    postalCode: settings.postal_code?.trim() ?? "",
+    businessHours: settings.business_hours ?? [],
     seoTitle: settings.seo_title?.trim() ?? "",
     seoDescription: settings.seo_description?.trim() ?? "",
     seoImageUrl: settings.seo_image_url?.trim() ?? "",

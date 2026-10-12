@@ -142,6 +142,7 @@ const AboutUs = () => {
                         >
                             <img
                                 className="z-10"
+                                style={{ filter: "url(#doctor-edge-soft)" }}
                                 src="/img/about-us/dr-zamani-op.webp"
                                 alt={`اتاق عمل ${clinicInfo.doctorName}`}
                                 width={1216}
@@ -149,21 +150,11 @@ const AboutUs = () => {
                                 loading="lazy"
                                 decoding="async"
                             />
-                            <motion.div
-                                className="relative hidden md:block"
-                                initial={{ opacity: 0, x: 40 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{
-                                    duration: 1,
-                                    type: "spring",
-                                    bounce: 0.1,
-                                }}
-                                viewport={{ once: true }}
-                            >
+                            <div className="relative hidden md:block">
                                 <div className="absolute inset-0 -z-10 rounded-full opacity-90 [background:radial-gradient(closest-side,var(--lightcyan),transparent)] scale-125" />
                                 <div className="absolute -left-8 -bottom-8 md:left-4 md:bottom-4 lg:left-2 lg:bottom-6 z-30">
                                     {content.about.facts.length > 0 && (
-                                        <GlassCard className="p-5 bg-linear-to-bl to-[#98C1D9] border-none">
+                                        <GlassCard className="p-5 clinic-stats">
                                             <div className="flex flex-col gap-4">
                                                 {content.about.facts.map((fact, index) => {
                                                     const Icon = index % 2 === 0 ? FaUsers : BiSolidCheckShield;
@@ -190,7 +181,7 @@ const AboutUs = () => {
                                         </GlassCard>
                                     )}
                                 </div>
-                            </motion.div>
+                            </div>
                         </motion.div>
                     </div>
                 </div>

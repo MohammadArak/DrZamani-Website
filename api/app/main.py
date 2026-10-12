@@ -34,6 +34,7 @@ from .sms_automation import seed_sms_rules
 from .site_services import seed as seed_site_services
 from .site_content import seed as seed_site_content
 from .site_gallery import seed as seed_site_gallery
+from .initial_content import seed as seed_initial_content
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -143,6 +144,9 @@ def seed_defaults() -> None:
                 db.flush()
                 assign_legacy_role(db, db.scalar(select(StaffUser).where(StaffUser.username == username)))
                 logger.warning("مدیر اولیه ساخته شد؛ اطلاعات راه‌اندازی مدیر را از فایل .env حذف کنید")
+
+        if settings.seed_default_content:
+            seed_initial_content(db, settings)
 
 
 @asynccontextmanager

@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from datetime import date, datetime, time
 from urllib.parse import urlparse
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
@@ -328,6 +329,18 @@ class ServiceWrite(BaseModel):
         return self
 
 
+class BusinessHours(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    day_of_week: Literal["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    opens: str = Field(pattern=r"^(?:[01][0-9]|2[0-3]):[0-5][0-9]$")
+    closes: str = Field(pattern=r"^(?:[01][0-9]|2[0-3]):[0-5][0-9]$")
+
+    @field_validator("opens", "closes", mode="before")
+    @classmethod
+    def normalize_clock(cls, value):
+        return normalize_digits(value).strip() if isinstance(value, str) else value
+
+
 class ClinicSettingRead(BaseModel):
     booking_enabled: bool = False
     booking_disabled_message: str = "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید."
@@ -348,6 +361,8 @@ class ClinicSettingRead(BaseModel):
     address_city: str
     address: str
     working_hours: str
+    postal_code: str = ""
+    business_hours: list[BusinessHours] = Field(default_factory=list, max_length=7)
     site_url: str
     map_embed_url: str
     map_page_url: str
@@ -399,6 +414,21 @@ class ClinicSettingUpdate(ClinicSettingRead):
     first_reminder_hours: int = Field(ge=1, le=336)
     final_reminder_hours: int = Field(ge=1, le=168)
     timezone_name: str = Field(default="Asia/Tehran", max_length=64)
+
+    @field_validator("postal_code")
+    @classmethod
+    def validate_postal_code(cls, value):
+        value = normalize_digits(value).strip().replace(" ", "").replace("-", "")
+        if value and not re.fullmatch(r"[0-9]{10}", value):
+            raise ValueError("کدپستی باید ده رقم باشد یا خالی بماند")
+        return value
+
+    @field_validator("business_hours")
+    @classmethod
+    def validate_business_days(cls, value):
+        if len({slot.day_of_week for slot in value}) != len(value):
+            raise ValueError("هر روز فقط یک بازه ساعت کاری داشته باشد")
+        return value
 
     @field_validator("office_phone", "consultation_phone")
     @classmethod

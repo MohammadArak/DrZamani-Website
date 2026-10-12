@@ -1,22 +1,6 @@
 @import "./assets/styles/app.css";
 @import "./assets/styles/global.scss";
 
-@media (min-width: 768px) {
-    .footer-gr-border::after {
-        content: "";
-        position: absolute;
-        width: 1.5px;
-        height: 100%;
-        background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 1) 0%,
-            rgba(255, 255, 255, 0.4) 50%,
-            rgba(255, 255, 255, 0) 100%
-        );
-        left: -4%;
-        top: 0%;
-    }
-}
 
 .instagram-btn {
     background: linear-gradient(115deg, #f9ce34, #ee2a7b, #6228d7);
