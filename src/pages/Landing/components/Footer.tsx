@@ -1,3 +1,4 @@
+import BusinessHoursView from "@/components/BusinessHoursView";
 import NavList from "./NavList";
 import LazyIframe from "@/components/Iframe";
 import { motion } from "@/components/Motion";
@@ -191,6 +192,7 @@ const Footer = () => {
                             <span>
                                 {clinicInfo.address.full}
                             </span>
+                            <BusinessHoursView />
                         </div>
                         {clinicInfo.mapEmbedUrl ? (
                             <LazyIframe

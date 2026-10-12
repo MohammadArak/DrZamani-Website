@@ -255,3 +255,5 @@
 @keyframes reserve-pop{from{opacity:.5;transform:scale(.97)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.reservation-dialog .dialog-content{animation:none}.reservation-overlay{transition:none}}
 @media(prefers-reduced-motion:reduce){.footer-social,.legacy-social{animation:none}}
+
+.clinic-stats{background:linear-gradient(135deg,#172b43ed,#213b55ed);backdrop-filter:blur(8px)}.clinic-stats:before{opacity:.2}

@@ -126,6 +126,8 @@ const createMotionElement = (tagName: keyof HTMLElementTagNameMap) => {
             forwardedRef,
         ) => {
             const localRef = useRef<HTMLElement | null>(null);
+            const enteredRef = useRef(false);
+            const hasViewportAnimation = Boolean(whileInView);
             const [isVisible, setIsVisible] = useState(() => {
                 const reducedMotion =
                     typeof window !== "undefined" &&
@@ -168,7 +170,7 @@ const createMotionElement = (tagName: keyof HTMLElementTagNameMap) => {
             useEffect(() => {
                 const element = localRef.current;
 
-                if (!element || !whileInView) {
+                if (!element || !hasViewportAnimation || (enteredRef.current && viewport?.once !== false)) {
                     return;
                 }
 
@@ -184,18 +186,19 @@ const createMotionElement = (tagName: keyof HTMLElementTagNameMap) => {
                         setIsVisible(entry.isIntersecting);
 
                         if (entry.isIntersecting && viewport?.once !== false) {
+                            enteredRef.current = true;
                             observer.unobserve(element);
                         }
                     },
                     {
-                        threshold: viewport?.amount ?? 0.12,
-                        rootMargin: "0px 0px -4% 0px",
+                        threshold: viewport?.amount ?? 0,
+                        rootMargin: "160px 0px",
                     },
                 );
 
                 observer.observe(element);
                 return () => observer.disconnect();
-            }, [viewport?.amount, viewport?.once, whileInView]);
+            }, [viewport?.amount, viewport?.once, hasViewportAnimation]);
 
             const animatedStyle = useMemo<CSSProperties>(() => {
                 const targetState = isVisible
@@ -207,7 +210,7 @@ const createMotionElement = (tagName: keyof HTMLElementTagNameMap) => {
                 return {
                     ...stateToStyle(targetState),
                     transitionProperty: "opacity, transform, filter",
-                    transitionDuration: `${transition?.duration ?? 0.7}s`,
+                    transitionDuration: `${whileInView ? Math.min(transition?.duration ?? 0.4, 0.4) : transition?.duration ?? 0.7}s`,
                     transitionDelay: `${transition?.delay ?? 0}s`,
                     transitionTimingFunction: toEasing(transition),
                     // Promote an element only while it is waiting to enter the

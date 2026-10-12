@@ -4,8 +4,12 @@ import hashlib,json,os,shutil,sqlite3,subprocess,sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from PIL import Image
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 api=Path(__file__).resolve().parents[1]/'api'
+config=Config(str(api/'alembic.ini'));config.set_main_option('script_location',str(api/'alembic'))
+head=ScriptDirectory.from_config(config).get_current_head()
 with TemporaryDirectory(prefix='drzamani-comments-') as directory:
     root=Path(directory);database=root/'comments.db';media=root/'media';media.mkdir()
     env=dict(os.environ,APP_ENV='test',APP_DEBUG='false',SMS_PROVIDER='disabled',BOOKING_ENABLED='false',DATABASE_URL=f'sqlite:///{database.as_posix()}',PUBLIC_MEDIA_DIR=str(media),UPLOAD_DIR=str(root/'private'))
@@ -42,7 +46,7 @@ with TemporaryDirectory(prefix='drzamani-comments-') as directory:
         assert db.execute('SELECT COUNT(*) FROM public_comments').fetchone()[0]==2
         assert db.execute('SELECT content_json FROM public_comments LIMIT 1').fetchone()[0]==json.dumps(data)
         assert db.execute('SELECT COUNT(*) FROM articles').fetchone()[0]==1
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='20261005_0023'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]==head
         assert db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
         assert db.execute('PRAGMA foreign_key_check').fetchall()==[]
     assert hashlib.sha256(file.read_bytes()).hexdigest()==digest

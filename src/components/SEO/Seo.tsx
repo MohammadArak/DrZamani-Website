@@ -30,6 +30,12 @@ const Seo = ({
 }: SeoProps) => {
     const { clinicInfo } = useClinicInfo();
     const siteRoot = `${clinicInfo.siteUrl.replace(/\/$/, "")}/`;
+    const siteLabel = `وبسایت ${clinicInfo.doctorName}`;
+    const oldSuffix = ` | ${clinicInfo.doctorName}`;
+    const pageLabel = title.endsWith(oldSuffix) ? title.slice(0, -oldSuffix.length) : title;
+    const resolvedTitle = canonical.replace(/\/$/, "") === siteRoot.replace(/\/$/, "")
+        ? clinicInfo.seoTitle || `وبسایت رسمی ${clinicInfo.doctorName}`
+        : pageLabel.endsWith(` | ${siteLabel}`) ? pageLabel : `${pageLabel} | ${siteLabel}`;
     const physicianId = `${siteRoot}#physician`;
     const clinicId = `${siteRoot}#clinic`;
     const websiteId = `${siteRoot}#website`;
@@ -74,7 +80,7 @@ const Seo = ({
         },
         {
             "@context": "https://schema.org",
-            "@type": "MedicalClinic",
+            "@type": ["MedicalClinic", "LocalBusiness"],
             "@id": clinicId,
             name: `مطب ${clinicInfo.doctorName}`,
             url: siteRoot,
@@ -87,8 +93,10 @@ const Seo = ({
                 addressRegion: clinicInfo.address.region,
                 addressLocality: clinicInfo.address.city,
                 streetAddress: clinicInfo.address.street,
+                ...(clinicInfo.postalCode ? { postalCode: clinicInfo.postalCode } : {}),
             },
             telephone,
+            ...(clinicInfo.businessHours.length ? { openingHoursSpecification: clinicInfo.businessHours.map(slot => ({ "@type": "OpeningHoursSpecification", dayOfWeek: slot.day_of_week, opens: slot.opens, closes: slot.closes })) } : {}),
             geo: {
                 "@type": "GeoCoordinates",
                 latitude: clinicInfo.mapCoordinates.latitude,
@@ -120,7 +128,7 @@ const Seo = ({
 
     return (
         <Helmet>
-            <title>{title}</title>
+            <title>{resolvedTitle}</title>
 
             <meta name="description" content={description} />
 
@@ -143,7 +151,7 @@ const Seo = ({
 
             <meta property="og:site_name" content={clinicInfo.doctorName} />
 
-            <meta property="og:title" content={title} />
+            <meta property="og:title" content={resolvedTitle} />
 
             <meta property="og:description" content={description} />
 
@@ -169,7 +177,7 @@ const Seo = ({
 
             <meta name="twitter:card" content="summary_large_image" />
 
-            <meta name="twitter:title" content={title} />
+            <meta name="twitter:title" content={resolvedTitle} />
 
             <meta name="twitter:description" content={description} />
 

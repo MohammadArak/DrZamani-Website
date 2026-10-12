@@ -43,6 +43,10 @@ const DefaultLoading = (props: BaseLoadingProps) => {
                 <img
                     src="/img/logo/logo-loading.png"
                     width={logoSize}
+                    height={logoSize}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="sync"
                     alt="لوگوی دکتر فرزاد زمانی"
                     className="z-20"
                 />

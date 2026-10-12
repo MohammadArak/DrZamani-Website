@@ -168,7 +168,14 @@ from app.database import SessionLocal
 from app.models import Patient, AuthSession, SmsOutbox, StaffUser, ClinicSetting
 from app.security import issue_session_token, utcnow
 with SessionLocal.begin() as db:
-    assert not db.scalar(select(StaffUser.id).limit(1))
+    assert not db.scalar(select(StaffUser.id).where(StaffUser.is_active.is_(True)).limit(1))
+    from app.content_models import Article, ContentSeedState
+    from app.comment_models import Comment
+    assert db.get(ContentSeedState, 'approved-public-content-v1')
+    assert len(db.scalars(select(Comment.id)).all()) == 3
+    assert len(db.scalars(select(Article.id)).all()) == 6
+    actor = db.scalar(select(StaffUser).where(StaffUser.username == '__default_public_content__'))
+    assert actor and actor.is_active is False and actor.password_hash == '!' 
     from app.runtime_settings import get_settings
     assert get_settings().booking_enabled is False
     patient = Patient(phone='00000000000', first_name='Synthetic', last_name='Fixture')

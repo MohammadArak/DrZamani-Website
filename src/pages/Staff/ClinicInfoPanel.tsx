@@ -3,6 +3,7 @@ import Toast from "@/components/Toast";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import {
     appointmentApi,
+    type BusinessHours,
     type ClinicSettings
 } from "@/services/appointmentApi";
 import {
@@ -13,6 +14,7 @@ import {
 import { useStaffAccess } from "./staffAccess";
 
 import { errorMessage,inputClass } from "./staffUi";
+const businessDays: [BusinessHours["day_of_week"], string][] = [["Saturday","شنبه"],["Sunday","یکشنبه"],["Monday","دوشنبه"],["Tuesday","سه‌شنبه"],["Wednesday","چهارشنبه"],["Thursday","پنجشنبه"],["Friday","جمعه"]];
 const ClinicInfoPanel = ({
     token,
     settings,
@@ -190,6 +192,23 @@ const ClinicInfoPanel = ({
                             />
                         </label>
                     </div>
+                    <label className="mt-4 block">
+                        <span className="mb-2 block text-sm">کدپستی مطب</span>
+                        <input dir="ltr" inputMode="numeric" disabled={!canEdit} value={draft.postal_code ?? ""} onChange={event => update("postal_code", event.target.value)} className={inputClass} placeholder="اختیاری، ده رقم" />
+                    </label>
+                    <fieldset className="mt-5">
+                        <legend className="font-dana text-lg text-primary">ساعت کاری برای نمایش عمومی و گوگل</legend>
+                        <p className="my-2 text-sm text-slate-600">روزهای حضور را انتخاب کنید و ساعت واقعی را بنویسید. تا زمانی که مشخص نیست، خالی بگذارید.</p>
+                        {businessDays.map(([day, label]) => {
+                            const slots = draft.business_hours ?? [];
+                            const slot = slots.find(item => item.day_of_week === day);
+                            const setTime = (key: "opens" | "closes", value: string) => update("business_hours", slots.map(item => item.day_of_week === day ? { ...item, [key]: value } : item));
+                            return <div key={day} className="my-2 flex flex-wrap items-center gap-3">
+                                <label className="flex items-center gap-2"><input type="checkbox" disabled={!canEdit} checked={!!slot} onChange={event => update("business_hours", event.target.checked ? [...slots, {day_of_week:day, opens:"", closes:""}] : slots.filter(item => item.day_of_week !== day))} />{label}</label>
+                                {slot && <><label className="flex items-center gap-2">شروع<input type="time" required disabled={!canEdit} value={slot.opens} onChange={event => setTime("opens",event.target.value)} className={inputClass} /></label><label className="flex items-center gap-2">پایان<input type="time" required disabled={!canEdit} value={slot.closes} onChange={event => setTime("closes",event.target.value)} className={inputClass} /></label></>}
+                            </div>;
+                        })}
+                    </fieldset>
                 </div>
 
                 <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">

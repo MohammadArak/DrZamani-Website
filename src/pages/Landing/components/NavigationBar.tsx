@@ -1,3 +1,4 @@
+import DoctorEdgeDefs from "@/components/DoctorEdgeDefs";
 import { useState } from "react";
 import NavList from "./NavList";
 import Drawer from "@/components/Drawer";
@@ -58,6 +59,7 @@ const Navigation = ({ solid = false }: { solid?: boolean }) => {
             // )}
             className={classNames("w-full fixed inset-x-0 z-40")}
         >
+            <DoctorEdgeDefs />
             <ReserveDialog
                 dialogIsOpen={reserveOpen}
                 onClose={() => setReserveOpen(false)}
@@ -84,6 +86,8 @@ const Navigation = ({ solid = false }: { solid?: boolean }) => {
                             src="/img/logo/logo-dark-full.webp"
                             className="w-40 md:w-48 lg:w-56"
                             alt={`لوگوی ${clinicInfo.doctorName}`}
+                            loading="eager"
+                            fetchPriority="high"
                             width="560"
                             height="175"
                             decoding="async"

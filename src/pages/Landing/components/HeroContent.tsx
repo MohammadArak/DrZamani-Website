@@ -33,6 +33,7 @@ const HeroContent = () => {
                         <div className="absolute inset-0 rounded-full -z-10 opacity-35 [background:radial-gradient(closest-side,var(--lightcyan),transparent)] scale-110" />
                         <img
                             className="max-h-100 lg:max-h-125 z-20"
+                            style={{ filter: "url(#doctor-edge-soft)" }}
                             src="/img/zamani/dr-zamani-hero.webp"
                             srcSet="/img/zamani/dr-zamani-hero-560.webp 560w, /img/zamani/dr-zamani-hero.webp 1018w"
                             sizes="(max-width: 1024px) 400px, 500px"

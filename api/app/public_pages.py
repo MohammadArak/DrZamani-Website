@@ -65,7 +65,7 @@ def render(clinic, page, db=None, editorial=None):
     esc = html.escape
     site = clinic.site_url.rstrip("/")
     name = clinic.doctor_name
-    title = clinic.seo_title or f"{name} | {clinic.specialty}"
+    title = clinic.seo_title or f"وبسایت رسمی {name}"
     description = clinic.seo_description or f"وب‌سایت رسمی {name}، {clinic.specialty} در {clinic.address_city}؛ معرفی خدمات و راه‌های ارتباطی."
     image = clinic.seo_image_url or f"{site}/og-cover.jpg"
     path, robots, status = "/", "index, follow, max-image-preview:large", 200
@@ -78,6 +78,13 @@ def render(clinic, page, db=None, editorial=None):
     if editorial:
         title, description, path, robots = editorial['title'], editorial['description'], editorial['path'], editorial.get('robots', robots)
         image = editorial.get('image') or image
+    if page != "home" or editorial:
+        old_suffix = f" | {name}"
+        if title.endswith(old_suffix):
+            title = title[:-len(old_suffix)]
+        suffix = f" | وبسایت {name}"
+        if not title.endswith(suffix):
+            title += suffix
     canonical = site + path
     meta = f'<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-rh="true">{esc(title)}</title><link data-rh="true" rel="canonical" href="{esc(canonical)}">'
     for attribute, key, value in [
@@ -89,13 +96,18 @@ def render(clinic, page, db=None, editorial=None):
         ("name", "twitter:description", description), ("name", "twitter:image", image),
     ]:
         meta += f'<meta data-rh="true" {attribute}="{key}" content="{esc(value)}">'
-    schema = {"@context": "https://schema.org", "@type": "MedicalClinic", "name": name,
+    schema = {"@context": "https://schema.org", "@type": ["MedicalClinic", "LocalBusiness"], "name": name,
               "url": site + "/", "image": image, "telephone": [phone(clinic.office_phone), phone(clinic.consultation_phone)],
               "email": clinic.email, "medicalSpecialty": clinic.specialty,
               "address": {"@type": "PostalAddress", "addressCountry": "IR", "streetAddress": clinic.address,
                           "addressLocality": clinic.address_city, "addressRegion": clinic.address_region},
               "geo": {"@type": "GeoCoordinates", "latitude": clinic.map_latitude, "longitude": clinic.map_longitude},
               "sameAs": [value for value in [clinic.instagram_url, clinic.eitaa_url] if value]}
+    if getattr(clinic, "postal_code", ""):
+        schema["address"]["postalCode"] = clinic.postal_code
+    business_hours = getattr(clinic, "business_hours", [])
+    if business_hours:
+        schema["openingHoursSpecification"] = [{"@type":"OpeningHoursSpecification", "dayOfWeek":slot["day_of_week"], "opens":slot["opens"], "closes":slot["closes"]} for slot in business_hours]
     if clinic.medical_council_number:
         schema["identifier"] = clinic.medical_council_number
     payload = public_clinic(clinic, db).model_dump()

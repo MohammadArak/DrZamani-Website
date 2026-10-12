@@ -170,6 +170,21 @@ class ClinicSetting(Base):
         Text,
         default="اراک، خیابان خرم، ساختمان پزشکان نیکان، طبقه ششم، واحد B",
     )
+    postal_code: Mapped[str] = mapped_column(String(10), default="")
+    business_hours_json: Mapped[str] = mapped_column(Text, default="[]")
+
+    @property
+    def business_hours(self):
+        try:
+            value = json.loads(self.business_hours_json or "[]")
+            return value if isinstance(value, list) else []
+        except (ValueError, TypeError):
+            return []
+
+    @business_hours.setter
+    def business_hours(self, value):
+        self.business_hours_json = json.dumps(value, ensure_ascii=False)
+
     working_hours: Mapped[str] = mapped_column(String(500), default="روزهای کاری، با هماهنگی قبلی")
     site_url: Mapped[str] = mapped_column(String(500), default="https://drfarzadzamani.ir")
     map_embed_url: Mapped[str] = mapped_column(

@@ -113,6 +113,7 @@ class Settings:
     booking_enabled: bool = False
     booking_disabled_message: str = "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید."
     mfa_required_owners: bool = False
+    seed_default_content: bool = True
 
     @property
     def development_debug(self) -> bool:
@@ -227,5 +228,6 @@ def get_settings() -> Settings:
         settings_encryption_keys=_as_list(os.getenv("SETTINGS_ENCRYPTION_KEYS")),
         sms_webhook_allowed_hosts=_as_list(os.getenv("SMS_WEBHOOK_ALLOWED_HOSTS")),
         public_media_dir=public_media_dir,
+        seed_default_content=_as_bool(os.getenv("SEED_DEFAULT_CONTENT"), True),
         public_html_dir=Path(os.getenv("PUBLIC_HTML_DIR") or str(BACKEND_DIR.parent / "public_html")).resolve(),
     )

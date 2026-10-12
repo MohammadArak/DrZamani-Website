@@ -6,6 +6,13 @@ from .database import Base
 from .models import utcnow
 
 
+class ContentSeedState(Base):
+    __tablename__ = "content_seed_states"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    applied_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    details_json: Mapped[str] = mapped_column(Text, default="{}")
+
+
 class Article(Base):
     __tablename__ = "articles"
     id: Mapped[int] = mapped_column(primary_key=True)

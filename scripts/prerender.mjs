@@ -475,7 +475,13 @@ const prepareDocument = ({
     preloadImages = [],
     robots = "index, follow, max-image-preview:large",
 }) => {
-    let html = setImagePreloads(template, preloadImages);
+    const siteLabel = `وبسایت ${clinic.doctorName}`;
+    const oldSuffix = ` | ${clinic.doctorName}`;
+    if (canonical !== `${siteUrl}/`) {
+        if (title.endsWith(oldSuffix)) title = title.slice(0, -oldSuffix.length);
+        if (!title.endsWith(` | ${siteLabel}`)) title += ` | ${siteLabel}`;
+    }
+    let html = setImagePreloads(template, [{href:"/img/logo/logo-loading.png",type:"image/png"},{href:"/img/logo/logo-dark-full.webp",type:"image/webp"}, ...preloadImages]);
     html = setTitle(html, title);
     html = setMeta(html, "name", "description", description);
     html = setMeta(
@@ -498,7 +504,7 @@ const prepareDocument = ({
     return setRootContent(html, body);
 };
 
-const homeTitle = textOrFallback(rawClinicSettings.seo_title, `${clinic.doctorName} | ${clinic.specialty}`);
+const homeTitle = textOrFallback(rawClinicSettings.seo_title, `وبسایت رسمی ${clinic.doctorName}`);
 const homeDescription = textOrFallback(rawClinicSettings.seo_description, `وب‌سایت رسمی ${clinic.doctorName}، ${clinic.specialty} در ${clinic.addressCity}؛ معرفی خدمات و راه‌های ارتباطی.`);
 const homeImage = textOrFallback(rawClinicSettings.seo_image_url, `${siteUrl}/og-cover.jpg`);
 const clinicSameAs = [clinic.instagramUrl, clinic.eitaaUrl].filter(Boolean);
@@ -546,7 +552,7 @@ const homeDocument = prepareDocument({
     schema: [
         {
             "@context": "https://schema.org",
-            "@type": ["Physician", "MedicalClinic"],
+            "@type": ["Physician", "MedicalClinic", "LocalBusiness"],
             name: clinic.doctorName,
             url: `${siteUrl}/`,
             image: homeImage,
@@ -571,12 +577,14 @@ const homeDocument = prepareDocument({
                 addressRegion: clinic.addressRegion,
                 addressCountry: "IR",
                 streetAddress: clinic.address,
+                ...(rawClinicSettings.postal_code ? { postalCode: rawClinicSettings.postal_code } : {}),
             },
             geo: {
                 "@type": "GeoCoordinates",
                 latitude: clinic.latitude,
                 longitude: clinic.longitude,
             },
+            ...(Array.isArray(rawClinicSettings.business_hours) && rawClinicSettings.business_hours.length ? {openingHoursSpecification:rawClinicSettings.business_hours.map(slot => ({"@type":"OpeningHoursSpecification",dayOfWeek:slot.day_of_week,opens:slot.opens,closes:slot.closes}))} : {}),
             ...(clinicSameAs.length ? { sameAs: clinicSameAs } : {}),
         },
         {

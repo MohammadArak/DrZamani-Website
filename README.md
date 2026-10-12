@@ -1,3 +1,13 @@
+# وضعیت مقدم — 1.18.3، 2026-10-12
+
+[محتوای نصب تازه، سئو و اصلاح نمایش](docs/PUBLIC_CONTENT_SEO_2026-10-12.md): 3نظر سایت اصلی،6مقاله نمونه و4FAQ در بسته و startup یک‌باره، بدون بازگرداندن حذف/ویرایش؛ ساعت کاری وکدپستی قابل تعریف باRBAC/CAS، عنوان دقیق خانه وپسوند سایرصفحات، schema مطب، نقشه ازابتداگرد، کارتآمارخوانا، لوگوpreload و mount هم‌زمان بخش‌ها، فقطنرم‌کردنSourceAlpha تصاویر باRGB/فایل اصلی ثابت. full376pass/16skip،64targeted،Ruff/lint/build/budget ومigrationverifiers موفق. نتیجه CI/PR/merge دقیق درreceipt کنارخروجی؛ محلی راادغام فرض نکنید.
+
+PR19 نسخه1.18.2 ادغام‌شده: main e7f28e8232f5caab1385f754ffa9cb8270eba639، head45e59372d90dfa6ae002c2175a4295f9dbf6f665،CI38254445426 هر5jobموفق. رفتار نهایی footer32px متقارن، dotsدایره8/active16 وکل294px، NavList200ms، دیالوگ140ms محفوظ است. عبارت‌های16px/بدونانیمیشن/نمونه فقطمحلی دریادداشت‌های قبلی تاریخی و superseded هستند. FAQ5محلی حفظ؛ cleanup قدیمی اجرا نشود.
+
+کار جاری ناتمام: صفحه‌های404/maintenance/connectionlost و بهینه‌سازی کاملچت؛ پس از تکمیل وتست،PRبعدی و بستهٔنهایی/AIhandoff. BusinessProfile ایران پشتیبانی نمی‌شود؛ ثبتGoogle واقعی/deploy وگیت‌هایVPS/provider مجوز واطلاعات مستقل لازم دارند. ساعت ناشناخته خالی بماند. no production deployment/payment/booking/SMS، no patient data. automation-2 تا پایان همه درخواست‌های تازه فعال بماند.
+
+---
+
 # سامانه دکتر فرزاد زمانی
 
 ## برنامه توسعه و ادامه کار
