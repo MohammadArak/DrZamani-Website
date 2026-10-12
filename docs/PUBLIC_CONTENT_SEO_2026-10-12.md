@@ -26,3 +26,5 @@ Google Business Profile طبق [راهنمای رسمی](https://support.google.
 ## ادامهٔ ضروری
 
 درخواست‌های تازهٔ مالک هنوز تمام نشده‌اند: 404، در حال بروزرسانی، قطع ارتباط با نمادهای تم و تشخیص عملی از درخواست واقعی/online-offline، بدون healthpoll؛ ممیزی و بهینه‌سازی چت (client/API/WS، ordering، unread، dedupe، بازیابی و حفظdraft، عدم polling تاریخچه کامل/کار در تب مخفی). سپس تست، مرورگر واقعی، PR محدود بعدی و ادغام پس از5checks، بسته نهایی و فایل AI کنار آن. automation-2 تا تکمیل همه این‌ها فعال بماند. deploy/booking/payment/SMS production، داده بیمار واقعی و حل CAPTCHA تازه بدون تأیید جدا مجاز نیست.
+
+CI اولیه38269115753: frontend و secrets موفق، suite لینوکس392pass؛ rollback نظرات با assert نسخهٔ قدیمی0023 شکست خورد و runtime فرض «هیچ staff وجود ندارد» را داشت، درحالی‌که attribution داخلی غیرفعال جزو نصب تازه است. verifierها به head واقعی و عدم staff فعال اصلاح شدند؛ runtime حالا حضور3نظر/6مقاله/ledger و غیرقابل‌ورود بودن attribution را هم بررسی می‌کند. نتیجهٔ نهایی پس از rerun درreceipt ثبت شود.
