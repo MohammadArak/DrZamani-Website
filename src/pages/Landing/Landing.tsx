@@ -69,13 +69,25 @@ const Landing = () => {
             try { id = decodeURIComponent(id); } catch { return; }
             if (!id) return;
             const deadline = performance.now() + 3000;
+            let previous = "";
+            let stableSince = performance.now();
             const ready = () => {
                 const target = document.getElementById(id);
                 const pending = document.querySelector('[aria-label="در حال آماده‌سازی بخش بعدی"]');
+                const now = performance.now();
                 if (target && !target.hasAttribute("aria-hidden") && !pending) {
-                    frame = 0;
-                    target.scrollIntoView({ behavior: "instant" });
-                } else if (performance.now() < deadline) frame = requestAnimationFrame(ready);
+                    const rect = target.getBoundingClientRect();
+                    const layout = `${Math.round(rect.top + window.scrollY)}:${Math.round(rect.height)}`;
+                    if (layout !== previous || document.fonts.status !== "loaded") {
+                        previous = layout;
+                        stableSince = now;
+                    } else if (now - stableSince >= 250) {
+                        frame = 0;
+                        target.scrollIntoView({ behavior: "instant" });
+                        return;
+                    }
+                } else stableSince = now;
+                if (now < deadline) frame = requestAnimationFrame(ready);
             };
             frame = requestAnimationFrame(ready);
         };
