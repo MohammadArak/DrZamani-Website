@@ -1,17 +1,17 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import AutoGrowTextarea from "@/components/AutoGrowTextarea";
 import Toast from "@/components/Toast";
-import useConsultationRealtime from "@/hooks/useConsultationRealtime";
+import useConversation from "@/hooks/useConversation";
+import useConversationImages from "@/hooks/useConversationImages";
+import useConversationScroll from "@/hooks/useConversationScroll";
 import {
-    appointmentApi,
     formatLocalPhone,
     formatPersianDate,
     formatTime,
     toPersianDigits,
-    type ConsultationMessage,
     type ConsultationThread,
 } from "@/services/appointmentApi";
-import { useCallback,useEffect,useMemo,useRef,useState,type FormEvent } from "react";
+import { useEffect,useMemo,useRef,useState,type FormEvent } from "react";
 import {
     IoArrowForwardOutline,
     IoChatbubbleEllipsesOutline,
@@ -43,21 +43,17 @@ const StaffChatWorkspace = ({
 }) => {
     const can = useStaffAccess();
     const [selectedId, setSelectedId] = useState<number | null>(initialAppointmentId ?? threads[0]?.appointment_id ?? null);
-    const [messages, setMessages] = useState<ConsultationMessage[]>([]);
-    const [body, setBody] = useState("");
     const [search, setSearch] = useState("");
     const [view, setView] = useState<"all" | "unread" | "unanswered">("all");
-    const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
-    const [imageUrls, setImageUrls] = useState<Record<number, string>>({});
-    const imageUrlsRef = useRef<Record<number, string>>({});
     const initializedRef = useRef(false);
-    const bottomRef = useRef<HTMLDivElement | null>(null);
-    const realtimeRefreshTimer = useRef(0);
     const [toast, setToast] = useState<{ message: string; kind: "success" | "error" }>({
         message: "",
         kind: "success",
     });
+    const {messages,loading,draft:body,setDraft:setBody,sendText,hasOlder,olderLoading,loadOlder,realtimeStatus}=useConversation(token,selectedId,"staff",error=>setToast({message:error instanceof Error?error.message:"دریافت گفتگو ناموفق بود",kind:"error"}),()=>void onRefresh().catch(()=>{}));
+    const imageUrls=useConversationImages(token,selectedId,"staff",messages);
+    const {container:messageListRef,bottom:bottomRef,onScroll:scrollChanged,older:showOlder}=useConversationScroll(selectedId,messages[messages.length-1]?.id,imageUrls,loadOlder);
     const activeThread = threads.find((thread) => thread.appointment_id === selectedId) ?? null;
     const filtered = useMemo(() => {
         const needle = search.trim().toLocaleLowerCase("fa");
@@ -70,33 +66,6 @@ const StaffChatWorkspace = ({
         });
     }, [search, threads, view]);
 
-    const loadMessages = useCallback(async (quiet = false) => {
-        if (selectedId === null) return;
-        if (!quiet) setLoading(true);
-        try {
-            setMessages(await appointmentApi.staffConsultation(token, selectedId));
-            await onRefresh();
-        } catch (error) {
-            if (!quiet) {
-                setToast({
-                    message: error instanceof Error ? error.message : "دریافت گفتگو ناموفق بود",
-                    kind: "error",
-                });
-            }
-        } finally {
-            if (!quiet) setLoading(false);
-        }
-    }, [onRefresh, selectedId, token]);
-
-    const realtimeStatus = useConsultationRealtime(token, (event) => {
-        if (event.appointment_id !== selectedId) return;
-        window.clearTimeout(realtimeRefreshTimer.current);
-        realtimeRefreshTimer.current = window.setTimeout(
-            () => void loadMessages(true),
-            120,
-        );
-    });
-
     useEffect(() => {
         if (!initializedRef.current && threads.length) {
             initializedRef.current = true;
@@ -108,60 +77,12 @@ const StaffChatWorkspace = ({
         if (initialAppointmentId) setSelectedId(initialAppointmentId);
     }, [initialAppointmentId]);
 
-    useEffect(() => {
-        void loadMessages();
-        const timer = window.setInterval(() => void loadMessages(true), 30_000);
-        return () => window.clearInterval(timer);
-    }, [loadMessages]);
-
-    useEffect(() => {
-        const missing = messages.filter(
-            (message) => message.has_image && !imageUrlsRef.current[message.id],
-        );
-        if (!missing.length || selectedId === null) return;
-        let cancelled = false;
-        void Promise.all(
-            missing.map(async (message) => {
-                const blob = await appointmentApi.staffConsultationImage(
-                    token,
-                    selectedId,
-                    message.id,
-                );
-                return [message.id, URL.createObjectURL(blob)] as const;
-            }),
-        ).then((entries) => {
-            if (cancelled) {
-                entries.forEach(([, url]) => URL.revokeObjectURL(url));
-                return;
-            }
-            const next = { ...imageUrlsRef.current };
-            entries.forEach(([id, url]) => { next[id] = url; });
-            imageUrlsRef.current = next;
-            setImageUrls(next);
-        }).catch(() => setToast({ message: "نمایش تصویر ناموفق بود", kind: "error" }));
-        return () => { cancelled = true; };
-    }, [messages, selectedId, token]);
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, imageUrls]);
-
-    useEffect(
-        () => () => {
-            window.clearTimeout(realtimeRefreshTimer.current);
-            Object.values(imageUrlsRef.current).forEach(URL.revokeObjectURL);
-        },
-        [],
-    );
-
     const send = async (event: FormEvent) => {
         event.preventDefault();
-        if (!body.trim() || selectedId === null) return;
+        if (!body.trim() || selectedId === null || sending) return;
         setSending(true);
         try {
-            await appointmentApi.sendStaffConsultationMessage(token, selectedId, body.trim());
-            setBody("");
-            await loadMessages(true);
+            await sendText();
         } catch (error) {
             setToast({
                 message: error instanceof Error ? error.message : "ارسال پیام ناموفق بود",
@@ -183,7 +104,7 @@ const StaffChatWorkspace = ({
                             <h2 className="mt-1 font-dana text-2xl text-primary">پیام‌ها</h2>
                             <span className="mt-1 flex items-center gap-1 text-[10px] text-slate-400">
                                 <span className={`h-1.5 w-1.5 rounded-full ${realtimeStatus === "live" ? "bg-emerald-500" : "bg-amber-400"}`} />
-                                {realtimeStatus === "live" ? "دریافت زنده فعال" : "در حال اتصال"}
+                                {realtimeStatus === "live" ? "دریافت زنده فعال" : realtimeStatus === "expired" ? "نیاز به ورود دوباره" : "دریافت با بررسی پیام‌های تازه"}
                             </span>
                         </div>
                         <span className="rounded-full bg-primary px-2.5 py-1 text-xs text-white">
@@ -239,7 +160,8 @@ const StaffChatWorkspace = ({
                             </div>
                             <span className="hidden rounded-full bg-emerald-50 px-3 py-1.5 text-xs text-emerald-700 sm:block">{statusLabel[activeThread.appointment_status]}</span>
                         </header>
-                        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8">
+                        <div ref={messageListRef} onScroll={scrollChanged} className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8">
+                            {hasOlder && <button type="button" onClick={()=>void showOlder()} disabled={olderLoading} className="mx-auto mb-4 block rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-primary">{olderLoading?"در حال دریافت…":"پیام‌های قدیمی‌تر"}</button>}
                             <div className="mx-auto max-w-3xl space-y-3">
                                 {loading ? <p className="py-16 text-center text-sm text-slate-400">در حال دریافت پیام‌ها…</p> : messages.length ? messages.map((message) => {
                                     const mine = message.sender_type === "staff";

@@ -141,6 +141,7 @@ export const StaffDashboard = ({
     const [smsCampaigns, setSmsCampaigns] = useState<SmsCampaign[]>([]);
     const [smsOutbox, setSmsOutbox] = useState<SmsOutboxItem[]>([]);
     const realtimeRefreshTimer = useRef(0);
+    const threadsRequest=useRef<Promise<void>|null>(null);
 
     const loadAppointments = useCallback(
         async (filters = {}) => {
@@ -151,23 +152,20 @@ export const StaffDashboard = ({
         [can, token],
     );
     const loadConsultations = useCallback(async () => {
-        const nextConsultations = can("consultations.view") ? await appointmentApi.staffConsultations(token) : [];
-        setConsultations(nextConsultations);
-        setStats((current) => ({
-            ...current,
-            unread_conversations: nextConsultations.reduce(
-                (sum, item) => sum + item.unread_count,
-                0,
-            ),
-        }));
-    }, [can, token]);
+        window.clearTimeout(realtimeRefreshTimer.current);
+        if(threadsRequest.current)return threadsRequest.current;
+        const work=(async()=>{
+            const nextConsultations = can("consultations.view") ? await appointmentApi.staffConsultations(token) : [];
+            setConsultations(nextConsultations);
+            setStats(current=>({...current,unread_conversations:nextConsultations.reduce((sum,item)=>sum+item.unread_count,0)}));
+        })();
+        threadsRequest.current=work;
+        try{await work;}finally{if(threadsRequest.current===work)threadsRequest.current=null;}
+    },[can,token]);
     useConsultationRealtime(token, () => {
         window.clearTimeout(realtimeRefreshTimer.current);
-        realtimeRefreshTimer.current = window.setTimeout(
-            () => void loadConsultations(),
-            150,
-        );
-    }, can("consultations.view"));
+        realtimeRefreshTimer.current = window.setTimeout(()=>void loadConsultations().catch(()=>{}),150);
+    },can("consultations.view"));
     useEffect(
         () => () => window.clearTimeout(realtimeRefreshTimer.current),
         [],

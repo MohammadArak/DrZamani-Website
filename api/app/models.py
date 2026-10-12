@@ -570,6 +570,9 @@ class AppointmentReminder(Base):
 class ConsultationMessage(Base):
     __tablename__ = "consultation_messages"
     __table_args__ = (
+        Index("ix_consultation_thread_order", "appointment_id", "created_at", "id"),
+        Index("ix_consultation_thread_unread", "appointment_id", "sender_type", "read_at"),
+        UniqueConstraint("appointment_id", "sender_type", "client_nonce", name="uq_consultation_client_nonce"),
         UniqueConstraint(
             "appointment_id",
             "image_requirement_id",
@@ -586,6 +589,7 @@ class ConsultationMessage(Base):
         ForeignKey("staff_users.id", ondelete="SET NULL"), index=True
     )
     body: Mapped[str | None] = mapped_column(String(2000))
+    client_nonce: Mapped[str | None] = mapped_column(String(36))
     view_label: Mapped[str | None] = mapped_column(String(32))
     image_requirement_id: Mapped[int | None] = mapped_column(
         ForeignKey("service_image_requirements.id", ondelete="SET NULL"), index=True

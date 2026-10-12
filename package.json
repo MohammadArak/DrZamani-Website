@@ -1,7 +1,7 @@
 {
   "name": "drzamani",
   "private": true,
-  "version": "1.18.3",
+  "version": "1.18.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "check:bundle": "node scripts/check-bundle.mjs",
     "check:fonts": "node scripts/check-font-assets.mjs",
-    "check:proxy": "node scripts/check-proxy.mjs"
+    "check:proxy": "node scripts/check-proxy.mjs",
+    "check:chat": "node scripts/check-status-chat.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",

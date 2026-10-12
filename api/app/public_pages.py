@@ -169,8 +169,9 @@ def staff(db: Session = Depends(get_db)):
 
 
 @router.get("/404.html", response_class=HTMLResponse)
-def missing(db: Session = Depends(get_db)):
-    return render(clinic_row(db), "404", db)
+def missing():
+    from .status_pages import status_response
+    return status_response("missing", 404)
 
 
 @router.get("/index.html")
@@ -217,4 +218,17 @@ def public_error(status: int):
         410: ("این صفحه دیگر در دسترس نیست", "این نشانی قدیمی است یا مطلب آن دیگر منتشر نمی‌شود. می‌توانید مقالات در دسترس را ببینید."),
         422: ("نشانی واردشده معتبر نیست", "عبارت جست‌وجو یا شمارهٔ صفحه را بررسی کنید و دوباره تلاش کنید."),
     }[status]
-    return HTMLResponse(f'''<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,follow"><title>{title}</title><style>body{{margin:0;background:#182435;color:#fff;font-family:Tahoma,sans-serif;line-height:2}}main{{max-width:36rem;margin:12vh auto;padding:2rem}}h1{{font-size:1.7rem}}nav{{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2rem}}a{{color:#fddba1;padding:.5rem 1rem;border:1px solid #d5ab64;border-radius:.5rem}}a:focus-visible{{outline:3px solid white;outline-offset:4px}}</style></head><body><main><h1>{title}</h1><p>{message}</p><nav aria-label="ادامهٔ مسیر"><a href="/articles/">مشاهدهٔ مقالات</a><a href="/">بازگشت به صفحه اصلی</a></nav></main></body></html>''',status_code=status,headers={"Cache-Control":"no-store","X-Robots-Tag":"noindex, follow"})
+    from .status_pages import status_response
+    return status_response("missing", status, title=title, description=message, code=str(status))
+
+
+@router.get("/maintenance.html", response_class=HTMLResponse)
+def maintenance_preview():
+    from .status_pages import status_response
+    return status_response("maintenance", 503)
+
+
+@router.get("/connection-lost.html", response_class=HTMLResponse)
+def connection_preview():
+    from .status_pages import status_response
+    return status_response("connection", 503)

@@ -58,6 +58,7 @@ jobs:
       - run: npm run build
       - run: npm run check:proxy
       - run: npm run check:fonts
+      - run: npm run check:chat
       - run: npm run check:bundle -- --report .work/bundle-report.json
       - run: npm audit --audit-level=low
 
@@ -89,6 +90,7 @@ jobs:
       - run: uv run --frozen python ../scripts/verify-migrations.py
       - run: uv run --frozen python ../scripts/verify-editorial-migrations.py
       - run: uv run --frozen python ../scripts/verify-comments-migrations.py
+      - run: uv run --frozen python ../scripts/verify-chat-migrations.py
       - run: python -c "from pathlib import Path; Path('../.work').mkdir(exist_ok=True)"
       - run: uv export --frozen --all-groups --no-hashes --no-emit-project --output-file ../.work/audit-requirements.txt
       - run: pip-audit --requirement ../.work/audit-requirements.txt --no-deps --disable-pip

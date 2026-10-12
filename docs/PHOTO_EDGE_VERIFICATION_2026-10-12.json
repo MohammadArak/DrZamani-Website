@@ -1,0 +1,29 @@
+[
+  {
+    "source": "zamani/dr-zamani-hero.webp",
+    "originalBytes": 85522,
+    "cleanBytes": 81134,
+    "originalRgbBitstreamIdentical": true,
+    "decodedRgbPixelsIdentical": true,
+    "cleanAlphaExact": true,
+    "sha256": "1f03bd3edf4169a5f0dc6971b1fb744fa99bf9c7e63b2d5f9db1a2531dd2c2b4"
+  },
+  {
+    "source": "zamani/dr-zamani-hero-560.webp",
+    "originalBytes": 45394,
+    "cleanBytes": 38690,
+    "originalRgbBitstreamIdentical": true,
+    "decodedRgbPixelsIdentical": true,
+    "cleanAlphaExact": true,
+    "sha256": "012af74bfedbd4438afcde4e65f76773d359047e3aae1ee8cfbde86de37046d5"
+  },
+  {
+    "source": "about-us/dr-zamani-op.webp",
+    "originalBytes": 79372,
+    "cleanBytes": 79636,
+    "originalRgbBitstreamIdentical": true,
+    "decodedRgbPixelsIdentical": true,
+    "cleanAlphaExact": true,
+    "sha256": "a8dc046abd8f1b0f7a19a400be49629fd6c2182fccd4f0a4022118a7e470adc4"
+  }
+]

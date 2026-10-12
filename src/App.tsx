@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import Loading from "./pages/Loading";
+import ConnectionStatus from "@/components/ConnectionStatus";
 import { ClinicInfoProvider } from "@/contexts/ClinicInfoContext";
 
 import "keen-slider/keen-slider.min.css";
@@ -32,6 +33,7 @@ function App() {
             >
                 <Page />
             </Suspense>
+            <ConnectionStatus />
         </ClinicInfoProvider>
     );
 }

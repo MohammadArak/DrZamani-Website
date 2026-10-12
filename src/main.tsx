@@ -34,3 +34,6 @@ if (rootElement.dataset.shell === "island") {
         </StrictMode>,
     );
 }
+
+// Enables the public connection page on later offline navigations, without polling.
+if("serviceWorker" in navigator)window.addEventListener("load",()=>{void navigator.serviceWorker.register("/connection-worker.js").catch(()=>{});},{once:true});

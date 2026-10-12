@@ -543,9 +543,9 @@ const homeDocument = prepareDocument({
     body: homeBody,
     preloadImages: [
         {
-            href: "/img/zamani/dr-zamani-hero.webp",
+            href: "/img/zamani/dr-zamani-hero-clean.webp",
             type: "image/webp",
-            srcset: "/img/zamani/dr-zamani-hero-560.webp 560w, /img/zamani/dr-zamani-hero.webp 1018w",
+            srcset: "/img/zamani/dr-zamani-hero-560-clean.webp 560w, /img/zamani/dr-zamani-hero-clean.webp 1018w",
             sizes: "(max-width: 1024px) 400px, 500px",
         },
     ],
@@ -641,7 +641,7 @@ const notFoundDocument = prepareDocument({
                 <h1>صفحه پیدا نشد</h1>
                 <p>آدرس واردشده وجود ندارد یا جابه‌جا شده است.</p>
                 <p>
-                    <a href="/">بازگشت به صفحه اصلی</a>
+                    <a href="/">بازگشت به صفحه اصلی</a><a class="site-status__secondary" href="/articles/">مشاهدهٔ مقالات</a>
                 </p>
             </section>
         </main>
@@ -740,3 +740,16 @@ await Promise.all([
 console.log(
     "Prerendered homepage, appointment, staff and 404. Published articles are rendered dynamically by the API; unreviewed legacy paths remain retired.",
 );
+
+// Fault pages are standalone: no clinic request, SPA chunk or API is needed.
+const statusRoot=resolve("api/app");
+const statusRecords=JSON.parse(await readFile(resolve(statusRoot,"status_pages.json"),"utf8"));
+const statusTemplate=await readFile(resolve(statusRoot,"status_page_template.html"),"utf8");
+const statusCss=await readFile(resolve(statusRoot,"status_page.css"),"utf8");
+for(const [kind,file] of [["missing","404.html"],["maintenance","maintenance.html"],["connection","connection-lost.html"],["connection","offline.html"]]){
+    const item=statusRecords[kind];
+    const values={TITLE:escapeHtml(item.title),DESCRIPTION:escapeHtml(item.description),CODE:escapeHtml(item.code),LABEL:escapeHtml(item.label),CSS:statusCss,SYMBOL:await readFile(resolve(statusRoot,"status_symbols",`${kind}.svg`),"utf8"),ACTIONS:kind==="missing"?'<a href="/">بازگشت به صفحه اصلی</a><a class="site-status__secondary" href="/articles/">مشاهدهٔ مقالات</a>':'<a href="">تلاش دوباره</a><a class="site-status__secondary" href="/">صفحه اصلی</a>'};
+    let document=statusTemplate;for(const [key,value] of Object.entries(values))document=document.replaceAll(`{{${key}}}`,value);
+    await writeFile(resolve(outputDirectory,file),document,"utf8");
+}
+console.log("Standalone themed 404, maintenance, connection and offline documents created.");

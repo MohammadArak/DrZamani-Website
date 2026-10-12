@@ -43,6 +43,8 @@ class ConsultationRealtimeManager:
     async def publish(self, event: dict[str, Any], patient_id: int) -> None:
         stale: list[WebSocket] = []
         for connection in list(self._connections.values()):
+            if connection.audience != "staff" and not (connection.audience == "patient" and connection.user_id == patient_id):
+                continue
             if await asyncio.to_thread(_authenticate_hash, connection.token_hash) != (
                 connection.audience,
                 connection.user_id,
@@ -60,8 +62,8 @@ class ConsultationRealtimeManager:
             ):
                 continue
             try:
-                await connection.websocket.send_json(event)
-            except (RuntimeError, WebSocketDisconnect):
+                await asyncio.wait_for(connection.websocket.send_json(event),timeout=3)
+            except (RuntimeError, WebSocketDisconnect, TimeoutError):
                 stale.append(connection.websocket)
         for websocket in stale:
             self.remove(websocket)
@@ -120,6 +122,10 @@ async def publish_consultation_event(
         },
         patient_id,
     )
+
+
+async def publish_consultation_read_event(*, appointment_id:int,patient_id:int,sender_type:str,message_id:int):
+    await manager.publish({"type":"consultation.read","appointment_id":appointment_id,"message_id":message_id,"sender_type":sender_type},patient_id)
 
 
 @router.websocket("/realtime")

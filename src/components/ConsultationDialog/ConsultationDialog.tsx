@@ -1,16 +1,16 @@
 import AutoGrowTextarea from "@/components/AutoGrowTextarea";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
-import useConsultationRealtime from "@/hooks/useConsultationRealtime";
+import useConversation from "@/hooks/useConversation";
+import useConversationImages from "@/hooks/useConversationImages";
+import useConversationScroll from "@/hooks/useConversationScroll";
 import {
     appointmentApi,
     toPersianDigits,
-    type ConsultationMessage,
     type Service,
     type UploadProgress,
 } from "@/services/appointmentApi";
 import {
-    useCallback,
     useEffect,
     useMemo,
     useRef,
@@ -57,8 +57,6 @@ const ConsultationDialog = ({
     imageRequirements?: Service["image_requirements"];
     onClose: () => void;
 }) => {
-    const [messages, setMessages] = useState<ConsultationMessage[]>([]);
-    const [body, setBody] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState("");
     const [imageRequirementId, setImageRequirementId] = useState<number | null>(
@@ -72,24 +70,19 @@ const ConsultationDialog = ({
         total: 0,
         percent: 0,
     });
-    const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState<{ message: string; kind: "success" | "error" }>({
         message: "",
         kind: "success",
     });
-    const [imageUrls, setImageUrls] = useState<Record<number, string>>({});
-    const imageUrlsRef = useRef<Record<number, string>>({});
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const bottomRef = useRef<HTMLDivElement | null>(null);
+    const {messages,loading,draft:body,setDraft:setBody,sendText,sync:load,hasOlder,olderLoading,loadOlder,uploadedRequirementIds:requirementIds,realtimeStatus}=useConversation(token,appointmentId,role,error=>setToast({message:error instanceof Error?error.message:"دریافت گفت‌وگو ناموفق بود",kind:"error"}));
+    const imageUrls=useConversationImages(token,appointmentId,role,messages);
+    const {container:messageListRef,bottom:bottomRef,onScroll:scrollChanged,older:showOlder}=useConversationScroll(appointmentId,messages[messages.length-1]?.id,imageUrls,loadOlder);
 
     const uploadedRequirementIds = useMemo(
         () =>
-            new Set(
-                messages
-                    .map((message) => message.image_requirement_id)
-                    .filter((value): value is number => value !== null),
-            ),
-        [messages],
+            new Set(requirementIds),
+        [requirementIds],
     );
     const remainingRequirements = useMemo(
         () =>
@@ -107,100 +100,12 @@ const ConsultationDialog = ({
         (item) => item.id === activeRequirementId,
     );
 
-    const load = useCallback(async () => {
-        try {
-            const result =
-                role === "patient"
-                    ? await appointmentApi.getConsultation(token, appointmentId)
-                    : await appointmentApi.staffConsultation(token, appointmentId);
-            setMessages(result);
-        } catch (error) {
-            setToast({
-                message: error instanceof Error ? error.message : "دریافت گفت‌وگو ناموفق بود",
-                kind: "error",
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, [appointmentId, role, token]);
-
-    const realtimeStatus = useConsultationRealtime(
-        token,
-        (event) => {
-            if (event.appointment_id === appointmentId) void load();
-        },
-        role === "patient",
-    );
-
-    useEffect(() => {
-        const task = window.setTimeout(() => void load(), 0);
-        const fallback = window.setInterval(() => void load(), 30_000);
-        return () => {
-            window.clearTimeout(task);
-            window.clearInterval(fallback);
-        };
-    }, [load]);
-
-    useEffect(() => {
-        const missing = messages.filter(
-            (message) => message.has_image && !imageUrlsRef.current[message.id],
-        );
-        if (!missing.length) return;
-        let cancelled = false;
-        void Promise.all(
-            missing.map(async (message) => {
-                const blob =
-                    role === "patient"
-                        ? await appointmentApi.consultationImage(
-                              token,
-                              appointmentId,
-                              message.id,
-                          )
-                        : await appointmentApi.staffConsultationImage(
-                              token,
-                              appointmentId,
-                              message.id,
-                          );
-                return [message.id, URL.createObjectURL(blob)] as const;
-            }),
-        )
-            .then((entries) => {
-                if (cancelled) {
-                    entries.forEach(([, url]) => URL.revokeObjectURL(url));
-                    return;
-                }
-                const next = { ...imageUrlsRef.current };
-                entries.forEach(([id, url]) => {
-                    next[id] = url;
-                });
-                imageUrlsRef.current = next;
-                setImageUrls(next);
-            })
-            .catch(() =>
-                setToast({ message: "نمایش یکی از تصاویر ناموفق بود", kind: "error" }),
-            );
-        return () => {
-            cancelled = true;
-        };
-    }, [appointmentId, messages, role, token]);
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, imageUrls]);
-
     const updateFile = (next: File | null) => {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         setPreviewUrl(next ? URL.createObjectURL(next) : "");
         setFile(next);
     };
     useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
-
-    useEffect(
-        () => () => {
-            Object.values(imageUrlsRef.current).forEach(URL.revokeObjectURL);
-        },
-        [],
-    );
 
     const resetAttachment = () => {
         updateFile(null);
@@ -250,13 +155,7 @@ const ConsultationDialog = ({
         if (!text || sendingMessage) return;
         setSendingMessage(true);
         try {
-            if (role === "patient") {
-                await appointmentApi.sendConsultationMessage(token, appointmentId, text);
-            } else {
-                await appointmentApi.sendStaffConsultationMessage(token, appointmentId, text);
-            }
-            setBody("");
-            await load();
+            await sendText();
         } catch (error) {
             setToast({
                 message: error instanceof Error ? error.message : "ارسال پیام ناموفق بود",
@@ -319,7 +218,7 @@ const ConsultationDialog = ({
                             />
                             {realtimeStatus === "live"
                                 ? "متصل و آماده دریافت پیام"
-                                : "در حال برقراری ارتباط"}
+                                : realtimeStatus === "expired" ? "برای ادامه دوباره وارد شوید" : "دریافت با بررسی پیام‌های تازه"}
                         </span>
                     </div>
                     <button
@@ -333,7 +232,8 @@ const ConsultationDialog = ({
                     </button>
                 </header>
 
-                <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
+                <div ref={messageListRef} onScroll={scrollChanged} className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
+                    {hasOlder && <button type="button" onClick={()=>void showOlder()} disabled={olderLoading} className="mx-auto mb-4 block rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-primary">{olderLoading?"در حال دریافت…":"پیام‌های قدیمی‌تر"}</button>}
                     {loading ? (
                         <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-slate-500">
                             <Spinner size={22} />

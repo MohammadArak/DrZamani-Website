@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+from fastapi import Query, Response
+from sqlalchemy.exc import IntegrityError
+from ..consultations import message_page, retry_message
+from ..schemas import ConsultationMessagePage
+from ..realtime import publish_consultation_read_event
+
 import json
 import secrets
 from datetime import date, datetime, time, timedelta
@@ -1005,6 +1011,15 @@ def consultation_messages(
     return [consultation_message_read(message) for message in messages]
 
 
+
+@router.get("/appointments/{appointment_id}/consultation/sync", response_model=ConsultationMessagePage)
+def consultation_sync(appointment_id:int, background_tasks:BackgroundTasks, response:Response, after_id:int|None=Query(None,gt=0), before_id:int|None=Query(None,gt=0), limit:int=Query(50,ge=1,le=100), patient:Patient=Depends(get_current_patient), db:Session=Depends(get_db)):
+    appointment=_patient_consultation_appointment(db,appointment_id,patient)
+    page,ack=message_page(db,appointment_id,"patient",consultation_message_read,after_id=after_id,before_id=before_id,limit=limit)
+    response.headers["Cache-Control"]="no-store"
+    if ack: background_tasks.add_task(publish_consultation_read_event,appointment_id=appointment_id,patient_id=appointment.patient_id,sender_type="patient",message_id=ack)
+    return page
+
 @router.post(
     "/appointments/{appointment_id}/consultation/messages",
     response_model=ConsultationMessageRead,
@@ -1020,14 +1035,22 @@ def create_consultation_message(
     appointment = _patient_consultation_appointment(db, appointment_id, patient)
     if appointment.status == "cancelled":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="گفت‌وگو برای نوبت لغوشده بسته است")
+    previous=retry_message(db,appointment_id,"patient",payload.client_nonce,payload.body)
+    if previous: return consultation_message_read(previous)
     consume_limit(db, "consult-message", str(patient.id), MESSAGES_PER_HOUR, 3600)
     message = ConsultationMessage(
         appointment_id=appointment_id,
         sender_type="patient",
         body=payload.body,
+        client_nonce=payload.client_nonce,
     )
     db.add(message)
-    db.commit()
+    try: db.commit()
+    except IntegrityError:
+        db.rollback()
+        previous=retry_message(db,appointment_id,"patient",payload.client_nonce,payload.body)
+        if previous: return consultation_message_read(previous)
+        raise
     db.refresh(message)
     background_tasks.add_task(
         publish_consultation_event,
