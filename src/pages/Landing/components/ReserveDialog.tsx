@@ -14,6 +14,8 @@ const ReserveDialog = ({
     return (
         <Dialog
             isOpen={dialogIsOpen}
+            className="reservation-dialog"
+            overlayClassName="reservation-overlay"
             style={{
                 content: {
                     marginTop: "10vh",

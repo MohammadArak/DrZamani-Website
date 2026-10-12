@@ -58,27 +58,19 @@ function Carousel({ slides }: { slides: React.ReactNode[] }) {
                     </div>
                 ))}
             </div>
-            {slides.length > 1 && (
-                <div className="mt-4 flex justify-center">
-                    <button type="button" onClick={autoplay.toggle} aria-pressed={autoplay.paused} className="rounded-lg border border-secondary px-4 py-2 text-primary-deep focus-visible:outline-2 focus-visible:outline-offset-4">
-                        {autoplay.paused ? "ادامه نمایش خودکار" : "توقف نمایش خودکار"}
-                    </button>
-                </div>
-            )}
             {/* pagination dots */}
-            <div className="flex flex-wrap justify-center gap-1 mt-4">
+            <div className="gallery-dots mt-4">
                 {slides.map((_, idx) => (
                     <button
                         key={idx}
                         onClick={() => instanceRef.current?.moveToIdx(idx)}
                         aria-label={`نمایش تصویر ${idx + 1}`}
                         aria-current={current === idx ? "true" : undefined}
-                        className={`h-6 shrink-0 rounded-full border-8 border-transparent bg-clip-padding transition-all duration-300 ${
-                            current === idx
-                                ? "w-10 bg-secondary-deep"
-                                : "w-6 bg-gray-500"
-                        }`}
-                    />
+                        style={{ width: current === idx ? 24 : 18, padding: 0, minWidth: 0, border: 0, background: "transparent" }}
+                        className="h-6 shrink-0 flex items-center justify-center"
+                    >
+                        <span aria-hidden="true" style={{ width: current === idx ? 16 : 8, borderRadius: 9999 }} className={`block h-2 transition-all duration-200 ${current === idx ? "bg-secondary-deep" : "bg-gray-500"}`} />
+                    </button>
                 ))}
             </div>
 
@@ -166,9 +158,6 @@ const Samples = () => {
                 }}
                 viewport={{ once: true }}
             >
-                <p className="mb-4 text-center text-sm text-gray-600">
-                    نتیجه‌ی درمان برای هر فرد متفاوت است و این تصاویر وعده‌ی نتیجه نیستند.
-                </p>
                 {!gallery.length && (
                     <p role="status" className="text-center text-gray-700">
                         {loading ? "در حال دریافت نمونه‌کارها…" : error ? "دریافت نمونه‌کارها ممکن نشد." : "هنوز نمونه‌کاری برای نمایش منتشر نشده است."}
@@ -186,7 +175,7 @@ const Samples = () => {
                                 sizes="(min-width: 768px) 30vw, 90vw"
                                 width={image.src.startsWith("/img/samples/") ? 614 : undefined}
                                 height={image.src.startsWith("/img/samples/") ? 768 : undefined}
-                                className="max-h-96 h-fit rounded-xl shadow-lg"
+                                className="gallery-photo rounded-xl shadow-lg"
                                 loading="lazy"
                                 decoding="async"
                             />

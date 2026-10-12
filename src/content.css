@@ -181,8 +181,8 @@
 .legacy-contact-mark{display:grid;place-items:center;flex:none;width:40px;height:40px;border:1px solid #6b768a;border-radius:50%;color:#d5ab64}
 .legacy-contact-item h3{margin:0 0 2px;font-family:Lalezar,Vazir,sans-serif;font-weight:400;font-size:19px;color:#fddba1}
 .legacy-contact-item a{display:block;color:#e5e9f0;text-decoration:none}
-.legacy-contact-item a:hover{color:#fddba1}
-.legacy-socials{display:grid;gap:10px;max-width:220px}
+.legacy-contact-item a:hover,.legacy-contact-item a:focus-visible{color:#fddba1}
+.legacy-socials{display:flex;gap:8px}.legacy-socials a{flex:1;white-space:nowrap;padding:8px}
 .legacy-social{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-radius:8px;color:#fff!important;text-decoration:none;font-size:14px;box-shadow:0 6px 16px #0003}
 .legacy-instagram{background:linear-gradient(115deg,#f9ce34,#ee2a7b,#6228d7)}
 .legacy-eitaa{background:#f58220}
@@ -233,3 +233,25 @@
 .rv.rv-wait{animation:none;opacity:0;transform:translateY(34px)}
 .rv.rv-go{animation:rv-rise .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*110ms)}
 @media(prefers-reduced-motion:reduce){.rv,.rv.rv-wait,.rv.rv-go{animation:none;opacity:1;transform:none}}
+
+.gallery-photo{height:auto;width:auto;max-height:24rem;max-width:100%;object-fit:contain;align-self:center;flex:none}
+.gallery-dots{display:flex;flex-wrap:wrap;justify-content:center;gap:0}
+.raviel-credit{display:inline-flex;color:#fddba1!important;font-weight:700;background:linear-gradient(110deg,#ffe4a8 15%,#7ecaff 40%,#f3b654 65%,#ffe4a8 90%);background-size:300%;background-clip:text;-webkit-text-fill-color:transparent;animation:credit-flow 4s ease-in-out infinite}
+@keyframes credit-flow{50%{background-position:100%}}
+.article-empty{grid-column:1/-1;text-align:center;padding:28px 12px;color:#3d5a80}
+.article-empty img{display:block;margin:auto;animation:empty-float 4s ease-in-out infinite}
+.article-empty h2,.article-empty h3{font-size:1.4rem;margin:12px 0 6px}
+.article-empty p{color:#64748b}
+@keyframes empty-float{50%{transform:translateY(-7px)}}
+@media(prefers-reduced-motion:reduce){.article-empty img,.raviel-credit{animation:none}}
+#main-content{overflow-anchor:none}
+
+#about-us,#services,#comments,#samples,#faq,#footer{scroll-margin-top:var(--nav-h)}
+
+.footer-social,.legacy-social{background-size:220%;animation:credit-flow 5s ease-in-out infinite}
+.footer-contact:hover,.footer-contact:focus-visible{color:#d5ab64}
+.footer-nav-link{padding:6px 4px;font-weight:400}
+.reservation-dialog .dialog-content{animation:reserve-pop .14s ease-out}.reservation-overlay{transition:opacity .12s ease-out;backdrop-filter:none;z-index:100}
+@keyframes reserve-pop{from{opacity:.5;transform:scale(.97)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.reservation-dialog .dialog-content{animation:none}.reservation-overlay{transition:none}}
+@media(prefers-reduced-motion:reduce){.footer-social,.legacy-social{animation:none}}

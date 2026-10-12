@@ -82,7 +82,7 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
     );
 }
 
-export default function StaffSiteContentPanel({ token, onDirtyChange, onBusyChange }: { token: string; onDirtyChange: (value: boolean) => void; onBusyChange: (value: boolean) => void }) {
+export default function StaffSiteContentPanel({ token, blockKey, onDirtyChange, onBusyChange }: { token: string; blockKey?: BlockKey; onDirtyChange: (value: boolean) => void; onBusyChange: (value: boolean) => void }) {
     const can = useStaffAccess();
     const { ask, confirmation } = useContentConfirm();
     const [rows, setRows] = useState<SiteBlockRow[]>([]);
@@ -97,13 +97,14 @@ export default function StaffSiteContentPanel({ token, onDirtyChange, onBusyChan
         try {
             const result = await siteContentApi.list(token);
             if (sequence !== request.current) return;
-            setRows(result.items);
-            setDrafts(Object.fromEntries(result.items.map((row) => [row.key, row.content])) as Partial<Record<BlockKey, Draft>>);
+            const visible = result.items.filter(row => !blockKey || row.key === blockKey);
+            setRows(visible);
+            setDrafts(Object.fromEntries(visible.map((row) => [row.key, row.content])) as Partial<Record<BlockKey, Draft>>);
             setError("");
         } catch (e) {
             if (sequence === request.current) setError(failure(e));
         }
-    }, [token]);
+    }, [blockKey, token]);
     useEffect(() => { void load(); }, [load]);
 
     const dirtyKeys = rows.filter((row) => drafts[row.key] && JSON.stringify(drafts[row.key]) !== JSON.stringify(row.content)).map((row) => row.key);
@@ -141,7 +142,7 @@ export default function StaffSiteContentPanel({ token, onDirtyChange, onBusyChan
             {confirmation}
             <header className="content-header">
                 <div>
-                    <h1>متن‌های صفحه اصلی</h1>
+                    <h1>{blockKey === "faq" ? "سوالات متداول" : "متن‌های صفحه اصلی"}</h1>
                     <p>هر بخش پیش‌نویس جدا دارد؛ تا منتشر نکنید روی سایت تغییری دیده نمی‌شود.</p>
                 </div>
             </header>

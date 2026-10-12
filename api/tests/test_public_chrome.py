@@ -77,7 +77,7 @@ def test_list_content_paginates_and_keeps_required_labels():
     assert "فیلتر دسته‌بندی" in page and 'value="سینوس"' in page and '<option value="گوش" selected>' in page
     assert page.count("legacy-card") >= 3 and "۳۰ مقاله یافت شد" in page and "صفحه ۲ از ۳" in page
     assert 'aria-current="page"' in page and "?page=3&amp;q=" in page
-    assert "هنوز مقاله‌ای منتشر نشده است" in chrome.list_content([], total=0, page=1, per_page=12, q="", category="", categories=[])
+    assert "مقاله‌ها در راه‌اند" in chrome.list_content([], total=0, page=1, per_page=12, q="", category="", categories=[])
 
 
 def test_detail_content_has_structure_and_escapes_text():

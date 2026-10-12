@@ -108,9 +108,9 @@ def site_header(clinic, *, crumbs=None, banner=True) -> str:
 def site_footer(clinic) -> str:
     social = ""
     if safe_https(clinic.instagram_url):
-        social += f'<a class="legacy-social legacy-instagram" href="{esc(clinic.instagram_url)}" rel="noopener noreferrer">{icon("insta")} صفحه اینستاگرام</a>'
+        social += f'<a class="legacy-social legacy-instagram" href="{esc(clinic.instagram_url)}" rel="noopener noreferrer">{icon("insta")} اینستاگرام</a>'
     if safe_https(clinic.eitaa_url):
-        social += f'<a class="legacy-social legacy-eitaa" href="{esc(clinic.eitaa_url)}" rel="noopener noreferrer"><img src="/img/logo/eitaa.png" alt="" width="20" height="20"> صفحه ایتا</a>'
+        social += f'<a class="legacy-social legacy-eitaa" href="{esc(clinic.eitaa_url)}" rel="noopener noreferrer"><img src="/img/logo/eitaa.png" alt="" width="20" height="20"> ایتا</a>'
     links = [("درباره ما", "/#about-us"), ("خدمات ما", "/#services"), ("نمونه کارها", "/#samples"), ("نظرات مراجعین", "/#comments"), ("سوالات متداول", "/#faq"), ("مقالات", "/articles/")]
     link_html = "".join(f'<li><a href="{href}">{icon("chevron")}{label}</a></li>' for label, href in links)
     map_html = ""
@@ -130,7 +130,7 @@ def site_footer(clinic) -> str:
         f'<div class="legacy-socials">{social}</div></section>'
         f'<section><h2>آدرس ما روی نقشه</h2><p>{esc(clinic.address)}</p>{map_html}</section>'
         '</div><div class="legacy-footer-bottom"><span class="legacy-diamond-rule" aria-hidden="true"><i></i></span>'
-        f'<p>تمامی حقوق این وبسایت متعلق به <a href="/">{esc(clinic.doctor_name)}</a> می‌باشد و هر گونه کپی برداری از آن بدون ذکر منبع پیگرد قانونی خواهد داشت.</p></div></footer></div>'
+        f'<p>تمامی حقوق این وبسایت متعلق به <a href="/">{esc(clinic.doctor_name)}</a> می‌باشد و هر گونه کپی برداری از آن بدون ذکر منبع پیگرد قانونی خواهد داشت.</p><a class="raviel-credit" href="https://raviel.ir" target="_blank" rel="noopener noreferrer">طراحی و توسعه توسط Raviel</a></div></footer></div>'
     )
 
 
@@ -219,8 +219,8 @@ def list_content(items: list[dict], *, total: int, page: int, per_page: int, q: 
     def href(number: int) -> str:
         return f"?page={number}&q={quote(q)}&category={quote(category)}"
 
-    empty_message = "برای این جست‌وجو نتیجه‌ای پیدا نشد. واژهٔ دیگری را امتحان کنید." if q else "مقاله‌ای در این دسته‌بندی پیدا نشد." if category else "هنوز مقاله‌ای منتشر نشده است."
-    cards = "".join(article_card(item, index % 3) for index, item in enumerate(items)) if items else f'<p class="legacy-empty">{empty_message}</p>'
+    empty_message = "برای این جست‌وجو نتیجه‌ای پیدا نشد. واژهٔ دیگری را امتحان کنید." if q else "مقاله‌ای در این دسته‌بندی پیدا نشد." if category else "مقاله‌ها در راه‌اند"
+    cards = "".join(article_card(item, index % 3) for index, item in enumerate(items)) if items else (f'<p class="legacy-empty">{empty_message}</p>' if q or category else '<div class="article-empty" role="status"><img src="/img/ui/article-empty.svg" width="160" height="120" alt="" aria-hidden="true"><h2>مقاله‌ها در راه‌اند</h2><p>به‌زودی مطالب تازه را اینجا می‌خوانید.</p></div>')
     return (
         '<section class="legacy-article-index">'
         + hero_title("مقالات گوش، حلق، بینی و رینوپلاستی", "مطالب علمی با زبان ساده و منابع معتبر برای شناخت بهتر بیماری‌های ENT و مراقبت‌های جراحی بینی")
