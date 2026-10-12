@@ -102,8 +102,8 @@ def test_maintenance_blocks_publication_requests_before_upstream(
     upstream = ThreadingHTTPServer(("127.0.0.1", 0), Upstream)
     thread = threading.Thread(target=upstream.serve_forever, daemon=True)
     thread.start()
-    html, shared = tmp_path / "html", tmp_path / "shared"
-    html.mkdir()
+    html, shared = tmp_path / "current/public_html", tmp_path / "shared"
+    html.mkdir(parents=True)
     shared.mkdir()
     (shared / "maintenance.html").write_text("synthetic maintenance", encoding="utf8")
     (tmp_path / "logs").mkdir()
@@ -131,6 +131,7 @@ def test_maintenance_blocks_publication_requests_before_upstream(
     }
     for before, after in replacements.items():
         configuration = configuration.replace(before, '"' + after.as_posix() + '"')
+    configuration = configuration.replace("root /var/www/drzamani;", 'root "' + tmp_path.as_posix() + '";')
     port, redirect_port = free_port(), free_port()
     configuration = configuration.replace("__DOMAIN__", "fixture.test").replace(
         "http://127.0.0.1:8000", f"http://127.0.0.1:{upstream.server_port}"
@@ -204,11 +205,20 @@ def test_maintenance_blocks_publication_requests_before_upstream(
             with pytest.raises(HTTPError) as error:
                 urlopen(origin + path, context=context, timeout=3)
             assert error.value.code == 503
+            assert error.value.headers["X-DrZ-Status"] == "maintenance"
+            assert error.value.headers["Cache-Control"] == "no-store"
             assert b"synthetic maintenance" in error.value.read()
             error.value.close()
         assert len(hits) == before, (
             "maintenance request reached a possible database writer"
         )
+        (html / "maintenance.html").write_text("current themed maintenance", encoding="utf8")
+        with pytest.raises(HTTPError) as current_error:
+            urlopen(origin + "/", context=context, timeout=3)
+        assert current_error.value.code == 503
+        assert b"current themed maintenance" in current_error.value.read()
+        current_error.value.close()
+        assert len(hits) == before
         (tmp_path / "maintenance.flag").unlink()
         with urlopen(origin + "/articles/", context=context, timeout=3) as response:
             assert response.status == 200

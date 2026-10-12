@@ -1,3 +1,4 @@
+import useConnectionRecovery from "@/hooks/useConnectionRecovery";
 import { useEffect, useState } from "react";
 import { apiRequest } from "./appointmentApi";
 
@@ -38,6 +39,7 @@ const readBootstrap = (): GalleryImage[] | null => {
 
 export function useSiteGallery() {
     const [state, setState] = useState(() => ({ items: readBootstrap() ?? [], loading: true, error: false }));
+    const recovery=useConnectionRecovery();
     const [attempt, setAttempt] = useState(0);
     useEffect(() => {
         let active = true;
@@ -52,7 +54,7 @@ export function useSiteGallery() {
                 if (active) setState({ items: [], loading: false, error: true });
             });
         return () => { active = false; controller.abort(); };
-    }, [attempt]);
+    }, [attempt,recovery]);
     return { ...state, retry: () => { setState(value => ({ ...value, loading: true, error: false })); setAttempt(value => value + 1); } };
 }
 
