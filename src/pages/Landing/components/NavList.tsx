@@ -54,7 +54,7 @@ const NavList = ({
         >
             <span
                 aria-hidden="true"
-                className="pointer-events-none absolute left-0 top-0 rounded-xl bg-duskblue shadow-[0_8px_24px_rgba(83,115,146,0.3)] transition-[transform,width,height,opacity] duration-300 ease-out"
+                className="pointer-events-none absolute left-0 top-0 rounded-xl bg-duskblue shadow-[0_8px_24px_rgba(83,115,146,0.3)] transition-[transform,width,height,opacity] duration-200 ease-out"
                 style={highlightStyle}
             />
             {propTabs.map((tab, idx) => (
@@ -65,7 +65,7 @@ const NavList = ({
                     }}
                     href={tab.href}
                     className={classNames(
-                        "relative z-10 rounded-xl px-5 py-2 transition-colors duration-300 hover:text-white focus-visible:text-white",
+                        "relative z-10 rounded-xl px-5 py-2 transition-colors duration-200 hover:text-white focus-visible:text-white",
                         tabClassName,
                     )}
                     onClick={onTabClick}
