@@ -1,3 +1,4 @@
+import useConnectionRecovery from "@/hooks/useConnectionRecovery";
 import { useEffect, useState } from "react";
 import defaultBlocks from "../../api/app/site_content_defaults.json";
 import type { ClinicInfo } from "@/config/clinicInfo";
@@ -58,6 +59,7 @@ const loadBlocks = () => {
 };
 
 export function useSiteContent(): SiteBlocks {
+    const recovery=useConnectionRecovery();
     const [blocks, setBlocks] = useState<SiteBlocks>(readBootstrap);
     useEffect(() => {
         let active = true;
@@ -65,7 +67,7 @@ export function useSiteContent(): SiteBlocks {
             .then((result) => { if (active) setBlocks(merge(result.blocks)); })
             .catch(() => undefined);
         return () => { active = false; };
-    }, []);
+    }, [recovery]);
     return blocks;
 }
 

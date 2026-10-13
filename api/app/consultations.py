@@ -95,3 +95,53 @@ def attachment_path(item: ConsultationMessage) -> Path:
             status_code=status.HTTP_404_NOT_FOUND, detail="تصویر پیدا نشد"
         )
     return path
+
+
+def retry_message(db, appointment_id, sender, nonce, body):
+    from sqlalchemy import select
+    if not nonce: return None
+    item = db.scalar(select(ConsultationMessage).where(ConsultationMessage.appointment_id == appointment_id, ConsultationMessage.sender_type == sender, ConsultationMessage.client_nonce == nonce))
+    if item and item.body != body:
+        raise HTTPException(409, "شناسهٔ این پیام قبلاً برای متن دیگری استفاده شده است")
+    return item
+
+
+def message_page(db, appointment_id, viewer, serialize, *, after_id=None, before_id=None, limit=50):
+    """A stable (created_at,id) window. Incoming messages are acknowledged through
+    the returned high-water mark only, so a concurrent new message stays unread."""
+    from sqlalchemy import select, tuple_, update
+    from sqlalchemy.orm import joinedload
+    from sqlalchemy.orm.attributes import set_committed_value
+    from .models import utcnow, StaffUser, ServiceImageRequirement
+    from .schemas import ConsultationMessagePage
+    if after_id is not None and before_id is not None:
+        raise HTTPException(422, "فقط یکی از مسیرهای پیام‌های قدیمی یا جدید مجاز است")
+    base = ConsultationMessage.appointment_id == appointment_id
+    order = tuple_(ConsultationMessage.created_at, ConsultationMessage.id)
+    query = select(ConsultationMessage).where(base).options(
+        joinedload(ConsultationMessage.sender_staff).load_only(StaffUser.id,StaffUser.full_name).raiseload("*"),
+        joinedload(ConsultationMessage.image_requirement).load_only(ServiceImageRequirement.id,ServiceImageRequirement.title),
+    )
+    cursor_id = after_id if after_id is not None else before_id
+    if cursor_id is not None:
+        cursor = db.execute(select(ConsultationMessage.created_at,ConsultationMessage.id).where(base,ConsultationMessage.id == cursor_id)).first()
+        if not cursor: raise HTTPException(422, "نشانی ادامهٔ گفتگو معتبر نیست")
+        query = query.where(order > tuple(cursor) if after_id is not None else order < tuple(cursor))
+    ascending = after_id is not None
+    query = query.order_by(ConsultationMessage.created_at.asc() if ascending else ConsultationMessage.created_at.desc(),ConsultationMessage.id.asc() if ascending else ConsultationMessage.id.desc()).limit(limit+1)
+    rows = list(db.scalars(query).unique())
+    more = len(rows)>limit
+    rows = rows[:limit]
+    if not ascending: rows.reverse()
+    acknowledged = None
+    if rows and before_id is None:
+        last = rows[-1]; now=utcnow()
+        count = db.execute(update(ConsultationMessage).where(base,ConsultationMessage.sender_type != viewer,ConsultationMessage.read_at.is_(None),order <= (last.created_at,last.id)).values(read_at=now).execution_options(synchronize_session=False)).rowcount
+        if count:
+            for item in rows:
+                if item.sender_type != viewer and item.read_at is None: set_committed_value(item,"read_at",now)
+            db.commit()
+            acknowledged=last.id
+    peer = db.execute(select(ConsultationMessage.id,ConsultationMessage.created_at,ConsultationMessage.read_at).where(base,ConsultationMessage.sender_type == viewer,ConsultationMessage.read_at.is_not(None)).order_by(ConsultationMessage.created_at.desc(),ConsultationMessage.id.desc()).limit(1)).first()
+    requirements=list(db.scalars(select(ConsultationMessage.image_requirement_id).where(base,ConsultationMessage.image_requirement_id.is_not(None)).distinct()))
+    return ConsultationMessagePage(items=[serialize(item) for item in rows],has_more=more,before_id=rows[0].id if rows else before_id,after_id=rows[-1].id if rows else after_id,peer_read_through=dict(peer._mapping) if peer else None,uploaded_requirement_ids=requirements), acknowledged

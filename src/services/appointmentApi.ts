@@ -1,3 +1,4 @@
+import { beginRequest, requestFailed, responseObserved } from "./networkStatus";
 const API_BASE = (import.meta.env.VITE_APPOINTMENT_API_URL ?? "/api/v1").replace(/\/$/, "");
 
 export const PATIENT_TOKEN_KEY = "drz_patient_token";
@@ -399,6 +400,8 @@ export type SmsCampaign = {
     created_at: string;
 };
 
+export type ConsultationMessagePage={items:ConsultationMessage[];has_more:boolean;before_id:number|null;after_id:number|null;peer_read_through:{id:number;created_at:string;read_at:string}|null;uploaded_requirement_ids:number[]};
+
 export type ConsultationThread = {
     appointment_id: number;
     patient_name: string;
@@ -574,11 +577,17 @@ export async function apiRequest<T>(
     sessionHeaders(token).forEach((value, key) => headers.set(key, value));
 
     let response: Response;
+    const ticket=beginRequest();
+    const timeout=AbortSignal.timeout(20_000);
+    const signal=options.signal ? AbortSignal.any([options.signal,timeout]) : timeout;
     try {
-        response = await fetch(`${API_BASE}${path}`, { ...options, headers, credentials: "include" });
-    } catch {
-        throw new AppointmentApiError("ارتباط با سامانه نوبت‌دهی برقرار نشد", 0);
+        response = await fetch(`${API_BASE}${path}`, { ...options, signal, headers, credentials: "include", cache:"no-store" });
+    } catch (error) {
+        if(options.signal?.aborted)throw error;
+        requestFailed(ticket);
+        throw new AppointmentApiError("ارتباط با سامانه برقرار نشد", 0);
     }
+    responseObserved(ticket,response);
 
     if (!response.ok) {
         if (response.status === 401 && token === STAFF_COOKIE_SESSION) window.dispatchEvent(new Event("drz:staff-expired"));
@@ -607,6 +616,8 @@ function apiUpload<T>(
 ): Promise<T> {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        const ticket=beginRequest();
+        xhr.timeout=120_000;
         xhr.open("POST", `${API_BASE}${path}`);
         xhr.withCredentials = true;
         xhr.setRequestHeader("Accept", "application/json");
@@ -620,11 +631,11 @@ function apiUpload<T>(
             const percent = Math.min(100, Math.round(ratio * 100));
             onProgress?.({ loaded, total, percent });
         };
-        xhr.onerror = () =>
-            reject(new AppointmentApiError("ارتباط با سامانه نوبت‌دهی برقرار نشد", 0));
+        xhr.onerror = xhr.ontimeout = () => {requestFailed(ticket);reject(new AppointmentApiError("ارتباط با سامانه برقرار نشد",0));};
         xhr.onabort = () =>
             reject(new AppointmentApiError("بارگذاری تصویر متوقف شد", 0));
         xhr.onload = () => {
+            responseObserved(ticket,{status:xhr.status,ok:xhr.status>=200&&xhr.status<300,headers:new Headers({"X-DrZ-Status":xhr.getResponseHeader("X-DrZ-Status")??""})});
             let payload: ApiErrorPayload | T = {} as T;
             if (xhr.responseText) {
                 try {
@@ -649,16 +660,20 @@ function apiUpload<T>(
     });
 }
 
-async function apiBlob(path: string, token: string): Promise<Blob> {
+async function apiBlob(path: string, token: string, signal?:AbortSignal): Promise<Blob> {
     let response: Response;
+    const ticket=beginRequest();
     try {
         response = await fetch(`${API_BASE}${path}`, {
             headers: { ...Object.fromEntries(sessionHeaders(token)), Accept: "*/*" },
-            credentials: "include",
+            credentials: "include", cache:"no-store", signal:signal ? AbortSignal.any([signal,AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000),
         });
-    } catch {
+    } catch (error) {
+        if(signal?.aborted)throw error;
+        requestFailed(ticket);
         throw new AppointmentApiError("ارتباط با سامانه برقرار نشد", 0);
     }
+    responseObserved(ticket,response);
     if (!response.ok) {
         const payload = (await response.json().catch(() => ({}))) as ApiErrorPayload;
         throw new AppointmentApiError(
@@ -780,16 +795,17 @@ export const appointmentApi = {
     appointmentCalendar: (token: string, appointmentId: number) =>
         apiBlob(`/appointments/${appointmentId}/calendar`, token),
 
+    consultationSync:(token:string,appointmentId:number,role:"patient"|"staff",cursor:{after_id?:number;before_id?:number}={},signal?:AbortSignal)=>apiRequest<ConsultationMessagePage>(`${role==="staff"?"/staff":""}/appointments/${appointmentId}/consultation/sync?${new URLSearchParams(Object.entries(cursor).map(([key,value])=>[key,String(value)]))}`,{signal},token),
     getConsultation: (token: string, appointmentId: number) =>
         apiRequest<ConsultationMessage[]>(
             `/appointments/${appointmentId}/consultation`,
             {},
             token,
         ),
-    sendConsultationMessage: (token: string, appointmentId: number, body: string) =>
+    sendConsultationMessage: (token: string, appointmentId: number, body: string, clientNonce?:string) =>
         apiRequest<ConsultationMessage>(
             `/appointments/${appointmentId}/consultation/messages`,
-            { method: "POST", body: JSON.stringify({ body }) },
+            { method: "POST", body: JSON.stringify({ body,client_nonce:clientNonce }) },
             token,
         ),
     uploadConsultationImage: (
@@ -810,10 +826,10 @@ export const appointmentApi = {
             onProgress,
         );
     },
-    consultationImage: (token: string, appointmentId: number, messageId: number) =>
+    consultationImage: (token: string, appointmentId: number, messageId: number, signal?:AbortSignal) =>
         apiBlob(
             `/appointments/${appointmentId}/consultation/images/${messageId}`,
-            token,
+            token,signal,
         ),
 
     staffCaptcha: () => apiRequest<CaptchaChallenge>("/staff/auth/captcha"),
@@ -1063,20 +1079,22 @@ export const appointmentApi = {
         token: string,
         appointmentId: number,
         body: string,
+        clientNonce?:string,
     ) =>
         apiRequest<ConsultationMessage>(
             `/staff/appointments/${appointmentId}/consultation/messages`,
-            { method: "POST", body: JSON.stringify({ body }) },
+            { method: "POST", body: JSON.stringify({ body,client_nonce:clientNonce }) },
             token,
         ),
     staffConsultationImage: (
         token: string,
         appointmentId: number,
         messageId: number,
+        signal?:AbortSignal,
     ) =>
         apiBlob(
             `/staff/appointments/${appointmentId}/consultation/images/${messageId}`,
-            token,
+            token,signal,
         ),
     staffSmsRules: (token: string) =>
         apiRequest<SmsAutomationRule[]>("/staff/sms/rules", {}, token),

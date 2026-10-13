@@ -65,9 +65,7 @@ ln -sfn /etc/nginx/sites-available/drzamani /etc/nginx/sites-enabled/drzamani
 rm -f /etc/nginx/sites-enabled/default
 
 if [[ ! -f /var/www/drzamani/shared/maintenance.html ]]; then
-    install -o www-data -g www-data -m 0644 /dev/stdin /var/www/drzamani/shared/maintenance.html <<'HTML'
-<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>به‌روزرسانی سامانه</title><style>body{font-family:sans-serif;background:#f8fafc;color:#14344a;display:grid;place-items:center;min-height:100vh;margin:0}.box{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:40px;text-align:center;max-width:480px}</style><div class="box"><h1>در حال به‌روزرسانی سامانه</h1><p>لطفاً چند دقیقه دیگر دوباره تلاش کنید.</p></div></html>
-HTML
+    install -o www-data -g www-data -m 0644 "$deploy_dir/maintenance.html" /var/www/drzamani/shared/maintenance.html
 fi
 
 systemctl daemon-reload

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { ClinicInfoProvider } from "@/contexts/ClinicInfoContext";
 import NavigationBar from "@/pages/Landing/components/NavigationBar";
+import ConnectionStatus from "@/components/ConnectionStatus";
 import Footer from "@/pages/Landing/components/Footer";
 
 /**
@@ -27,7 +28,7 @@ function initReveal() {
                 observer.unobserve(entry.target);
             }
         },
-        { rootMargin: "0px 0px -8% 0px" },
+        { rootMargin: "160px 0px" },
     );
     waiting.forEach((element) => observer.observe(element));
 }
@@ -46,6 +47,7 @@ export function mountChrome() {
             <ClinicInfoProvider>
                 {header && createPortal(<NavigationBar solid={header.dataset.solid === "1"} />, header)}
                 {footer && createPortal(<Footer />, footer)}
+                <ConnectionStatus />
             </ClinicInfoProvider>
         </StrictMode>,
     );

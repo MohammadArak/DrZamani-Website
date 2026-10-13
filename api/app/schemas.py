@@ -841,6 +841,7 @@ class AppointmentPage(BaseModel):
 
 class ConsultationMessageCreate(BaseModel):
     body: str = Field(min_length=1, max_length=2000)
+    client_nonce: str | None = Field(default=None, pattern=r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
     @field_validator("body")
     @classmethod
@@ -864,6 +865,21 @@ class ConsultationMessageRead(BaseModel):
     original_file_name: str | None
     created_at: datetime
     read_at: datetime | None
+
+
+class ConsultationReadReceipt(BaseModel):
+    id: int
+    created_at: datetime
+    read_at: datetime
+
+
+class ConsultationMessagePage(BaseModel):
+    items: list[ConsultationMessageRead]
+    has_more: bool
+    before_id: int | None
+    after_id: int | None
+    peer_read_through: ConsultationReadReceipt | None
+    uploaded_requirement_ids: list[int]
 
 
 class ConsultationThreadRead(BaseModel):

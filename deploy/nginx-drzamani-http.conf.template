@@ -131,8 +131,19 @@ server {
     error_page 404 /404.html;
     error_page 503 /maintenance.html;
     location = /maintenance.html {
-        root /var/www/drzamani/shared;
+        root /var/www/drzamani;
+        try_files /current/public_html/maintenance.html /shared/maintenance.html =503;
         internal;
+        include /etc/nginx/snippets/drzamani-security-headers.conf;
+        add_header X-DrZ-Status maintenance always;
+        add_header Retry-After 60 always;
+        add_header Cache-Control no-store always;
+    }
+    error_page 502 504 /connection-lost.html;
+    location = /connection-lost.html {
+        internal;
+        include /etc/nginx/snippets/drzamani-security-headers.conf;
+        add_header Cache-Control no-store always;
     }
 
 }

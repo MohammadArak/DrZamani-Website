@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+from fastapi import Query, Response
+from sqlalchemy.exc import IntegrityError
+from ..consultations import message_page, retry_message
+from ..schemas import ConsultationMessagePage
+from ..realtime import publish_consultation_read_event
+
 from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..consultations import attachment_path
 from ..database import get_db
@@ -42,6 +48,7 @@ def consultation_threads(
     appointments = (
         db.scalars(
             select(Appointment)
+            .options(joinedload(Appointment.patient),joinedload(Appointment.service))
             .join(Appointment.service)
             .where(Service.allows_media_chat.is_(True))
             .order_by(Appointment.created_at.desc())
@@ -140,6 +147,16 @@ def staff_consultation_messages(
     return [_staff_message(message, _staff) for message in messages]
 
 
+
+@router.get("/appointments/{appointment_id}/consultation/sync", response_model=ConsultationMessagePage)
+def staff_consultation_sync(appointment_id:int, background_tasks:BackgroundTasks, response:Response, after_id:int|None=Query(None,gt=0), before_id:int|None=Query(None,gt=0), limit:int=Query(50,ge=1,le=100), staff:StaffUser=Depends(require_permission("consultations.view")), db:Session=Depends(get_db)):
+    appointment=_staff_consultation_appointment(db,appointment_id)
+    page,ack=message_page(db,appointment_id,"staff",lambda item:_staff_message(item,staff),after_id=after_id,before_id=before_id,limit=limit)
+    if not can(staff,"images.view"): page.uploaded_requirement_ids=[]
+    response.headers["Cache-Control"]="no-store"
+    if ack: background_tasks.add_task(publish_consultation_read_event,appointment_id=appointment_id,patient_id=appointment.patient_id,sender_type="staff",message_id=ack)
+    return page
+
 @router.post(
     "/appointments/{appointment_id}/consultation/messages",
     response_model=ConsultationMessageRead,
@@ -153,13 +170,22 @@ def staff_create_consultation_message(
     db: Session = Depends(get_db),
 ) -> ConsultationMessageRead:
     appointment = _staff_consultation_appointment(db, appointment_id)
+    previous=retry_message(db,appointment_id,"staff",payload.client_nonce,payload.body)
+    if previous: return _staff_message(previous,staff)
     message = ConsultationMessage(
         appointment_id=appointment_id,
         sender_type="staff",
         sender_staff_id=staff.id,
         body=payload.body,
+        client_nonce=payload.client_nonce,
     )
     db.add(message)
+    try: db.flush()
+    except IntegrityError:
+        db.rollback()
+        previous=retry_message(db,appointment_id,"staff",payload.client_nonce,payload.body)
+        if previous: return _staff_message(previous,staff)
+        raise
     queue_sms_event(
         db,
         "staff_message_received",

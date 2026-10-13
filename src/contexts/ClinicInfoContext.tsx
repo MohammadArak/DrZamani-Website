@@ -81,14 +81,16 @@ export const ClinicInfoProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel("drz-clinic-settings");
         if (channel) channel.onmessage = () => { void refreshClinicInfo(); };
-        const timer = window.setInterval(() => { if (document.visibilityState === "visible") void refreshClinicInfo(); }, 30000);
         const refreshOnFocus = () => { if (document.visibilityState === "visible") void refreshClinicInfo(); };
         window.addEventListener("focus", refreshOnFocus);
+        window.addEventListener("online", refreshOnFocus);
+        window.addEventListener("drz:retry", refreshOnFocus);
         document.addEventListener("visibilitychange", refreshOnFocus);
         return () => {
-            window.clearInterval(timer);
             channel?.close();
             window.removeEventListener("focus", refreshOnFocus);
+            window.removeEventListener("online", refreshOnFocus);
+            window.removeEventListener("drz:retry", refreshOnFocus);
             document.removeEventListener("visibilitychange", refreshOnFocus);
         };
     }, [refreshClinicInfo]);

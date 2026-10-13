@@ -142,8 +142,7 @@ const AboutUs = () => {
                         >
                             <img
                                 className="z-10"
-                                style={{ filter: "url(#doctor-edge-soft)" }}
-                                src="/img/about-us/dr-zamani-op.webp"
+                                    src="/img/about-us/dr-zamani-op-clean.webp"
                                 alt={`اتاق عمل ${clinicInfo.doctorName}`}
                                 width={1216}
                                 height={919}
