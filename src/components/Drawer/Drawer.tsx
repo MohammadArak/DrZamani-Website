@@ -1,5 +1,7 @@
 import classNames from 'classnames'
 import Modal from 'react-modal'
+
+Modal.setAppElement('#root')
 import CloseButton from '../CloseButton'
 import { motion } from "@/components/Motion"
 import type ReactModal from 'react-modal'
@@ -113,7 +115,11 @@ const Drawer = (props: DrawerProps) => {
                 lockScroll && 'drawer-lock-scroll',
                 bodyOpenClassName,
             )}
-            ariaHideApp={false}
+            contentLabel={typeof title==='string'?title:'منو'}
+            ariaHideApp={true}
+            style={{content: placement==='left'||placement==='right'
+                ? {position:'fixed',top:0,bottom:0,[placement]:0,width,height:'100dvh'}
+                : {position:'fixed',left:0,right:0,[placement]:0,width:'100%',height}}}
             isOpen={isOpen}
             closeTimeoutMS={closeTimeoutMS}
             {...rest}

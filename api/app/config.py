@@ -106,6 +106,7 @@ class Settings:
     google_min_score: int = 50
     captcha_primary: str = "turnstile"
     captcha_fallback: bool = False
+    local_review_disable_staff_captcha: bool = False
     captcha_staff_login: bool = True
     captcha_otp_request: bool = True
     captcha_otp_verify: bool = True
@@ -114,6 +115,15 @@ class Settings:
     booking_disabled_message: str = "رزرو آنلاین نوبت فعلاً غیرفعال است. برای هماهنگی با مطب تماس بگیرید."
     mfa_required_owners: bool = False
     seed_default_content: bool = True
+    ai_provider: str = "disabled"
+    ai_base_url: str = ""
+    ai_model: str = ""
+    ai_account_id: str = ""
+    ai_api_key: str = ""
+    ai_requests_per_hour: int = 5
+    ai_max_tokens: int = 900
+    ai_allowed_hosts: tuple[str, ...] = ()
+
 
     @property
     def development_debug(self) -> bool:
@@ -220,6 +230,7 @@ def get_settings() -> Settings:
         google_min_score=_bounded_int("GOOGLE_MIN_SCORE", 50, 0, 100),
         captcha_primary=os.getenv("CAPTCHA_PRIMARY", "turnstile").strip(),
         captcha_fallback=_as_bool(os.getenv("CAPTCHA_FALLBACK"), False),
+        local_review_disable_staff_captcha=_as_bool(os.getenv("LOCAL_REVIEW_DISABLE_STAFF_CAPTCHA")),
         captcha_staff_login=_as_bool(os.getenv("CAPTCHA_STAFF_LOGIN"), True),
         captcha_otp_request=_as_bool(os.getenv("CAPTCHA_OTP_REQUEST"), True),
         captcha_otp_verify=_as_bool(os.getenv("CAPTCHA_OTP_VERIFY"), True),
@@ -228,6 +239,14 @@ def get_settings() -> Settings:
         settings_encryption_keys=_as_list(os.getenv("SETTINGS_ENCRYPTION_KEYS")),
         sms_webhook_allowed_hosts=_as_list(os.getenv("SMS_WEBHOOK_ALLOWED_HOSTS")),
         public_media_dir=public_media_dir,
+        ai_provider=os.getenv("AI_PROVIDER", "disabled").strip(),
+        ai_base_url=os.getenv("AI_BASE_URL", "").strip(),
+        ai_model=os.getenv("AI_MODEL", "").strip(),
+        ai_account_id=os.getenv("AI_ACCOUNT_ID", "").strip(),
+        ai_api_key=os.getenv("AI_API_KEY", "").strip(),
+        ai_requests_per_hour=_bounded_int("AI_REQUESTS_PER_HOUR",5,1,20),
+        ai_max_tokens=_bounded_int("AI_MAX_TOKENS",900,256,2000),
+        ai_allowed_hosts=_as_list(os.getenv("AI_ALLOWED_HOSTS")),
         seed_default_content=_as_bool(os.getenv("SEED_DEFAULT_CONTENT"), True),
         public_html_dir=Path(os.getenv("PUBLIC_HTML_DIR") or str(BACKEND_DIR.parent / "public_html")).resolve(),
     )

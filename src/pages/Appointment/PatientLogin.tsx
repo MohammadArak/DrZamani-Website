@@ -156,7 +156,7 @@ const Login = ({
             <div className="mx-auto flex w-full min-w-0 max-w-md flex-col">
                 <a
                     href="/"
-                    className="mb-10 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary md:hidden"
+                    className="mb-5 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary md:hidden"
                 >
                     <IoArrowForward /> بازگشت به سایت
                 </a>

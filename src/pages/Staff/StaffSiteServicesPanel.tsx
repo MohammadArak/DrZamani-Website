@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { safeContentHtml } from "@/services/contentApi";
+import SeoPreview from "./SeoPreview";
+import EditorialSeoAssistant from "./EditorialSeoAssistant";
+import { contentApi, safeContentHtml } from "@/services/contentApi";
 import {
     emptyService,
     SERVICE_IMAGES,
@@ -34,17 +36,19 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
     const [notice, setNotice] = useState("");
     const [busy, setBusy] = useState(false);
     const [preview, setPreview] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [aiBusy,setAiBusy]=useState(false);
     const editable = row ? can("site_services.edit") : can("site_services.create");
     const dirty = editable && JSON.stringify(content) !== saved;
 
     useEffect(() => { onDirty(dirty); }, [dirty, onDirty]);
-    useEffect(() => { onBusy(busy); }, [busy, onBusy]);
+    useEffect(() => { onBusy(busy || uploading || aiBusy); }, [busy, uploading, aiBusy, onBusy]);
     useEffect(() => {
-        if (!dirty) return;
+        if (!dirty && !uploading) return;
         const warn = (e: BeforeUnloadEvent) => e.preventDefault();
         window.addEventListener("beforeunload", warn);
         return () => window.removeEventListener("beforeunload", warn);
-    }, [dirty]);
+    }, [dirty, uploading]);
 
     const patch = <K extends keyof SiteServiceContent>(key: K, value: SiteServiceContent[K]) => {
         setPreview(false);
@@ -58,7 +62,7 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
         onSaved(next);
     };
     const save = async () => {
-        if (!editable || busy) return;
+        if (!editable || busy || uploading) return;
         if (content.title.trim().length < 2) { setError("عنوان خدمت را کامل کنید."); return; }
         if (!SLUG_PATTERN.test(content.slug)) { setError("نشانی صفحه فقط حروف کوچک انگلیسی، عدد و خط تیره دارد (مثل face-lift)."); return; }
         setBusy(true);
@@ -73,7 +77,7 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
         }
     };
     const transition = async (action: "publish" | "unpublish") => {
-        if (!row || busy) return;
+        if (!row || busy || uploading) return;
         if (dirty) { setError("ابتدا پیش‌نویس را ذخیره کنید."); return; }
         const question = action === "publish"
             ? "این نسخه ذخیره‌شده روی سایت منتشر شود؟"
@@ -90,7 +94,7 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
         }
     };
     const reload = async () => {
-        if (!row || busy || !await ask("متن محلی با نسخه تازه سرور جایگزین شود؟")) return;
+        if (!row || busy || uploading || !await ask("متن محلی با نسخه تازه سرور جایگزین شود؟")) return;
         setBusy(true);
         try {
             accept(await siteServicesApi.get(token, row.id));
@@ -102,7 +106,7 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
         }
     };
 
-    const locked = !editable || busy;
+    const locked = !editable || busy || uploading;
     const [source, setSource] = useState(false);
     return (
         <section className="article-compose">
@@ -137,9 +141,17 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
                     <input type="number" min={0} max={10000} value={content.sort_order} readOnly={locked} onChange={(e) => patch("sort_order", Number(e.target.value))} />
                 </label>
             </div>
-            {can("media.manage") && (
-                <MediaPicker token={token} label="عکس سمت راست صفحه (اختیاری؛ بدون انتخاب، عکس پیش‌فرض نمایش داده می‌شود)" value={content.hero_key ?? ""} disabled={locked} onSelect={(media) => patch("hero_key", media?.key ?? null)} />
-            )}
+            {can("media.manage") && (<>
+                <p>این تصویر همان عکس بزرگ کنار عنوان خدمت است. پس از تغییر، پیش‌نویس را ذخیره و جداگانه منتشر کنید. انتخاب «بدون انتخاب» عکس پیش‌فرض را برمی‌گرداند.</p>
+                {can("media.manage") && <label>بارگذاری مستقیم تصویر این خدمت<input type="file" accept="image/jpeg,image/png,image/webp" disabled={locked || uploading} onChange={async event => {
+                    const file=event.target.files?.[0];event.target.value="";if(!file)return;
+                    if(file.size>10*1024*1024){setError("تصویر باید حداکثر ۱۰ مگابایت باشد.");return;}
+                    setUploading(true);setError("");
+                    try{const media=await contentApi.upload(token,file,content.title||"تصویر معرفی خدمت");patch("hero_key",media.key);setNotice("تصویر بارگذاری شد؛ برای نمایش عمومی، ذخیره و انتشار خدمت لازم است.");}
+                    catch(error){setError(failure(error));}finally{setUploading(false);}
+                }} />{uploading && <span role="status">در حال بارگذاری تصویر…</span>}</label>}
+                <MediaPicker token={token} label="تصویر بزرگ بالای صفحه خدمت؛ انتخاب یا جایگزینی" value={content.hero_key ?? ""} disabled={locked} onSelect={(media) => patch("hero_key", media?.key ?? null)} />
+            </>)}
             <h3>متن کامل صفحه</h3>
             <p className="editor-help">متن دقیق این صفحه همین است؛ چیز دیگری خودکار به آن اضافه نمی‌شود. می‌توانید با ویرایشگر یا مستقیم با کد HTML بنویسید.</p>
             <div className="article-actions">
@@ -152,14 +164,16 @@ function ServiceForm({ token, initial, onSaved, onDirty, onBusy }: FormProps) {
             )}
             <fieldset>
                 <legend>سئو (اختیاری)</legend>
+                <SeoPreview title={content.seo_title || content.title} description={content.seo_description || content.summary} path={`/services/${content.slug}/`} />
                 <label>عنوان نتیجه جست‌وجو<input maxLength={200} value={content.seo_title} readOnly={locked} onChange={(e) => patch("seo_title", e.target.value)} /></label>
                 <label>توضیح نتیجه جست‌وجو<textarea maxLength={400} value={content.seo_description} readOnly={locked} onChange={(e) => patch("seo_description", e.target.value)} /></label>
             </fieldset>
+            {editable&&<EditorialSeoAssistant token={token} kind="service" title={content.title} description={content.seo_description||content.summary} html={content.description_html} contextKey={JSON.stringify(content)} disabled={busy||uploading} onBusy={setAiBusy} onApply={suggestion=>setContent(previous=>({...previous,seo_title:suggestion.seo_title,seo_description:suggestion.seo_description}))}/>}
             <div className="article-actions">
-                {editable && <button className="content-primary" disabled={busy} onClick={() => void save()}>ذخیره پیش‌نویس</button>}
+                {editable && <button className="content-primary" disabled={busy || uploading} onClick={() => void save()}>ذخیره پیش‌نویس</button>}
                 <button onClick={() => setPreview(!preview)}>{preview ? "بستن پیش‌نمایش" : "پیش‌نمایش"}</button>
-                {row && can("site_services.publish") && <button disabled={busy || dirty} onClick={() => void transition("publish")}>انتشار نسخه ذخیره‌شده</button>}
-                {row?.published && can("site_services.publish") && <button disabled={busy} onClick={() => void transition("unpublish")}>توقف انتشار</button>}
+                {row && can("site_services.publish") && <button disabled={busy || uploading || dirty} onClick={() => void transition("publish")}>انتشار نسخه ذخیره‌شده</button>}
+                {row?.published && can("site_services.publish") && <button disabled={busy || uploading} onClick={() => void transition("unpublish")}>توقف انتشار</button>}
                 {row?.published && <a href={`/services/${row.content.slug}/`} target="_blank" rel="noopener noreferrer">مشاهده صفحه عمومی</a>}
             </div>
             {preview && (

@@ -28,7 +28,7 @@ const Footer = () => {
     return (
         <footer
             id="footer"
-            className="relative z-20 bg-jetblack dark:bg-jetblack pt-16 pb-8 flex flex-col"
+            className="relative z-20 bg-jetblack dark:bg-jetblack text-slate-200 pt-16 pb-8 flex flex-col"
         >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 px-10 items-start">
                 <motion.div

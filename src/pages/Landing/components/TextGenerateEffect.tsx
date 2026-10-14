@@ -41,6 +41,7 @@ const TextGenerateEffect = <T extends ElementType = "div">({
                     )}
                     style={
                         {
+                            marginInlineEnd: idx<wordsArray.length-1?".18em":undefined,
                             "--word-delay": `${idx * 0.075}s`,
                             "--word-duration": `${duration}s`,
                             "--word-filter": filter ? "blur(10px)" : "none",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavList from "./NavList";
 import Drawer from "@/components/Drawer";
 import classNames from "@/utils/classNames";
@@ -39,6 +39,17 @@ const Navigation = ({ solid = false }: { solid?: boolean }) => {
 
     const [isOpen, setIsOpen] = useState(false);
     const [reserveOpen, setReserveOpen] = useState(false);
+
+    useEffect(() => {
+        const open = (event: MouseEvent) => {
+            if (clinicInfo.bookingEnabled || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+            if (event.target instanceof Element && event.target.closest("a[data-reservation]")) {
+                event.preventDefault();setReserveOpen(true);
+            }
+        };
+        document.addEventListener("click", open);
+        return () => document.removeEventListener("click", open);
+    }, [clinicInfo.bookingEnabled]);
 
     const openDrawer = () => {
         setIsOpen(true);
@@ -82,7 +93,7 @@ const Navigation = ({ solid = false }: { solid?: boolean }) => {
                     <a className="z-10" href="/">
                         <img
                             src="/img/logo/logo-dark-full.webp"
-                            className="w-40 md:w-48 lg:w-56"
+                            className="w-32 sm:w-40 md:w-48 lg:w-56"
                             alt={`لوگوی ${clinicInfo.doctorName}`}
                             loading="eager"
                             fetchPriority="high"
@@ -153,14 +164,14 @@ const Navigation = ({ solid = false }: { solid?: boolean }) => {
                     <a
                         href="/appointment/"
                                 onClick={event => { if (!clinicInfo.bookingEnabled) { event.preventDefault(); setReserveOpen(true); } }}
-                        className="text-white hover:bg-secondary-deep dark:hover:bg-secondary-deep relative block heading-text z-10 shadow-md rounded-lg items-center justify-center py-1 px-2 bg-secondary dark:bg-secondary"
+                        className="whitespace-nowrap text-white hover:bg-secondary-deep dark:hover:bg-secondary-deep relative block heading-text z-10 shadow-md rounded-lg items-center justify-center py-1 px-2 bg-secondary dark:bg-secondary"
                         aria-label="رزرو نوبت"
                     >
                         رزرو نوبت
                     </a>
                     {/* <button
                         onClick={() => setReserveOpen(true)}
-                        className="text-white hover:bg-secondary-deep dark:hover:bg-secondary-deep relative block heading-text z-10 shadow-md rounded-lg items-center justify-center py-1 px-2 bg-secondary dark:bg-secondary"
+                        className="whitespace-nowrap text-white hover:bg-secondary-deep dark:hover:bg-secondary-deep relative block heading-text z-10 shadow-md rounded-lg items-center justify-center py-1 px-2 bg-secondary dark:bg-secondary"
                     >
                         رزرو نوبت
                     </button> */}

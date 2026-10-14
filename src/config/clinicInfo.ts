@@ -15,6 +15,7 @@ export type ClinicInfo = {
     seoTitle: string;
     seoDescription: string;
     seoImageUrl: string;
+    seoSiteName: string;
     siteUrl: string;
     email: string;
     phones: {
@@ -93,6 +94,7 @@ export const fallbackClinicInfo: ClinicInfo = {
     seoTitle: "",
     seoDescription: "",
     seoImageUrl: "",
+    seoSiteName: "",
     siteUrl: "https://drfarzadzamani.ir",
     email: "info@drfarzadzamani.ir",
     phones: {
@@ -129,6 +131,7 @@ export const buildClinicInfo = (settings: ClinicSettings): ClinicInfo => ({
     postalCode: settings.postal_code?.trim() ?? "",
     businessHours: settings.business_hours ?? [],
     seoTitle: settings.seo_title?.trim() ?? "",
+    seoSiteName: settings.seo_site_name?.trim() ?? "",
     seoDescription: settings.seo_description?.trim() ?? "",
     seoImageUrl: settings.seo_image_url?.trim() ?? "",
     doctorName: textOrFallback(settings.doctor_name, fallbackClinicInfo.doctorName),

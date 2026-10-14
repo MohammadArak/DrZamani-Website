@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
+import SeoPreview from "./SeoPreview";
 import Toast from "@/components/Toast";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import {
@@ -355,11 +356,16 @@ const ClinicInfoPanel = ({
                     <h3 className="font-dana text-xl text-primary">سئوی صفحه اصلی</h3>
                     <p className="mt-2 text-sm leading-7 text-slate-500">فیلد خالی از مشخصات پزشک ساخته می‌شود. پس از ذخیره، HTML اولیه، متادیتا و داده‌های ساختاریافته تازه خوانده می‌شوند.</p>
                     <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        <label><span className="text-sm">نام سایت در پسوند صفحات</span><input disabled={!canEdit} maxLength={160} value={draft.seo_site_name ?? ""} placeholder={`وبسایت ${draft.doctor_name}`} onChange={event => update("seo_site_name", event.target.value)} className={inputClass} /></label>
+                        <label><span className="text-sm">عنوان صفحه مقالات</span><input disabled={!canEdit} maxLength={160} value={draft.seo_articles_title ?? ""} placeholder="مقالات" onChange={event => update("seo_articles_title", event.target.value)} className={inputClass} /></label>
+                        <label className="md:col-span-2"><span className="text-sm">توضیح صفحه مقالات</span><textarea disabled={!canEdit} maxLength={320} value={draft.seo_articles_description ?? ""} onChange={event => update("seo_articles_description", event.target.value)} className={inputClass} /></label>
                         <label><span className="text-sm">عنوان سئو (حداکثر ۱۶۰ حرف)</span><input disabled={!canEdit} maxLength={160} value={draft.seo_title ?? ""} onChange={event => update("seo_title", event.target.value)} className={inputClass} /></label>
                         <label><span className="text-sm">تصویر اشتراک‌گذاری (HTTPS)</span><input disabled={!canEdit} type="url" dir="ltr" maxLength={500} value={draft.seo_image_url ?? ""} onChange={event => update("seo_image_url", event.target.value)} className={inputClass} /></label>
                         <label className="md:col-span-2"><span className="text-sm">توضیح سئو (حداکثر ۳۲۰ حرف)</span><textarea disabled={!canEdit} maxLength={320} value={draft.seo_description ?? ""} onChange={event => update("seo_description", event.target.value)} className={`${inputClass} h-24 py-3`} /></label>
                     </div>
                 </div>
+                <SeoPreview home siteUrl={draft.site_url} siteName={draft.seo_site_name || `وبسایت ${draft.doctor_name}`} title={draft.seo_title || `وبسایت رسمی ${draft.doctor_name}`} description={draft.seo_description || `وب‌سایت رسمی ${draft.doctor_name}، ${draft.specialty} در ${draft.address_city}؛ معرفی خدمات و راه‌های ارتباطی.`} path="/" />
+                <SeoPreview title={draft.seo_articles_title || "مقالات"} description={draft.seo_articles_description || "مقالات درباره سلامت گوش، بینی، سینوس، گلو و رینوپلاستی"} path="/articles/" siteUrl={draft.site_url} siteName={draft.seo_site_name || `وبسایت ${draft.doctor_name}`} />
                 {canEdit && (
                     <div className="sticky bottom-3 z-10 flex justify-end rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur">
                         <button

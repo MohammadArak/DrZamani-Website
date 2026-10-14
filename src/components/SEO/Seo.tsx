@@ -30,7 +30,7 @@ const Seo = ({
 }: SeoProps) => {
     const { clinicInfo } = useClinicInfo();
     const siteRoot = `${clinicInfo.siteUrl.replace(/\/$/, "")}/`;
-    const siteLabel = `وبسایت ${clinicInfo.doctorName}`;
+    const siteLabel = clinicInfo.seoSiteName || `وبسایت ${clinicInfo.doctorName}`;
     const oldSuffix = ` | ${clinicInfo.doctorName}`;
     const pageLabel = title.endsWith(oldSuffix) ? title.slice(0, -oldSuffix.length) : title;
     const resolvedTitle = canonical.replace(/\/$/, "") === siteRoot.replace(/\/$/, "")
@@ -108,7 +108,7 @@ const Seo = ({
             "@context": "https://schema.org",
             "@type": "WebSite",
             "@id": websiteId,
-            name: `وب‌سایت ${clinicInfo.doctorName}`,
+            name: siteLabel,
             url: siteRoot,
             inLanguage: "fa-IR",
         },
@@ -149,7 +149,7 @@ const Seo = ({
 
             <meta property="og:locale" content="fa_IR" />
 
-            <meta property="og:site_name" content={clinicInfo.doctorName} />
+            <meta property="og:site_name" content={siteLabel} />
 
             <meta property="og:title" content={resolvedTitle} />
 

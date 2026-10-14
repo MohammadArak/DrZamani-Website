@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
+import SeoPreview from "./SeoPreview";
+import EditorialSeoAssistant from "./EditorialSeoAssistant";
 import { contentApi,emptyArticle,safeContentHtml,type Article,type ArticleContent,type ArticleHistory,type SeoFeedback } from "@/services/contentApi";
 import { useCallback,useEffect,useRef,useState } from "react";
 import ArticleEditor from "./ArticleEditor";
@@ -17,13 +19,13 @@ function ArticleForm({token,initial,onSaved,onDirty,onBusy}:{token:string;initia
     const [history,setHistory]=useState<ArticleHistory[]>([]);const [schedule,setSchedule]=useState("");
     const [categoriesText,setCategoriesText]=useState(initial?.content.categories.join("، ")??"");
     const [tagsText,setTagsText]=useState(initial?.content.tags.join("، ")??"");
-    const [seoError,setSeoError]=useState("");
+    const [seoError,setSeoError]=useState("");const [aiBusy,setAiBusy]=useState(false);
     const rowRef=useRef(row);
     const [savedJson,setSavedJson]=useState(JSON.stringify(initial?.content??emptyArticle()));const lastSaved=useRef(JSON.stringify(initial?.content??emptyArticle()));const current=useRef(content);const busyRef=useRef(false);const alive=useRef(true);
     const editable=row?can("articles.edit"):can("articles.create");const serialized=JSON.stringify(content);const dirty=editable&&serialized!==savedJson;
     useEffect(()=>{current.current=content;},[content]);
     useEffect(()=>{onDirty(dirty);},[dirty,onDirty]);
-    useEffect(()=>{onBusy(busy);},[busy,onBusy]);
+    useEffect(()=>{onBusy(busy||aiBusy);},[busy,aiBusy,onBusy]);
     useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
     useEffect(()=>{if(!dirty)return;const warn=(e:BeforeUnloadEvent)=>{e.preventDefault();};window.addEventListener("beforeunload",warn);return()=>window.removeEventListener("beforeunload",warn);},[dirty]);
     const patch=<K extends keyof ArticleContent>(key:K,value:ArticleContent[K])=>setContent(c=>({...c,[key]:value}));
@@ -75,7 +77,8 @@ function ArticleForm({token,initial,onSaved,onDirty,onBusy}:{token:string;initia
                 {can("media.manage")&&<MediaPicker token={token} label="تصویر شاخص" value={content.cover_key??""} disabled={!editable} onSelect={m=>setContent(v=>({...v,cover_key:m?.key??null,cover_alt:m?.alt??""}))}/>}{field("cover_alt","توضیح تصویر شاخص")}
             </div>
             <fieldset><legend>منابع</legend>{content.sources.map((s,i)=><div className="source-row" key={i}><label>عنوان منبع<input value={s.title} readOnly={!editable} onChange={e=>patch("sources",content.sources.map((v,j)=>j===i?{...v,title:e.target.value}:v))}/></label><label>نشانی HTTPS<input dir="ltr" value={s.url} readOnly={!editable} onChange={e=>patch("sources",content.sources.map((v,j)=>j===i?{...v,url:e.target.value}:v))}/></label>{editable&&<button onClick={()=>patch("sources",content.sources.filter((_,j)=>j!==i))}>حذف منبع</button>}</div>)}{editable&&<button onClick={()=>patch("sources",[...content.sources,{title:"",url:""}])}>افزودن منبع</button>}</fieldset>
-            <fieldset><legend>اطلاعات سئو</legend><div className="article-fields">{field("seo_title","عنوان نتیجه جستجو")}{field("target_keyword","عبارت هدف")}</div>{field("seo_description","توضیح نتیجه جستجو",true)}</fieldset>
+            <SeoPreview title={content.seo_title || content.title} description={content.seo_description || content.summary} path={`/articles/${content.slug}/`} /><fieldset><legend>اطلاعات سئو</legend><div className="article-fields">{field("seo_title","عنوان نتیجه جستجو")}{field("target_keyword","عبارت هدف")}</div>{field("seo_description","توضیح نتیجه جستجو",true)}</fieldset>
+            {editable&&<EditorialSeoAssistant token={token} kind="article" title={content.title} description={content.seo_description||content.summary} keyword={content.target_keyword} html={content.body_html} contextKey={serialized} disabled={busy} autosave={auto} onBusy={setAiBusy} onApply={suggestion=>setContent(previous=>({...previous,seo_title:suggestion.seo_title,seo_description:suggestion.seo_description,target_keyword:suggestion.target_keyword}))}/>}
             <div className="article-actions">
                 {editable&&<><button disabled={busy} onClick={()=>void save().catch(()=>{})}>{busy?"در حال ذخیره…":"ذخیره پیش‌نویس"}</button><label className="inline-choice"><input type="checkbox" checked={auto} onChange={e=>setAuto(e.target.checked)}/>ذخیره خودکار</label></>}
                 <button onClick={()=>setPreview(!preview)}>{preview?"بستن پیش‌نمایش":"پیش‌نمایش امن"}</button>

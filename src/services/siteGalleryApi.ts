@@ -2,7 +2,7 @@ import useConnectionRecovery from "@/hooks/useConnectionRecovery";
 import { useEffect, useState } from "react";
 import { apiRequest } from "./appointmentApi";
 
-export type GalleryImage = { id: number; src: string; alt: string; sort_order: number };
+export type GalleryImage = { id: number; src: string; alt: string; sort_order: number; width?: number; height?: number };
 
 export type GalleryContent = {
     kind: "static" | "media";

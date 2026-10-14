@@ -37,6 +37,8 @@ def _media(db, settings, actor, asset, alt):
         image.thumbnail((1600, 1600))
         image.save(target, "WEBP", quality=85)
         db.add(PublicMedia(key=key, owner_id=actor.id, alt=alt, width=image.width, height=image.height, size=target.stat().st_size))
+        # Autoflush is disabled; a later cover may reuse this same verified asset.
+        db.flush()
     return key
 
 

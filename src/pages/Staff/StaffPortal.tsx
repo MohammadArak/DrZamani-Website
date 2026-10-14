@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import Seo from "@/components/SEO";
+import Drawer from "@/components/Drawer";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import useConsultationRealtime from "@/hooks/useConsultationRealtime";
 import {
@@ -99,6 +100,12 @@ export const StaffDashboard = ({
     };
     const navigateTab=async(next:StaffTab)=>{if(next===tab||await leaveArticle())setTab(next);};
     const [mobileMenu, setMobileMenu] = useState(false);
+    useEffect(()=>{
+        const desktop=window.matchMedia("(min-width:1024px)");
+        const close=()=>{if(desktop.matches)setMobileMenu(false);};
+        desktop.addEventListener("change",close);
+        return()=>desktop.removeEventListener("change",close);
+    },[]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [stats, setStats] = useState<DashboardStats>({
@@ -416,28 +423,25 @@ export const StaffDashboard = ({
     return (
         <main
             dir="rtl"
-            className="staff-shell min-h-screen w-full max-w-full overflow-x-clip bg-[#f3f5f8] text-slate-800"
+            className="staff-shell min-h-0 w-full max-w-full bg-[#f3f5f8] text-slate-800"
+            style={{flex:"1 1 0",display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}
         >
             {contentConfirmation}
-            <aside className="fixed inset-y-0 right-0 hidden w-62 flex-col bg-[#18344f] shadow-2xl shadow-slate-900/10 lg:flex">
+            <aside className="absolute inset-y-0 right-0 hidden w-62 flex-col bg-[#18344f] shadow-2xl shadow-slate-900/10 lg:flex">
                 {sidebar}
             </aside>
-            {mobileMenu && (
-                <div className="fixed inset-0 z-50 lg:hidden">
-                    <button
-                        aria-label="بستن منو"
-                        onClick={() => setMobileMenu(false)}
-                        className="absolute inset-0 bg-black/40"
-                    />
-                    <aside className="relative flex h-full w-72 flex-col bg-[#18344f]">
-                        {sidebar}
-                    </aside>
-                </div>
-            )}
-            <div className="min-w-0 overflow-x-clip lg:mr-62">
-                <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/88 px-4 backdrop-blur-xl md:px-7">
+            <Drawer isOpen={mobileMenu} width={288} title="منوی پنل" contentLabel="منوی پنل مدیریت"
+                ariaHideApp appElement={document.getElementById("root")??undefined}
+                bodyClass="flex min-h-0 flex-col p-0 bg-primary" headerClass="bg-primary text-white"
+                onClose={()=>setMobileMenu(false)} onRequestClose={()=>setMobileMenu(false)}>
+                <aside className="flex h-full min-h-0 flex-col bg-[#18344f]">{sidebar}</aside>
+            </Drawer>
+            <div className="min-w-0 min-h-0 flex-1 flex flex-col lg:mr-62">
+                <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/88 px-4 backdrop-blur-xl md:px-7">
                     <button
                         aria-label="نمایش منوی پنل"
+                        aria-expanded={mobileMenu}
+                        aria-haspopup="dialog"
                         onClick={() => setMobileMenu(true)}
                         className="text-2xl text-primary lg:hidden"
                     >
@@ -454,7 +458,7 @@ export const StaffDashboard = ({
                         مشاهده پنل بیمار
                     </a>
                 </header>
-                <div className={`min-w-0 ${tab === "consultations" ? "" : "p-4 md:p-7"}`}>
+                <div className={`min-w-0 min-h-0 flex-1 ${tab === "consultations" ? "overflow-hidden" : "overflow-y-auto p-4 md:p-7"}`}>
                     {error && (
                         <div className="mb-5 rounded-xl bg-rose-50 p-4 text-sm text-rose-700">
                             {error}

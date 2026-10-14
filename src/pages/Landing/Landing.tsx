@@ -1,3 +1,4 @@
+import useDeferredImages from "./useDeferredImages";
 import HeroContent from "./components/HeroContent";
 import NavigationBar from "./components/NavigationBar";
 
@@ -24,6 +25,7 @@ const SectionFallback = ({ id, minHeight = "760px" }: { id?: string; minHeight?:
 const Landing = () => {
 
     const { clinicInfo } = useClinicInfo();
+    useDeferredImages();
 
 
 

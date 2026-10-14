@@ -1,11 +1,12 @@
 import { safeContentHtml,type Media } from "@/services/contentApi";
 import Image from "@tiptap/extension-image";
 import { TableKit } from "@tiptap/extension-table";
-import { EditorContent,useEditor } from "@tiptap/react";
+import { EditorContent,useEditor,Mark } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect,useState } from "react";
 import MediaPicker from "./MediaPicker";
 
+const ReferenceSup=Mark.create({name:"referenceSup",parseHTML:()=>[{tag:"sup"}],renderHTML:()=>["sup",0]});
 const LibraryImage=Image.extend({addNodeView(){return ({node})=>{
     const img=document.createElement("img");
     const update=(attrs:Record<string,unknown>)=>{const src=String(attrs.src??"");const key=src.match(/^\/media\/([a-f0-9]{32})\.webp$/)?.[1];img.src=key?`/api/v1/staff/media/${key}/file`:"";img.alt=String(attrs.alt??"");};
@@ -15,7 +16,7 @@ const LibraryImage=Image.extend({addNodeView(){return ({node})=>{
 export default function ArticleEditor({html,onChange,token,editable,canUseMedia}:{html:string;onChange:(value:string)=>void;token:string;editable:boolean;canUseMedia:boolean}){
     const [source,setSource]=useState(false);const [link,setLink]=useState("");const [selected,setSelected]=useState<Media|null>(null);
     const [linkError,setLinkError]=useState("");
-    const editor=useEditor({extensions:[StarterKit.configure({heading:{levels:[2,3,4]},link:{openOnClick:false,autolink:false,protocols:["https"]}}),LibraryImage.configure({allowBase64:false}),TableKit],content:safeContentHtml(html),editable,
+    const editor=useEditor({extensions:[StarterKit.configure({heading:{levels:[2,3,4]},link:{openOnClick:false,autolink:false,protocols:["https"]}}),LibraryImage.configure({allowBase64:false}),TableKit,ReferenceSup],content:safeContentHtml(html),editable,
         editorProps:{attributes:{dir:"rtl",lang:"fa","aria-label":"متن مقاله","role":"textbox","aria-multiline":"true"},transformPastedHTML:value=>safeContentHtml(value)},
         onUpdate:({editor:active})=>{if(editable)onChange(active.getHTML());}});
     useEffect(()=>{if(editor&&editor.getHTML()!==html&&!source)editor.commands.setContent(safeContentHtml(html),{emitUpdate:false});},[html,editor,source]);

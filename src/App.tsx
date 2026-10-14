@@ -32,9 +32,11 @@ function App() {
             <Suspense
                 fallback={<Loading loading={true} className="w-full h-screen" />}
             >
-                <Page />
+                {Page === Appointment || Page === Staff ? <div style={{minHeight:"100dvh",height:Page===Staff?"100dvh":undefined,display:"flex",flexDirection:"column"}}>
+                    <Page />
+                    <footer className="raviel-credit-footer" style={{flexShrink:0}}><RavielCredit /></footer>
+                </div> : <Page />}
             </Suspense>
-            {(Page === Appointment || Page === Staff) && <footer className="raviel-credit-footer"><RavielCredit /></footer>}
             <ConnectionStatus />
         </ClinicInfoProvider>
     );

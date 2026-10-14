@@ -306,7 +306,7 @@ def services_page(clinic, services: list[dict], service: dict, tel: str) -> str:
         f'<aside class="svc2-photo"><img {hero_attrs} alt="" width="1920" height="1281" fetchpriority="high">'
         f'<div class="svc2-photo-in">{crumb}<div class="svc2-ring"><img src="/img/services/{esc(service["image"])}" alt="" width="52" height="52"></div>'
         f'<h1>{esc(name)}</h1><p>{esc(service["summary"])}</p>'
-        f'<div class="svc2-glass"><span>برای هماهنگی با مطب</span><a href="tel:{esc(tel)}">تماس</a></div></div></aside>'
+        f'<div class="svc2-glass"><span>برای هماهنگی با مطب</span><a href="tel:{esc(tel)}">تماس</a><a data-reservation href="/appointment/">رزرو نوبت</a></div></div></aside>'
     )
     others = [item for item in services if item["slug"] != service["slug"]]
     text = (

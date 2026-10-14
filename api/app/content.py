@@ -14,7 +14,7 @@ from .models import StaffUser, utcnow
 from .activity import record_audit
 
 MEDIA_RE = re.compile(r"^/media/([a-f0-9]{32})\.webp$")
-TAGS = frozenset("p br h1 h2 h3 h4 ul ol li strong b em i u s blockquote pre code hr table thead tbody tr th td a img figure figcaption".split())
+TAGS = frozenset("p br sup h1 h2 h3 h4 ul ol li strong b em i u s blockquote pre code hr table thead tbody tr th td a img figure figcaption".split())
 
 
 def safe_url(value, external_only=False):

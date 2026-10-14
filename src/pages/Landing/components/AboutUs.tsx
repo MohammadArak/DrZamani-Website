@@ -1,7 +1,7 @@
 import { motion } from "@/components/Motion";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 import { FaUsers } from "react-icons/fa6";
-import GlassCard from "./GlassCard";
+import AnimatedStats, { AnimatedStat } from "./AnimatedStats";
 import { BiSolidCheckShield } from "react-icons/bi";
 import { useSiteServices } from "@/services/siteServicesApi";
 import { fillText, useSiteContent } from "@/services/siteContentApi";
@@ -149,11 +149,11 @@ const AboutUs = () => {
                                 loading="lazy"
                                 decoding="async"
                             />
-                            <div className="relative hidden md:block">
+                            <div className="relative mt-5 md:mt-0">
                                 <div className="absolute inset-0 -z-10 rounded-full opacity-90 [background:radial-gradient(closest-side,var(--lightcyan),transparent)] scale-125" />
-                                <div className="absolute -left-8 -bottom-8 md:left-4 md:bottom-4 lg:left-2 lg:bottom-6 z-30">
+                                <div className="md:absolute md:left-4 md:bottom-4 lg:left-2 lg:bottom-6 z-30">
                                     {content.about.facts.length > 0 && (
-                                        <GlassCard className="p-5 clinic-stats">
+                                        <AnimatedStats>
                                             <div className="flex flex-col gap-4">
                                                 {content.about.facts.map((fact, index) => {
                                                     const Icon = index % 2 === 0 ? FaUsers : BiSolidCheckShield;
@@ -166,7 +166,7 @@ const AboutUs = () => {
                                                                 </div>
                                                                 <div>
                                                                     <h3 className="text-lg lg:text-xl font-bold text-gray-100">
-                                                                        {fact.value}
+                                                                        <AnimatedStat value={fact.value} />
                                                                     </h3>
                                                                     <p className="text-sm text-gray-100">
                                                                         {fillText(fact.label, clinicInfo)}
@@ -177,7 +177,7 @@ const AboutUs = () => {
                                                     );
                                                 })}
                                             </div>
-                                        </GlassCard>
+                                        </AnimatedStats>
                                     )}
                                 </div>
                             </div>

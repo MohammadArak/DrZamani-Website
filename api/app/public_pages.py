@@ -65,6 +65,7 @@ def render(clinic, page, db=None, editorial=None):
     esc = html.escape
     site = clinic.site_url.rstrip("/")
     name = clinic.doctor_name
+    site_label = clinic.seo_site_name or f"وبسایت {name}"
     title = clinic.seo_title or f"وبسایت رسمی {name}"
     description = clinic.seo_description or f"وب‌سایت رسمی {name}، {clinic.specialty} در {clinic.address_city}؛ معرفی خدمات و راه‌های ارتباطی."
     image = clinic.seo_image_url or f"{site}/og-cover.jpg"
@@ -82,16 +83,16 @@ def render(clinic, page, db=None, editorial=None):
         old_suffix = f" | {name}"
         if title.endswith(old_suffix):
             title = title[:-len(old_suffix)]
-        suffix = f" | وبسایت {name}"
+        suffix = f" | {site_label}"
         if not title.endswith(suffix):
             title += suffix
     canonical = site + path
-    meta = f'<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-rh="true">{esc(title)}</title><link data-rh="true" rel="canonical" href="{esc(canonical)}">'
+    meta = f'<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content"><title data-rh="true">{esc(title)}</title><link data-rh="true" rel="canonical" href="{esc(canonical)}">'
     for attribute, key, value in [
         ("name", "description", description), ("name", "robots", robots),
         ("property", "og:title", title), ("property", "og:description", description),
         ("property", "og:url", canonical), ("property", "og:image", image),
-        ("property", "og:type", "article" if editorial and editorial.get("article") else "website"), ("property", "og:site_name", name),
+        ("property", "og:type", "article" if editorial and editorial.get("article") else "website"), ("property", "og:site_name", site_label),
         ("name", "twitter:card", "summary_large_image"), ("name", "twitter:title", title),
         ("name", "twitter:description", description), ("name", "twitter:image", image),
     ]:
@@ -110,6 +111,8 @@ def render(clinic, page, db=None, editorial=None):
         schema["openingHoursSpecification"] = [{"@type":"OpeningHoursSpecification", "dayOfWeek":slot["day_of_week"], "opens":slot["opens"], "closes":slot["closes"]} for slot in business_hours]
     if clinic.medical_council_number:
         schema["identifier"] = clinic.medical_council_number
+    website = {"@context":"https://schema.org","@type":"WebSite","name":site_label,"url":site+"/","inLanguage":"fa-IR"}
+    meta += f'<script data-rh="true" type="application/ld+json">{safe_json(website)}</script>'
     payload = public_clinic(clinic, db).model_dump()
     meta += f'<script data-rh="true" type="application/ld+json">{safe_json(schema)}</script><script id="clinic-bootstrap" type="application/json">{safe_json(payload)}</script>'
     if editorial:

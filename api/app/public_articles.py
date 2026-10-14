@@ -24,13 +24,13 @@ def list_html(db,q='',category='',page=1,tag=''):
     if category and category not in categories:raise HTTPException(404,'دسته پیدا نشد')
     if tag and tag not in {v for r in rows for v in json.loads(r.published_json)['tags']}:raise HTTPException(404,'برچسب پیدا نشد')
     if page>1 and (page-1)*12>=len(items):raise HTTPException(404,'صفحه پیدا نشد')
-    title='مقالات'+(' '+(category or tag) if category or tag else '')+' | '+clinic.doctor_name
+    title=(clinic.seo_articles_title or 'مقالات')+(' '+(category or tag) if category or tag else '')
     path='/articles/category/'+quote(category)+'/' if category else '/articles/tag/'+quote(tag)+'/' if tag else '/articles/'
     page_items=[dict(item['content'],published_at=item['published_at']) for item in items[(page-1)*12:page*12]]
     body=list_content(page_items,total=len(items),page=page,per_page=12,q=q,category=category,categories=categories)
     body=layout(db,clinic,body,q=q,index=True)
     if page>1:path+=f'?page={page}'
-    return render(clinic,'articles',db,editorial=dict(preload='/img/blog/article-header-surgeon.webp',title=title,description='مقالات آموزشی مطب با نویسنده، بازبین و منابع قابل بررسی.',path=path,body=body,robots='noindex, follow' if q or not items else 'index, follow',schemas=[]))
+    return render(clinic,'articles',db,editorial=dict(preload='/img/blog/article-header-surgeon.webp',title=title,description=clinic.seo_articles_description or 'مقالات آموزشی مطب با نویسنده، بازبین و منابع قابل بررسی.',path=path,body=body,robots='noindex, follow' if q or not items else 'index, follow',schemas=[]))
 
 
 @router.get('/articles')

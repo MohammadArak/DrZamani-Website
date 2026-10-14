@@ -48,6 +48,9 @@ export type ClinicSettings = {
     seo_title: string;
     seo_description: string;
     seo_image_url: string;
+    seo_site_name?: string;
+    seo_articles_title?: string;
+    seo_articles_description?: string;
     doctor_name: string;
     specialty: string;
     medical_council_number: string;

@@ -1,6 +1,6 @@
 
 export default function BookingClosed({ message }: { message: string }) {
-    return <main className="booking-closed" dir="rtl" lang="fa">
+    return <main className="booking-closed" style={{minHeight:0,flex:1}} dir="rtl" lang="fa">
         <div className="booking-closed__card" role="status">
             <div className="booking-closed__symbol" aria-hidden="true">
                 <span className="booking-closed__halo" />

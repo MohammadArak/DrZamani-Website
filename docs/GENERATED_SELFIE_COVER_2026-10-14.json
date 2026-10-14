@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-14",
+  "tool": "built-in image_gen",
+  "article": "selfie-nose-distortion",
+  "asset": "/img/blog/articles/selfie-perspective-20261014.webp",
+  "sha256": "af788292bc3f787f3c3eeca99a3da7bce29dc8e7641787fff00db48aa54a2b6c",
+  "bytes": 84826,
+  "width": 1672,
+  "height": 941,
+  "generatedFictionalPerson": true,
+  "doctorPhotosChanged": false,
+  "articleTextAndSourcesChanged": false,
+  "prompt": "Use case: photorealistic-natural. Asset type: a distinct landscape editorial cover for the Persian medical article 'Why does my nose look bigger in a selfie?' on an established navy-blue and warm-gold ENT website. Create a tasteful, polished, realistic editorial photograph of one fictional adult Middle Eastern woman taking a selfie with a smartphone held close to her face. Show the smartphone prominently and its front camera relationship to the face; a subtle realistic reflection or phone screen shows the same person's natural face. Natural facial features and anatomy, no exaggerated or grotesque nose, no beauty surgery, no before-and-after comparison, no clinical promise. Calm soft lighting, refined navy blue surroundings and a few warm gold accents compatible with the website. A single coherent scene, useful central composition for both wide article cover and mobile thumbnail cropping, landscape about 16:9. Clear visual story of a close camera and perspective. No words, numbers, logos, watermark, doctor portrait, needles, masks, or operating room. This is an illustrative fictional scene, not an actual patient photograph.\n",
+  "encoding": "Existing authenticated public-media upload pipeline; original generated PNG retained outside repository"
+}
