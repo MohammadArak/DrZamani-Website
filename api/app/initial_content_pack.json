@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "verifiedOn": "2026-10-13",
   "provenance": [
     {
@@ -49,7 +49,7 @@
     }
   ],
   "publicationAuthorization": "Owner explicitly requested bundling the original public reviews as site defaults on 2026-10-12.",
-  "faqSourceNotes": "First three original answers match, with doctorName placeholder; fourth uses the existing current-site contact answer.",
+  "faqSourceNotes": "All four questions and answers exactly match original public source verified 2026-10-14.",
   "comments": [
     {
       "photo_path": "/img/comments/profile-1.jpg",
@@ -461,7 +461,7 @@
   "faq": [
     {
       "title": "آیا نتیجه جراحی بینی طبیعی خواهد بود؟",
-      "content": "هدف اصلی در جراحی‌های {doctorName}، ایجاد تناسب میان بینی و سایر اجزای صورت است. فرم نهایی بینی با توجه به ویژگی‌های چهره، نوع پوست و ساختار بینی هر فرد طراحی می‌شود تا علاوه بر زیبایی، ظاهری طبیعی و هماهنگ ایجاد شود."
+      "content": "هدف اصلی در جراحی‌های دکتر فرزاد زمانی، ایجاد تناسب میان بینی و سایر اجزای صورت است. فرم نهایی بینی با توجه به ویژگی‌های چهره، نوع پوست و ساختار بینی هر فرد طراحی می‌شود تا علاوه بر زیبایی، ظاهری طبیعی و هماهنگ ایجاد شود."
     },
     {
       "title": "آیا جراحی زیبایی بینی بر تنفس تأثیر می‌گذارد؟",
@@ -473,7 +473,7 @@
     },
     {
       "title": "چگونه می‌توان برای مشاوره یا تعیین وقت اقدام کرد؟",
-      "content": "برای دریافت مشاوره یا تعیین وقت، دکمه رزرو نوبت را انتخاب کنید یا با شماره‌های {officePhone} و {consultationPhone} تماس بگیرید."
+      "content": "برای دریافت مشاوره تخصصی یا رزرو نوبت، می‌توانید از طریق شماره‌های تماس، تلگرام یا فرم درخواست مشاوره موجود در سایت با کلینیک در ارتباط باشید."
     }
   ],
   "articleAssets": [
@@ -573,5 +573,6 @@
       "sha256": "a415cb77a5ea5a167f076e491ca1de2aacbccfcb048d87f4d1427a22db52c7e4",
       "bytes": 40256
     }
-  ]
+  ],
+  "faqVerifiedOn": "2026-10-14"
 }

@@ -249,7 +249,7 @@
 .footer-social,.legacy-social{background-size:220%;animation:credit-flow 5s ease-in-out infinite}
 .footer-contact:hover,.footer-contact:focus-visible{color:#d5ab64}
 .footer-nav-link{padding:6px 4px;font-weight:400}
-.reservation-dialog .dialog-content{animation:reserve-pop .14s ease-out}.reservation-overlay{transition:opacity .12s ease-out;backdrop-filter:none;z-index:100}
+.reservation-dialog .dialog-content{animation:reserve-pop .14s ease-out}.reservation-dialog .close-button{background:#f1f5f9;color:#475569}.reservation-overlay{transition:opacity .12s ease-out;backdrop-filter:none;z-index:100}
 @keyframes reserve-pop{from{opacity:.5;transform:scale(.97)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.reservation-dialog .dialog-content{animation:none}.reservation-overlay{transition:none}}
 @media(prefers-reduced-motion:reduce){.footer-social,.legacy-social{animation:none}}
@@ -258,5 +258,5 @@
 
 /* Animate the visible card itself; the absolute wrapper has no observer area. */
 .clinic-stats{animation:clinic-stats-float 5.5s ease-in-out infinite}
-@keyframes clinic-stats-float{0%,100%{transform:translateY(0) rotate(-.3deg)}50%{transform:translateY(-10px) rotate(.3deg)}}
+@keyframes clinic-stats-float{50%{transform:translateY(-10px)}}
 @media(prefers-reduced-motion:reduce){.clinic-stats{animation:none}}

@@ -37,6 +37,11 @@ def test_builtin_pages_are_seeded_and_public(client):
     assert "description_html" not in items["items"][0] and items["items"][0]["tile_label"]
     page = client.get("/services/rhinoplasty/").text
     assert "رینوپلاستی" in page and "legacy-service-body" in page
+    for slug in ["rhinoplasty", "blepharoplasty", "face-lift", "mentoplasty"]:
+        rendered = client.get(f"/services/{slug}/").text
+        assert "منابع پزشکی" in rendered and "پرسش‌هایی برای جلسه مشاوره" in rendered
+        assert rendered.count("https://www.plasticsurgery.org/cosmetic-procedures/") >= 4
+        assert "عوارض" in rendered
     sitemap = client.get("/sitemap.xml").text
     assert "/services/face-lift/" in sitemap
 

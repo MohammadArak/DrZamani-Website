@@ -26,7 +26,8 @@ SEED_TEXT = {
     "face-lift": ("ایجاد ظاهری جوان‌تر با حفظ حالت طبیعی چهره", "(جراحی جوانسازی)"),
     "mentoplasty": ("اصلاح فرم چانه و ایجاد تناسب بهتر در چهره", "(جراحی فک)"),
 }
-SEED_DATE = datetime(2026, 10, 2)
+PATIENT_CONTENT = json.loads(Path(__file__).with_name("service_patient_content.json").read_text(encoding="utf-8"))
+SEED_DATE = datetime(2026, 10, 14)
 # The homepage grid is designed for four cards; each service page lists every published service under "other services".
 HOME_LIMIT = 4
 
@@ -163,7 +164,7 @@ def seed(db: Session) -> None:
         summary, tile = SEED_TEXT.get(item["slug"], (item["summary"], ""))
         data = ServiceContent(
             slug=item["slug"], title=item["title"], summary=summary, tile_label=tile, image=item["image"],
-            description_html=f"<p>{item['description']}</p>", seo_description=item["description"], sort_order=order,
+            description_html=c.sanitize(PATIENT_CONTENT[item["slug"]]["description_html"]), seo_description=PATIENT_CONTENT[item["slug"]]["seo_description"], sort_order=order,
         ).model_dump()
         snapshot = json.dumps(data, ensure_ascii=False)
         db.add(SiteService(
