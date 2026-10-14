@@ -1,5 +1,6 @@
 """Editable homepage wording: seeding, draft/publish isolation, validation and permissions."""
 import json
+from pathlib import Path
 
 from test_content import client, isolated  # noqa: F401
 from test_roles import account, headers, owner
@@ -11,10 +12,14 @@ def blocks(client, access):
     return {item["key"]: item for item in client.get(BASE, headers=access).json()["items"]}
 
 
-def test_blocks_are_seeded_with_the_previous_wording(client):
+def test_blocks_are_seeded_with_the_original_faq_wording(client):
     public = client.get("/api/v1/site-content").json()["blocks"]
     assert set(public) == {"hero", "about", "faq", "footer"}
     assert len(public["faq"]["items"]) == 4 and len(public["about"]["paragraphs"]) == 3
+    verified = json.loads((Path(__file__).resolve().parents[2] / "docs/PUBLIC_FAQ_SOURCE_2026-10-14.json").read_text(encoding="utf-8"))
+    assert public["faq"]["items"] == verified["faq"]
+    from app.initial_content import PACK
+    assert PACK["faq"] == verified["faq"]
     assert "{doctorName}" in public["hero"]["description"]
     assert len(public["about"]["facts"]) == 2
     home = client.get("/").text

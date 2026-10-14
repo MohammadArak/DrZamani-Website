@@ -10,6 +10,7 @@ from app import config
 from app.database import SessionLocal
 from app.main import app
 from app.models import ClinicSetting
+from app.site_services import PATIENT_CONTENT
 from app.site_services import SEED_CATALOG as SERVICES
 from test_roles import schema  # noqa: F401
 
@@ -31,7 +32,7 @@ def test_all_services_have_initial_html_canonical_and_breadcrumb(service_client)
         assert response.status_code == 200
         assert response.headers['cache-control'] == 'no-store'
         assert service['title'] in response.text
-        assert service['description'] in response.text
+        assert PATIENT_CONTENT[service['slug']]['description_html'] in response.text
         assert f'/services/{service["slug"]}/' in response.text
         # The module script only mounts the shared header/footer into the islands; the page body stays server HTML.
         assert 'data-shell="island"' in response.text and 'id="site-header"' in response.text and 'id="site-footer"' in response.text
