@@ -142,7 +142,7 @@ const AboutUs = () => {
                         >
                             <img
                                 className="z-10"
-                                    src="/img/about-us/dr-zamani-op-clean.webp"
+                                    src="/img/about-us/dr-zamani-op-smooth.webp"
                                 alt={`اتاق عمل ${clinicInfo.doctorName}`}
                                 width={1216}
                                 height={919}

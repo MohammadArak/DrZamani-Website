@@ -242,6 +242,7 @@ def detail_content(data: dict, *, published_at, updated_at, body_html: str, toc_
     )
     cats = "".join(f'<a href="/articles/category/{quote(name)}/">{esc(name)}</a>' for name in data.get("categories", []))
     tags = "".join(f'<a href="/articles/tag/{quote(name)}/">{esc(name)}</a>' for name in data.get("tags", []))
+    reviewer_label = f' · بازبین پزشکی: {esc(data["reviewer"])}' if data.get("reviewer") else ""
     cover_html = ""
     if data.get("cover_key"):
         cover_html = f'<img class="article-cover rv" style="--i:1" src="/media/{esc(data["cover_key"])}.webp" srcset="{cover_srcset(data["cover_key"], (640, 960, 1280))}" sizes="(min-width:1000px) 830px, 100vw" alt="{esc(data.get("cover_alt", ""))}" width="960" height="600">'
@@ -250,7 +251,7 @@ def detail_content(data: dict, *, published_at, updated_at, body_html: str, toc_
         f'<span class="legacy-pill">{esc(category)}</span><span class="legacy-meta-item">{icon("calendar")}انتشار: <time datetime="{published_at.isoformat()}">{esc(fa_date(published_at))}</time></span>'
         f'<span class="legacy-meta-item">{icon("clock")}زمان مطالعه {esc(fa_digits(reading_minutes(body_html)))} دقیقه</span></div>'
         f'<h1>{esc(data["title"])}</h1><p class="legacy-article-summary">{esc(data["summary"])}</p>'
-        f'<p class="legacy-byline">نویسنده: {esc(data["author_name"])} · بازبین پزشکی: {esc(data["reviewer"])} · به‌روزرسانی: <time datetime="{updated_at.isoformat()}">{esc(fa_date(updated_at))}</time></p></header>'
+        f'<p class="legacy-byline">نویسنده: {esc(data["author_name"])}{reviewer_label} · به‌روزرسانی: <time datetime="{updated_at.isoformat()}">{esc(fa_date(updated_at))}</time></p></header>'
         f'{cover_html}{toc_html.replace("class=\"legacy-article-outline\"", "class=\"legacy-article-outline rv\" style=\"--i:1\"", 1)}<div class="article-body rv" style="--i:2">{body_html}</div>'
         f'<footer class="rv"><h2>منابع</h2><ul class="legacy-sources">{sources}</ul>'
         '<p class="legacy-disclaimer">این مطلب برای آموزش است و جایگزین مشاوره و معاینه پزشکی نیست.</p>'

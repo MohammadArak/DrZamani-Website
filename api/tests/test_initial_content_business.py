@@ -39,14 +39,14 @@ def test_fresh_install_is_public_but_creates_no_login(client, isolated):
     comments = client.get("/api/v1/comments").json()
     assert comments["total"] == 3
     assert {row["display_name"] for row in comments["items"]} == {row["display_name"] for row in PACK["comments"]}
-    assert client.get("/api/v1/articles").json()["total"] == 6
+    assert client.get("/api/v1/articles").json()["total"] == 12
     with SessionLocal() as db:
         actor = db.scalar(select(StaffUser).where(StaffUser.username == "__default_public_content__"))
         assert actor.is_active is False and actor.password_hash == "!"
         assert db.get(ContentSeedState, KEY)
         faq = json.loads(db.get(SiteBlock, "faq").published_json)
         assert len(next(value for value in faq.values() if isinstance(value, list))) == 4
-        assert len(db.scalars(select(PublicMedia)).all()) == 4
+        assert len(db.scalars(select(PublicMedia)).all()) == 15
 
 
 def test_seed_never_recreates_deleted_content_or_revives_media(client, isolated):

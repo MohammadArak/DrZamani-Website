@@ -15,7 +15,8 @@ from .models import StaffUser, utcnow
 
 PACK = json.loads(Path(__file__).with_name("initial_content_pack.json").read_text(encoding="utf-8"))
 KEY = "approved-public-content-v1"
-ASSETS = {"/img/comments/profile-1.jpg", "/img/comments/profile-2.jpg", "/img/comments/profile-3.jpg", "/img/blog/article-header-surgeon.webp"}
+ARTICLE_ASSETS = {item["slug"]: item for item in PACK["articleAssets"]}
+ASSETS = {"/img/comments/profile-1.jpg", "/img/comments/profile-2.jpg", "/img/comments/profile-3.jpg"} | {item["path"] for item in ARTICLE_ASSETS.values()}
 
 
 def _media(db, settings, actor, asset, alt):
@@ -70,8 +71,8 @@ def seed(db, settings):
                 db.add(Comment(actor_id=actor.id, content_json=snapshot, published_json=snapshot, published_at=now, public_updated_at=now))
                 counts["comments"] += 1
         if articles_empty:
-            cover = _media(db, settings, actor, "/img/blog/article-header-surgeon.webp", "تصویر نمونهٔ مقاله")
             for item in PACK["articles"]:
+                cover = _media(db, settings, actor, ARTICLE_ASSETS[item["slug"]]["path"], item["cover_alt"])
                 data = ArticleContent.model_validate({**item, "cover_key": cover}).model_dump()
                 data["body_html"] = sanitize(data["body_html"])
                 snapshot = json.dumps(data, ensure_ascii=False)

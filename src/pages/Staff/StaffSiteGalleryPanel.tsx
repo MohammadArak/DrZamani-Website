@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { emptyGalleryItem, siteGalleryApi, type GalleryContent, type GalleryRow } from "@/services/siteGalleryApi";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { contentApi } from "@/services/contentApi";
 import MediaPicker from "./MediaPicker";
 import { useStaffAccess } from "./staffAccess";
 import { useContentConfirm } from "./useContentConfirm";
@@ -36,7 +37,7 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
     useEffect(() => { onBusyChange(busy); }, [busy, onBusyChange]);
     useEffect(() => () => { request.current++; onDirtyChange(false); onBusyChange(false); }, [onDirtyChange, onBusyChange]);
 
-    const open = (row: GalleryRow | null) => { setSelected(row); setContent(row ? row.content : emptyGalleryItem()); setNotice(""); };
+    const open = async (row: GalleryRow | null) => { if (busy || (dirty && !await ask("تغییرات ذخیره‌نشده کنار گذاشته شود؟"))) return; setSelected(row); setContent(row ? row.content : emptyGalleryItem()); setNotice(""); };
     const run = async (task: () => Promise<GalleryRow | null>, done: string) => {
         if (busy) return;
         setBusy(true);
@@ -52,7 +53,17 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
             setBusy(false);
         }
     };
-    const editable = can("site_gallery.edit") && !busy;
+    const editable = can(selected ? "site_gallery.edit" : "site_gallery.create") && !busy;
+    const upload = async (file: File) => {
+        if (!content || !editable || selected?.published || !can("media.manage")) return;
+        if (content.alt.trim().length < 2) { setError("ابتدا توضیح تصویر را وارد کنید."); return; }
+        setBusy(true); setError("");
+        try {
+            const media = await contentApi.upload(token, file, content.alt);
+            setContent(old => old && ({...old, kind:"media", ref:media.key, consent_received:false, privacy_reviewed:false, consent_reference:""}));
+            setNotice("عکس بارگذاری شد؛ پیش‌نویس را ذخیره و سپس منتشر کنید.");
+        } catch (e) { setError(failure(e)); } finally { setBusy(false); }
+    };
     const patch = <K extends keyof GalleryContent>(key: K, value: GalleryContent[K]) =>
         setContent((old) => old && ({ ...old, [key]: value, ...(key === "ref" || key === "alt" ? { consent_received: false, privacy_reviewed: false } : {}) }));
     const preview = (item: GalleryContent) => (item.kind === "static" ? item.ref : item.ref && can("media.manage") ? `/api/v1/staff/media/${item.ref}/file` : "");
@@ -65,15 +76,15 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
                     <h1>نمونه‌کارها</h1>
                     <p>هر تصویر پیش‌نویس جدا دارد. تصویر تازه فقط با ثبت رضایت مراجع و بازبینی حریم خصوصی منتشر می‌شود.</p>
                 </div>
-                {can("site_gallery.create") && <button className="content-primary" disabled={busy} onClick={() => open(null)}>+ تصویر تازه</button>}
+                {can("site_gallery.create") && <button className="content-primary" disabled={busy} onClick={() => void open(null)}>+ تصویر تازه</button>}
             </header>
             {error && <p role="alert" className="content-error">{error}<button onClick={() => void load()}>خواندن دوباره</button></p>}
             {notice && <p role="status" className="content-notice">{notice}</p>}
             <ul className="source-list" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(120px,1fr))", gap: 12, listStyle: "none", padding: 0 }}>
                 {rows.map((row) => (
                     <li key={row.id}>
-                        <button type="button" onClick={() => open(row)} aria-pressed={selected?.id === row.id} style={{ width: "100%", textAlign: "center" }}>
-                            {preview(row.content) ? <img src={preview(row.content)} alt={row.content.alt} loading="lazy" style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 8 }} /> : <span>بدون پیش‌نمایش</span>}
+                        <button type="button" disabled={busy} onClick={() => void open(row)} aria-pressed={selected?.id === row.id} style={{ width: "100%", textAlign: "center" }}>
+                            {preview(row.content) ? <img src={preview(row.content)} alt={row.content.alt} loading="lazy" style={{ width: "100%", height: 100, objectFit: "contain", borderRadius: 8 }} /> : <span>بدون پیش‌نمایش</span>}
                             <small style={{ display: "block" }}>{row.published ? (row.unpublished_changes ? "منتشر + تغییر" : "منتشر") : "پیش‌نویس"} · ترتیب {row.content.sort_order}</small>
                         </button>
                     </li>
@@ -82,12 +93,15 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
             {content && (
                 <section className="article-compose" aria-label="ویرایش تصویر">
                     <h2>{selected ? "ویرایش تصویر" : "تصویر تازه"}</h2>
-                    {content.kind === "static" && <p>این تصویر از نسخه‌ی قدیمی سایت است ({content.ref}).</p>}
-                    {content.kind === "media" && can("media.manage") && !selected?.published && (
-                        <MediaPicker token={token} label="تصویر از رسانه عمومی" value={content.ref} disabled={!editable} onSelect={(m) => setContent((old) => old && ({ ...old, ref: m?.key ?? "", alt: old.alt || m?.alt || "", consent_received: false, privacy_reviewed: false }))} />
-                    )}
-                    {preview(content) && <img src={preview(content)} alt={content.alt} style={{ maxHeight: 200, borderRadius: 12 }} />}
                     <label>توضیح تصویر (متن جایگزین)<input maxLength={300} value={content.alt} readOnly={!editable} onChange={(e) => patch("alt", e.target.value)} /></label>
+                    {content.kind === "static" && <p>این تصویر از نسخه‌ی قدیمی سایت است ({content.ref}).</p>}
+                    {can("media.manage") && !selected?.published && (
+                        <MediaPicker token={token} label="تصویر از رسانه عمومی" value={content.kind === "media" ? content.ref : ""} disabled={!editable} onSelect={(m) => setContent((old) => old && ({ ...old, kind: "media", ref: m?.key ?? "", alt: old.alt || m?.alt || "", consent_received: false, privacy_reviewed: false }))} />
+                    )}
+                    {can("media.manage") && !selected?.published && <label>بارگذاری عکس تازه (JPEG، PNG یا WebP، حداکثر ۱۰ مگابایت)<input type="file" accept="image/jpeg,image/png,image/webp" disabled={!editable} onChange={e => { const file=e.target.files?.[0]; e.target.value=""; if (file) void upload(file); }} /></label>}
+                    {selected?.published && <p className="editor-help">برای جایگزینی عکس، ابتدا انتشار آن را متوقف کنید. ترتیب و توضیح تصویر را می‌توانید با ذخیره و انتشار نسخهٔ تازه تغییر دهید.</p>}
+                    {preview(content) && <img src={preview(content)} alt={content.alt} style={{ maxHeight: 200, borderRadius: 12 }} />}
+
                     <label>ترتیب نمایش<input type="number" min={0} max={10000} value={content.sort_order} readOnly={!editable} onChange={(e) => patch("sort_order", Number(e.target.value) || 0)} /></label>
                     {content.kind === "media" && (
                         <fieldset>
@@ -102,7 +116,7 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
                         {selected && can("site_gallery.publish") && <button disabled={busy || dirty || (selected.published && !selected.unpublished_changes)} onClick={async () => { if (await ask("این تصویر روی سایت منتشر شود؟")) await run(() => siteGalleryApi.transition(token, selected, "publish"), "منتشر شد."); }}>انتشار نسخه ذخیره‌شده</button>}
                         {selected?.published && can("site_gallery.publish") && <button disabled={busy} onClick={async () => { if (await ask("انتشار این تصویر متوقف شود؟")) await run(() => siteGalleryApi.transition(token, selected, "unpublish"), "انتشار متوقف شد."); }}>توقف انتشار</button>}
                         {selected && can("site_gallery.delete") && <button disabled={busy} onClick={async () => { if (await ask("این تصویر بایگانی شود؟")) await run(async () => { await siteGalleryApi.archive(token, selected); return null; }, "بایگانی شد."); }}>بایگانی</button>}
-                        <button type="button" disabled={busy} onClick={() => { setSelected(null); setContent(null); }}>بستن</button>
+                        <button type="button" disabled={busy} onClick={async () => { if (!dirty || await ask("تغییرات ذخیره‌نشده کنار گذاشته شود؟")) {setSelected(null);setContent(null);} }}>بستن</button>
                     </div>
                 </section>
             )}
