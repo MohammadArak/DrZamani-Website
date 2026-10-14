@@ -86,6 +86,10 @@ def test_detail_content_has_structure_and_escapes_text():
     assert "legacy-article-detail" in html_page and "<h2>تیتر</h2>" in html_page
     assert "&lt;i&gt;عنوان&lt;/i&gt;" in html_page and "<b>خطرناک</b>" not in html_page
     assert 'rel="noopener noreferrer"' in html_page and "این مطلب برای آموزش است" in html_page
+    assert "بازبین پزشکی: بازبین" in html_page
+    item["reviewer"] = ""
+    without_reviewer = chrome.detail_content(item, published_at=item["published_at"], updated_at=item["updated_at"], body_html="<p>متن</p>", toc_html="")
+    assert "بازبین پزشکی:" not in without_reviewer and "نویسنده:" in without_reviewer
     assert chrome.related_section([make_item("only")], "only") == ""
 
 
