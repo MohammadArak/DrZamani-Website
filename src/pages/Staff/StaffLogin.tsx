@@ -21,7 +21,7 @@ export default function StaffLogin({ onLogin }: { onLogin: (token: string, profi
         try {
             if (mfa) { complete(await appointmentApi.mfaLogin(mfa.challenge_id, code, method)); return; }
             const proof = await bot.current?.proof();
-            const result = await appointmentApi.staffLogin(username, password, captcha?.captcha_id ?? "", answer, proof);
+            const result = await appointmentApi.staffLogin(username, password, provider === "local" ? captcha?.captcha_id ?? "" : "", provider === "local" ? answer : "", proof);
             if ("mfa_required" in result) { setMfa(result); setPassword(""); setAnswer(""); return; }
             complete(result);
         } catch (failure) {
@@ -30,22 +30,22 @@ export default function StaffLogin({ onLogin }: { onLogin: (token: string, profi
             setCode("");
         } finally { setBusy(false); }
     };
-    return <main dir="rtl" className="flex min-h-screen items-center justify-center bg-primary px-4 py-10 text-slate-800"><div className="w-full min-w-0 max-w-md rounded-4xl bg-white p-6 shadow-2xl md:p-9">
-        <a href="/" className="mx-auto mb-7 block w-fit"><img src="/img/logo/logo-dark-full.webp" alt={clinicInfo.doctorName} width="560" height="175" className="w-52" /></a>
-        <span className="text-sm text-secondary-deep">ورود کارکنان مطب</span><h1 className="mt-2 font-dana text-3xl text-primary">{mfa ? "تأیید دومرحله‌ای" : "پنل مدیریت"}</h1>
-        <p className="mt-3 text-sm leading-7 text-slate-500">{mfa ? "رمز عبور تأیید شد. هنوز وارد پنل نشده‌اید؛ کد رمزساز یا یک کد بازیابی را وارد کنید." : "ورود کارکنان مجاز مطب"}</p>
+    return <main dir="rtl" className="flex flex-1 items-center justify-center bg-primary px-3 py-3 text-slate-800"><div className="w-full min-w-0 max-w-sm rounded-4xl bg-white p-4 shadow-2xl sm:p-6">
+        <a href="/" className="mx-auto mb-3 block w-fit"><img src="/img/logo/logo-dark-full.webp" alt={clinicInfo.doctorName} width="560" height="175" className="w-52" style={{filter:"contrast(1.15) brightness(.75)"}} /></a>
+        <h1 className="text-center font-dana text-2xl text-primary">{mfa ? "تأیید دومرحله‌ای" : "پنل مدیریت"}</h1>
+        {mfa && <p className="mt-3 text-sm leading-7 text-slate-500">رمز عبور تأیید شد. کد رمزساز یا یک کد بازیابی را وارد کنید.</p>}
         {error && <p role="alert" className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
-        <form onSubmit={submit} className="mt-7 space-y-4"><fieldset disabled={busy} className="min-w-0 space-y-4">
+        <form onSubmit={submit} className="mt-3"><fieldset disabled={busy} className="min-w-0 space-y-3">
             {mfa ? <>
                 <label className="block text-sm">روش تأیید<select className={field} value={method} onChange={event => { setMethod(event.target.value as "totp" | "recovery"); setCode(""); }}><option value="totp">برنامه رمزساز</option><option value="recovery">کد بازیابی یک‌بارمصرف</option></select></label>
                 <label className="block text-sm">{method === "totp" ? "کد ۶ رقمی برنامه" : "کد بازیابی"}<input className={field} dir="ltr" value={code} onChange={event => setCode(event.target.value)} autoComplete="one-time-code" inputMode={method === "totp" ? "numeric" : "text"} maxLength={80} required /></label>
             </> : <>
                 <label className="block text-sm">نام کاربری<input dir="ltr" className={field} autoComplete="username" value={username} onChange={event => setUsername(event.target.value)} required /></label>
                 <label className="block text-sm">رمز عبور<input type="password" dir="ltr" className={field} autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} required /></label>
-                {provider === "local" && <div><label className="block text-sm">کد امنیتی<input className={field} dir="ltr" value={answer} onChange={event => setAnswer(event.target.value)} inputMode="numeric" maxLength={8} required /></label><div className="mt-2 flex items-center justify-between gap-2">{captcha && <img src={captcha.image_data} alt="کد امنیتی" width="180" height="64" />}<button type="button" onClick={() => void loadCaptcha()} className="text-sm text-primary">تصویر تازه</button></div></div>}
+                {provider === "local" && <div className="flex items-end gap-3"><label className="block min-w-0 flex-1 text-sm">پاسخ تصویر<input className={field} dir="ltr" value={answer} onChange={event => setAnswer(event.target.value)} inputMode="numeric" autoComplete="off" maxLength={8} required /></label><div className="text-center">{captcha && <img src={captcha.image_data} alt="تأیید تصویری ورود" width="140" height="50" />}<button type="button" onClick={() => void loadCaptcha()} className="text-sm text-primary">تصویر تازه</button></div></div>}
                 <BotProtection ref={bot} operation="staff_login" onProviderChange={setProvider} />
             </>}
-            <button disabled={busy || (!mfa && !provider)} className="h-12 w-full rounded-xl bg-secondary font-bold text-primary disabled:opacity-50">{busy ? "در حال بررسی…" : mfa ? "تأیید و ورود" : "ورود به پنل"}</button>
+            <button disabled={busy || (!mfa && (!provider || (provider === "local" && !captcha)))} className="h-12 w-full rounded-xl bg-secondary font-bold text-primary disabled:opacity-50">{busy ? "در حال بررسی…" : mfa ? "تأیید و ورود" : "ورود به پنل"}</button>
             {mfa && <button type="button" onClick={() => { setMfa(null); setCode(""); setProvider(null); }} className="text-sm text-slate-500">بازگشت به ورود با رمز</button>}
         </fieldset></form>
     </div></main>;

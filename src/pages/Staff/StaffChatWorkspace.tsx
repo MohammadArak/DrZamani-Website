@@ -94,7 +94,7 @@ const StaffChatWorkspace = ({
     };
 
     return (
-        <section className="chat-workspace grid h-[calc(100vh-4rem)] min-h-[620px] overflow-hidden bg-[#f4f6f9] lg:grid-cols-[330px_minmax(0,1fr)_270px]">
+        <section className="chat-workspace grid grid-cols-1 h-full min-h-0 overflow-hidden bg-[#f4f6f9] lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_260px]">
             <Toast {...toast} onClose={() => setToast((value) => ({ ...value, message: "" }))} />
             <aside className={`${selectedId !== null ? "hidden lg:flex" : "flex"} min-h-0 flex-col border-l border-slate-200 bg-white`}>
                 <header className="border-b border-slate-100 p-5">
@@ -146,7 +146,7 @@ const StaffChatWorkspace = ({
                 </div>
             </aside>
 
-            <main className={`${selectedId === null ? "hidden lg:flex" : "flex"} min-h-0 flex-col bg-[#f5f7fa]`}>
+            <main className={`${selectedId === null ? "hidden lg:flex" : "flex"} min-w-0 min-h-0 flex-col bg-[#f5f7fa]`}>
                 {activeThread ? (
                     <>
                         <header className="flex h-18 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6">
@@ -154,7 +154,7 @@ const StaffChatWorkspace = ({
                                 <button type="button" onClick={() => setSelectedId(null)} className="rounded-xl p-2 text-primary lg:hidden" aria-label="بازگشت به گفتگوها"><IoArrowForwardOutline /></button>
                                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary/15 font-bold text-secondary-deep">{activeThread.patient_name.slice(0, 1)}</span>
                                 <div className="min-w-0">
-                                    <h3 className="truncate font-bold text-primary">{activeThread.patient_name}</h3>
+                                    <h3 className="truncate font-bold text-primary" style={{fontSize:"1rem",lineHeight:1.5}}>{activeThread.patient_name}</h3>
                                     <p className="mt-0.5 truncate text-xs text-slate-400">{activeThread.service_title}</p>
                                 </div>
                             </div>
@@ -206,7 +206,7 @@ const StaffChatWorkspace = ({
                 )}
             </main>
 
-            <aside className="hidden min-h-0 overflow-y-auto border-r border-slate-200 bg-white p-5 lg:block">
+            <aside className="hidden min-h-0 overflow-y-auto border-r border-slate-200 bg-white p-5 xl:block">
                 {activeThread ? (
                     <>
                         <div className="text-center">

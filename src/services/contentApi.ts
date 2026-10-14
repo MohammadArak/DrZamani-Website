@@ -12,7 +12,7 @@ export type MediaPage={items:Media[];total:number;page:number};
 export type ArticleHistory={id:number;revision:number;action:string;created_at:string};
 export const emptyArticle=():ArticleContent=>({title:"",slug:"",summary:"",body_html:"<p></p>",cover_key:null,cover_alt:"",categories:[],tags:[],author_name:"",reviewer:"",sources:[],seo_title:"",seo_description:"",target_keyword:""});
 export function safeContentHtml(value:string,preview=false){
-    const clean=DOMPurify.sanitize(value,{ALLOWED_TAGS:"p br h1 h2 h3 h4 ul ol li strong b em i u s blockquote pre code hr table thead tbody tr th td a img figure figcaption".split(" "),ALLOWED_ATTR:["href","src","alt","title","colspan","rowspan"]});
+    const clean=DOMPurify.sanitize(value,{ALLOWED_TAGS:"p br sup h1 h2 h3 h4 ul ol li strong b em i u s blockquote pre code hr table thead tbody tr th td a img figure figcaption".split(" "),ALLOWED_ATTR:["href","src","alt","title","colspan","rowspan"]});
     const doc=new DOMParser().parseFromString(clean,"text/html");
     doc.querySelectorAll("img").forEach(img=>{const m=img.getAttribute("src")?.match(/^\/media\/([a-f0-9]{32})\.webp$/);if(!m)img.remove();else if(preview)img.setAttribute("src",`/api/v1/staff/media/${m[1]}/file`);});
     doc.querySelectorAll("a").forEach(a=>{const href=a.getAttribute("href")??"";if(!/^(https:\/\/|\/(?!\/)|#)/.test(href))a.removeAttribute("href");a.setAttribute("rel","noopener noreferrer");});

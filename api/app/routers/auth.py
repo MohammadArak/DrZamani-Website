@@ -303,7 +303,9 @@ def staff_login(
         settings.staff_login_max_per_ip_window,
         settings.staff_login_lock_seconds,
     )
-    if bot.provider_for(settings, "staff_login") in {"google", "turnstile"}:
+    if bot.local_review_bypass(settings, request):
+        pass  # Password, rate limits, MFA, session and RBAC checks below still apply.
+    elif bot.provider_for(settings, "staff_login") in {"google", "turnstile"}:
         bot.verify(db, request, settings, "staff_login", payload.bot)
     else:
         db.execute(text("BEGIN IMMEDIATE"))

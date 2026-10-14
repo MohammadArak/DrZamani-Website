@@ -43,4 +43,19 @@ with TemporaryDirectory(prefix='drzamani-chat-') as directory:
         assert db.execute('SELECT body FROM consultation_messages ORDER BY id').fetchall()==[('preserved synthetic message',),('retry fixture',)]
         assert db.execute('PRAGMA integrity_check').fetchone()==('ok',)
         assert db.execute('PRAGMA foreign_key_check').fetchall()==[]
-print('PASS: populated chat/profile upgrade, indexed order/unread, nonce uniqueness, rollback/re-upgrade and integrity/FK.')
+    # The SEO migration may drop only its own fields on rollback; old clinic/chat data survives.
+    with closing(sqlite3.connect(database)) as db:
+        assert db.execute('SELECT seo_site_name,seo_articles_title,seo_articles_description FROM clinic_settings WHERE id=1').fetchone()==('','','')
+        db.execute('UPDATE clinic_settings SET seo_site_name=?,seo_articles_title=?,seo_articles_description=? WHERE id=1',('Synthetic site','Synthetic articles','Synthetic description'))
+        db.commit()
+    migrate('downgrade','20261012_0025')
+    with closing(sqlite3.connect(database)) as db:
+        assert 'seo_site_name' not in {row[1] for row in db.execute('PRAGMA table_info(clinic_settings)')}
+        assert db.execute('SELECT postal_code FROM clinic_settings WHERE id=1').fetchone()==('1234567890',)
+        assert db.execute('SELECT COUNT(*) FROM consultation_messages').fetchone()==(2,)
+    migrate('upgrade','head')
+    with closing(sqlite3.connect(database)) as db:
+        assert db.execute('SELECT seo_site_name,seo_articles_title,seo_articles_description FROM clinic_settings WHERE id=1').fetchone()==('','','')
+        assert db.execute('PRAGMA integrity_check').fetchone()==('ok',)
+        assert db.execute('PRAGMA foreign_key_check').fetchall()==[]
+print('PASS: populated chat/profile upgrade, indexed order/unread, nonce uniqueness, rollback/re-upgrade, SEO column isolation/defaults and integrity/FK.')

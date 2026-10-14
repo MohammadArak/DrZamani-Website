@@ -1,0 +1,215 @@
+{
+  "date": "2026-10-14",
+  "articles": [
+    {
+      "slug": "selfie-nose-distortion",
+      "title": "چرا بینی در سلفی بزرگ‌تر دیده می‌شود؟",
+      "words": 612,
+      "sources": [
+        {
+          "title": "Ward و همکاران، ۲۰۱۸؛ مدل ریاضی اثر سلفی بر نمایش بینی",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/29494735/"
+        },
+        {
+          "title": "Pressler و همکاران، ۲۰۲۲؛ مقایسه سلفی و عکس بالینی در ۳۰ داوطلب",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/35139046/"
+        },
+        {
+          "title": "Quantifying Facial Distortion، ۲۰۲۴؛ مقایسه فاصله‌ها و دوربین‌ها در ۱۲ فرد",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/37543968/"
+        },
+        {
+          "title": "ASPS؛ روند ارزیابی و گفت‌وگو در مشاوره رینوپلاستی",
+          "url": "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/consultation"
+        }
+      ]
+    },
+    {
+      "slug": "thick-skin-rhinoplasty",
+      "title": "بینی گوشتی بعد از عمل برمی‌گردد؟",
+      "words": 652,
+      "sources": [
+        {
+          "title": "Cobo و همکاران، ۲۰۲۴؛ مرور مدیریت پوست ضخیم در رینوپلاستی",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39341669/"
+        },
+        {
+          "title": "Baser و همکاران، ۲۰۲۴؛ مطالعه گذشته‌نگر ۲۶ بیمار پوست‌ضخیم",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/38057968/"
+        },
+        {
+          "title": "ASPS؛ روند مشخص‌شدن نتیجه و تغییرات پس از رینوپلاستی",
+          "url": "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/results"
+        },
+        {
+          "title": "ASPS؛ خطرها و عوارض رینوپلاستی",
+          "url": "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/safety"
+        }
+      ]
+    },
+    {
+      "slug": "nighttime-nasal-congestion",
+      "title": "گرفتگی بینی در شب؛ از کجا شروع کنیم؟",
+      "words": 709,
+      "sources": [
+        {
+          "title": "Cleveland Clinic؛ علت‌های گرفتگی بینی هنگام خواب، ۲۰۲۵",
+          "url": "https://health.clevelandclinic.org/why-does-my-nose-get-stuffy-at-night"
+        },
+        {
+          "title": "Cleveland Clinic؛ چرخه بینی و گرفتگی یک سمت",
+          "url": "https://health.clevelandclinic.org/why-do-i-sometimes-get-stuffy-in-one-nostril"
+        },
+        {
+          "title": "NHS؛ علائم، محرک‌ها و پیگیری رینیت آلرژیک، ۲۰۲۶",
+          "url": "https://www.nhs.uk/conditions/allergic-rhinitis/"
+        },
+        {
+          "title": "CDC؛ ایمنی آب برای شست‌وشوی بینی، ۲۰۲۵",
+          "url": "https://www.cdc.gov/naegleria/prevention/sinus-rinsing.html"
+        },
+        {
+          "title": "Cleveland Clinic؛ گرفتگی برگشتی ناشی از ضداحتقان، ۲۰۲۶",
+          "url": "https://my.clevelandclinic.org/health/diseases/23393-rhinitis-medicamentosa"
+        },
+        {
+          "title": "NHS HWE؛ راهنمای ارجاع رینیت و علائم غیرمعمول، ۲۰۲۶",
+          "url": "https://www.hweclinicalguidance.nhs.uk/all-clinical-areas-documents/ear-nose-throat-ent/seasonal-allergic-rhinitis-hay-fever/"
+        }
+      ]
+    },
+    {
+      "slug": "snoring-or-sleep-apnea",
+      "title": "خروپف یا آپنه خواب؛ تفاوت مهم چیست؟",
+      "words": 695,
+      "sources": [
+        {
+          "title": "وبدا؛ رسانه سلامت وزارت بهداشت — نقش خواب در سلامت، متن منتشرشده رسمی",
+          "url": "https://t.me/s/webda?before=62743"
+        },
+        {
+          "title": "AAO-HNS / ENT Health؛ خروپف و آپنه انسدادی خواب",
+          "url": "https://www.enthealth.org/conditions/snoring-sleeping-disorders-and-sleep-apnea/"
+        },
+        {
+          "title": "NHS؛ نشانه‌ها، آزمون خواب و اهمیت خواب‌آلودگی، ۲۰۲۶",
+          "url": "https://www.nhs.uk/conditions/sleep-apnoea/"
+        },
+        {
+          "title": "NHLBI / NIH؛ ارزیابی و تشخیص آپنه خواب",
+          "url": "https://www.nhlbi.nih.gov/health/sleep-apnea/diagnosis"
+        },
+        {
+          "title": "NHLBI / NIH؛ گزینه‌های درمان آپنه خواب",
+          "url": "https://www.nhlbi.nih.gov/health/sleep-apnea/treatment"
+        }
+      ]
+    },
+    {
+      "slug": "vertigo-turning-in-bed",
+      "title": "سرگیجه در تخت؛ وقتی اتاق می‌چرخد",
+      "words": 704,
+      "sources": [
+        {
+          "title": "وبدا؛ رسانه سلامت وزارت بهداشت — سرگیجه هنگام غلت زدن، متن رسمی منتشرشده",
+          "url": "https://t.me/s/webda?before=62128"
+        },
+        {
+          "title": "AAO-HNS / ENT Health؛ توضیح بیمارمحور BPPV",
+          "url": "https://www.enthealth.org/conditions/benign-paroxysmal-positional-vertigo-bppv/"
+        },
+        {
+          "title": "NHS؛ سرگیجه چرخشی و علائم نیازمند بررسی فوری",
+          "url": "https://www.nhs.uk/conditions/vertigo/"
+        },
+        {
+          "title": "Bhattacharyya و همکاران؛ راهنمای بالینی AAO-HNS برای BPPV، ۲۰۱۷",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28248609/"
+        }
+      ]
+    },
+    {
+      "slug": "questions-before-rhinoplasty",
+      "title": "قبل از عمل بینی چه سؤال‌هایی بپرسیم؟",
+      "words": 746,
+      "sources": [
+        {
+          "title": "ASPS؛ موضوع‌های ارزیابی در مشاوره رینوپلاستی",
+          "url": "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/consultation"
+        },
+        {
+          "title": "ASPS؛ پرسش‌های پیشنهادی جلسه مشاوره رینوپلاستی",
+          "url": "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/questions"
+        },
+        {
+          "title": "ASPS؛ خطرها، رضایت آگاهانه و عوارض رینوپلاستی",
+          "url": "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/safety"
+        },
+        {
+          "title": "NHS؛ تصمیم پیش از جراحی، انتخاب درمانگر و نقاهت رینوپلاستی",
+          "url": "https://www.nhs.uk/tests-and-treatments/cosmetic-procedures/cosmetic-surgery/nose-reshaping-rhinoplasty/"
+        },
+        {
+          "title": "ASPS؛ روند تغییر و مشخص‌شدن نتیجه رینوپلاستی",
+          "url": "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/results"
+        },
+        {
+          "title": "Mayo Clinic؛ هدف جراحی، معاینه، سابقه پزشکی و آمادگی رینوپلاستی",
+          "url": "https://www.mayoclinic.org/tests-procedures/rhinoplasty/about/pac-20384532"
+        },
+        {
+          "title": "NHS؛ تصمیم‌گیری درباره مناسب‌بودن عمل زیبایی",
+          "url": "https://www.nhs.uk/tests-and-treatments/cosmetic-procedures/advice/cosmetic-procedure-right-for-me/"
+        }
+      ]
+    }
+  ],
+  "conservativeParagraphAttribution": {
+    "https://pubmed.ncbi.nlm.nih.gov/29494735/": 186,
+    "https://pubmed.ncbi.nlm.nih.gov/35139046/": 69,
+    "https://pubmed.ncbi.nlm.nih.gov/37543968/": 172,
+    "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/consultation": 116,
+    "https://pubmed.ncbi.nlm.nih.gov/39341669/": 183,
+    "https://pubmed.ncbi.nlm.nih.gov/38057968/": 171,
+    "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/results": 161,
+    "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/safety": 166,
+    "https://health.clevelandclinic.org/why-does-my-nose-get-stuffy-at-night": 200,
+    "https://health.clevelandclinic.org/why-do-i-sometimes-get-stuffy-in-one-nostril": 63,
+    "https://www.nhs.uk/conditions/allergic-rhinitis/": 99,
+    "https://www.cdc.gov/naegleria/prevention/sinus-rinsing.html": 66,
+    "https://my.clevelandclinic.org/health/diseases/23393-rhinitis-medicamentosa": 106,
+    "https://www.hweclinicalguidance.nhs.uk/all-clinical-areas-documents/ear-nose-throat-ent/seasonal-allergic-rhinitis-hay-fever/": 51,
+    "https://www.enthealth.org/conditions/snoring-sleeping-disorders-and-sleep-apnea/": 175,
+    "https://t.me/s/webda?before=62743": 68,
+    "https://www.nhs.uk/conditions/sleep-apnoea/": 133,
+    "https://www.nhlbi.nih.gov/health/sleep-apnea/diagnosis": 148,
+    "https://www.nhlbi.nih.gov/health/sleep-apnea/treatment": 114,
+    "https://t.me/s/webda?before=62128": 129,
+    "https://www.enthealth.org/conditions/benign-paroxysmal-positional-vertigo-bppv/": 193,
+    "https://www.nhs.uk/conditions/vertigo/": 114,
+    "https://pubmed.ncbi.nlm.nih.gov/28248609/": 199,
+    "https://www.mayoclinic.org/tests-procedures/rhinoplasty/about/pac-20384532": 173,
+    "https://www.nhs.uk/tests-and-treatments/cosmetic-procedures/advice/cosmetic-procedure-right-for-me/": 62,
+    "https://www.plasticsurgery.org/cosmetic-procedures/rhinoplasty/questions": 169,
+    "https://www.nhs.uk/tests-and-treatments/cosmetic-procedures/cosmetic-surgery/nose-reshaping-rhinoplasty/": 57
+  },
+  "verbatimQuotes": false,
+  "medicalReviewerClaimed": false,
+  "limitations": {
+    "createdOn": "2026-10-14",
+    "selectedTopics": [
+      1,
+      3,
+      4,
+      5,
+      7,
+      8
+    ],
+    "origin": "Original patient-facing Persian writing with numbered medical references; owner-selected topics",
+    "medicalReview": "No clinician review claimed; reviewer remains empty until actual review",
+    "ministryPriority": "Relevant Webda material is first for sleep and positional vertigo; no directly verified relevant ministry document was obtained for the other four topics",
+    "governmentAccess": "behdasht.gov.ir short links were not accessible; published text on official Webda channel was verified",
+    "noAutomaticUpgradeOverwrite": true,
+    "images": "Previously approved public package images reused; not clinical evidence for individual outcomes"
+  }
+}

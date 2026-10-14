@@ -350,6 +350,10 @@ class ClinicSettingRead(BaseModel):
     seo_title: str = ""
     seo_description: str = ""
     seo_image_url: str = ""
+    seo_site_name: str = ""
+    seo_articles_title: str = ""
+    seo_articles_description: str = ""
+
 
     doctor_name: str
     specialty: str
@@ -388,6 +392,9 @@ class ClinicSettingUpdate(ClinicSettingRead):
     seo_title: str = Field(default="", max_length=160)
     seo_description: str = Field(default="", max_length=320)
     seo_image_url: str = Field(default="", max_length=500)
+    seo_site_name: str = Field(default="", max_length=160)
+    seo_articles_title: str = Field(default="", max_length=160)
+    seo_articles_description: str = Field(default="", max_length=320)
     doctor_name: str = Field(min_length=2, max_length=120)
     specialty: str = Field(min_length=2, max_length=160)
     medical_council_number: str = Field(default="", max_length=40)

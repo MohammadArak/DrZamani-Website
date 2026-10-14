@@ -96,11 +96,21 @@ def _live(db: Session):
 
 
 def public_items(db: Session) -> list[dict]:
+    snapshots = [(row.id, json.loads(row.published_json)) for row in _live(db) if row.published_json]
+    keys = {data["ref"] for _, data in snapshots if data["kind"] == "media"}
+    media = {item.key: item for item in db.scalars(select(PublicMedia).where(
+        PublicMedia.key.in_(keys), PublicMedia.deleted.is_(False)))} if keys else {}
     items = []
-    for row in _live(db):
-        if row.published_json:
-            data = json.loads(row.published_json)
-            items.append({"id": row.id, "src": src_of(data), "alt": data["alt"], "sort_order": data["sort_order"]})
+    for item_id, data in snapshots:
+        if data["kind"] == "media":
+            image = media.get(data["ref"])
+            if image is None:
+                continue  # Never expose removed media or private metadata.
+            width, height = image.width, image.height
+        else:
+            width, height = 614, 768  # Verified dimensions of all 16 bundled originals.
+        items.append({"id": item_id, "src": src_of(data), "alt": data["alt"],
+                      "sort_order": data["sort_order"], "width": width, "height": height})
     return sorted(items, key=lambda item: (item["sort_order"], item["id"]))
 
 

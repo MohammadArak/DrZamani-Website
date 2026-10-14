@@ -173,8 +173,8 @@ const Samples = () => {
                                 alt={image.alt}
                                 srcSet={/^\/media\/[a-f0-9]{32}\.webp$/.test(image.src) ? [320, 480, 640, 960].map(width => `${image.src}?w=${width} ${width}w`).join(", ") : undefined}
                                 sizes="(min-width: 768px) 30vw, 90vw"
-                                width={image.src.startsWith("/img/samples/") ? 614 : undefined}
-                                height={image.src.startsWith("/img/samples/") ? 768 : undefined}
+                                width={image.width ?? (image.src.startsWith("/img/samples/") ? 614 : undefined)}
+                                height={image.height ?? (image.src.startsWith("/img/samples/") ? 768 : undefined)}
                                 className="gallery-photo rounded-xl shadow-lg"
                                 loading="lazy"
                                 decoding="async"

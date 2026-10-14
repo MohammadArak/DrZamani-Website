@@ -256,3 +256,6 @@ app.include_router(site_content_router.staff_router, prefix=settings.api_prefix)
 from .routers import site_gallery as site_gallery_router
 app.include_router(site_gallery_router.router, prefix=settings.api_prefix)
 app.include_router(site_gallery_router.staff_router, prefix=settings.api_prefix)
+
+from .routers import editorial_assistance
+app.include_router(editorial_assistance.router, prefix=settings.api_prefix)

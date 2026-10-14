@@ -39,14 +39,14 @@ def test_fresh_install_is_public_but_creates_no_login(client, isolated):
     comments = client.get("/api/v1/comments").json()
     assert comments["total"] == 3
     assert {row["display_name"] for row in comments["items"]} == {row["display_name"] for row in PACK["comments"]}
-    assert client.get("/api/v1/articles").json()["total"] == 12
+    assert client.get("/api/v1/articles").json()["total"] == 6
     with SessionLocal() as db:
         actor = db.scalar(select(StaffUser).where(StaffUser.username == "__default_public_content__"))
         assert actor.is_active is False and actor.password_hash == "!"
         assert db.get(ContentSeedState, KEY)
         faq = json.loads(db.get(SiteBlock, "faq").published_json)
         assert len(next(value for value in faq.values() if isinstance(value, list))) == 4
-        assert len(db.scalars(select(PublicMedia)).all()) == 15
+        assert len(db.scalars(select(PublicMedia)).all()) == 9
 
 
 def test_seed_never_recreates_deleted_content_or_revives_media(client, isolated):
@@ -113,3 +113,47 @@ def test_invalid_profile_metadata_cannot_be_published(client, change):
     original = client.get("/api/v1/staff/settings", headers=auth).json()
     assert client.put("/api/v1/staff/settings", headers=auth, json={**original, **change}).status_code == 422
     assert client.get("/api/v1/staff/settings", headers=auth).json() == original
+
+
+def test_selected_articles_are_readable_referenced_and_do_not_claim_clinician_review(client, isolated):
+    with SessionLocal.begin() as db:
+        seed(db, isolated)
+    articles=client.get("/api/v1/articles").json()["items"]
+    assert {item["content"]["slug"] for item in articles} == {
+        "selfie-nose-distortion","thick-skin-rhinoplasty","nighttime-nasal-congestion",
+        "snoring-or-sleep-apnea","vertigo-turning-in-bed","questions-before-rhinoplasty",
+    }
+    for article in articles:
+        response=client.get(f"/articles/{article['content']['slug']}/")
+        assert response.status_code==200
+        assert "<sup>" in response.text
+        assert "منابع" in response.text
+        source=next(item for item in PACK["articles"] if item["slug"]==article["content"]["slug"])
+        assert source["reviewer"]==""
+        assert len(re.sub("<[^>]+>"," ",source["body_html"]).split())>=500
+        assert len(source["sources"])>=4
+        assert all(ref["url"].startswith("https://") for ref in source["sources"])
+    ministry_topics={"snoring-or-sleep-apnea","vertigo-turning-in-bed"}
+    for article in PACK["articles"]:
+        if article["slug"] in ministry_topics:
+            assert "وزارت بهداشت" in article["sources"][0]["title"]
+            assert article["sources"][0]["url"].startswith("https://t.me/s/webda")
+
+def test_selected_default_covers_are_distinct_and_selfie_is_dedicated():
+    assets=PACK["articleAssets"]
+    assert len({item["path"] for item in assets})==6
+    assert len({item["sha256"] for item in assets})==6
+    selfie=next(item for item in assets if item["slug"]=="selfie-nose-distortion")
+    assert selfie["path"]=="/img/blog/articles/selfie-perspective-20261014.webp"
+    assert "fictional" in selfie["origin"]
+
+def test_reused_seed_media_in_one_transaction_does_not_duplicate(isolated):
+    from app.initial_content import _media
+    with SessionLocal.begin() as db:
+        actor=StaffUser(username="fixture_media_seed",full_name="Source seed",password_hash="!",role="secretary",is_active=False)
+        db.add(actor);db.flush()
+        asset=PACK["articleAssets"][0]["path"]
+        first=_media(db,isolated,actor,asset,"تصویر ساختگی منبع")
+        second=_media(db,isolated,actor,asset,"کاربرد دوم همان تصویر")
+        assert first==second
+        assert len(db.scalars(select(PublicMedia)).all())==1

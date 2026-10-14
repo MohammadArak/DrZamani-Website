@@ -2,7 +2,7 @@ import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
 export const LoadingScreen = () => (
     <div
-        className="flex min-h-screen items-center justify-center bg-[#f5f7fd]"
+        className="flex flex-1 items-center justify-center bg-[#f5f7fd]"
         dir="rtl"
     >
         <div className="text-center">
@@ -18,9 +18,9 @@ export const AuthShell = ({ children }: { children: React.ReactNode }) => {
     return (
     <main
         dir="rtl"
-        className="min-h-screen bg-[radial-gradient(circle_at_top_right,rgba(213,171,100,0.2),transparent_35%),linear-gradient(145deg,#0e192c,#293241)] px-4 py-8 text-slate-800 md:py-8"
+        className="flex flex-1 items-center bg-[radial-gradient(circle_at_top_right,rgba(213,171,100,0.2),transparent_35%),linear-gradient(145deg,#0e192c,#293241)] px-3 py-4 text-slate-800"
     >
-        <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-5xl overflow-hidden rounded-4xl bg-white shadow-2xl shadow-black/20 md:grid-cols-[0.9fr_1.1fr]">
+        <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-4xl bg-white shadow-2xl shadow-black/20 md:grid-cols-[0.9fr_1.1fr]">
             <section className="relative hidden overflow-hidden bg-primary p-10 text-white md:flex md:flex-col md:justify-between">
                 <div className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-secondary/20 blur-2xl" />
                 <a href="/" className="relative inline-flex w-fit self-center">

@@ -41,6 +41,13 @@ class Field:
 
 
 FIELDS = [
+    Field("ai_provider", "سرویس هوش مصنوعی", "ai", "select", choices=("disabled","avalai","gapgpt","cloudflare","custom"), help="فقط با دکمه درخواست پیشنهاد متن ارسال می‌شود؛ خاموش یعنی بدون اتصال خارجی."),
+    Field("ai_base_url", "نشانی API سرویس", "ai", maximum=500, help="AvalAI: خالی برای مسیر رسمی. گپ‌جی‌پی‌تی/سرویس دیگر: نشانی سازگار Chat Completions از پنل سرویس؛ دامنه باید در AI_ALLOWED_HOSTS سرور مجاز باشد."),
+    Field("ai_model", "نام مدل", "ai", maximum=160, help="شناسه دقیق مدل از پنل ارائه‌دهنده؛ محدودیت اعتبار سرویس را بررسی کنید."),
+    Field("ai_account_id", "شناسه حساب Cloudflare", "ai", maximum=32, help="برای Workers AI شناسه ۳۲حرفی حساب و مدل @cf/... لازم است."),
+    Field("ai_api_key", "کلید API هوش مصنوعی", "ai", maximum=2048, secret=True, help="فقط رمزگذاری‌شده در سرور ذخیره می‌شود؛ مقدار به مرورگر برنمی‌گردد."),
+    Field("ai_requests_per_hour", "سقف درخواست هر نویسنده در ساعت", "ai", "integer", 1, 20),
+    Field("ai_max_tokens", "سقف توکن پاسخ هر درخواست", "ai", "integer", 256, 2000),
     Field("app_name", "نام سرویس", "system", maximum=120, help="نام نمایشی سرویس سلامت و اسناد API؛ از درخواست بعدی."),
     Field("patient_session_days", "اعتبار نشست بیمار (روز)", "security", "integer", 1, 30, help="حداکثر عمر نشست‌های جدید و موجود؛ کاهش زمان ممکن است کاربران را خارج کند."),
     Field("staff_session_hours", "اعتبار نشست کارکنان (ساعت)", "security", "integer", 1, 24, help="حداکثر عمر نشست‌های جدید و موجود."),
@@ -182,6 +189,8 @@ def validate_effective(settings: config.Settings, *, check_dns: bool):
         raise ValueError("فاصله ارسال مجدد باید کمتر یا مساوی اعتبار کد باشد")
     if settings.app_env == "production" and (settings.zarinpal_sandbox or settings.sms_provider == "console"):
         raise ValueError("پیامک یا پرداخت آزمایشی در محیط اصلی مجاز نیست")
+    from .editorial_ai import validate_configuration as validate_ai
+    validate_ai(settings, resolve=check_dns)
     bootstrap = config.get_settings()
     allowed = {bootstrap.frontend_url, *bootstrap.allowed_origins}
     parsed = urlsplit(settings.frontend_url)
@@ -288,6 +297,7 @@ def describe(db):
                     ("DATABASE_URL / UPLOAD_DIR / PUBLIC_HTML_DIR", "مسیر دیتابیس، رسانه خصوصی و خروجی ساخت؛ فقط تنظیم سرور."),
                     ("API_PREFIX / ALLOWED_ORIGINS", "مسیر API و سیاست CORS؛ نیازمند هماهنگی frontend و Nginx."),
                     ("SETTINGS_ENCRYPTION_KEYS", "کلیدهای مستقل رمزگذاری؛ جدید در ابتدای فهرست، قدیمی برای خواندن تاریخچه."),
+                    ("AI_ALLOWED_HOSTS", "دامنه‌های دقیق API هوش مصنوعی سفارشی و گپ‌جی‌پی‌تی؛ HTTPS، بدون IP/redirect و با اتصال DNS ثابت."),
                     ("SMS_WEBHOOK_ALLOWED_HOSTS", "فهرست دقیق دامنه‌های وب‌هوک مجاز؛ کنترل خروجی شبکه."),
                     ("BOOTSTRAP_ADMIN_*", "فقط نصب اولیه؛ پس از استفاده از محیط حذف شوند."),
                     ("VITE_* / PRERENDER_* / PYTHONDONTWRITEBYTECODE", "تنظیمات ساخت و اجرای سرویس؛ مدیریت از محیط استقرار."),

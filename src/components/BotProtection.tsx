@@ -42,7 +42,7 @@ const BotProtection = forwardRef<BotHandle, Props>(function BotProtection({ oper
             if (!live) return;
             if (challenge.provider === "google") { setReady(true); return; }
             if (!container.current || !window.turnstile) throw new Error("سرویس امنیتی بارگیری نشد");
-            widget = window.turnstile.render(container.current, { sitekey: challenge.site_key, action: challenge.operation, language: "fa", size: "flexible",
+            widget = window.turnstile.render(container.current, { sitekey: challenge.site_key, action: challenge.operation, language: "fa", size: container.current.clientWidth < 300 ? "compact" : "flexible",
                 callback: (value: string) => { if (live) { setToken(value); setError(""); } },
                 "expired-callback": () => { if (live) setToken(""); },
                 "error-callback": () => { if (live) { setToken(""); setError("تأیید کلادفلر ممکن نشد؛ دوباره تلاش کنید."); } },
@@ -72,13 +72,14 @@ const BotProtection = forwardRef<BotHandle, Props>(function BotProtection({ oper
         });
         return { challenge_id: challenge.challenge_id, token: value };
     } }), [challenge, operation, ready, error, token, retry]);
+    if (challenge?.provider === "none" || challenge?.provider === "local") return null;
     return <div className="min-w-0 space-y-2" dir="rtl">
         {(!challenge || !ready) && !["none", "local"].includes(challenge?.provider ?? "") && !error && <p role="status" className="text-xs text-slate-500">در حال آماده‌سازی تأیید امنیتی…</p>}
         {challenge?.provider === "turnstile" && <div ref={container} className="min-w-0" />}
         {challenge?.provider === "google" && <p className="text-xs leading-6 text-slate-500">این اقدام با Google Fraud Defense بررسی می‌شود. <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">حریم خصوصی</a> · <a href="https://policies.google.com/terms" target="_blank" rel="noreferrer">شرایط گوگل</a></p>}
         {challenge?.fallback_used && <p className="text-xs text-amber-800">سرویس جایگزین با تأیید سرور انتخاب شده است.</p>}
         {error && <p role="alert" className="text-xs text-rose-700">{error}</p>}
-        {!setupChallenge && challenge?.provider !== "none" && challenge?.provider !== "local" && <button type="button" onClick={() => retry()} className="text-xs text-primary">تازه‌سازی تأیید امنیتی</button>}
+        {!setupChallenge && challenge && <button type="button" onClick={() => retry()} className="text-xs text-primary">تازه‌سازی تأیید امنیتی</button>}
     </div>;
 });
 export default BotProtection;

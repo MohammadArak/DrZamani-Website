@@ -32,6 +32,7 @@ export default function MediaPicker({token, label, value, disabled, onSelect}: {
         <select aria-label={label} value={value} disabled={disabled||loading} onChange={e=>onSelect(items.find(item=>item.key===e.target.value)??null)}>
             <option value="">بدون انتخاب</option>{items.map(item=><option key={item.key} value={item.key}>{item.alt}</option>)}
         </select>
+        {value && selected?.key===value && <figure style={{margin:"12px 0"}}><img src={selected.preview_url} alt={selected.alt} width={selected.width} height={selected.height} style={{maxWidth:"100%",height:"auto",maxHeight:220,objectFit:"contain",borderRadius:12}} /><figcaption>{selected.alt} · {selected.width}×{selected.height}</figcaption></figure>}
         {loading&&<p role="status">در حال دریافت رسانه…</p>}
         {error&&<p role="alert">{error}<button type="button" onClick={()=>setRetry(v=>v+1)}>تلاش مجدد</button></p>}
         {!loading&&!error&&result.total===0&&<p>تصویری با این توضیح پیدا نشد.</p>}

@@ -65,7 +65,27 @@ def validate_configuration(settings):
                 raise ValueError("پیش از فعال‌سازی، کلیدهای این ارائه‌دهنده را ذخیره و با آزمون مرورگر/سرور تأیید کنید")
 
 
-def provider_for(settings, operation):
+def local_review_bypass(settings, request):
+    """Explicit owner-authorized loopback review DB only; never a runtime panel setting."""
+    if not (settings.local_review_disable_staff_captcha and settings.app_env == "development" and settings.debug):
+        return False
+    if request is None or request.client is None or request.client.host not in {"127.0.0.1", "::1"}:
+        return False
+    from sqlalchemy.engine import make_url
+    from pathlib import Path
+    try:
+        url = make_url(settings.database_url)
+        if url.get_backend_name() != "sqlite" or not url.database:
+            return False
+        path = Path(url.database).resolve()
+        return path.name == "review.db" and path.parent.name == "runtime" and path.parent.parent.name == ".local"
+    except (ValueError, OSError):
+        return False
+
+
+def provider_for(settings, operation, request=None):
+    if operation == "staff_login" and local_review_bypass(settings, request):
+        return "none"
     if not getattr(settings, "captcha_" + operation):
         return "local" if operation == "staff_login" else "none"
     enabled = [p for p in (settings.captcha_primary, "google" if settings.captcha_primary == "turnstile" else "turnstile") if getattr(settings, p + "_enabled")]
@@ -80,7 +100,7 @@ def describe(challenge, settings):
 
 def issue(db, request, settings, operation, *, provider=None, fallback=False):
     from .auth_limits import client_ip
-    provider = provider or provider_for(settings, operation)
+    provider = provider or provider_for(settings, operation, request)
     if provider in {"none", "local"}:
         return {"provider": provider, "operation": operation, "challenge_id": "", "site_key": "", "expires_in_seconds": 0, "fallback_used": False}
     db.execute(delete(BotChallenge).where(BotChallenge.expires_at < now() - timedelta(days=1)))
