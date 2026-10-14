@@ -745,10 +745,10 @@ console.log(
 const statusRoot=resolve("api/app");
 const statusRecords=JSON.parse(await readFile(resolve(statusRoot,"status_pages.json"),"utf8"));
 const statusTemplate=await readFile(resolve(statusRoot,"status_page_template.html"),"utf8");
-const statusCss=await readFile(resolve(statusRoot,"status_page.css"),"utf8");
+const statusCss=await readFile(resolve(statusRoot,"status_page.css"),"utf8") + await readFile(resolve(statusRoot,"brand_credit.css"),"utf8");
 for(const [kind,file] of [["missing","404.html"],["maintenance","maintenance.html"],["connection","connection-lost.html"],["connection","offline.html"]]){
     const item=statusRecords[kind];
-    const values={TITLE:escapeHtml(item.title),DESCRIPTION:escapeHtml(item.description),CODE:escapeHtml(item.code),LABEL:escapeHtml(item.label),CSS:statusCss,SYMBOL:await readFile(resolve(statusRoot,"status_symbols",`${kind}.svg`),"utf8"),ACTIONS:kind==="missing"?'<a href="/">بازگشت به صفحه اصلی</a><a class="site-status__secondary" href="/articles/">مشاهدهٔ مقالات</a>':'<a href="">تلاش دوباره</a><a class="site-status__secondary" href="/">صفحه اصلی</a>'};
+    const values={KIND:kind,TITLE:escapeHtml(item.title),DESCRIPTION:escapeHtml(item.description),CODE:escapeHtml(item.code),LABEL:escapeHtml(item.label),CSS:statusCss,SYMBOL:await readFile(resolve(statusRoot,"status_symbols",`${kind}.svg`),"utf8"),ACTIONS:kind==="missing"?'<a href="/">بازگشت به صفحه اصلی</a><a class="site-status__secondary" href="/articles/">مشاهدهٔ مقالات</a>':'<a href="">تلاش دوباره</a><a class="site-status__secondary" href="/">صفحه اصلی</a>'};
     let document=statusTemplate;for(const [key,value] of Object.entries(values))document=document.replaceAll(`{{${key}}}`,value);
     await writeFile(resolve(outputDirectory,file),document,"utf8");
 }

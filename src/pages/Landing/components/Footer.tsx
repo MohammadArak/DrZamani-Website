@@ -1,3 +1,4 @@
+import RavielCredit from "@/components/RavielCredit";
 import BusinessHoursView from "@/components/BusinessHoursView";
 import NavList from "./NavList";
 import LazyIframe from "@/components/Iframe";
@@ -250,14 +251,7 @@ const Footer = () => {
                     viewport={{ once: true }}
                     className="text-sm"
                 >
-                    <a
-                        className="raviel-credit items-center flex gap-2 px-3 py-2"
-                        href="https://raviel.ir"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        طراحی و توسعه توسط Raviel
-                    </a>
+                    <RavielCredit />
                 </motion.p>
             </div>
         </footer>

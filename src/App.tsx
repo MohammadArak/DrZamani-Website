@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import Loading from "./pages/Loading";
+import RavielCredit from "@/components/RavielCredit";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import { ClinicInfoProvider } from "@/contexts/ClinicInfoContext";
 
@@ -33,6 +34,7 @@ function App() {
             >
                 <Page />
             </Suspense>
+            {(Page === Appointment || Page === Staff) && <footer className="raviel-credit-footer"><RavielCredit /></footer>}
             <ConnectionStatus />
         </ClinicInfoProvider>
     );

@@ -21,7 +21,7 @@ const worker={location:{origin:"https://clinic.test"},addEventListener:(type,fn)
 const caches={open:async()=>({addAll:async assets=>{cached.push(...assets);}}),keys:async()=>[],match:async()=>fallback};
 let networkFails=false;vm.runInNewContext(readFileSync("public/connection-worker.js","utf8"),{self:worker,caches,URL,Response,fetch:async()=>{if(networkFails)throw Error("offline");return new Response("uncached authenticated page");}});
 let installation;workerHandlers.install({waitUntil:value=>{installation=value;}});await installation;
-assert.deepEqual(cached.sort(),["/offline.html","/img/logo/logo-loading.png","/fonts/optimized/dana-regular.woff2"].sort());
+assert.deepEqual(cached.sort(),["/offline.html","/img/logo/logo-dark-full.webp","/fonts/optimized/dana-regular.woff2","/fonts/optimized/vazir-bold.woff2"].sort());
 for(const path of ["/api/v1/me","/api/v1/staff/consultations","/media/private.webp","/uploads/x"]){let intercepted=false;workerHandlers.fetch({request:{method:"GET",url:"https://clinic.test"+path,mode:"cors"},respondWith:()=>{intercepted=true;}});assert.equal(intercepted,false,path);}
 let nav;workerHandlers.fetch({request:{method:"GET",url:"https://clinic.test/staff/",mode:"navigate"},respondWith:value=>{nav=value;}});assert.equal(await(await nav).text(),"uncached authenticated page");networkFails=true;
 workerHandlers.fetch({request:{method:"GET",url:"https://clinic.test/staff/",mode:"navigate"},respondWith:value=>{nav=value;}});assert.equal(await nav,fallback);

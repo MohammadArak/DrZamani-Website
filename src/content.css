@@ -236,14 +236,12 @@
 
 .gallery-photo{height:auto;width:auto;max-height:24rem;max-width:100%;object-fit:contain;align-self:center;flex:none}
 .gallery-dots{display:flex;flex-wrap:wrap;justify-content:center;gap:0}
-.raviel-credit{display:inline-flex;color:#fddba1!important;font-weight:700;background:linear-gradient(110deg,#ffe4a8 15%,#7ecaff 40%,#f3b654 65%,#ffe4a8 90%);background-size:300%;background-clip:text;-webkit-text-fill-color:transparent;animation:credit-flow 4s ease-in-out infinite}
-@keyframes credit-flow{50%{background-position:100%}}
 .article-empty{grid-column:1/-1;text-align:center;padding:28px 12px;color:#3d5a80}
 .article-empty img{display:block;margin:auto;animation:empty-float 4s ease-in-out infinite}
 .article-empty h2,.article-empty h3{font-size:1.4rem;margin:12px 0 6px}
 .article-empty p{color:#64748b}
 @keyframes empty-float{50%{transform:translateY(-7px)}}
-@media(prefers-reduced-motion:reduce){.article-empty img,.raviel-credit{animation:none}}
+@media(prefers-reduced-motion:reduce){.article-empty img{animation:none}}
 #main-content{overflow-anchor:none}
 
 #about-us,#services,#comments,#samples,#faq,#footer{scroll-margin-top:var(--nav-h)}
@@ -257,3 +255,8 @@
 @media(prefers-reduced-motion:reduce){.footer-social,.legacy-social{animation:none}}
 
 .clinic-stats{background:linear-gradient(135deg,#172b43ed,#213b55ed);backdrop-filter:blur(8px)}.clinic-stats:before{opacity:.2}
+
+/* Animate the visible card itself; the absolute wrapper has no observer area. */
+.clinic-stats{animation:clinic-stats-float 5.5s ease-in-out infinite}
+@keyframes clinic-stats-float{0%,100%{transform:translateY(0) rotate(-.3deg)}50%{transform:translateY(-10px) rotate(.3deg)}}
+@media(prefers-reduced-motion:reduce){.clinic-stats{animation:none}}
