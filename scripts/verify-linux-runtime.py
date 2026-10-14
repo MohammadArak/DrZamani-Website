@@ -173,7 +173,7 @@ with SessionLocal.begin() as db:
     from app.comment_models import Comment
     assert db.get(ContentSeedState, 'approved-public-content-v1')
     assert len(db.scalars(select(Comment.id)).all()) == 3
-    assert len(db.scalars(select(Article.id)).all()) == 6
+    assert len(db.scalars(select(Article.id)).all()) == 12
     actor = db.scalar(select(StaffUser).where(StaffUser.username == '__default_public_content__'))
     assert actor and actor.is_active is False and actor.password_hash == '!' 
     from app.runtime_settings import get_settings
