@@ -21,7 +21,7 @@ export function useConfirmDialog(){
             <p id={`${id}-message`} className="text-sm leading-8 text-slate-600">{request.message}</p>
             <div className="mt-6 flex flex-wrap justify-end gap-3">
                 <button ref={cancelButton} type="button" style={{minHeight:44}} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-primary" onClick={()=>finish(false)}>{request.cancelLabel||"لغو"}</button>
-                <button type="button" style={{minHeight:44}} className="rounded-xl bg-secondary px-5 py-3 text-sm font-bold text-primary" onClick={()=>finish(true)}>{request.confirmLabel||"تأیید"}</button>
+                <button type="button" style={{minHeight:44}} className="rounded-xl bg-secondary px-5 py-3 text-sm font-bold text-primary-deep" onClick={()=>finish(true)}>{request.confirmLabel||"تأیید"}</button>
             </div>
         </section>
     </div>,document.body):null;
