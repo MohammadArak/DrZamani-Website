@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy import delete, select, text, update
 from sqlalchemy.orm import Session
 
-from ..auth_limits import client_ip, consume_limit, reset_limit
+from ..auth_limits import client_ip, consume_limit, consume_limits, reset_limit
 from ..browser_sessions import (
     clear_session_cookies,
     request_token,
@@ -132,12 +132,14 @@ def request_otp(
     consume_limit(
         db, "otp-request-ip", client_ip(request), settings.otp_max_per_ip_hour, 3600
     )
-    # Prove a human first: spending a victim's per-phone budget must need a solved challenge.
+    if settings.sms_provider == "disabled":
+        raise HTTPException(status_code=503, detail="ارسال کد ورود فعلاً فعال نیست. برای هماهنگی با مطب تماس بگیرید.")
+    # Prove a human before spending a victim's phone budget.
     bot.verify(db, request, settings, "otp_request", payload.bot)
-    consume_limit(
-        db, "otp-request-phone", payload.phone, settings.otp_max_per_phone_hour, 3600
-    )
-    consume_limit(db, "otp-resend", payload.phone, 1, settings.otp_resend_seconds)
+    consume_limits(db, [
+        ("otp-resend", payload.phone, 1, settings.otp_resend_seconds),
+        ("otp-request-phone", payload.phone, settings.otp_max_per_phone_hour, 3600),
+    ])
     now = utcnow()
     db.execute(text("BEGIN IMMEDIATE"))
     db.execute(

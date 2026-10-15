@@ -18,9 +18,9 @@ export const AuthShell = ({ children }: { children: React.ReactNode }) => {
     return (
     <main
         dir="rtl"
-        className="flex flex-1 items-center bg-[radial-gradient(circle_at_top_right,rgba(213,171,100,0.2),transparent_35%),linear-gradient(145deg,#0e192c,#293241)] px-3 py-4 text-slate-800"
+        className="flex flex-1 items-center px-3 py-4 text-slate-800"
     >
-        <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-4xl bg-white shadow-2xl shadow-black/20 md:grid-cols-[0.9fr_1.1fr]">
+        <div className="mx-auto grid w-full max-w-7xl overflow-hidden rounded-4xl bg-white shadow-2xl shadow-black/20 md:grid-cols-[0.9fr_1.1fr]">
             <section className="relative hidden overflow-hidden bg-primary p-10 text-white md:flex md:flex-col md:justify-between">
                 <div className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-secondary/20 blur-2xl" />
                 <a href="/" className="relative inline-flex w-fit self-center">
@@ -34,19 +34,19 @@ export const AuthShell = ({ children }: { children: React.ReactNode }) => {
                     <span className="mb-4 inline-flex rounded-full border border-secondary/50 bg-secondary/10 px-4 py-1 text-sm text-secondary-mild">
                         سامانه نوبت‌دهی مطب {clinicInfo.doctorName}
                     </span>
-                    <h1 className="font-dana text-4xl leading-normal">
+                    <h1 className="font-dana text-4xl leading-normal text-white">
                         {clinicInfo.bookingEnabled ? "رزرو نوبت، بدون تماس و انتظار" : "پرونده و پیگیری نوبت‌های شما"}
                     </h1>
                     <p className="mt-5 leading-8 text-slate-300">
                         {clinicInfo.bookingEnabled ? "با وارد کردن مشخصات، خدمت و زمان مراجعه را انتخاب کنید." : clinicInfo.bookingDisabledMessage}
                     </p>
                 </div>
-                <p className="relative text-sm text-slate-400">
+                <p className="relative text-sm text-slate-200">
                     اطلاعات شما فقط برای هماهنگی و ارائه خدمات درمانی استفاده
                     می‌شود.
                 </p>
             </section>
-            <section className="flex min-w-0 items-center p-5 sm:p-6 md:p-12">
+            <section className="flex min-w-0 items-center p-5 sm:p-6 md:p-8 xl:p-12">
                 {children}
             </section>
         </div>

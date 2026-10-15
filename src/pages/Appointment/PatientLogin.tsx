@@ -90,30 +90,51 @@ const Login = ({
     const [stage, setStage] = useState<"phone" | "otp">("phone");
     const [phone, setPhone] = useState("");
     const [code, setCode] = useState("");
+    const [lastSentPhone,setLastSentPhone]=useState("");
     const [debugOtp, setDebugOtp] = useState("");
     const [codeLength, setCodeLength] = useState(6);
     const [cooldown, setCooldown] = useState(0);
+    const [cooldownUntil, setCooldownUntil] = useState(0);
+    const inFlight = useRef(false);
+    const codeStart = useRef<HTMLDivElement>(null);
+    const startCooldown = (seconds: number) => {
+        const remaining = Math.max(0, Math.ceil(seconds));
+        setCooldown(remaining);
+        setCooldownUntil(Date.now() + remaining * 1000);
+    };
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!cooldown) return;
-        const timer = window.setInterval(
-            () => setCooldown((value) => Math.max(0, value - 1)),
-            1000,
-        );
+        if (!cooldownUntil) return;
+        const timer = window.setInterval(() => {
+            const remaining = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+            setCooldown(remaining);
+            if (!remaining) window.clearInterval(timer);
+        }, 1000);
         return () => window.clearInterval(timer);
-    }, [cooldown]);
+    }, [cooldownUntil]);
+    useEffect(() => {
+        if (stage === "otp") codeStart.current?.querySelector("input")?.focus();
+    }, [stage]);
 
     const requestCode = async (event?: FormEvent) => {
         event?.preventDefault();
+        if (inFlight.current || Date.now() < cooldownUntil) return;
+        const normalized = normalizeDigits(phone).replace(/[\s()-]/g, "");
+        if (!/^(09\d{9}|(?:\+98|0098|98)9\d{9})$/.test(normalized)) {
+            setError("شماره موبایل را کامل و درست وارد کنید؛ مانند ۰۹۱۲۱۲۳۴۵۶۷.");
+            return;
+        }
+        inFlight.current = true;
         setBusy(true);
         setError("");
         try {
             const activeBot = stage === "phone" ? bot : resendBot;
-            const result = await appointmentApi.requestOtp(phone, await activeBot.current?.proof());
+            const result = await appointmentApi.requestOtp(normalized, await activeBot.current?.proof());
+            setLastSentPhone(normalized);
             setStage("otp");
-            setCooldown(result.retry_after_seconds);
+            startCooldown(result.retry_after_seconds);
             setDebugOtp(result.debug_otp ?? "");
             setCodeLength(result.code_length ?? 6);
             setCode("");
@@ -124,15 +145,18 @@ const Login = ({
                 requestError instanceof AppointmentApiError &&
                 requestError.retryAfter
             ) {
-                setCooldown(requestError.retryAfter);
+                startCooldown(requestError.retryAfter);
             }
         } finally {
+            inFlight.current = false;
             setBusy(false);
         }
     };
 
     const verifyCode = async (event: FormEvent) => {
         event.preventDefault();
+        if (inFlight.current || code.replace(/\D/g, "").length !== codeLength) return;
+        inFlight.current = true;
         setBusy(true);
         setError("");
         try {
@@ -147,13 +171,14 @@ const Login = ({
             setError(errorMessage(verifyError));
             bot.current?.retry(verifyError);
         } finally {
+            inFlight.current = false;
             setBusy(false);
         }
     };
 
     return (
         <AuthShell>
-            <div className="mx-auto flex w-full min-w-0 max-w-md flex-col">
+            <div className="mx-auto flex w-full min-w-0 max-w-xl flex-col">
                 <a
                     href="/"
                     className="mb-5 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary md:hidden"
@@ -168,12 +193,21 @@ const Login = ({
                         ? "شماره موبایل خود را وارد کنید"
                         : "کد تأیید را وارد کنید"}
                 </h2>
-                <p className="mt-4 leading-7 text-slate-500">
+                <p id="phone-help" className="mt-4 leading-7 text-slate-600">
                     {stage === "phone"
                         ? "برای ساخت حساب یا ورود، کد یک‌بارمصرف برای شما ارسال می‌شود."
                         : `کد ${toPersianDigits(String(codeLength))} رقمی به ${toPersianDigits(phone)} ارسال شد.`}
                 </p>
 
+                <details className="mt-4 rounded-xl border border-slate-200 p-3 text-sm text-slate-600">
+                    <summary className="cursor-pointer font-bold text-primary">چطور نوبت بگیرم؟</summary>
+                    <ol className="mt-3 list-inside list-decimal space-y-2 leading-7">
+                        <li>با شماره موبایل و کد تأیید وارد شوید؛ اگر حساب ندارید مشخصات لازم را کامل کنید.</li>
+                        <li>خدمت، تاریخ و ساعت مناسب را انتخاب کنید.</li>
+                        <li>اطلاعات را بررسی و نوبت را ثبت کنید؛ پرداخت فقط در صورت نیازِ خدمت انجام می‌شود.</li>
+                    </ol>
+                    <p className="mt-3 leading-7">رسید، وضعیت نوبت و راه پیگیری در بخش «نوبت‌ها» در دسترس است.</p>
+                </details>
                 {error && (
                     <div
                         role="alert"
@@ -191,6 +225,7 @@ const Login = ({
 
                 {stage === "phone" ? (
                     <form onSubmit={requestCode} className="mt-7 space-y-5">
+                        {lastSentPhone && lastSentPhone===normalizeDigits(phone).replace(/[\s()-]/g, "") && <button type="button" className="text-sm text-primary underline" onClick={()=>{setError("");setStage("otp");}}>کد را دارم؛ بازگشت به ورود کد</button>}
                         <BotProtection ref={bot} operation="otp_request" />
                         <label className="block">
                             <span className="mb-2 block text-sm text-slate-600">
@@ -203,6 +238,9 @@ const Login = ({
                                     setPhone(event.target.value)
                                 }
                                 className={`${inputClass} text-left`}
+                                type="tel"
+                                disabled={busy}
+                                aria-describedby="phone-help"
                                 inputMode="tel"
                                 autoComplete="tel"
                                 placeholder="0912 000 0000"
@@ -210,15 +248,15 @@ const Login = ({
                             />
                         </label>
                         <button
-                            disabled={busy}
+                            disabled={busy || Boolean(cooldown)}
                             className="h-13 w-full rounded-2xl bg-secondary font-bold text-primary shadow-lg shadow-secondary/20 transition hover:bg-secondary-mild disabled:opacity-60"
                         >
-                            {busy ? "در حال ارسال…" : "ارسال کد تأیید"}
+                            {busy ? "در حال ارسال…" : cooldown ? `تلاش دوباره در ${toPersianDigits(cooldown)} ثانیه` : "ارسال کد تأیید"}
                         </button>
                     </form>
                 ) : (
                     <form onSubmit={verifyCode} className="mt-7 space-y-5">
-                        <OtpInput value={code} onChange={setCode} length={codeLength} />
+                        <div ref={codeStart}><OtpInput value={code} onChange={setCode} length={codeLength} /></div>
                         <BotProtection ref={bot} operation="otp_verify" />
                         <button
                             disabled={
@@ -232,7 +270,8 @@ const Login = ({
                         <div className="flex items-center justify-between text-sm">
                             <button
                                 type="button"
-                                onClick={() => setStage("phone")}
+                                disabled={busy}
+                                onClick={() => { setStage("phone"); setCode(""); setDebugOtp(""); setError(""); }}
                                 className="text-slate-500 hover:text-primary"
                             >
                                 تغییر شماره

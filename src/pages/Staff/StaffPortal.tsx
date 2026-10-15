@@ -91,12 +91,14 @@ export const StaffDashboard = ({
     const { clinicInfo } = useClinicInfo();
     const can = useCallback((code: string) => profile.permissions.includes(code), [profile.permissions]);
     const [tab, setTab] = useState<StaffTab>(() => (Object.keys(staffTabPermissions).find(t => can(staffTabPermissions[t])) ?? "account-security") as StaffTab);
+    const [clinicDirty,setClinicDirty]=useState(false);
+    const [clinicBusy,setClinicBusy]=useState(false);
     const [articleDirty,setArticleDirty]=useState(false);
     const [articleBusy,setArticleBusy]=useState(false);
     const {ask:askContent,confirmation:contentConfirmation}=useContentConfirm();
     const leaveArticle=async()=>{
         if(articleBusy){setError("ذخیره محتوا در حال انجام است؛ پس از پایان آن خارج شوید.");return false;}
-        return !articleDirty||await askContent("تغییرات محتوا هنوز ذخیره نشده‌اند؛ از ویرایش خارج شوید؟");
+        return !articleDirty||await askContent("تغییرات این بخش هنوز ذخیره نشده‌اند؛ بدون ذخیره خارج شوید؟");
     };
     const navigateTab=async(next:StaffTab)=>{if(next===tab||await leaveArticle())setTab(next);};
     const [mobileMenu, setMobileMenu] = useState(false);
@@ -661,9 +663,11 @@ export const StaffDashboard = ({
                     {tab === "media" && can("media.manage") && <Suspense fallback={<p>در حال آماده‌سازی رسانه…</p>}><StaffMediaPanel token={token} /></Suspense>}
                     {tab === "account-security" && <><StaffMfaPanel token={token} /><StaffPasswordPanel token={token} /></>}
                     {tab === "clinic-info" && can("settings.view") && settings && (
-                        <StaffSettingsPanel token={token} clinicRevision={settings.revision} onReload={loadAll} clinicPanel={<Suspense fallback={<p role="status">در حال آماده‌سازی بخش…</p>}><ClinicInfoPanel
+                        <StaffSettingsPanel clinicDirty={clinicDirty} clinicBusy={clinicBusy} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} token={token} clinicRevision={settings.revision} onReload={loadAll} clinicPanel={<Suspense fallback={<p role="status">در حال آماده‌سازی بخش…</p>}><ClinicInfoPanel
                             token={token}
                             settings={settings}
+                            onDirtyChange={setClinicDirty}
+                            onBusyChange={setClinicBusy}
                             onReload={loadAll}
                         /></Suspense>} />
                     )}

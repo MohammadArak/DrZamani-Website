@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
+import {useContentConfirm} from "./useContentConfirm";
+import SettingsSaveBar from "./SettingsSaveBar";
 import SeoPreview from "./SeoPreview";
 import Toast from "@/components/Toast";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
@@ -19,12 +21,15 @@ const businessDays: [BusinessHours["day_of_week"], string][] = [["Saturday","ش�
 const ClinicInfoPanel = ({
     token,
     settings,
-    onReload,
+    onReload, onDirtyChange, onBusyChange,
 }: {
     token: string;
     settings: ClinicSettings;
     onReload: () => Promise<void>;
+    onDirtyChange?: (value:boolean) => void;
+    onBusyChange?: (value:boolean) => void;
 }) => {
+    const {ask,confirmation}=useContentConfirm();
     const [draft, setDraft] = useState(settings);
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState("");
@@ -34,12 +39,16 @@ const ClinicInfoPanel = ({
     const { applyClinicSettings } = useClinicInfo();
     const can = useStaffAccess();
     const canEdit = can("settings.edit");
+    const dirty = JSON.stringify(draft) !== JSON.stringify(settings);
 
     useEffect(() => setDraft(settings), [settings]);
+    useEffect(() => { onDirtyChange?.(dirty); }, [dirty,onDirtyChange]);
+    useEffect(() => { onBusyChange?.(busy); }, [busy,onBusyChange]);
+    useEffect(() => () => { onDirtyChange?.(false);onBusyChange?.(false); }, [onDirtyChange,onBusyChange]);
 
     const save = async (event: FormEvent) => {
         event.preventDefault();
-        if (!canEdit) return;
+        if (!canEdit || busy || !dirty) return;
         setBusy(true);
         setMessage("");
         try {
@@ -63,6 +72,7 @@ const ClinicInfoPanel = ({
 
     return (
         <section className="app-panel-enter">
+            {confirmation}
             <Toast
                 message={message}
                 kind={messageKind}
@@ -88,7 +98,7 @@ const ClinicInfoPanel = ({
                 </div>
             )}
 
-            <form onSubmit={save} className="mt-6 space-y-5">
+            <form onSubmit={save} className="mt-6"><fieldset disabled={busy} className="space-y-5">
                 <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
                     <div className="flex items-center justify-between gap-3">
                         <div>
@@ -366,17 +376,8 @@ const ClinicInfoPanel = ({
                 </div>
                 <SeoPreview home siteUrl={draft.site_url} siteName={draft.seo_site_name || `وبسایت ${draft.doctor_name}`} title={draft.seo_title || `وبسایت رسمی ${draft.doctor_name}`} description={draft.seo_description || `وب‌سایت رسمی ${draft.doctor_name}، ${draft.specialty} در ${draft.address_city}؛ معرفی خدمات و راه‌های ارتباطی.`} path="/" />
                 <SeoPreview title={draft.seo_articles_title || "مقالات"} description={draft.seo_articles_description || "مقالات درباره سلامت گوش، بینی، سینوس، گلو و رینوپلاستی"} path="/articles/" siteUrl={draft.site_url} siteName={draft.seo_site_name || `وبسایت ${draft.doctor_name}`} />
-                {canEdit && (
-                    <div className="sticky bottom-3 z-10 flex justify-end rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur">
-                        <button
-                            disabled={busy}
-                            className="h-12 rounded-xl bg-primary px-7 font-bold text-white transition hover:bg-primary-mild disabled:opacity-50"
-                        >
-                            {busy ? "در حال ذخیره…" : "ذخیره اطلاعات مطب"}
-                        </button>
-                    </div>
-                )}
-            </form>
+                {canEdit && <SettingsSaveBar busy={busy} dirty={dirty} label="ذخیره اطلاعات مطب"><button type="button" disabled={busy || !dirty} className="text-sm text-primary" onClick={() => { void ask("تغییرات اطلاعات مطب کنار گذاشته شوند؟").then(confirmed=>{if(confirmed)setDraft(settings);}); }}>لغو تغییرات</button></SettingsSaveBar>}
+            </fieldset></form>
         </section>
     );
 };

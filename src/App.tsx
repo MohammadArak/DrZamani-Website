@@ -34,9 +34,9 @@ function App() {
             <Suspense
                 fallback={<Loading loading={true} className="w-full h-screen" />}
             >
-                {Page === Appointment || Page === Staff ? <div style={{minHeight:"100dvh",height:Page===Staff?"100dvh":undefined,display:"flex",flexDirection:"column"}}>
+                {Page === Appointment || Page === Staff ? <div style={{minHeight:"100dvh",height:Page===Staff?"100dvh":undefined,display:"flex",flexDirection:"column",background:Page===Appointment?"radial-gradient(circle at top right,rgba(213,171,100,.2),transparent 35%),linear-gradient(145deg,#0e192c,#293241)":undefined}}>
                     <Page />
-                    {Page === Appointment && <footer className="raviel-credit-footer" style={{flexShrink:0}}><RavielCredit /></footer>}
+                    {Page === Appointment && <footer className="raviel-credit-footer" style={{flexShrink:0,background:"transparent"}}><RavielCredit /></footer>}
                 </div> : <Page />}
             </Suspense>
             <ConnectionStatus />
