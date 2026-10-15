@@ -208,7 +208,7 @@ const Portal = ({
     return (
         <main
             dir="rtl"
-            className="min-h-screen w-full max-w-full overflow-x-clip bg-[#f3f6f8] pb-28 text-slate-800 md:pb-12"
+            className="patient-shell min-h-screen w-full max-w-full overflow-x-clip bg-[#f3f6f8] pb-28 text-slate-800 md:pb-12"
         >
             {confirmation}
             <Toast

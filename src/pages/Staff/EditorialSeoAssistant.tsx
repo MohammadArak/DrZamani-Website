@@ -45,7 +45,7 @@ export default function EditorialSeoAssistant({token,kind,title,description,keyw
         <p>سرویس: {status?providers[status.provider]||"سرویس انتخاب‌شده":"در حال دریافت تنظیمات…"}</p>
         {status?.destination&&<p>مقصد ارسال متن: <b dir="ltr">https://{status.destination}</b></p>}
         {status&&!status.enabled&&<p>مدیر می‌تواند سرویس و کلید را در «تنظیمات ← هوش مصنوعی» تعریف کند. بررسی معمول سئو همچنان در همین ویرایشگر در دسترس است.</p>}
-        <button type="button" disabled={busy||disabled} onClick={()=>{if(!open){setText(plain(html));setConsent("");}setOpen(!open);}}>{open?"بستن دستیار":"انتخاب متن و دریافت پیشنهاد"}</button>
+        <button type="button" disabled={busy||disabled||!status?.enabled} onClick={()=>{if(!open){setText(plain(html));setConsent("");}setOpen(!open);}}>{open?"بستن دستیار":"انتخاب متن و دریافت پیشنهاد"}</button>
         {open&&<>
             <p>فقط متن انتخابی زیر، عنوان، توضیح و عبارت هدف به سرویس نمایش‌داده‌شده فرستاده می‌شود. اطلاعات واقعی یا محرمانه بیماران را وارد نکنید؛ پرونده، چت و تصاویر ارسال نمی‌شوند.</p>
             <label>متن انتخابی برای ارسال<textarea rows={6} maxLength={12000} value={text} disabled={busy||disabled} onChange={event=>setText(event.target.value)}/></label>

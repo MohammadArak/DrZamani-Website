@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import AppSelect from "@/components/AppSelect";
 import ServiceIcon from "@/components/ServiceIcon";
 import Toast from "@/components/Toast";
@@ -13,9 +12,10 @@ import {
     type PatientPage,
     type PatientRecord,
 } from "@/services/appointmentApi";
-import { useCallback,useEffect,useMemo,useState,type FormEvent } from "react";
+import { useCallback,useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode } from "react";
+import StaffEditorDialog from "./StaffEditorDialog";
+import {useContentConfirm} from "./useContentConfirm";
 import {
-    IoArrowForwardOutline,
     IoCalendarOutline,
     IoCallOutline,
     IoCardOutline,
@@ -29,6 +29,11 @@ import {
 const inputClass =
     "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-slate-800 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/10";
 
+const parseTags=(value:string)=>value.split(/[,،\n]/).map(item=>item.trim()).filter((item,index,items)=>Boolean(item)&&items.indexOf(item)===index);
+function RecordFrame({compact,title,busy,onClose,children}:{compact:boolean;title:string;busy:boolean;onClose:()=>Promise<void>;children:ReactNode}) {
+    const content=<div className="space-y-4">{children}</div>;
+    return compact ? <StaffEditorDialog title={title} busy={busy} onClose={onClose} closeLabel="بازگشت به فهرست بیماران" closeText="بازگشت">{content}</StaffEditorDialog> : content;
+}
 type RecordTab = "overview" | "appointments" | "forms" | "conversations" | "payments";
 
 const statusLabel: Record<Appointment["status"], string> = {
@@ -52,12 +57,25 @@ import { useStaffAccess } from "./staffAccess";
 
 export default function StaffPatientsPanel({
     token,
-    onOpenConversation,
+    onOpenConversation, onDirtyChange, onBusyChange,
 }: {
     token: string;
     onOpenConversation: (appointmentId: number) => void;
+    onDirtyChange?: (dirty:boolean)=>void;
+    onBusyChange?: (busy:boolean)=>void;
 }) {
     const can = useStaffAccess();
+    const {ask,confirmation}=useContentConfirm();
+    const [compact,setCompact]=useState(()=>!window.matchMedia("(min-width:1280px)").matches);
+    const [recordLoading,setRecordLoading]=useState(false);
+    const requests=useRef({list:0,record:0}), searchTimer=useRef(0), firstLoad=useRef(true);
+    useEffect(()=>{
+        const query=window.matchMedia("(min-width:1280px)");
+        const change=()=>setCompact(!query.matches);
+        query.addEventListener("change",change);
+        return()=>query.removeEventListener("change",change);
+    },[]);
+    useEffect(()=>{const pending=requests.current;return()=>{pending.list++;pending.record++;};},[]);
     const [pageData, setPageData] = useState<PatientPage>({
         items: [],
         available_tags: [],
@@ -82,23 +100,38 @@ export default function StaffPatientsPanel({
         kind: "success",
     });
 
+    const dirty=Boolean(record && can("patients.records.edit") && (note.trim()!==(record.internal_note??"") || JSON.stringify(parseTags(tagsText))!==JSON.stringify(record.tags) || needsFollowUp!==record.needs_follow_up));
+    useEffect(()=>{onDirtyChange?.(dirty);},[dirty,onDirtyChange]);
+    useEffect(()=>{onBusyChange?.(saving||recordLoading);},[saving,recordLoading,onBusyChange]);
+    useEffect(()=>()=>{onDirtyChange?.(false);onBusyChange?.(false);},[onDirtyChange,onBusyChange]);
+    useEffect(()=>{
+        if(!dirty)return;
+        const warn=(event:BeforeUnloadEvent)=>event.preventDefault();
+        window.addEventListener("beforeunload",warn);
+        return()=>window.removeEventListener("beforeunload",warn);
+    },[dirty]);
+    const closeRecord=async()=>{
+        if(saving)return;
+        if(dirty&&!await ask("یادداشت و تغییرات پرونده هنوز ذخیره نشده‌اند؛ بدون ذخیره به فهرست برگردید؟"))return;
+        requests.current.record++;setRecord(null);setSelectedId(null);setRecordLoading(false);
+    };
     const loadPatients = useCallback(
         async (page = 1) => {
+            const sequence=++requests.current.list;
             setLoading(true);
             try {
-                setPageData(
-                    await appointmentApi.staffPatients(token, {
+                const next=await appointmentApi.staffPatients(token, {
                         search: search.trim() || undefined,
                         tag: tag || undefined,
                         needs_follow_up: followUpOnly || undefined,
                         page,
                         page_size: 20,
-                    }),
-                );
+                    });
+                if(sequence===requests.current.list)setPageData(next);
             } catch (error) {
-                setToast({ message: error instanceof Error ? error.message : "دریافت بیماران ناموفق بود", kind: "error" });
+                if(sequence===requests.current.list)setToast({ message: error instanceof Error ? error.message : "دریافت بیماران ناموفق بود", kind: "error" });
             } finally {
-                setLoading(false);
+                if(sequence===requests.current.list)setLoading(false);
             }
         },
         [followUpOnly, search, tag, token],
@@ -106,42 +139,50 @@ export default function StaffPatientsPanel({
 
     const loadRecord = useCallback(
         async (id: number) => {
-            setLoading(true);
+            if(saving)return;
+            if(dirty&&!await ask("تغییرات پرونده هنوز ذخیره نشده‌اند؛ بدون ذخیره بیمار دیگری را باز کنید؟"))return;
+            const sequence=++requests.current.record;
+            setToast({message:"",kind:"success"});
+            setRecordLoading(true);
             try {
                 const value = await appointmentApi.staffPatientRecord(token, id);
+                if(sequence!==requests.current.record)return;
+                setRecordTab("overview");
                 setRecord(value);
                 setSelectedId(id);
                 setNote(value.internal_note ?? "");
                 setTagsText(value.tags.join("، "));
                 setNeedsFollowUp(value.needs_follow_up);
             } catch (error) {
-                setToast({ message: error instanceof Error ? error.message : "دریافت پرونده ناموفق بود", kind: "error" });
+                if(sequence===requests.current.record)setToast({ message: error instanceof Error ? error.message : "دریافت پرونده ناموفق بود", kind: "error" });
             } finally {
-                setLoading(false);
+                if(sequence===requests.current.record)setRecordLoading(false);
             }
         },
-        [token],
+        [token,dirty,saving,ask],
     );
 
     useEffect(() => {
-        void loadPatients();
+        const pending=requests.current;
+        if(firstLoad.current){firstLoad.current=false;void loadPatients();}
+        else searchTimer.current=window.setTimeout(()=>void loadPatients(),250);
+        return()=>{window.clearTimeout(searchTimer.current);pending.list++;};
     }, [loadPatients]);
 
     const saveRecord = async (event: FormEvent) => {
         event.preventDefault();
-        if (!record) return;
+        if (!record || saving || !dirty) return;
         setSaving(true);
         try {
-            const tags = tagsText
-                .split(/[,،\n]/)
-                .map((item) => item.trim())
-                .filter((item, index, items) => item && items.indexOf(item) === index);
+            const tags = parseTags(tagsText);
             const updated = await appointmentApi.updateStaffPatientRecord(token, record.id, {
                 internal_note: note.trim() || null,
                 tags,
                 needs_follow_up: needsFollowUp,
             });
             setRecord(updated);
+            setNote(updated.internal_note??"");
+            setNeedsFollowUp(updated.needs_follow_up);
             setTagsText(updated.tags.join("، "));
             setToast({ message: "اطلاعات داخلی پرونده ذخیره شد", kind: "success" });
             await loadPatients(pageData.page);
@@ -169,6 +210,7 @@ export default function StaffPatientsPanel({
 
     return (
         <section className="app-panel-enter min-w-0">
+            {confirmation}
             <Toast {...toast} onClose={() => setToast((value) => ({ ...value, message: "" }))} />
             <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
@@ -183,12 +225,13 @@ export default function StaffPatientsPanel({
             <form
                 onSubmit={(event) => {
                     event.preventDefault();
+                    window.clearTimeout(searchTimer.current);
                     void loadPatients(1);
                 }}
                 className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[minmax(220px,1fr)_210px_auto]"
             >
                 <label className="relative">
-                    <input value={search} onChange={(event) => setSearch(event.target.value)} className={`${inputClass} pl-10`} placeholder="نام، موبایل، کد ملی یا شناسه اتباع" />
+                    <span className="sr-only">جست‌وجوی بیمار</span><input aria-label="جست‌وجوی بیمار" value={search} onChange={(event) => setSearch(event.target.value)} className={`${inputClass} pl-10`} placeholder="نام، موبایل، کد ملی یا شناسه اتباع" />
                     <IoSearchOutline className="absolute left-3 top-3 text-xl text-slate-400" />
                 </label>
                 <AppSelect
@@ -251,14 +294,14 @@ export default function StaffPatientsPanel({
                             <p className="mt-2 text-sm leading-7 text-slate-500">مشخصات، نوبت‌ها، فرم‌ها، گفتگوها و پرداخت‌ها در یک پرونده نمایش داده می‌شوند.</p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <RecordFrame compact={compact} title={`پروندهٔ ${record.first_name} ${record.last_name}`} busy={saving} onClose={closeRecord}>
+                            {toast.message && <p role={toast.kind==="error"?"alert":"status"} className={toast.kind==="error"?"rounded-xl bg-rose-50 p-4 text-sm text-rose-700":"rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800"}>{toast.message}</p>}
                             <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                                 <div className="bg-[linear-gradient(135deg,#173c5b,#2f6387)] p-5 text-white sm:p-6">
-                                    <button type="button" onClick={() => { setRecord(null); setSelectedId(null); }} className="mb-4 inline-flex items-center gap-1 text-xs text-slate-200 xl:hidden"><IoArrowForwardOutline /> بازگشت به بیماران</button>
                                     <div className="flex flex-wrap items-start justify-between gap-4">
                                         <div>
                                             <span className="text-xs text-secondary">پرونده شماره {toPersianDigits(record.id)}</span>
-                                            <h3 className="mt-1 font-dana text-2xl">{record.first_name} {record.last_name}</h3>
+                                            <h3 className="mt-1 font-dana text-2xl text-white">{record.first_name} {record.last_name}</h3>
                                             <p dir="ltr" className="mt-2 w-fit text-sm text-slate-200">{formatLocalPhone(record.phone)}</p>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
@@ -289,7 +332,7 @@ export default function StaffPatientsPanel({
                                         <div className="min-w-0 rounded-2xl bg-slate-50 p-3"><span className="text-xs text-slate-400">ایمیل</span><b dir="ltr" className="mt-1 block truncate text-right text-slate-700">{record.email || "ثبت نشده"}</b></div>
                                     </div>
                                     <form onSubmit={saveRecord} className="rounded-2xl border border-amber-100 bg-amber-50/50 p-4">
-                                        <fieldset disabled={!can("patients.records.edit")}><label className="flex items-center justify-between gap-3 text-sm font-bold text-amber-900">
+                                        <fieldset disabled={saving || !can("patients.records.edit")}><label className="flex items-center justify-between gap-3 text-sm font-bold text-amber-900">
                                             نیازمند پیگیری
                                             <input type="checkbox" checked={needsFollowUp} onChange={(event) => setNeedsFollowUp(event.target.checked)} className="h-5 w-5 accent-amber-600" />
                                         </label>
@@ -299,7 +342,7 @@ export default function StaffPatientsPanel({
                                         <label className="mt-3 block text-xs text-slate-500">یادداشت داخلی
                                             <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={4} maxLength={5000} className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white p-3 text-sm leading-6 outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10" placeholder="فقط کارکنان مطب این متن را می‌بینند" />
                                         </label>
-                                        <button disabled={saving || !can("patients.records.edit")} className="mt-3 h-10 w-full rounded-xl bg-primary text-xs font-bold text-white disabled:opacity-50">{saving ? "در حال ذخیره…" : "ذخیره پرونده"}</button></fieldset>
+                                        <button disabled={saving || !dirty || !can("patients.records.edit")} className="mt-3 h-10 w-full rounded-xl bg-primary text-xs font-bold text-white disabled:opacity-50">{saving ? "در حال ذخیره…" : "ذخیره پرونده"}</button></fieldset>
                                     </form>
                                 </div>
                             </article>
@@ -384,11 +427,11 @@ export default function StaffPatientsPanel({
                                     </div>
                                 </section>
                             )}
-                        </div>
+                        </RecordFrame>
                     )}
                 </div>
             </div>
-            {loading && <div className="pointer-events-none fixed inset-x-0 bottom-5 z-50 mx-auto w-fit rounded-full bg-primary px-4 py-2 text-xs text-white shadow-lg">در حال دریافت اطلاعات…</div>}
+            {(loading || recordLoading) && <div className="pointer-events-none fixed inset-x-0 bottom-5 z-50 mx-auto w-fit rounded-full bg-primary px-4 py-2 text-xs text-white shadow-lg">در حال دریافت اطلاعات…</div>}
         </section>
     );
 }

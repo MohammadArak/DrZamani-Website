@@ -249,7 +249,7 @@ const Login = ({
                         </label>
                         <button
                             disabled={busy || Boolean(cooldown)}
-                            className="h-13 w-full rounded-2xl bg-secondary font-bold text-primary shadow-lg shadow-secondary/20 transition hover:bg-secondary-mild disabled:opacity-60"
+                            className="h-13 w-full rounded-2xl bg-secondary font-bold text-primary-deep shadow-lg shadow-secondary/20 transition hover:bg-secondary-mild disabled:opacity-60"
                         >
                             {busy ? "در حال ارسال…" : cooldown ? `تلاش دوباره در ${toPersianDigits(cooldown)} ثانیه` : "ارسال کد تأیید"}
                         </button>
@@ -262,7 +262,7 @@ const Login = ({
                             disabled={
                                 busy || code.replace(/\D/g, "").length !== codeLength
                             }
-                            className="h-13 w-full rounded-2xl bg-secondary font-bold text-primary shadow-lg shadow-secondary/20 transition hover:bg-secondary-mild disabled:opacity-50"
+                            className="h-13 w-full rounded-2xl bg-secondary font-bold text-primary-deep shadow-lg shadow-secondary/20 transition hover:bg-secondary-mild disabled:opacity-50"
                         >
                             {busy ? "در حال بررسی…" : "تأیید و ادامه"}
                         </button>
