@@ -52,46 +52,15 @@ const Drawer = (props: DrawerProps) => {
 
     const renderCloseButton = <CloseButton onClick={onCloseClick} />
 
-    const getStyle = (): {
-        dimensionClass?: string
-        contentStyle?: {
-            width?: string | number
-            height?: string | number
-        }
-        motionStyle: {
-            [x: string]: string
-        }
-    } => {
-        if (placement === 'left' || placement === 'right') {
-            return {
-                dimensionClass: 'vertical',
-                contentStyle: { width },
-                motionStyle: {
-                    [placement]: `-${width}${
-                        typeof width === 'number' && 'px'
-                    }`,
-                },
-            }
-        }
-
-        if (placement === 'top' || placement === 'bottom') {
-            return {
-                dimensionClass: 'horizontal',
-                contentStyle: { height },
-                motionStyle: {
-                    [placement]: `-${height}${
-                        typeof height === 'number' && 'px'
-                    }`,
-                },
-            }
-        }
-
-        return {
-            motionStyle: {},
-        }
-    }
-
-    const { dimensionClass, contentStyle, motionStyle } = getStyle()
+    const vertical=placement==='left'||placement==='right';
+    const dimensionClass=vertical?'vertical':'horizontal';
+    const dimension=vertical?width:height;
+    const size=`min(${typeof dimension==='number'?`${dimension}px`:dimension},${vertical?'100vw':'100dvh'})`;
+    const rootStyle=vertical
+        ? {position:'fixed' as const,top:0,bottom:0,[placement]:0,width:size,height:'100dvh'}
+        : {position:'fixed' as const,left:0,right:0,[placement]:0,width:'100%',height:size};
+    const contentStyle=vertical?{[placement]:0,top:0,width:size}:{[placement]:0,left:0,height:size};
+    const closedState=vertical?{x:placement==='right'?'100%':'-100%'}:{y:placement==='bottom'?'100%':'-100%'};
 
     return (
         <Modal
@@ -117,9 +86,7 @@ const Drawer = (props: DrawerProps) => {
             )}
             contentLabel={typeof title==='string'?title:'منو'}
             ariaHideApp={true}
-            style={{content: placement==='left'||placement==='right'
-                ? {position:'fixed',top:0,bottom:0,[placement]:0,width,height:'100dvh'}
-                : {position:'fixed',left:0,right:0,[placement]:0,width:'100%',height}}}
+            style={{content:rootStyle}}
             isOpen={isOpen}
             closeTimeoutMS={closeTimeoutMS}
             {...rest}
@@ -127,17 +94,14 @@ const Drawer = (props: DrawerProps) => {
             <motion.div
                 className={classNames('drawer-content', dimensionClass)}
                 style={contentStyle}
-                initial={motionStyle}
-                animate={{
-                    [placement as 'top' | 'right' | 'bottom' | 'left']: isOpen
-                        ? 0
-                        : motionStyle[placement],
-                }}
+                initial={closedState}
+                animate={isOpen?{x:0,y:0}:closedState}
+                transition={{duration:.28,ease:[.22,.8,.22,1]}}
             >
                 {title || closable ? (
                     <div className={classNames('drawer-header', headerClass)}>
                         {typeof title === 'string' ? (
-                            <h4>{title}</h4>
+                            <h4 style={{color:"inherit"}}>{title}</h4>
                         ) : (
                             <span>{title}</span>
                         )}

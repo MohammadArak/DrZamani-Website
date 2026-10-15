@@ -467,3 +467,25 @@ def update_service(
         ],
     )
     return item
+
+
+def _service_activity(db:Session,staff:StaffUser,service_id:int,active:bool):
+    from ..content import lock
+    lock(db,staff,'services.edit')
+    item=db.get(Service,service_id)
+    if not item:raise HTTPException(404,'خدمت پیدا نشد')
+    item.is_active=active
+    record_audit(db,action='service.restored' if active else 'service.archived',entity_type='service',entity_id=item.id,
+        summary='بازگردانی خدمت' if active else 'حذف خدمت از فهرست فعال؛ سوابق محفوظ',actor_staff_id=staff.id)
+    db.commit()
+    return ApiMessage(message='خدمت بازگردانده شد' if active else 'خدمت به بایگانی منتقل شد؛ نوبت‌ها و تنظیمات قبلی حفظ شدند')
+
+
+@router.delete('/services/{service_id}',response_model=ApiMessage)
+def archive_service(service_id:int,db:Session=Depends(get_db),staff:StaffUser=Depends(require_permission('services.edit'))):
+    return _service_activity(db,staff,service_id,False)
+
+
+@router.post('/services/{service_id}/restore',response_model=ApiMessage)
+def restore_service(service_id:int,db:Session=Depends(get_db),staff:StaffUser=Depends(require_permission('services.edit'))):
+    return _service_activity(db,staff,service_id,True)

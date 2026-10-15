@@ -90,7 +90,7 @@ const Landing = () => {
             />
 
             <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:right-2 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-5 focus:py-3 focus:text-primary">رفتن به محتوای اصلی</a>
-            <main id="main-content" tabIndex={-1} className="text-base pb-16 md:pb-0">
+            <main id="main-content" tabIndex={-1} className="text-base" style={{paddingBottom:"var(--mobile-nav-space, 0px)",backgroundColor:"#293241"}}>
                 <NavigationBar />
                 <HeroContent />
                 <Suspense fallback={<SectionFallback />}>

@@ -1,3 +1,4 @@
+import {useContentConfirm} from "./useContentConfirm";
 /* eslint-disable react-hooks/set-state-in-effect */
 import AppSelect from "@/components/AppSelect";
 import JalaliDatePicker from "@/components/JalaliDatePicker";
@@ -440,6 +441,8 @@ const ServicesPanel = ({
     const [iconKey, setIconKey] = useState<Service["icon_key"]>("medical");
     const [allowsChat, setAllowsChat] = useState(false);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showInactive,setShowInactive]=useState(false);
+    const {ask,confirmation}=useContentConfirm();
     const [expandedServiceId, setExpandedServiceId] = useState<number | null>(null);
     const [paymentModes, setPaymentModes] = useState<
         Record<number, Service["payment_mode"]>
@@ -500,6 +503,13 @@ const ServicesPanel = ({
             setMessageKind("error");
             setMessage(errorMessage(addError));
         }
+    };
+    const archiveOrRestore=async(item:Service)=>{
+        if(savingServiceId!==null)return;
+        if(!await ask(item.is_active?"خدمت از فهرست فعال حذف شود؟ نوبت‌ها و تنظیمات قبلی حفظ می‌شوند و می‌توانید آن را از بخش غیرفعال‌ها بازگردانید.":"این خدمت دوباره برای رزرو فعال شود؟"))return;
+        setSavingServiceId(item.id);
+        try{const result=await (item.is_active?appointmentApi.archiveStaffService(token,item.id):appointmentApi.restoreStaffService(token,item.id));setMessageKind("success");setMessage(result.message);setExpandedServiceId(null);await onReload();}
+        catch(e){setMessageKind("error");setMessage(errorMessage(e));}finally{setSavingServiceId(null);}
     };
     const toggle = async (item: Service) => {
         try {
@@ -648,6 +658,8 @@ const ServicesPanel = ({
     };
     return (
         <section className="app-panel-enter">
+            {confirmation}
+            <label className="inline-choice"><input type="checkbox" checked={showInactive} onChange={e=>setShowInactive(e.target.checked)}/>نمایش خدمات غیرفعال و بایگانی‌شده</label>
             <Toast
                 message={message}
                 kind={messageKind}
@@ -730,7 +742,7 @@ const ServicesPanel = ({
                 </form>
             )}
             <div className="mt-5 grid max-w-5xl gap-4">
-                {services.map((item, serviceIndex) => (
+                {services.filter(item=>showInactive||item.is_active).map((item, serviceIndex) => (
                     <article
                         key={item.id}
                         className="app-card-enter rounded-2xl border border-slate-200 bg-white p-5"
@@ -758,6 +770,7 @@ const ServicesPanel = ({
                                 >
                                     {item.is_active ? "فعال" : "غیرفعال"}
                                 </span>
+                                {canEdit&&<button type="button" disabled={savingServiceId!==null} onClick={()=>void archiveOrRestore(item)} className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-primary">{item.is_active?"حذف از فهرست":"بازگردانی"}</button>}
                                 <button
                                     type="button"
                                     onClick={() =>

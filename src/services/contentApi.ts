@@ -6,8 +6,8 @@ export type ArticleContent = {
     seo_title:string; seo_description:string; target_keyword:string;
 };
 export type SeoFeedback={score:number;word_count:number;notice:string;checks:{code:string;passed:boolean;reason:string;suggestion:string}[]};
-export type Article={id:number;revision:number;content:ArticleContent;status:string;scheduled_at:string|null;has_publication:boolean;unpublished_changes:boolean;author_id:number;seo:SeoFeedback;sanitized?:boolean};
-export type Media={key:string;alt:string;width:number;height:number;size:number;owner_id:number;url:string;preview_url:string};
+export type Article={deleted?:boolean;id:number;revision:number;content:ArticleContent;status:string;scheduled_at:string|null;has_publication:boolean;unpublished_changes:boolean;author_id:number;seo:SeoFeedback;sanitized?:boolean};
+export type Media={deleted?:boolean;key:string;alt:string;width:number;height:number;size:number;owner_id:number;url:string;preview_url:string};
 export type MediaPage={items:Media[];total:number;page:number};
 export type ArticleHistory={id:number;revision:number;action:string;created_at:string};
 export const emptyArticle=():ArticleContent=>({title:"",slug:"",summary:"",body_html:"<p></p>",cover_key:null,cover_alt:"",categories:[],tags:[],author_name:"",reviewer:"",sources:[],seo_title:"",seo_description:"",target_keyword:""});
@@ -19,7 +19,9 @@ export function safeContentHtml(value:string,preview=false){
     return doc.body.innerHTML;
 }
 export const contentApi={
-    list:(token:string,page=1)=>apiRequest<{items:Article[];total:number;page:number}>(`/staff/articles?page=${page}`,{},token),
+    unarchiveArticle:(token:string,row:Article)=>apiRequest<Article>(`/staff/articles/${row.id}/unarchive`,{method:"POST",body:JSON.stringify({revision:row.revision})},token),
+    unarchiveMedia:(token:string,key:string)=>apiRequest<Media>(`/staff/media/${key}/unarchive`,{method:"POST"},token),
+    list:(token:string,page=1,deleted=false)=>apiRequest<{items:Article[];total:number;page:number}>(`/staff/articles?page=${page}&deleted=${deleted}`,{},token),
     get:(token:string,id:number)=>apiRequest<Article>(`/staff/articles/${id}`,{},token),
     save:(token:string,id:number|null,revision:number,content:ArticleContent)=>apiRequest<Article>(`/staff/articles${id?`/${id}`:""}`,{method:id?"PUT":"POST",body:JSON.stringify({revision,content})},token),
     analyze:(token:string,content:ArticleContent)=>apiRequest<{content:ArticleContent;seo:SeoFeedback;sanitized:boolean}>("/staff/articles/seo",{method:"POST",body:JSON.stringify(content)},token),
@@ -27,7 +29,7 @@ export const contentApi={
     archive:(token:string,row:Article)=>apiRequest<{message:string}>(`/staff/articles/${row.id}`,{method:"DELETE",body:JSON.stringify({revision:row.revision})},token),
     history:(token:string,id:number)=>apiRequest<ArticleHistory[]>(`/staff/articles/${id}/revisions`,{},token),
     restore:(token:string,row:Article,revision_id:number)=>apiRequest<Article>(`/staff/articles/${row.id}/restore/${revision_id}`,{method:"POST",body:JSON.stringify({revision:row.revision})},token),
-    media:(token:string,page=1,q="")=>apiRequest<MediaPage>(`/staff/media?page=${page}&q=${encodeURIComponent(q)}`,{},token),
+    media:(token:string,page=1,q="",deleted=false)=>apiRequest<MediaPage>(`/staff/media?page=${page}&q=${encodeURIComponent(q)}&deleted=${deleted}`,{},token),
     getMedia:(token:string,key:string)=>apiRequest<Media>(`/staff/media/${key}`,{},token),
     upload:(token:string,file:File,alt:string)=>{const body=new FormData();body.append("file",file);body.append("alt",alt);return apiRequest<Media>("/staff/media",{method:"POST",body},token);},
     editMedia:(token:string,key:string,alt:string)=>apiRequest<Media>(`/staff/media/${key}`,{method:"PUT",body:JSON.stringify({alt})},token),

@@ -1,3 +1,4 @@
+import BackToTop from "@/components/BackToTop";
 import RavielCredit from "@/components/RavielCredit";
 import BusinessHoursView from "@/components/BusinessHoursView";
 import NavList from "./NavList";
@@ -26,8 +27,10 @@ const Footer = () => {
     const content = useSiteContent();
 
     return (
+        <>
         <footer
             id="footer"
+            style={{overflowX:"clip"}}
             className="relative z-20 bg-jetblack dark:bg-jetblack text-slate-200 pt-16 pb-8 flex flex-col"
         >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 px-10 items-start">
@@ -40,7 +43,7 @@ const Footer = () => {
                         bounce: 0.5,
                     }}
                     viewport={{ once: true }}
-                    className="col-span-12 lg:col-span-4 flex flex-col items-start justify-center gap-4"
+                    className="min-w-0 col-span-1 md:col-span-12 lg:col-span-4 flex flex-col items-start justify-center gap-4"
                 >
                     <div className="w-full flex flex-col justify-center items-center gap-2">
                         <a className="z-10" href="/">
@@ -64,7 +67,7 @@ const Footer = () => {
                         {fillText(content.footer.description, clinicInfo)}
                     </p>
                 </motion.div>
-                <div className="col-span-12 lg:col-span-8 grid grid-cols-8 divide-y lg:divide-x lg:divide-y-0 divide-gray-500/40">
+                <div className="min-w-0 col-span-1 md:col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-8 divide-y lg:divide-x lg:divide-y-0 divide-gray-500/40">
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -74,7 +77,7 @@ const Footer = () => {
                             bounce: 0.5,
                         }}
                         viewport={{ once: true }}
-                        className="col-span-8 md:col-span-2 lg:col-span-2 flex flex-col items-center gap-8 px-2 py-8 lg:py-0"
+                        className="min-w-0 col-span-1 md:col-span-2 lg:col-span-2 flex flex-col items-center gap-8 px-2 py-8 lg:py-0"
                     >
                         <div className="w-full flex flex-col gap-2 items-center">
                             <h2 className="text-2xl font-lalezar text-white">لینک ها</h2>
@@ -93,7 +96,7 @@ const Footer = () => {
                             bounce: 0.5,
                         }}
                         viewport={{ once: true }}
-                        className="col-span-8 md:col-span-6 lg:col-span-3 flex flex-col items-center gap-8 px-3 py-8 lg:py-0"
+                        className="min-w-0 col-span-1 md:col-span-6 lg:col-span-3 flex flex-col items-center gap-8 px-3 py-8 lg:py-0"
                     >
                         <div className="w-full flex flex-col gap-2 items-center">
                             <h2 className="text-2xl font-lalezar text-white">تماس ها</h2>
@@ -184,7 +187,7 @@ const Footer = () => {
                             bounce: 0.5,
                         }}
                         viewport={{ once: true }}
-                        className="col-span-8 lg:col-span-3 flex flex-col items-center gap-8 px-6 py-8 lg:py-0"
+                        className="min-w-0 col-span-1 md:col-span-8 lg:col-span-3 flex flex-col items-center gap-8 px-6 py-8 lg:py-0"
                     >
                         <div className="flex flex-col gap-2">
                             <h2 className="text-2xl font-lalezar text-white">
@@ -255,6 +258,8 @@ const Footer = () => {
                 </motion.p>
             </div>
         </footer>
+        <BackToTop />
+        </>
     );
 };
 

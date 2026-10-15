@@ -1,3 +1,4 @@
+import useModalScope from "@/hooks/useModalScope";
 /* eslint-disable react-hooks/set-state-in-effect */
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import ServiceIcon from "@/components/ServiceIcon";
@@ -58,24 +59,24 @@ const BookingWizard = ({
     const [waitlistJoined, setWaitlistJoined] = useState(false);
 
     useEffect(() => {
-        if (step !== 3 || dates.length || !draft.serviceId) return;
-        setBusy(true);
-        appointmentApi
-            .getAvailableDates(draft.serviceId, draft.isUrgent)
-            .then(setDates)
-            .catch((reason) => setError(errorMessage(reason)))
-            .finally(() => setBusy(false));
-    }, [dates.length, draft.isUrgent, draft.serviceId, step]);
+        if(step!==3||!draft.serviceId)return;
+        let active=true;setDates([]);setBusy(true);setError("");
+        void appointmentApi.getAvailableDates(draft.serviceId,draft.isUrgent)
+            .then(result=>{if(active)setDates(result);})
+            .catch(reason=>{if(active)setError(errorMessage(reason));})
+            .finally(()=>{if(active)setBusy(false);});
+        return()=>{active=false;};
+    },[draft.isUrgent,draft.serviceId,step]);
 
     useEffect(() => {
-        if (!draft.date || !draft.serviceId) return;
-        setBusy(true);
-        appointmentApi
-            .getAvailableSlots(draft.date, draft.serviceId, draft.isUrgent)
-            .then(setSlots)
-            .catch((reason) => setError(errorMessage(reason)))
-            .finally(() => setBusy(false));
-    }, [draft.date, draft.isUrgent, draft.serviceId]);
+        if(step!==4||!draft.date||!draft.serviceId)return;
+        let active=true;setSlots([]);setBusy(true);setError("");
+        void appointmentApi.getAvailableSlots(draft.date,draft.serviceId,draft.isUrgent)
+            .then(result=>{if(active)setSlots(result);})
+            .catch(reason=>{if(active)setError(errorMessage(reason));})
+            .finally(()=>{if(active)setBusy(false);});
+        return()=>{active=false;};
+    },[draft.date,draft.isUrgent,draft.serviceId,step]);
 
     useEffect(() => {
         setWaitlistJoined(false);
@@ -134,14 +135,15 @@ const BookingWizard = ({
         }
     };
 
+    const modal = useModalScope<HTMLDivElement>(true,onClose,busy);
     return (
-        <div
+        <div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="دریافت نوبت حضوری"
             className="fixed inset-0 z-100 overflow-y-auto bg-[#f5f7fd] text-slate-800 motion-safe:animate-[fade-in_.2s_ease-out]"
             dir="rtl"
         >
             <header className="sticky top-0 z-10 bg-primary px-4 py-4 text-white shadow-lg">
                 <div className="mx-auto flex max-w-4xl items-center justify-between">
-                    <button onClick={onClose} aria-label="بستن">
+                    <button disabled={busy} onClick={onClose} aria-label="بستن" style={{minWidth:44,minHeight:44}}>
                         <IoCloseOutline size={28} />
                     </button>
                     <h2 className="font-dana text-xl">دریافت نوبت حضوری</h2>
@@ -543,6 +545,7 @@ const BookingWizard = ({
                 <div className="mx-auto flex max-w-6xl gap-3 lg:pl-[344px]">
                     {step > 1 && (
                         <button
+                            disabled={busy}
                             onClick={() => setStep((value) => value - 1)}
                             className="h-12 rounded-2xl border border-slate-200 px-6 text-slate-600"
                         >
@@ -559,7 +562,7 @@ const BookingWizard = ({
                         className="h-12 flex-1 rounded-2xl bg-secondary font-bold text-primary shadow-lg shadow-secondary/20 disabled:opacity-40"
                     >
                         {busy
-                            ? "در حال ثبت…"
+                            ? (step===5?"در حال ثبت…":"در حال دریافت…")
                             : step === 5
                               ? payableNow > 0
                                   ? "پرداخت و ثبت نوبت"

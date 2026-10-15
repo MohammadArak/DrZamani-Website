@@ -82,6 +82,7 @@ const PatientsComments = () => {
         <section
             id="comments"
             style={{
+                overflowX:"clip",
                 backgroundImage: `url(/img/comments/background.webp)`,
                 backgroundRepeat: "no-repeat",
                 backgroundSize: "cover",
@@ -139,7 +140,7 @@ const PatientsComments = () => {
                     </svg>
                 </motion.div>
             </div>
-            <div className="flex flex-col gap-3 items-center">
+            <div className="flex flex-col gap-3 items-center" style={{width:"100%",paddingInline:16,textAlign:"center"}}>
                 <motion.p
                     className="text-lg md:text-2xl text-secondary font-dana font-bold"
                     initial={{ opacity: 0, x: -20 }}

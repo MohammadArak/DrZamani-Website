@@ -81,19 +81,20 @@ const Navigation = ({ solid = false }: { solid?: boolean }) => {
                         : "bg-transparent dark:bg-transparent",
                 )}
             >
-                <div className="flex gap-4">
+                <div className="flex gap-2 sm:gap-4" style={{minWidth:0}}>
                     <button
-                        className="flex lg:hidden items-center gap-4"
+                        className="flex lg:hidden items-center justify-center gap-4"
+                        style={{width:44,minHeight:44,flexShrink:0}}
                         onClick={openDrawer}
                         aria-label="باز کردن منوی سایت"
                         aria-expanded={isOpen}
                     >
                         <TbMenu2 size={24} />
                     </button>
-                    <a className="z-10" href="/">
+                    <a className="z-10" style={{minWidth:0}} href="/">
                         <img
                             src="/img/logo/logo-dark-full.webp"
-                            className="w-32 sm:w-40 md:w-48 lg:w-56"
+                            className="w-40 sm:w-48 lg:w-56"
                             alt={`لوگوی ${clinicInfo.doctorName}`}
                             loading="eager"
                             fetchPriority="high"

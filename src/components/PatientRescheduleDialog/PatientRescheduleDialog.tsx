@@ -1,3 +1,4 @@
+import useModalScope from "@/hooks/useModalScope";
 import Toast from "@/components/Toast";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import {
@@ -10,7 +11,7 @@ import {
     type AvailableSlot,
     type ClinicSettings,
 } from "@/services/appointmentApi";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     IoArrowForwardOutline,
     IoCalendarOutline,
@@ -31,6 +32,7 @@ const PatientRescheduleDialog = ({
     onClose: () => void;
     onRescheduled: (appointment: Appointment) => void;
 }) => {
+    const slotsGeneration=useRef(0);
     const [dates, setDates] = useState<AvailableDate[]>([]);
     const [slots, setSlots] = useState<AvailableSlot[]>([]);
     const [selectedDate, setSelectedDate] = useState("");
@@ -49,18 +51,19 @@ const PatientRescheduleDialog = ({
 
     const chooseDate = useCallback(
         async (day: string) => {
-            setSelectedDate(day);
+            const generation=++slotsGeneration.current;
+            setSlots([]);setSelectedDate(day);
             setSelectedTime("");
             setLoadingSlots(true);
             try {
-                setSlots(
-                    await appointmentApi.getPatientRescheduleSlots(
+                const next=await appointmentApi.getPatientRescheduleSlots(
                         token,
                         appointment.id,
                         day,
-                    ),
-                );
+                    );
+                if(generation===slotsGeneration.current)setSlots(next);
             } catch (error) {
+                if(generation!==slotsGeneration.current)return;
                 setSlots([]);
                 setToast({
                     message:
@@ -70,13 +73,14 @@ const PatientRescheduleDialog = ({
                     kind: "error",
                 });
             } finally {
-                setLoadingSlots(false);
+                if(generation===slotsGeneration.current)setLoadingSlots(false);
             }
         },
         [appointment.id, token],
     );
 
     useEffect(() => {
+        const requests=slotsGeneration;
         let cancelled = false;
         appointmentApi
             .getPatientRescheduleDates(token, appointment.id)
@@ -99,12 +103,12 @@ const PatientRescheduleDialog = ({
                 if (!cancelled) setLoading(false);
             });
         return () => {
-            cancelled = true;
+            cancelled = true;requests.current++;
         };
     }, [appointment.id, chooseDate, token]);
 
     const submit = async () => {
-        if (!selectedDate || !selectedTime) return;
+        if (saving||loadingSlots||!selectedDate || !selectedTime) return;
         setSaving(true);
         try {
             const updated = await appointmentApi.reschedulePatientAppointment(
@@ -129,8 +133,9 @@ const PatientRescheduleDialog = ({
         }
     };
 
+    const modal = useModalScope<HTMLDivElement>(true,onClose,saving);
     return (
-        <div className="fixed inset-0 z-140 flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-sm sm:items-center sm:p-5" dir="rtl">
+        <div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="تغییر زمان نوبت" className="fixed inset-0 z-140 flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-sm sm:items-center sm:p-5" dir="rtl">
             <Toast {...toast} onClose={() => setToast((value) => ({ ...value, message: "" }))} />
             <section className="flex max-h-[100dvh] w-full flex-col overflow-hidden rounded-t-4xl bg-[#f5f7fa] shadow-2xl sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-4xl">
                 <header className="flex shrink-0 items-center justify-between bg-primary px-4 py-4 text-white sm:px-6">
@@ -138,7 +143,7 @@ const PatientRescheduleDialog = ({
                         <span className="text-xs text-secondary-mild">تغییر زمان نوبت</span>
                         <h2 className="mt-1 truncate font-dana text-lg">{appointment.service_title}</h2>
                     </div>
-                    <button type="button" onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl hover:bg-white/10" aria-label="بازگشت">
+                    <button type="button" disabled={saving} onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl hover:bg-white/10" aria-label="بازگشت">
                         <IoArrowForwardOutline size={23} />
                     </button>
                 </header>
@@ -199,7 +204,7 @@ const PatientRescheduleDialog = ({
                 </div>
 
                 <footer className="shrink-0 border-t border-slate-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
-                    <button type="button" onClick={() => void submit()} disabled={!selectedDate || !selectedTime || saving} className="h-12 w-full rounded-2xl bg-secondary font-bold text-primary shadow-lg shadow-secondary/20 disabled:opacity-40">
+                    <button type="button" onClick={() => void submit()} disabled={!selectedDate || !selectedTime || saving || loadingSlots} className="h-12 w-full rounded-2xl bg-secondary font-bold text-primary shadow-lg shadow-secondary/20 disabled:opacity-40">
                         {saving ? "در حال ثبت زمان جدید…" : "ثبت و ارسال برای تأیید مطب"}
                     </button>
                 </footer>

@@ -1,3 +1,4 @@
+import StaffEditorDialog from "./StaffEditorDialog";
 /* eslint-disable react-hooks/set-state-in-effect */
 import { emptyGalleryItem, siteGalleryApi, type GalleryContent, type GalleryRow } from "@/services/siteGalleryApi";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -53,6 +54,7 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
             setBusy(false);
         }
     };
+    const closeEditor=async()=>{if(!busy&&(!dirty||await ask("تغییرات ذخیره‌نشده کنار گذاشته شود؟"))){setSelected(null);setContent(null);}};
     const editable = can(selected ? "site_gallery.edit" : "site_gallery.create") && !busy;
     const upload = async (file: File) => {
         if (!content || !editable || selected?.published || !can("media.manage")) return;
@@ -78,8 +80,8 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
                 </div>
                 {can("site_gallery.create") && <button className="content-primary" disabled={busy} onClick={() => void open(null)}>+ تصویر تازه</button>}
             </header>
-            {error && <p role="alert" className="content-error">{error}<button onClick={() => void load()}>خواندن دوباره</button></p>}
-            {notice && <p role="status" className="content-notice">{notice}</p>}
+            {!content&&error && <p role="alert" className="content-error">{error}<button onClick={() => void load()}>خواندن دوباره</button></p>}
+            {!content&&notice && <p role="status" className="content-notice">{notice}</p>}
             <ul className="source-list" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(120px,1fr))", gap: 12, listStyle: "none", padding: 0 }}>
                 {rows.map((row) => (
                     <li key={row.id}>
@@ -91,12 +93,12 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
                 ))}
             </ul>
             {content && (
-                <section className="article-compose" aria-label="ویرایش تصویر">
+                <StaffEditorDialog title={selected?"ویرایش تصویر نمونه‌کار":"تصویر تازه نمونه‌کار"} busy={busy} onClose={closeEditor}><section className="article-compose" aria-label="ویرایش تصویر">{error&&<p role="alert" className="content-error">{error}</p>}{notice&&<p role="status" className="content-notice">{notice}</p>}
                     <h2>{selected ? "ویرایش تصویر" : "تصویر تازه"}</h2>
                     <label>توضیح تصویر (متن جایگزین)<input maxLength={300} value={content.alt} readOnly={!editable} onChange={(e) => patch("alt", e.target.value)} /></label>
                     {content.kind === "static" && <p>این تصویر از نسخه‌ی قدیمی سایت است ({content.ref}).</p>}
                     {can("media.manage") && !selected?.published && (
-                        <MediaPicker token={token} label="تصویر از رسانه عمومی" value={content.kind === "media" ? content.ref : ""} disabled={!editable} onSelect={(m) => setContent((old) => old && ({ ...old, kind: "media", ref: m?.key ?? "", alt: old.alt || m?.alt || "", consent_received: false, privacy_reviewed: false }))} />
+                        <MediaPicker token={token} label="انتخاب از تصاویر" value={content.kind === "media" ? content.ref : ""} disabled={!editable} onSelect={(m) => setContent((old) => old && ({ ...old, kind: "media", ref: m?.key ?? "", alt: old.alt || m?.alt || "", consent_received: false, privacy_reviewed: false }))} />
                     )}
                     {can("media.manage") && !selected?.published && <label>بارگذاری عکس تازه (JPEG، PNG یا WebP، حداکثر ۱۰ مگابایت)<input type="file" accept="image/jpeg,image/png,image/webp" disabled={!editable} onChange={e => { const file=e.target.files?.[0]; e.target.value=""; if (file) void upload(file); }} /></label>}
                     {selected?.published && <p className="editor-help">برای جایگزینی عکس، ابتدا انتشار آن را متوقف کنید. ترتیب و توضیح تصویر را می‌توانید با ذخیره و انتشار نسخهٔ تازه تغییر دهید.</p>}
@@ -118,7 +120,7 @@ export default function StaffSiteGalleryPanel({ token, onDirtyChange, onBusyChan
                         {selected && can("site_gallery.delete") && <button disabled={busy} onClick={async () => { if (await ask("این تصویر بایگانی شود؟")) await run(async () => { await siteGalleryApi.archive(token, selected); return null; }, "بایگانی شد."); }}>بایگانی</button>}
                         <button type="button" disabled={busy} onClick={async () => { if (!dirty || await ask("تغییرات ذخیره‌نشده کنار گذاشته شود؟")) {setSelected(null);setContent(null);} }}>بستن</button>
                     </div>
-                </section>
+                </section></StaffEditorDialog>
             )}
         </div>
     );

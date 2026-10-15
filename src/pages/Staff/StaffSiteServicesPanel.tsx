@@ -1,3 +1,4 @@
+import StaffEditorDialog from "./StaffEditorDialog";
 /* eslint-disable react-hooks/set-state-in-effect */
 import SeoPreview from "./SeoPreview";
 import EditorialSeoAssistant from "./EditorialSeoAssistant";
@@ -264,12 +265,12 @@ export default function StaffSiteServicesPanel({ token, onDirtyChange, onBusyCha
                             <p>/{row.content.slug}/ · {row.published ? "منتشرشده" : "پیش‌نویس"}{row.unpublished_changes ? " · تغییرات منتشرنشده" : ""}</p>
                         </div>
                         <button disabled={busy} onClick={() => void select(row)}>باز کردن</button>
-                        {can("site_services.delete") && <button disabled={busy} onClick={() => void archive(row)}>بایگانی</button>}
+                        {can("site_services.delete") && <button disabled={busy} onClick={() => void archive(row)}>حذف</button>}
                     </article>
                 ))}
                 {!items.length && <p>هنوز صفحه خدمتی ثبت نشده است.</p>}
             </div>
-            {open && <ServiceForm key={formKey} token={token} initial={selected} onSaved={saved} onDirty={setDirty} onBusy={setBusy} />}
+            {open&&<StaffEditorDialog title="ویرایش صفحه خدمت" busy={busy} onClose={async()=>{if(busy)return;if(dirty&&!await ask("تغییرات ذخیره‌نشده کنار گذاشته شود؟"))return;setOpen(false);setDirty(false);}}><ServiceForm key={formKey} token={token} initial={selected} onSaved={saved} onDirty={setDirty} onBusy={setBusy} /></StaffEditorDialog>}
         </div>
     );
 }
