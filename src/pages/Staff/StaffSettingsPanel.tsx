@@ -1,5 +1,7 @@
 import { appointmentApi,type SettingsHistory,type SystemSettings } from "@/services/appointmentApi";
 import { useCallback,useEffect,useState,type FormEvent,type ReactNode } from "react";
+import {useContentConfirm} from "./useContentConfirm";
+import SettingsSaveBar from "./SettingsSaveBar";
 import CaptchaSetupPanel from "./CaptchaSetupPanel";
 import { useStaffAccess } from "./staffAccess";
 import StaffMfaPanel from "./StaffMfaPanel";
@@ -11,7 +13,8 @@ const groups = [
     ["ai", "هوش مصنوعی"], ["content", "محتوا و سئو"], ["system", "وضعیت سامانه"],
 ];
 
-export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel, onReload }: { token: string; clinicRevision: number; clinicPanel: ReactNode; onReload: () => Promise<void> }) {
+export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel, onReload, clinicDirty, clinicBusy, onDirtyChange, onBusyChange }: { token: string; clinicRevision: number; clinicPanel: ReactNode; onReload: () => Promise<void>; clinicDirty:boolean;clinicBusy:boolean;onDirtyChange:(value:boolean)=>void;onBusyChange:(value:boolean)=>void }) {
+    const {ask,confirmation}=useContentConfirm();
     const can = useStaffAccess();
     const owner = can("secrets.manage");
     const [tab, setTab] = useState("clinic");
@@ -43,7 +46,7 @@ export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel,
         setReset(current => current.includes(key) ? current.filter(item => item !== key) : [...current, key]);
     };
     const save = async (event: FormEvent) => {
-        event.preventDefault(); if (!data || !owner) return;
+        event.preventDefault(); if (!data || !owner || busy || !dirty) return;
         setBusy(true); setError(""); setMessage("");
         try {
             setData(await appointmentApi.updateSystemSettings(token, data.revision, changes, reset));
@@ -71,11 +74,22 @@ export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel,
         finally { setBusy(false); }
     };
     const dirty = Object.keys(changes).length + reset.length;
+    const anyDirty = Boolean(dirty) || clinicDirty;
+    useEffect(() => { onDirtyChange(anyDirty); }, [anyDirty,onDirtyChange]);
+    useEffect(() => { onBusyChange(busy || clinicBusy); }, [busy,clinicBusy,onBusyChange]);
+    useEffect(() => () => { onDirtyChange(false);onBusyChange(false); }, [onDirtyChange,onBusyChange]);
+    useEffect(() => {
+        if(!anyDirty)return;
+        const warn=(event:BeforeUnloadEvent)=>event.preventDefault();
+        window.addEventListener("beforeunload",warn);
+        return()=>window.removeEventListener("beforeunload",warn);
+    },[anyDirty]);
     return <section className="min-w-0 space-y-5" dir="rtl">
+        {confirmation}
         <div className="rounded-3xl border border-slate-200 bg-white p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="font-dana text-2xl text-primary">مرکز تنظیمات</h1>{owner && <button type="button" disabled={busy} className="text-sm text-primary" onClick={() => { setBusy(true); void refresh().then(onReload).catch(failure => setError(failure.message)).finally(() => setBusy(false)); }}>بارگیری آخرین نسخه</button>}</div>
+            <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="font-dana text-2xl text-primary">مرکز تنظیمات</h1>{owner && <button type="button" disabled={busy || clinicBusy || anyDirty} className="text-sm text-primary disabled:opacity-40" onClick={() => { setBusy(true); void refresh().then(onReload).catch(failure => setError(failure.message)).finally(() => setBusy(false)); }}>بارگیری آخرین نسخه</button>}</div>
             <p className="mt-2 text-sm leading-7 text-slate-500">اطلاعات عمومی با مجوز تنظیمات قابل ویرایش است. امنیت، سرویس‌ها و رمزها فقط در اختیار مدیرکل است.</p>
-            <nav className="mt-4 flex flex-wrap gap-2" aria-label="بخش‌های تنظیمات">{groups.filter(([key]) => owner || ["clinic", "content"].includes(key)).map(([key, label]) => <button key={key} type="button" disabled={busy} onClick={() => { if (dirty) { setError("پیش از تغییر بخش، تغییرات را ذخیره یا با بارگیری آخرین نسخه کنار بگذارید."); return; } setTab(key); setMessage(""); setError(""); }} aria-current={tab === key ? "page" : undefined} className={`rounded-xl px-4 py-2 text-sm ${tab === key ? "bg-primary text-white" : "bg-slate-50 text-primary"}`}>{label}</button>)}</nav>
+            <nav className="mt-4 flex flex-wrap gap-2" aria-label="بخش‌های تنظیمات">{groups.filter(([key]) => owner || ["clinic", "content"].includes(key)).map(([key, label]) => <button key={key} type="button" disabled={busy || clinicBusy} onClick={() => { if (anyDirty) { setError("پیش از تغییر بخش، تغییرات را ذخیره یا با «لغو تغییرات» کنار بگذارید."); return; } setTab(key); setMessage(""); setError(""); }} aria-current={tab === key ? "page" : undefined} className={`rounded-xl px-4 py-2 text-sm ${tab === key ? "bg-primary text-white" : "bg-slate-50 text-primary"}`}>{label}</button>)}</nav>
             {data && <p className="mt-3 text-xs text-slate-500">نسخه {data.revision} · محیط {data.status.environment} · تغییرات ذخیره‌نشده: {dirty}</p>}
         </div>
         {error && <p role="alert" className="rounded-xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>}
@@ -96,8 +110,10 @@ export default function StaffSettingsPanel({ token, clinicRevision, clinicPanel,
                     <label className="mt-3 flex items-center gap-2 text-xs"><input type="checkbox" checked={reset.includes(field.key)} onChange={() => resetField(field.key)} />بازگشت به مقدار محیط سرور</label>
                 </div>)}
             </fieldset>
-            {data && <button disabled={busy || !dirty} className="mt-5 rounded-xl bg-primary px-6 py-3 text-sm text-white disabled:opacity-40">{busy ? "در حال ثبت…" : "ذخیره تغییرات"}</button>}
-            {tab === "sms" && <button type="button" disabled={busy || Boolean(dirty)} onClick={() => void probe()} className="mr-3 mt-5 rounded-xl border border-slate-200 px-4 py-3 text-sm">بررسی اتصال امن وب‌هوک (بدون ارسال پیامک)</button>}
+            {data && <SettingsSaveBar busy={busy} dirty={Boolean(dirty)} label="ذخیره تغییرات">
+                <button type="button" disabled={busy || !dirty} className="text-sm text-primary" onClick={() => { void ask("تغییرات این تنظیمات کنار گذاشته شوند؟").then(confirmed=>{if(confirmed){setChanges({});setReset([]);}}); }}>لغو تغییرات</button>
+                {tab === "sms" && <button type="button" disabled={busy || Boolean(dirty)} onClick={() => void probe()} className="rounded-xl border border-slate-200 px-4 py-3 text-sm">بررسی اتصال امن وب‌هوک (بدون ارسال پیامک)</button>}
+            </SettingsSaveBar>}
         </form>}
         {tab === "system" && data && <div className="space-y-5"><div className="rounded-3xl bg-white p-5"><h2 className="font-dana text-xl text-primary">وضعیت و تنظیمات زیرساخت</h2><p className="my-3 text-sm">خروجی HTML سایت: {data.status.public_html_ready ? "آماده" : "نیازمند ساخت"} · رمزگذاری: {data.status.encryption_ready ? "کلید تعریف شده" : "کلید تعریف نشده"}</p><p className="text-sm leading-7">دامنه‌های مجاز وب‌هوک: {data.status.webhook_allowed_hosts.join("، ") || "تعریف نشده"}</p>{data.infrastructure.map(item => <div key={item.key} className="mt-4 border-t border-slate-100 pt-3"><code dir="ltr" className="break-all text-xs">{item.key}</code><p className="text-sm leading-7 text-slate-500">{item.help}</p></div>)}</div><div className="rounded-3xl bg-white p-5"><h2 className="font-dana text-xl text-primary">تاریخچه و بازیابی</h2><p className="mt-2 text-sm leading-7 text-slate-500">بازیابی شامل اطلاعات مطب، امنیت و سرویس‌هاست. بازنشانی‌های محیطی از ENV فعلی خوانده می‌شوند. رمزها نمایش داده نمی‌شوند.</p>{history.length === 0 && <p className="mt-4 text-sm">نسخه قبلی ثبت نشده است.</p>}{history.map(item => <div key={item.revision} className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3"><div className="min-w-0"><b className="text-sm">نسخه {item.revision}</b><p className="break-all text-xs leading-6 text-slate-500">{item.changed_keys.join("، ")}</p></div><button type="button" disabled={busy || Boolean(dirty)} onClick={() => void restore(item.revision)} className="rounded-xl border px-3 py-2 text-xs">بازیابی این نسخه</button></div>)}</div></div>}
     </section>;

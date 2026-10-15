@@ -15,6 +15,7 @@ import {
 } from "@/services/appointmentApi";
 import {
     useEffect,
+    useRef,
     useState
 } from "react";
 import {
@@ -23,6 +24,13 @@ import {
 } from "react-icons/io5";
 
 import { errorMessage } from "./patientUi";
+const bookingSteps = [
+    {label:"سابقه", title:"سابقهٔ مراجعه", help:"بگویید قبلاً در این مطب معاینه شده‌اید یا این اولین مراجعهٔ شماست."},
+    {label:"خدمت", title:"انتخاب خدمت", help:"خدمت موردنظر را انتخاب کنید. هزینه و شرایط پرداخت هر خدمت پیش از ادامه نمایش داده می‌شود."},
+    {label:"تاریخ", title:"انتخاب تاریخ", help:"روزهای دارای ظرفیت را ببینید و یک روز مناسب انتخاب کنید. می‌توانید برای تغییر خدمت به مرحلهٔ قبل برگردید."},
+    {label:"ساعت", title:"انتخاب ساعت", help:"یکی از ساعت‌های آزاد روز انتخاب‌شده را بردارید. اگر ظرفیتی نیست، تاریخ دیگری را بررسی کنید."},
+    {label:"تأیید", title:"بررسی و ثبت", help:"خدمت، تاریخ، ساعت و مبلغ را بررسی کنید؛ نوبت فقط بعد از ثبت نهایی و در صورت لزوم تکمیل پرداخت تأیید می‌شود."},
+];
 type BookingDraft = {
     hasPreviousVisit: boolean | null;
     serviceId: number | null;
@@ -44,6 +52,8 @@ const BookingWizard = ({
     onBooked: (item: Appointment) => void;
 }) => {
     const [step, setStep] = useState(1);
+    const stepHeading = useRef<HTMLHeadingElement>(null);
+    useEffect(() => { stepHeading.current?.focus(); }, [step]);
     const [draft, setDraft] = useState<BookingDraft>({
         hasPreviousVisit: null,
         serviceId: null,
@@ -146,39 +156,25 @@ const BookingWizard = ({
                     <button disabled={busy} onClick={onClose} aria-label="بستن" style={{minWidth:44,minHeight:44}}>
                         <IoCloseOutline size={28} />
                     </button>
-                    <h2 className="font-dana text-xl">دریافت نوبت حضوری</h2>
+                    <h2 className="font-dana text-xl text-white">دریافت نوبت حضوری</h2>
                     <span className="w-7" />
                 </div>
             </header>
             <main className="mx-auto max-w-6xl px-4 py-7 pb-32">
-                <ol
-                    className="mb-8 flex items-center justify-between gap-1"
-                    aria-label="مراحل رزرو"
-                >
-                    {Array.from({ length: 5 }, (_, index) => index + 1).map(
-                        (item) => (
-                            <li
-                                key={item}
-                                className="flex flex-1 items-center last:flex-none"
-                            >
-                                <span
-                                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${item < step ? "border-secondary bg-secondary text-primary" : item === step ? "border-primary bg-primary text-white" : "border-slate-200 bg-white text-slate-400"}`}
-                                >
-                                    {item < step ? (
-                                        <IoCheckmarkCircle color="white" />
-                                    ) : (
-                                        toPersianDigits(item)
-                                    )}
-                                </span>
-                                {item < 5 && (
-                                    <span
-                                        className={`mx-1 h-0.5 flex-1 ${item < step ? "bg-secondary" : "bg-slate-200"}`}
-                                    />
-                                )}
-                            </li>
-                        ),
-                    )}
+                <ol className="mb-5 flex items-start gap-1" aria-label="مراحل رزرو">
+                    {bookingSteps.map((item,index) => <li key={item.label} aria-current={step === index+1 ? "step" : undefined} className="min-w-0 flex-1 text-center">
+                        <span className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full border text-sm font-bold ${index+1 <= step ? "border-primary bg-primary text-white" : "border-slate-200 bg-white text-slate-500"}`}>
+                            {index+1 < step ? <IoCheckmarkCircle aria-label="انجام‌شده" /> : toPersianDigits(index+1)}
+                        </span>
+                        <span className="mt-2 block text-xs text-primary">{item.label}</span>
+                    </li>)}
                 </ol>
+                <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs text-secondary-deep" aria-live="polite">مرحلهٔ {toPersianDigits(step)} از {toPersianDigits(bookingSteps.length)}</p>
+                    <h3 ref={stepHeading} tabIndex={-1} style={{scrollMarginTop:96}} className="mt-2 font-dana text-xl text-primary">{bookingSteps[step-1].title}</h3>
+                    <p className="mt-2 text-sm leading-7 text-slate-600">{bookingSteps[step-1].help}</p>
+                    <p className="mt-2 text-xs leading-6 text-slate-500">با «مرحله قبل» انتخاب‌هایتان را ویرایش کنید؛ تا ثبت نهایی نوبتی رزرو نمی‌شود.</p>
+                </div>
                 {error && (
                     <div
                         role="alert"

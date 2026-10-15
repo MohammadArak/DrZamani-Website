@@ -615,3 +615,77 @@ def test_calendar_text_cannot_inject_properties():
     assert content.count("\r\nBEGIN:VEVENT\r\n") == 1
     assert "\r\nATTENDEE:" not in content
     assert "\r\nDESCRIPTION:injected" not in content
+
+
+def test_denied_resends_do_not_exhaust_hourly_phone_budget(client, monkeypatch):
+    from app.auth_limits import limit_key
+    from sqlalchemy import update
+
+    phone = "+989199991921"
+    monkeypatch.setattr(auth, "get_settings", lambda: replace(get_settings(), otp_max_per_phone_hour=2, otp_max_per_ip_hour=100))
+    sent = []
+    class FakeSms:
+        def send_otp(self, recipient, code):
+            sent.append(recipient)
+    monkeypatch.setattr(auth, "get_sms_provider", FakeSms)
+    first = client.post("/api/v1/auth/otp/request", json={"phone": phone})
+    assert first.status_code == 200
+    for _ in range(6):
+        denied = client.post("/api/v1/auth/otp/request", json={"phone": phone})
+        assert denied.status_code == 429
+        assert 1 <= denied.json()["detail"]["retry_after_seconds"] <= first.json()["retry_after_seconds"]
+    with SessionLocal.begin() as db:
+        assert db.get(AuthRateLimit, limit_key("otp-request-phone", phone)).attempts == 1
+        db.execute(update(AuthRateLimit).where(AuthRateLimit.key == limit_key("otp-resend",phone)).values(resets_at=utcnow()-timedelta(seconds=1)))
+    assert client.post("/api/v1/auth/otp/request", json={"phone": phone}).status_code == 200
+    with SessionLocal.begin() as db:
+        db.execute(update(AuthRateLimit).where(AuthRateLimit.key == limit_key("otp-resend",phone)).values(resets_at=utcnow()-timedelta(seconds=1)))
+    hourly = client.post("/api/v1/auth/otp/request", json={"phone": phone})
+    assert hourly.status_code == 429 and hourly.json()["detail"]["retry_after_seconds"] > 3500
+    assert len(sent) == 2
+
+
+def test_disabled_sms_does_not_spend_phone_budget_or_create_challenge(client, monkeypatch):
+    from app.auth_limits import limit_key
+    phone = "+989199991922"
+    monkeypatch.setattr(auth, "get_settings", lambda: replace(get_settings(), sms_provider="disabled"))
+    for _ in range(3):
+        response = client.post("/api/v1/auth/otp/request", json={"phone":phone})
+        assert response.status_code == 503 and "debug_otp" not in response.text
+    with SessionLocal() as db:
+        assert db.get(AuthRateLimit,limit_key("otp-request-phone",phone)) is None
+        assert db.get(AuthRateLimit,limit_key("otp-resend",phone)) is None
+        assert db.scalar(select(func.count(OtpChallenge.id)).where(OtpChallenge.phone==phone)) == 0
+        assert db.get(AuthRateLimit,limit_key("otp-request-ip","testclient")).attempts == 3
+
+
+def test_related_limit_reservations_are_atomic_under_concurrency():
+    from app.auth_limits import consume_limits, limit_key
+    def attempt(_):
+        with SessionLocal() as db:
+            try:
+                consume_limits(db, [("batch-hour","synthetic",10,3600),("batch-resend","synthetic",1,60)])
+                return 200
+            except HTTPException as exc:
+                return exc.status_code
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(attempt,range(8)))
+    assert results.count(200)==1 and results.count(429)==7
+    with SessionLocal() as db:
+        assert db.get(AuthRateLimit,limit_key("batch-hour","synthetic")).attempts==1
+
+
+def test_delivery_failure_consumes_reservation_and_invalidates_code(client,monkeypatch):
+    from app.sms import SmsDeliveryError
+    phone="+989199991923"
+    class FailedSms:
+        def send_otp(self,recipient,code):
+            raise SmsDeliveryError("synthetic provider failure")
+    monkeypatch.setattr(auth,"get_sms_provider",FailedSms)
+    response=client.post("/api/v1/auth/otp/request",json={"phone":phone})
+    assert response.status_code==503 and "debug_otp" not in response.text
+    with SessionLocal() as db:
+        challenge=db.scalar(select(OtpChallenge).where(OtpChallenge.phone==phone))
+        assert challenge.consumed_at is not None
+    # Delivery may be uncertain in a real provider failure; never refund and flood it.
+    assert client.post("/api/v1/auth/otp/request",json={"phone":phone}).status_code==429

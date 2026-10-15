@@ -1,3 +1,4 @@
+import {useConfirmDialog} from "@/hooks/useConfirmDialog";
 import {lazy,Suspense} from "react";
 /* eslint-disable react-hooks/set-state-in-effect */
 import ConsultationDialog from "@/components/ConsultationDialog";
@@ -65,6 +66,7 @@ const Portal = ({
     onRefresh: () => Promise<void>;
     onLogout: () => void;
 }) => {
+    const {ask,confirmation}=useConfirmDialog();
     const clinicInfo = useMemo(() => buildClinicInfo(clinic), [clinic]);
     const [tab, setTab] = useState<PortalTab>("home");
     const { clinicInfo: bookingPolicy, refreshClinicInfo } = useClinicInfo();
@@ -124,7 +126,7 @@ const Portal = ({
     }, []);
 
     const cancel = async (id: number) => {
-        if (!window.confirm("از لغو این نوبت مطمئن هستید؟")) return;
+        if (!await ask("از لغو این نوبت مطمئن هستید؟",{title:"لغو نوبت",confirmLabel:"بله، نوبت لغو شود",cancelLabel:"نوبت را نگه دار"})) return;
         try {
             await appointmentApi.cancelAppointment(token, id);
             setMessageKind("success");
@@ -208,6 +210,7 @@ const Portal = ({
             dir="rtl"
             className="min-h-screen w-full max-w-full overflow-x-clip bg-[#f3f6f8] pb-28 text-slate-800 md:pb-12"
         >
+            {confirmation}
             <Toast
                 message={message}
                 kind={messageKind}
@@ -236,7 +239,7 @@ const Portal = ({
                 <div className="relative mx-auto mt-6 flex max-w-6xl items-center justify-between gap-4 md:mt-5">
                     <div className="min-w-0">
                         <p className="text-xs text-slate-300 sm:text-sm">سلام، خوش آمدید</p>
-                        <h1 className="mt-1 truncate font-dana text-2xl sm:text-3xl">
+                        <h1 className="mt-1 truncate font-dana text-2xl text-white sm:text-3xl">
                             {profile.first_name} {profile.last_name}
                         </h1>
                         <p className="mt-2 text-xs text-slate-300">
