@@ -5,3 +5,6 @@
 @import './components/_dialog.css';
 @import './components/_drawer.css';
 
+
+/* Keep supporting text readable on light cards, including portal overlays. */
+.staff-shell .text-slate-400,.staff-overlay .text-slate-400,.patient-shell .text-slate-400{color:#475569}

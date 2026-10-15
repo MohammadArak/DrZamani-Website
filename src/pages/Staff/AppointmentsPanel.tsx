@@ -12,6 +12,7 @@ import {
     type AppointmentPage
 } from "@/services/appointmentApi";
 import {
+    useRef,
     useState,
     type FormEvent
 } from "react";
@@ -48,6 +49,8 @@ const AppointmentsPanel = ({
     const [date, setDate] = useState("");
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
+    const [filtering,setFiltering]=useState(false);
+    const filterInFlight=useRef(false);
     const [thisMonth, setThisMonth] = useState(false);
     const [busyId, setBusyId] = useState<number | null>(null);
     const [exporting, setExporting] = useState(false);
@@ -68,9 +71,21 @@ const AppointmentsPanel = ({
         page_size: pageData.page_size || 20,
     });
 
+    const reloadPage = async (page:number, explicitFilters?:AppointmentFilters) => {
+        if(filterInFlight.current)return;
+        filterInFlight.current=true;setFiltering(true);
+        try{await onReload(explicitFilters??filtersFor(page));}
+        catch(error){setToast({message:errorMessage(error),kind:"error"});}
+        finally{filterInFlight.current=false;setFiltering(false);}
+    };
+    const clearFilters=async()=>{
+        if(filterInFlight.current)return;
+        setDate("");setStatus("");setSearch("");setThisMonth(false);
+        await reloadPage(1,{page:1,page_size:pageData.page_size||20});
+    };
     const filter = (event: FormEvent) => {
         event.preventDefault();
-        void onReload(filtersFor(1));
+        void reloadPage(1);
     };
 
     const updateStatus = async (
@@ -138,7 +153,7 @@ const AppointmentsPanel = ({
                 </div>
             </div>
             <form
-                onSubmit={filter}
+                aria-busy={filtering} onSubmit={filter}
                 className="mt-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 lg:grid-cols-[minmax(220px,1fr)_190px_170px_auto]"
             >
                 <label className="relative">
@@ -162,9 +177,12 @@ const AppointmentsPanel = ({
                     options={appointmentFilterOptions}
                     ariaLabel="وضعیت"
                 />
-                <button className="h-11 rounded-xl bg-primary px-5 text-white transition hover:bg-primary-mild">
-                    اعمال فیلتر
+                <div className="flex flex-wrap gap-2">
+                <button disabled={filtering} className="h-11 rounded-xl bg-primary px-5 text-white transition hover:bg-primary-mild disabled:opacity-50">
+                    {filtering ? "در حال دریافت…" : "اعمال فیلتر"}
                 </button>
+                {(date||status||search||thisMonth)&&<button type="button" disabled={filtering} onClick={()=>void clearFilters()} className="h-11 rounded-xl border border-slate-200 px-4 text-sm text-primary disabled:opacity-50">پاک‌کردن فیلترها</button>}
+                </div>
                 <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600 lg:col-span-4">
                     <input
                         type="checkbox"
@@ -263,15 +281,16 @@ const AppointmentsPanel = ({
                 )}
             </div>
 
+            {filtering && <p role="status" className="mt-3 text-sm text-primary">در حال دریافت نتیجهٔ فیلتر…</p>}
             {pageData.total_pages > 1 && (
                 <nav
                     className="mt-6 flex flex-wrap items-center justify-center gap-2"
                     aria-label="صفحه‌بندی نوبت‌ها"
                 >
                     <button
-                        disabled={pageData.page <= 1}
+                        disabled={filtering || pageData.page <= 1}
                         onClick={() =>
-                            void onReload(filtersFor(pageData.page - 1))
+                            void reloadPage(pageData.page - 1)
                         }
                         className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm disabled:opacity-40"
                     >
@@ -282,9 +301,9 @@ const AppointmentsPanel = ({
                         {toPersianDigits(pageData.total_pages)}
                     </span>
                     <button
-                        disabled={pageData.page >= pageData.total_pages}
+                        disabled={filtering || pageData.page >= pageData.total_pages}
                         onClick={() =>
-                            void onReload(filtersFor(pageData.page + 1))
+                            void reloadPage(pageData.page + 1)
                         }
                         className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm disabled:opacity-40"
                     >

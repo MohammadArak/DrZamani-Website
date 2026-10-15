@@ -633,7 +633,7 @@ export const StaffDashboard = ({
                     )}
                     {tab === "patients" && can("patients.view") && (
                         <StaffPatientsPanel
-                            token={token}
+                            token={token} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy}
                             onOpenConversation={(appointmentId) => {
                                 setChatAppointmentId(appointmentId);
                                 navigateTab("consultations");
