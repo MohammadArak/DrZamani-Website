@@ -27,11 +27,20 @@ const AutoGrowTextarea = ({
     useLayoutEffect(() => {
         const textarea = textareaRef.current;
         if (!textarea) return;
-        textarea.style.height = "auto";
-        const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
-        textarea.style.height = `${nextHeight}px`;
-        textarea.style.overflowY =
-            textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+        const resize=()=>{
+            textarea.style.height = "auto";
+            const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
+            textarea.style.height = `${nextHeight}px`;
+            textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+        };
+        resize();
+        let width=textarea.getBoundingClientRect().width;
+        const observer=new ResizeObserver(entries=>{
+            const next=entries[0]?.contentRect.width;
+            if(next!==undefined&&next!==width){width=next;resize();}
+        });
+        observer.observe(textarea);
+        return()=>observer.disconnect();
     }, [maxHeight, value]);
 
     return (

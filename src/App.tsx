@@ -25,6 +25,8 @@ function currentPage() {
 
 // Chosen once when the script loads: the page never changes without a full page load.
 const Page = currentPage();
+// Staff and patient cards use the light base typography; public navy/gold pages retain their theme.
+if (Page === Staff || Page === Appointment) document.documentElement.classList.remove("dark");
 
 function App() {
     return (
@@ -34,7 +36,7 @@ function App() {
             >
                 {Page === Appointment || Page === Staff ? <div style={{minHeight:"100dvh",height:Page===Staff?"100dvh":undefined,display:"flex",flexDirection:"column"}}>
                     <Page />
-                    <footer className="raviel-credit-footer" style={{flexShrink:0}}><RavielCredit /></footer>
+                    {Page === Appointment && <footer className="raviel-credit-footer" style={{flexShrink:0}}><RavielCredit /></footer>}
                 </div> : <Page />}
             </Suspense>
             <ConnectionStatus />

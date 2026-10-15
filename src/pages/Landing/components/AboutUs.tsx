@@ -45,6 +45,7 @@ const AboutUs = () => {
     const content = useSiteContent();
     return (
         <section
+            style={{overflowX:"clip"}}
             id="about-us"
             className="relative flex bg-linear-to-b from-white to-[#f5f7fd] text-gray-900 px-6 md:px-10 py-16"
         >

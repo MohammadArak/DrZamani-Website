@@ -1,3 +1,4 @@
+import useModalScope from "@/hooks/useModalScope";
 import AutoGrowTextarea from "@/components/AutoGrowTextarea";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
@@ -194,8 +195,10 @@ const ConsultationDialog = ({
         }
     };
 
+    const modal=useModalScope<HTMLDivElement>(true,onClose,uploading||sendingMessage||attachmentOpen);
+    const attachmentModal=useModalScope<HTMLDivElement>(attachmentOpen,closeAttachment,uploading);
     return (
-        <div
+        <div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label={role==="patient"?"گفت‌وگو با مطب":"گفت‌وگو با مراجع"}
             className="fixed inset-0 z-150 overflow-hidden bg-[#f4f7fa] motion-safe:animate-[fade-in_.2s_ease-out]"
             dir="rtl"
         >
@@ -224,7 +227,7 @@ const ConsultationDialog = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        disabled={uploading}
+                        disabled={uploading||sendingMessage}
                         aria-label="بازگشت به پنل"
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition hover:bg-white/10 disabled:opacity-40"
                     >
@@ -384,7 +387,7 @@ const ConsultationDialog = ({
             </section>
 
             {attachmentOpen && role === "patient" && (
-                <div
+                <div ref={attachmentModal} tabIndex={-1}
                     className="fixed inset-0 z-30 flex items-end justify-center bg-slate-950/55 backdrop-blur-sm sm:items-center sm:p-4"
                     role="dialog"
                     aria-modal="true"

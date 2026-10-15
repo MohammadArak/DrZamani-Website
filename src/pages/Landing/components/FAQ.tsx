@@ -15,6 +15,7 @@ const FAQ = () => {
 
     return (
         <section
+            style={{overflowX:"clip"}}
             id="faq"
             className="relative flex flex-col bg-linear-to-b from-white to-[#f5f7fd] text-gray-900 pt-20 pb-8"
         >
@@ -145,7 +146,7 @@ const FAQ = () => {
                     سوالات متداول
                 </motion.h2>
             </div>
-            <div className="grid grid-cols-12 py-5 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-12 py-5 gap-8">
                 <div className="hidden md:col-span-4 md:block grow z-10 pr-4">
                     <motion.img
                         initial={{ opacity: 0, x: -40 }}
@@ -170,7 +171,7 @@ const FAQ = () => {
                         bounce: 0.5,
                     }}
                     viewport={{ once: true }}
-                    className="col-span-12 md:col-span-8 px-4 md:pl-10 flex flex-col gap-2 z-20"
+                    className="min-w-0 col-span-1 md:col-span-8 px-4 md:pl-10 flex flex-col gap-2 z-20"
                 >
                     {faqs.map((faq, index) => (
                         <Accordion

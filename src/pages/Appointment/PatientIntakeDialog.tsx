@@ -1,3 +1,4 @@
+import useModalScope from "@/hooks/useModalScope";
 import AppSelect from "@/components/AppSelect";
 import {
     appointmentApi,
@@ -33,6 +34,7 @@ const IntakeFormDialog = ({
     const [error, setError] = useState("");
     const submit = async (event: FormEvent) => {
         event.preventDefault();
+        if(busy)return;
         setBusy(true);
         setError("");
         try {
@@ -48,8 +50,9 @@ const IntakeFormDialog = ({
             setBusy(false);
         }
     };
+    const modal = useModalScope<HTMLDivElement>(true,onClose,busy);
     return (
-        <div className="fixed inset-0 z-110 overflow-y-auto bg-slate-950/55 p-0 backdrop-blur-sm sm:p-5" dir="rtl">
+        <div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="فرم قبل از مراجعه" className="fixed inset-0 z-110 overflow-y-auto bg-slate-950/55 p-0 backdrop-blur-sm sm:p-5" dir="rtl">
             <div className="mx-auto flex min-h-full max-w-3xl items-center justify-center">
                 <form onSubmit={submit} className="min-h-screen w-full overflow-hidden bg-[#f7f9fb] shadow-2xl sm:min-h-0 sm:rounded-4xl">
                     <header className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#173c5b,#2f6387)] px-4 py-4 text-white sm:px-6">
@@ -57,7 +60,7 @@ const IntakeFormDialog = ({
                             <span className="text-xs text-secondary">فرم قبل از مراجعه</span>
                             <h2 className="mt-1 truncate font-dana text-xl">{appointment.service_title}</h2>
                         </div>
-                        <button type="button" onClick={onClose} aria-label="بستن" className="rounded-xl p-2 transition hover:bg-white/10">
+                        <button type="button" disabled={busy} onClick={onClose} aria-label="بستن" className="rounded-xl p-2 transition hover:bg-white/10">
                             <IoCloseOutline size={26} />
                         </button>
                     </header>
@@ -160,7 +163,7 @@ const IntakeFormDialog = ({
                         )}
                     </div>
                     <footer className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-slate-200 bg-white/95 p-4 backdrop-blur sm:px-6">
-                        <button type="button" onClick={onClose} className="h-11 rounded-xl px-4 text-sm text-slate-500">انصراف</button>
+                        <button type="button" disabled={busy} onClick={onClose} className="h-11 rounded-xl px-4 text-sm text-slate-500">انصراف</button>
                         <button disabled={busy} className="h-11 rounded-xl bg-primary px-6 text-sm font-bold text-white disabled:opacity-50">
                             {busy ? "در حال ثبت…" : appointment.intake_completed ? "ذخیره تغییرات" : "ثبت فرم"}
                         </button>

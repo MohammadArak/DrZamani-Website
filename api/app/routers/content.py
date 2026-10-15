@@ -61,9 +61,9 @@ def public_article(slug:str,db:Session=Depends(get_db)):
 
 
 @staff_router.get('/articles')
-def staff_list(page:int=Query(1,ge=1,le=10000),db:Session=Depends(get_db),staff=Depends(require_permission('articles.view'))):
-    count=db.scalar(select(func.count(Article.id)).where(Article.deleted.is_(False)))
-    rows=db.scalars(select(Article).where(Article.deleted.is_(False)).order_by(Article.updated_at.desc(),Article.id.desc()).offset((page-1)*30).limit(30))
+def staff_list(page:int=Query(1,ge=1,le=10000),deleted:bool=Query(False),db:Session=Depends(get_db),staff=Depends(require_permission('articles.view'))):
+    count=db.scalar(select(func.count(Article.id)).where(Article.deleted.is_(deleted)))
+    rows=db.scalars(select(Article).where(Article.deleted.is_(deleted)).order_by(Article.updated_at.desc(),Article.id.desc()).offset((page-1)*30).limit(30))
     return dict(items=[c.read(r) for r in rows],total=count,page=page)
 
 
@@ -143,7 +143,7 @@ def restore(article_id:int,revision_id:int,payload:RevisionInput,db:Session=Depe
     c.revision(db,row,staff,'restore');db.commit();return c.read(row)
 
 
-def media_read(row):return dict(key=row.key,alt=row.alt,width=row.width,height=row.height,size=row.size,owner_id=row.owner_id,url=f'/media/{row.key}.webp',preview_url=f'/api/v1/staff/media/{row.key}/file')
+def media_read(row):return dict(deleted=row.deleted,key=row.key,alt=row.alt,width=row.width,height=row.height,size=row.size,owner_id=row.owner_id,url=f'/media/{row.key}.webp',preview_url=f'/api/v1/staff/media/{row.key}/file')
 
 
 def media_row(db,key):
@@ -160,8 +160,8 @@ def media_path(key):
 
 
 @staff_router.get('/media')
-def media_list(page:int=Query(1,ge=1,le=10000),q:str=Query('',max_length=120),db:Session=Depends(get_db),staff=Depends(require_permission('media.manage'))):
-    filters=[PublicMedia.deleted.is_(False)]
+def media_list(page:int=Query(1,ge=1,le=10000),q:str=Query('',max_length=120),deleted:bool=Query(False),db:Session=Depends(get_db),staff=Depends(require_permission('media.manage'))):
+    filters=[PublicMedia.deleted.is_(deleted)]
     if q.strip():filters.append(PublicMedia.alt.contains(q.strip(),autoescape=True))
     total=db.scalar(select(func.count(PublicMedia.key)).where(*filters))
     rows=db.scalars(select(PublicMedia).where(*filters).order_by(PublicMedia.created_at.desc(),PublicMedia.key.desc()).offset((page-1)*60).limit(60))
@@ -270,3 +270,31 @@ def public_file(key,db,request=None,width=None):
     if request is not None and request.headers.get('if-none-match')==response.headers['etag']:
         return Response(status_code=304,headers={'ETag':response.headers['etag'],**headers})
     return response
+
+
+@staff_router.post('/articles/{article_id}/unarchive')
+def unarchive_article(article_id:int,payload:RevisionInput,db:Session=Depends(get_db),staff=Depends(require_permission('articles.delete'))):
+    c.lock(db,staff,'articles.delete')
+    row=db.get(Article,article_id)
+    if not row or not row.deleted:raise HTTPException(404,'مقاله حذف‌شده پیدا نشد')
+    if row.revision!=payload.revision:raise HTTPException(409,'نسخه مقاله تغییر کرده؛ فهرست را تازه کنید')
+    # Validate media references, but do not republish a previous public/scheduled snapshot.
+    data,_=c.clean_content(c.ArticleContent.model_validate(json.loads(row.content_json)),db)
+    c.reserve_slug(db,data['slug'],row.id)
+    row.content_json=json.dumps(data,ensure_ascii=False)
+    row.deleted=False;row.status='draft';row.published_json=None;row.scheduled_json=None;row.scheduled_at=None;row.revision+=1
+    c.revision(db,row,staff,'unarchive');db.commit()
+    return c.read(row)
+
+
+@staff_router.post('/media/{key}/unarchive')
+def unarchive_media(key:str,db:Session=Depends(get_db),staff=Depends(require_permission('media.manage'))):
+    c.lock(db,staff,'media.manage')
+    if not c.re.fullmatch(r'[a-f0-9]{32}',key):raise HTTPException(404,'تصویر حذف‌شده پیدا نشد')
+    row=db.get(PublicMedia,key)
+    if not row or not row.deleted:raise HTTPException(404,'تصویر حذف‌شده پیدا نشد')
+    if row.owner_id!=staff.id and not is_owner(staff):raise HTTPException(403,'فقط بارگذار یا مدیرکل می‌تواند تصویر را بازیابی کند')
+    media_path(key)  # A missing physical file cannot be restored by changing a database flag.
+    row.deleted=False
+    record_audit(db,action='media.restored',entity_type='public_media',entity_id=key,summary='بازیابی تصویر بدون انتشار',actor_staff_id=staff.id)
+    db.commit();return media_read(row)

@@ -1,3 +1,62 @@
+## آمادهٔ CI مرحله 1.19.1 — 2026-10-15
+
+تغییرات رابط، دیالوگ‌ها، حذف/بازیابی و بنیاد mobile-first این مرحله از نظر تست‌های محلی آماده‌اند. [گزارش پذیرش](MOBILE_ACCEPTANCE_1.19.1.md) و [فهرست103فایل رابط](COMPONENT_AUDIT_1.19.1.md) دامنه را دقیق ثبت می‌کنند:126چیدمان پنل،30بیمار،60صفحه مقاله/خدمت،21وضعیت،هدر/فوتر و جریان‌های اصلی. قطع و بازیابی واقعی APIفرعی با حفظdraftو یک ارسال موفق نیز پذیرفته شد. full439PASS/16SKIP،گروه نهایی26PASS/16SKIP،build/lint/budget/fonts/chat/proxy/Ruffcriticalموفق؛ مجموعه‌ها همپوشان‌اند.
+
+اکنون PR/CIپنجjob/merge و بستهcanonical مانده؛ قبلgreenهمهjobها ادغام نشود. این سند پیش ازcommit/PRاست و SHA/ادغام را ادعا نمی‌کند؛ رسید DELIVERY-1.19.1 کنار خروجی مرجع نهایی خواهد بود. گیت‌های بیرونی: nativekeyboard/zoom/offlineدستگاه،کلیدواقعیAI/CAPTCHA،بازبینیپزشکی،اطلاعاتواقعی مطب،staging/deploy. هیچ deploy یا رزرو/پرداخت/SMSproduction مجازنیست. این پوشش به معنی آزمون همه ترکیب‌های ممکن داده/نقش/حالت نیست.
+
+پیش‌نمایش اصلی127.0.0.1:4173/API8000 روشن؛ تست مستقلlocalhost4174/API8001 دوباره روشن است. کپی بیمار3بیمارساختگی/3نوبت/72پیامساختگی/1عکسفردخیالی؛ اصلی2/2/69/0. secret و DB و پیام/تصویر بیمار واقعی واردGit/بسته/AIنشود. helperهایexactreplacementاین مرحله اجراشده‌اند،blindrerunنشوند. CAPTCHAفقطاستثنایمحدودreviewloopbackپیشین؛ مجوزهایپشت‌صحنه/رمز/MFAحفظ. اسناد تاریخی پایین‌تر ممکن است آمار قبل از تست نهایی داشته باشند.
+
+## 1.19.1 — نتیجهٔ قابل بررسی، 2026-10-15
+
+[گزارش مرحله و حدود پذیرش](MOBILE_ACCEPTANCE_1.19.1.md):126چیدمان پنل،21حالت صفحات وضعیت،6عرض عمومی، حذف/بازیابی واقعی ازUI و جریان ساختگی بیمار/چت بررسی شد. 439PASS/16SKIP وbuild/lint/budgetموفق؛ اسناد داخلdocsلینک گزارش را نسبت بههمانپوشه بخوانند. شاخه هنوز پیش از PR/CI/ادغام است؛ نتیجه نهایی از DELIVERY-1.19.1 کنار خروجی ثبت می‌شود. تمام حالت‌های تعاملی/دستگاه واقعی وگیت‌های بیرونی کامل اعلام نشده‌اند. قدم بعد QAکنترل‌های آخر، CIپنجjob،PRوmergeمجاز،بسته وادامهٔ موارد باقیماندهٔ نقشهراه است. هیچdeploy/رزرو/پرداخت/SMSproductionمجازنیست.
+
+## نتیجهٔ تازهٔ ممیزی موبایل 1.19.1 — 2026-10-15
+
+**هنوز uncommitted است؛ PR/CI/ادغام/بسته این مرحله انجام نشده‌اند.** مبنا همچنان PR24/main23b6029f51e677d71ffb7d44ef8619ae910d0460 است. یادداشت‌های پایین‌تر تاریخی‌اند.
+
+| بخش | کار و شواهد فعلی |
+|---|---|
+| تست backend | 439 passed،16 skipped،4 warnings،198.72s؛ outputs/pytest191-full.xml. گروه محتوای بازیابی 55 passed جداگانه است و نباید به439 جمع شود. پس از این اجرا فقط frontend تغییر کرده است. |
+| پنل | 126 مشاهده: هر21بخش در320/360/390/768/1024/1280. عرض سند و scrollWidth ناحیه محتوا از عرض مجاز بیرون نزد. BROWSER-STAFF-1.19.1.json؛ این پذیرش نمای پیش‌فرض است، نه تمام فرم‌های بازشده. |
+| دیالوگ‌ها | نظر/مقاله/خدمت وبسایت/نمونه‌کار/نقش/کارمند در StaffEditorDialog؛ حفظ draft هنگام لغو خروج و Tab/ShiftTab، Escape، isolation و برگشت دقیق تمرکز به «نقش جدید» و «تصویر تازه» در مرورگر موفق. پیام خطا/موفقیت نقش و گالری داخل دیالوگ دیده می‌شود. |
+| حذف قابل بازگشت | تصویر خیالی تازه upload/delete/trash/restore، مقاله LOCAL_QA_191 ساخته و delete/restore شد؛ مقاله پیش‌نویس ماند. هر دو پس از تست دوباره به بخش حذف‌شده‌ها رفتند؛ داده اصلی دست نخورده. |
+| صفحه عمومی | خانه/فهرست مقاله/یک مقاله/منتوپلاستی در هر6عرض بدون overflow. در320، gridهای12/8ستونه با span نامتناسب و فاصله زیاد باعث overflow بودند؛ FAQ و فوتر در گوشی یک ستون واقعی شدند. متن معرفی نظرات wrap و decorative offsetها محصور شدند. BROWSER-REFLOW-1.19.1.json. |
+| فوتر و منو | منوی5گزینه، تماس با ما#footer، نمونه‌کارها#samples؛ لوگو بزرگ‌تر؛ footerbottom788.55 وnavtop788.5 در390×844 انتهای پایدار، فاصله اضافی صفر. screenshot mobile-footer-1.19.1.jpg. BackToTop به0 رسید، با باقی‌ماندن#footer برنگشت و پنهان شد. |
+| بیمار | محیط جدا localhost4174/API8001؛ رزرو ساختگی بدون پرداخت ازUI، ثبت پاسخ فرم ساختگی، جابه‌جایی25→26مهر11:00 موفق و فرم محفوظ. هرگز رزرو/پرداخت/SMS واقعی رخ نداد. BROWSER-PATIENT-1.19.1.json. |
+| چت | پیام LOCAL_QA_191 و عکس فرد خیالی از مرورگر در کپیDB ارسال شد؛ عکس loaded، الزام باقی4→3، textarea16px، دیالوگ nested و Escape/بازگشت موفق. screenshot patient-chat-synthetic-1.19.1.jpg. تصویر واقعی بیمار نیست و هیچ cache/فایل خصوصی واردGit نمی‌شود. |
+| پاسخ دیررس | Wizard تاریخ‌های خدمت قبلی را دیگر نگه نمی‌دارد؛ دریافت dates/slots به service/date/step فعلی محدود است. Reschedule شماره درخواست دارد تا پاسخ قدیمی روی انتخاب تازه ننشیند. بستن/ارسال تکراری هنگام write مسدود. build/lint تازه و QA نهایی تغییرات کوچک باقی است. |
+| کنترل مشترک | AppSelect برای گزینه خالی crash ندارد، aria-activedescendant، Home/End، خروجTab، popupمحدود به visualViewport دارد؛ Escape روی منوی بسته باید به dialog برسد. AutoGrowTextarea با تغییرعرض دوباره اندازه می‌شود. CloseButton و منوهای اصلی target44px؛ لوگو در320 می‌تواند کمی جمع شود. این آخرین کدها نیازمند QA تازه هستند. |
+
+در اجرای مرورگر یک filechooser حدود16دقیقه در ابزار معطل ماند و بعد موفق شد؛ این زمان ابزار است و سنجش latency محصول محسوب نمی‌شود. دو بار نشست ابزار و سرورهای exec از بین رفتند؛ اکنون Start-Process Hidden با logهای بیرونGit استفاده می‌شود. محیط primary API5296/preview17328 و secondary API11620/preview15932 در آخرین بررسی زنده بودند؛ ادامه‌دهنده PID را تأیید کند. Browser2 سه tab:1صفحهخدمت عمومی،2بیمار،3کارکنان؛ markHandoff شده‌اند، قبلادامه inventoryبررسی شود. viewportفعلی1024×768 رویtab3، مقدار واقعیinnerWidthبرایهرQAخوانده شود. رمز محلی فقط درگفتگو داده شده و دراسناد/بسته ثبت نشود.
+
+فقط در patient-mobile-review.db پس از backup patient-mobile-before-schedule191-*.db، ساعات کاملاًساختگی هفت‌روزه و یک سؤال LOCAL_QA_191 تعریف شد تا فرم‌ها واقعاً آزمایش شوند؛ primaryreview تغییر ساعات/رزرو نداده است. شمارش بدون محتوا در LOCAL-QA-COUNTS-1.19.1.json است. helperهای exactreplacement جدید اجرا شده‌اند؛ دوباره کورکورانه اجرا نشوند. APIvenv مسیر مطلق D:/AI/Chatgpt/DrZamani/.local/api-venv/Scripts/python.exe و Ruff درqualityvenv. EOL mixed Landing باbytes حفظ شده؛ apply_patchمستقیمrepo رویreparsepoint ممکن نیست.
+
+**قدم بعد:** نتیجه build/lint/budgetآخر را ثبت؛ تست AppSelect/textarea و target44، حالت‌های بازشده خدمات/برنامه/تنظیمات و statusها/صفحات عمومی باقی، سپس اسناد و نقشه101کامپوننت را با شواهد دقیق تازه کن. تمام ممیزی/کیبورد و zoom/nativeDevice هنوز کامل اعلام نشود. بعد fullCI پنجjob،PR،ادغام مجاز و بستهcanonical+رسید+AI. PR24 و کارهای1.19.0 دوباره اجرا نشوند. کلید واقعیAI/CAPTCHA، مرورپزشکیانسانی، devicekeyboard/zoom/offline و staging/deploy گیت بیرونی‌اند. هیچdeploy/پرداخت/رزرو/SMSproduction یا داده بیمار/credential درGit مجاز نیست.
+
+## ادامهٔ مرحله 1.19.1 — 2026-10-15، هنوز ادغام نشده
+
+شاخه `feat/mobile-first-audit-20261014` بر پایه main `23b6029f51e677d71ffb7d44ef8619ae910d0460`؛ PR24 و بسته 1.19.0 کامل‌اند و تکرار نشوند. تغییرات این مرحله هنوز uncommitted و پذیرش نهایی مرورگر/CI/PR/بسته باقی است.
+
+- منوی کارکنان در چهار دسته پیشخوان و مراجعان، برنامه مطب، محتوای وبسایت و مدیریت مرتب شد؛ مجوزهای backend و فیلتر RBAC حفظ شد. رسانه عمومی با نام «تصاویر» نمایش داده می‌شود. رفع ارث‌بری dark در staff/appointment برای خوانایی کارت‌های سفید؛ امضای Raviel در صفحه عادی کارکنان حذف شده است.
+- ویرایش نظر، مقاله و خدمت وبسایت در دیالوگ مستقل و قابل اسکرول داخل صفحه، با حفظ draft/تأیید خروج باز می‌شود. تأییدها در portal مستقل، focus/Escape/Tab/background-inert دارند. قفل مشترک با شمارش مصرف‌کنندگان اضافه شد تا بستن همزمان دیالوگ‌های تو‌در‌تو، صفحه را inert یا بدون اسکرول رها نکند. پذیرش مرورگر این حالت هنوز باقی است. گالری و بعضی فرم‌های عملیاتی هنوز نیازمند بازبینی‌اند.
+- حذف و بازیابی مقاله و تصویر با مجوز سمت سرور و کنترل نسخه؛ مقاله بازیابی‌شده فقط پیش‌نویس می‌شود. رسانه مفقود بازیابی نمی‌شود و تصویر وابسته به محتوای فعال قابل حذف نیست. حذف خدمت نوبت‌دهی فقط غیرفعال‌سازی قابل بازگشت است و نوبت/تاریخچه/قیمت/مدت را حفظ می‌کند. خدمات غیرفعال و بایگانی‌شده وضعیت مشترک دارند؛ حذف فیزیکی اضافه نشده است.
+- 55 تست محتوا/بازیابی با یک هشدار وابستگی موفق، JUnit `outputs/pytest191-recycle.xml`. ساخت و lint بدون هشدار و Ruff critical موفق. Bundle main76614/staff26385/allJS440191/allCSS24920 و همه زیر سقف ثابت‌اند؛ fonts/chat/proxy موفق. proxy ابتدا به علت sandbox EPERM روی vite-temp اجرا نشد و در محیط مجاز موفق شد. full pytest شروع شده و هنوز نتیجه نهایی ثبت نشده؛ آن را PASS فرض نکنید.
+- منوی پایین گوشی پنج گزینه، تماس با ما به #footer و نمونه‌کارها به #samples؛ لوگوی 160px؛ فضای پایین با ارتفاع واقعی منو رزرو می‌شود. BackToTop متحرک فقط پس از اسکرول. Drawer با translate280ms به جای right/top پشتیبانی‌نشده. همه نیازمند پذیرش مرورگر تازه هستند. مشاهده سریع Ctrl+End ممکن است وسط smooth-scroll باشد؛ علت هر پرش را بدون خواندن اندازه‌های پایدار به content-visibility نسبت ندهید.
+
+تحقیق الگوهای پنل: [WAI modal dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/)، [Fluent navigation](https://fluent2.microsoft.design/components/web/react/core/nav/usage/)، [GOV.UK question pages](https://design-system.service.gov.uk/patterns/question-pages/). تصمیم‌ها: دسته‌بندی کارهای مرتبط، دیالوگ نزدیک به عمل کاربر، تمرکز محدود و برگشت‌پذیر، کنترل خروج بدون از دست دادن پیش‌نویس؛ فرم‌های مرتبط کارکنان بی‌دلیل به صفحه‌های متعدد شکسته نمی‌شوند.
+
+محیط primary محلی مجدداً API8000 PID16624 و preview4173 راه‌اندازی شد؛ PID/session در ادامه زنده بررسی شود. review.db حفظ شده، CAPTCHA فقط استثنای دقیق loopback/dev/debug/review طبق دستور مالک؛ SMS/رزرو/درگاه production خاموش. محیط جداگانه patient4174/8001 فعلاً نیازمند بررسی زنده است؛ پس از OTP آزمایشی تعداد بیمار ساختگی در کپی به3 رسیده و یادداشت قدیمی2 برای کپی منسوخ است. credential در AI/Git/بسته ثبت نشود. هیچ داده واقعی بیمار مجاز نیست.
+
+باقی: QA واقعی پنل/دیالوگ تو‌در‌تو/حذف و بازیابی با داده ساختگی، گالری/خدمات عملیاتی، ماتریس public+patient و تمام101کامپوننت، منوی متحرک و footer/backtotop در اندازه‌های تعیین‌شده، fulltests/CI/PR/merge و بسته canonical. کلید واقعی AI/CAPTCHA، مرور پزشکی انسانی، keyboard/zoom/offline دستگاه واقعی و staging/deploy گیت‌های بیرونی مستقل‌اند. هیچ ادعای اتمام کامل mobile-first یا deploy وجود ندارد.
+
+# مرحله جاری1.19.1 — ممیزی کامل mobile-first، 2026-10-14
+
+1.19.0 و PR24 ادغام‌شده‌اند: main23b6029f51e677d71ffb7d44ef8619ae910d0460،CI38615651984 هر5jobSUCCESS،Windows436PASS16SKIP وUbuntu452PASS. بسته527سورس/533entry باhash098a4a93932ef79d7631571f4ac51725f9747938bd9652c79efc36d837ea958a آماده؛ DELIVERY/AI_CONTINUATION_1.19.0 کنارoutputs مرجع نهایی است. یادداشت قبلی «PRناتمام» تاریخی است؛ تکرار نکنید.
+
+شاخه feat/mobile-first-audit-20261014 و1.19.1WIP: یافته واقعی input13/14px درموبایل و editor14px با قانون محدودعرض تا767 به16px اصلاح شد،zoomقفل نمی‌شود. Statusoverlay علاوه برfocus trap، siblingهای مسیرDOM را inert/aria-hidden می‌کند و حالت قبلی را دقیقاً برمی‌گرداند؛ بدونhealthpoll. کد تازه هنوزbuild/مرورگر/recovery قبول نشده. همه101کامپوننت/ماتریس هنوز درحال بررسی است.
+
+محیط مستقلpatient API8001/localhost4174،DBساختگیpatient-mobile-review.db وconsoleSMSبدونارسالواقعی/AIخاموش/درگاهخالی فعال است. خطایاول overlayتنظیمات bootstrapallowed_origins وsecretplaintext باحذفازoverlayرفع شد؛ فقطlauncherENVمجازاست. فرم‌ها/رزروایزوله آزمایش‌اند و تغییرprimary4173/production مجازنیست. رفتار profile/intake/chat/attachment/reschedule هنوزباقی. واقعیتoffline/keyboard/zoomگوشی وکلیدprovider وmedicalreviewبیرونی مستقل است.
+
 ## نهایی‌سازی تست محلی1.19.0
 
 تست کامل فعلی436PASS16SKIP4warnings در252.85s؛ چهار verifier core/editorial/comments/chat+SEO با exitcode مستقل صفر و PASS اجرا شدند. lint/build/budget/fonts/chat/proxy و criticalRuff موفق. رسید VALIDATION-1.19.0.json کنار outputs است. عدد431تست یادداشت قبل‌تر منسوخ است. API فقط reviewمحلی از launcher تأییدشده تازه شد،PID4660؛ preview4173. PR/CI/ادغام هنوز انجام نشده و باید با SHA دقیق ثبت شود. ممیزی101کامپوننت هنوز ناتمام است.
@@ -426,3 +485,13 @@ initial loadAll پنل از۱۳ درخواست حوزه‌ای به۲ درخوا
 درخواست تست مالک2026-10-12: نقطه‌ها18px وactive24px (مجموع294px برای16عکس)، پیام رزرو فوری با حذف animation320ms و blur پس‌زمینه8px فقط درReserveDialog، padding پایین32px برابر فاصله32px خط تا ردیف متن. گرادیان دکمه‌های اجتماعی5s و reduced-motion ثابت؛ تماس‌ها در hover/focus طلایی. فوتر از همانNavList هدر با هایلایت متحرک، حالتvertical و آیکون‌های موجود استفاده می‌کند. نسخه/CI نهایی ازreceipt خوانده شود؛ اعداد پیشین تاریخی‌اند.
 
 اصلاح بازخورد مالک: نقطه واقعی span دایره8×8 با radius کامل و active16×8؛ کلیک18/24px و ردیف294px حفظ شد. هایلایت و تغییر رنگ NavList مشترک هدر/فوتر هر دو200ms؛ انیمیشن رزرو کوتاه140ms باscale97% و بدونfilter، overlay120ms بدونblur؛ reduced-motion ثابت. حذف کامل انیمیشن رزرو/شکل border-based نقطه نسخه قبلی کنار گذاشته شد.
+
+### بازخورد تازه مالک — منوی پایین، هدر و امضای کارکنان
+
+تماس→تماس با ما وhref#footer، نمونه‌کارهاhref#samples افزوده؛ لوگوی گوشی128→160px وgap8pxبرایجاگیری320. در390×844 انتهای واقعی صفحه، footerbottom779.92 وbarTop788.5 بود:8.58pxفاصله واقعی ناشی ازpadding64ثابت دربرابرnavbar55.5، نه فقطoverscroll. فضای main ازارتفاع واقعی nav باResizeObserver (شاملsafearea/desktophidden) رزرو وbackgroundهم‌رنگفوترشد. نیازbuild/QAتازه. امضایRavielطبقاصلاحآخرمالک ازstafflogin/portalحذف؛ امضایبقیهصفحاتحفظ. loginlocal_audit/رمزساختگیبهخودمالکدرگفتگو داده شد، credentialواقعی/productionنیست ودرhandoffیاGitاضافه نشود.
+
+بررسی سریعEnd یک علت دیگر پرش را نشان داد: content-visibility:auto بااندازهتخمینی720 برایهمهبخش‌ها، بعدازورودبخشبهviewportارتفاع را عوض می‌کرد و انتهایصفحهناپایداربود. این تخمین عمومی حذف شد؛ DOMبخش‌هایک‌بارlayoutواقعی می‌شود وdeferred2concurrentتصاویر واندازهgallery همچنان محفوظ‌اند. تغییر وزنCSSکاهش می‌دهد،اما performanceدستگاهواقعی هنوزبایدسنجیده شود؛ نبودgapوپایداریfooterبایددرمرورگرتازهverifyشود.
+
+### درخواست‌های تازه مالک در مرحله موبایل
+
+دکمه بازگشت به بالا فقطبعداسکرول باfade/slide/scale و44×44 وsafearea/فضایمنو اضافهشد؛ درFooterمشترکهمهصفحاتعمومی،reducedmotionرعایت. Drawerقبلاًright/topanimateمی‌فرستاداماMotionسبکفقطx/y/scaleپشتیبانی‌می‌کند؛ اکنونtranslate280ms وoverlayfade وmaxviewportواقعی استفاده می‌شود،close300ms/focustrapحفظ. برایstaff/appointment ریشهdarkحذف تاheadingسفیدرویcardsسفیدرفع شود؛ صفحاتعمومیتمقبلی. کدنو هنوزbuild/QAتازهلازم. درخواست‌هایadminدرصف: رسانه→تصاویر،حذفواضحMedia/article/siteServiceباdependencyguardوسطلزباله/بازیابی؛ operationalservicesباوابستگیappointmentپیش ازحذف بررسی؛ sidebarدسته‌بندی/ترتیب؛ comment/article/service/galleryوeditorهایانتخابیDialogبه‌جایزیرلیسترویphone. تحقیقUI/UXرسمی/نمونهمرتبطباقی. فعالرزروهم‌اکنونمرکزتنظیمات→نوبت‌دهی→فعال‌بودن‌رزروآنلاین،بدونفعالکردنprimary/productionتوسطعامل.

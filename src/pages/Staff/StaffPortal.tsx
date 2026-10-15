@@ -51,7 +51,7 @@ import {
     IoTimeOutline
 } from "react-icons/io5";
 import { StaffPermissionsContext,staffTabPermissions } from "./staffAccess";
-import StaffAccessPanel from "./StaffAccessPanel";
+const StaffAccessPanel = lazy(() => import("./StaffAccessPanel"));
 import StaffChatWorkspace from "./StaffChatWorkspace";
 import StaffLogin from "./StaffLogin";
 import StaffMfaPanel from "./StaffMfaPanel";
@@ -277,10 +277,10 @@ export const StaffDashboard = ({
         },
         {
             id: "schedule",
-            label: "تنظیمات نوبت‌دهی",
+            label: "برنامه و ظرفیت",
             icon: <IoSettingsOutline />,
         },
-        { id: "services", label: "خدمات", icon: <IoCheckmarkCircleOutline /> },
+        { id: "services", label: "خدمات نوبت‌دهی", icon: <IoCheckmarkCircleOutline /> },
         ...(can("finance.view")
             ? [
                   { id: "finance" as const, label: "مالی و تسویه", icon: <IoCardOutline />, badge: stats.refund_attention_total },
@@ -299,9 +299,15 @@ export const StaffDashboard = ({
         { id: "site-content", label: "متن‌های صفحه اصلی", icon: <IoListOutline /> },
         { id: "faq", label: "سوالات متداول", icon: <IoListOutline /> },
         { id: "site-gallery", label: "نمونه‌کارها", icon: <IoListOutline /> },
-        { id: "media", label: "رسانه عمومی", icon: <IoListOutline /> },
+        { id: "media", label: "تصاویر", icon: <IoListOutline /> },
         { id: "access", label: "نقش‌ها و کارکنان", icon: <IoShieldCheckmarkOutline /> },
     ].filter(item => item.id === "account-security" || can(staffTabPermissions[item.id])) as typeof navItems;
+    const navGroups:{title:string;ids:StaffTab[]}[]=[
+        {title:"پیشخوان و مراجعان",ids:["dashboard","appointments","calendar","patients","consultations","waitlist"]},
+        {title:"برنامه مطب",ids:["services","schedule","finance","sms"]},
+        {title:"محتوای وبسایت",ids:["site-content","site-services","site-gallery","comments","articles","faq","media"]},
+        {title:"مدیریت",ids:["clinic-info","access","audit","account-security"]},
+    ];
     const sidebar = (
         <>
             <div className="border-b border-white/8 px-5 py-6">
@@ -316,7 +322,12 @@ export const StaffDashboard = ({
                 </a>
             </div>
             <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">
-                {navItems.map((item) => (
+                {navGroups.map(group=>{
+                    const items=group.ids.map(id=>navItems.find(item=>item.id===id)).filter((item):item is typeof navItems[number]=>Boolean(item));
+                    if(!items.length)return null;
+                    return <section key={group.title} aria-label={group.title}>
+                    <h2 style={{fontSize:12,lineHeight:"24px",fontWeight:700,color:"#d5ab64",padding:"12px 12px 4px"}}>{group.title}</h2>
+                    {items.map((item) => (
                     <button
                         key={item.id}
                         aria-current={tab === item.id ? "page" : undefined}
@@ -325,7 +336,7 @@ export const StaffDashboard = ({
                             setTab(item.id);
                             setMobileMenu(false);
                         }}
-                        className={`relative flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-right text-sm transition ${tab === item.id ? "bg-white/10 font-bold text-white shadow-inner" : "text-slate-400 hover:bg-white/5 hover:text-slate-100"}`}
+                        className={`relative flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-right text-sm transition ${tab === item.id ? "bg-white/10 font-bold text-white shadow-inner" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
                     >
                         {tab === item.id && <span className="absolute inset-y-2 right-0 w-1 rounded-l-full bg-secondary" />}
                         <span className={`text-lg ${tab === item.id ? "text-secondary" : ""}`}>{item.icon}</span>
@@ -337,6 +348,8 @@ export const StaffDashboard = ({
                         )}
                     </button>
                 ))}
+                    </section>;
+                })}
             </nav>
             <div className="border-t border-white/8 p-4">
                 <div className="mb-3 px-3">
@@ -443,7 +456,8 @@ export const StaffDashboard = ({
                         aria-expanded={mobileMenu}
                         aria-haspopup="dialog"
                         onClick={() => setMobileMenu(true)}
-                        className="text-2xl text-primary lg:hidden"
+                        className="flex items-center justify-center text-2xl text-primary lg:hidden"
+                        style={{width:44,height:44,flexShrink:0}}
                     >
                         <IoMenuOutline />
                     </button>
@@ -686,7 +700,7 @@ export const StaffDashboard = ({
                             onReload={loadOperations}
                         />
                     )}
-                    {tab === "access" && can("roles.manage") && <StaffAccessPanel token={token} currentId={profile.id} />}
+                    {tab === "access" && can("roles.manage") && <Suspense fallback={<p>در حال آماده‌سازی نقش‌ها و کارکنان…</p>}><StaffAccessPanel token={token} currentId={profile.id} /></Suspense>}
                     {!navItems.length && <p className="rounded-2xl border bg-white p-6">دسترسی به بخش‌های فعلی پنل برای این حساب تعریف نشده است. مجوزهای مقاله و محتوا در مراحل بعد فعال می‌شوند.</p>}
                     {tab === "audit" && can("audit.view") && (
                         <StaffAuditPanel items={auditLogs} />

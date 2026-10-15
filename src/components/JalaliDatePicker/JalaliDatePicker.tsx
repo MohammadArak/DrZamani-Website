@@ -21,6 +21,16 @@ const persian = unwrapDefault(persianPackage) as Calendar;
 const gregorian_en = unwrapDefault(gregorianEnPackage) as Locale;
 const persian_fa = unwrapDefault(persianFaPackage) as Locale;
 
+// Supported renderButton API: https://shahabyazdi.github.io/react-multi-date-picker/header/
+function DateNavigation({direction,handleClick,disabled}:{direction?:string;handleClick?:()=>void;disabled?:boolean}){
+    const next=direction==="right";
+    return <button type="button" disabled={disabled} onClick={handleClick}
+        aria-label={next?"بازه بعدی تقویم":"بازه قبلی تقویم"}
+        style={{minWidth:44,minHeight:44,border:0,background:"transparent",color:"#355a86",fontSize:24,cursor:disabled?"default":"pointer"}}>
+        <span aria-hidden="true">{next?"›":"‹"}</span>
+    </button>;
+}
+
 const JalaliDatePicker = ({
     value,
     onChange,
@@ -87,6 +97,10 @@ const JalaliDatePicker = ({
             inputClass="h-13 w-full cursor-pointer rounded-2xl border border-slate-200 bg-white px-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-secondary focus:ring-4 focus:ring-secondary/10 disabled:cursor-not-allowed disabled:bg-slate-100"
             placeholder={placeholder}
             title={placeholder}
+            renderButton={<DateNavigation />}
+            aria-label={placeholder}
+            inputMode="none"
+            onOpenPickNewDate={false}
             editable={false}
             required={required}
             disabled={disabled}

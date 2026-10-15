@@ -246,10 +246,7 @@
     transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
-:is(#about-us, #services, #comments, #samples, #faq, #footer) {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 720px;
-}
+/* Keep section geometry stable during fast scroll; images still warm progressively. */
 @keyframes l1 {
     to {
         transform: rotate(0.5turn);
@@ -273,3 +270,6 @@
         border-radius: 18px;
     }
 }
+
+/* Keep typed content legible on small screens; no viewport zoom restriction. */
+@media(max-width:767px){input:not([type=checkbox]):not([type=radio]):not(.text-lg),textarea,select,[contenteditable=true]{font-size:16px!important}}

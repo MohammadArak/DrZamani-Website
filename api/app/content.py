@@ -178,7 +178,7 @@ def revision(db,row,staff,action):
 def read(row,public=False):
     data=json.loads(row.published_json if public else row.content_json)
     common=dict(id=row.id,content=data,published_at=row.published_at,updated_at=row.public_updated_at if public else row.updated_at)
-    if not public: common.update(revision=row.revision,status=row.status,scheduled_at=row.scheduled_at,has_publication=bool(row.published_json),unpublished_changes=row.content_json!=row.published_json,author_id=row.author_id,seo=analyze(data))
+    if not public: common.update(deleted=row.deleted,revision=row.revision,status=row.status,scheduled_at=row.scheduled_at,has_publication=bool(row.published_json),unpublished_changes=row.content_json!=row.published_json,author_id=row.author_id,seo=analyze(data))
     return common
 
 

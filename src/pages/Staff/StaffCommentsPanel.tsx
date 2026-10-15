@@ -1,3 +1,4 @@
+import StaffEditorDialog from "./StaffEditorDialog";
 /* eslint-disable react-hooks/set-state-in-effect */
 import PatientComment from "@/pages/Landing/components/PatientComment";
 import { appointmentApi,type Service } from "@/services/appointmentApi";
@@ -51,6 +52,6 @@ export default function StaffCommentsPanel({token,onDirtyChange,onBusyChange}:{t
     const archive=async(row:CommentRow)=>{if(busy)return;if(dirty&&!await ask("پیش از بایگانی، متن ذخیره‌نشده نظر را کنار بگذارید؟"))return;if(!await ask("نظر بایگانی و از نمایش عمومی خارج شود؟"))return;setBusy(true);try{await commentsApi.archive(token,row);setOpen(false);setDirty(false);void load();}catch(e){setError(failure(e));}finally{setBusy(false);}};
     return <div className="content-admin" dir="rtl">{confirmation}<header className="content-header"><div><h1>نظرات مراجعین</h1><p>انتشار با رضایت ثبت‌شده؛ بدون اتصال به اطلاعات بیمار</p></div>{can("comments.create")&&<button onClick={()=>void select(null)}>+ نظر تازه</button>}</header>{error&&<p role="alert" className="content-error">{error}<button onClick={()=>void load()}>تلاش مجدد</button></p>}
         <div className="article-list">{items.map(row=><article key={row.id}><div><b>{row.content.display_name}</b><p>{row.published?"منتشرشده":"پیش‌نویس"}{row.unpublished_changes?" · تغییرات منتشرنشده":""}</p></div><button disabled={busy} onClick={()=>void select(row)}>باز کردن نظر</button>{can("comments.delete")&&<button disabled={busy} onClick={()=>void archive(row)}>بایگانی نظر</button>}</article>)}{!items.length&&<p>هنوز نظری ثبت نشده است.</p>}</div><div className="article-actions"><button disabled={page===1} onClick={()=>setPage(v=>v-1)}>صفحه قبل نظرات</button><span>صفحه {page} · {total} نظر</span><button disabled={page*30>=total} onClick={()=>setPage(v=>v+1)}>صفحه بعد نظرات</button></div>
-        {open&&<CommentForm key={formKey} token={token} initial={selected} onSaved={saved} onDirty={setDirty} onBusy={setBusy}/>}
+        {open&&<StaffEditorDialog title="ویرایش نظر" busy={busy} onClose={async()=>{if(busy)return;if(dirty&&!await ask("تغییرات ذخیره‌نشده کنار گذاشته شود؟"))return;setOpen(false);setDirty(false);}}><CommentForm key={formKey} token={token} initial={selected} onSaved={saved} onDirty={setDirty} onBusy={setBusy}/></StaffEditorDialog>}
     </div>;
 }

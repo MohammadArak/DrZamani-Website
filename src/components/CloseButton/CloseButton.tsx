@@ -13,7 +13,7 @@ export interface CloseButtonProps
 
 const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>(
     (props, ref) => {
-        const { absolute, className, resetDefaultClass, ...rest } = props;
+        const { absolute, className, resetDefaultClass, style, ...rest } = props;
         const closeButtonAbsoluteClass = "absolute z-10";
 
         const closeButtonClass = classNames(
@@ -26,6 +26,7 @@ const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>(
             <button
                 ref={ref}
                 className={closeButtonClass}
+                style={{minWidth:44,minHeight:44,display:"inline-flex",alignItems:"center",justifyContent:"center",...style}}
                 type="button"
                 aria-label="بستن"
                 {...rest}

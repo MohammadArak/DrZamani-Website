@@ -927,6 +927,8 @@ export const appointmentApi = {
             { method: "DELETE" },
             token,
         ),
+    archiveStaffService:(token:string,id:number)=>apiRequest<{message:string}>(`/staff/services/${id}`,{method:"DELETE"},token),
+    restoreStaffService:(token:string,id:number)=>apiRequest<{message:string}>(`/staff/services/${id}/restore`,{method:"POST"},token),
     staffServices: (token: string) => apiRequest<Service[]>("/staff/services", {}, token),
     staffPatients: (
         token: string,
