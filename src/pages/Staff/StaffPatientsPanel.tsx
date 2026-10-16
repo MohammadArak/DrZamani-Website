@@ -93,6 +93,7 @@ export default function StaffPatientsPanel({
     const [note, setNote] = useState("");
     const [tagsText, setTagsText] = useState("");
     const [needsFollowUp, setNeedsFollowUp] = useState(false);
+    const [listError,setListError]=useState("");
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState<{ message: string; kind: "success" | "error" }>({
@@ -118,7 +119,7 @@ export default function StaffPatientsPanel({
     const loadPatients = useCallback(
         async (page = 1) => {
             const sequence=++requests.current.list;
-            setLoading(true);
+            setListError("");setLoading(true);
             try {
                 const next=await appointmentApi.staffPatients(token, {
                         search: search.trim() || undefined,
@@ -129,7 +130,7 @@ export default function StaffPatientsPanel({
                     });
                 if(sequence===requests.current.list)setPageData(next);
             } catch (error) {
-                if(sequence===requests.current.list)setToast({ message: error instanceof Error ? error.message : "دریافت بیماران ناموفق بود", kind: "error" });
+                if(sequence===requests.current.list)setListError(error instanceof Error ? error.message : "دریافت بیماران ناموفق بود");
             } finally {
                 if(sequence===requests.current.list)setLoading(false);
             }
@@ -168,6 +169,8 @@ export default function StaffPatientsPanel({
         else searchTimer.current=window.setTimeout(()=>void loadPatients(),250);
         return()=>{window.clearTimeout(searchTimer.current);pending.list++;};
     }, [loadPatients]);
+
+    useEffect(()=>{const retry=()=>void loadPatients(pageData.page);window.addEventListener("drz:retry",retry);return()=>window.removeEventListener("drz:retry",retry);},[loadPatients,pageData.page]);
 
     const saveRecord = async (event: FormEvent) => {
         event.preventDefault();
@@ -248,6 +251,7 @@ export default function StaffPatientsPanel({
                 </label>
             </form>
 
+            {listError&&<div role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700"><p>{listError} فهرست زیر مربوط به آخرین دریافت موفق است.</p><button type="button" disabled={loading} onClick={()=>void loadPatients(1)} className="mt-2 min-h-11 rounded-xl border border-red-200 px-4">تلاش دوبارهٔ فهرست</button></div>}
             <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
                 <aside className={`${record ? "hidden xl:block" : "block"} h-fit overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm`}>
                     <div className="max-h-[72vh] divide-y divide-slate-100 overflow-y-auto">

@@ -141,7 +141,7 @@ const PatientRescheduleDialog = ({
                 <header className="flex shrink-0 items-center justify-between bg-primary px-4 py-4 text-white sm:px-6">
                     <div className="min-w-0">
                         <span className="text-xs text-secondary-mild">تغییر زمان نوبت</span>
-                        <h2 className="mt-1 truncate font-dana text-lg">{appointment.service_title}</h2>
+                        <h2 className="mt-1 truncate font-dana text-lg text-white">{appointment.service_title}</h2>
                     </div>
                     <button type="button" disabled={saving} onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl hover:bg-white/10" aria-label="بازگشت">
                         <IoArrowForwardOutline size={23} />

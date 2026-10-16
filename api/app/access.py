@@ -224,13 +224,13 @@ def assign_legacy_role(db: Session, staff: StaffUser) -> None:
 
 
 def is_owner(staff: StaffUser) -> bool:
-    return staff.is_active and any(
+    return staff.is_active and not staff.is_archived and any(
         r.slug == "superadmin" and r.is_system and r.is_active for r in staff.roles
     )
 
 
 def permissions_for(staff: StaffUser) -> set[str]:
-    if not staff.is_active:
+    if not staff.is_active or staff.is_archived:
         return set()
     if is_owner(staff):
         return CODES.copy()
@@ -268,6 +268,7 @@ def identity(staff: StaffUser) -> dict:
         permissions=sorted(permissions_for(staff)),
         is_superadmin=is_owner(staff),
         is_active=staff.is_active,
+        is_archived=staff.is_archived,
     )
 
 

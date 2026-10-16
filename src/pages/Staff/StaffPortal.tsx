@@ -704,7 +704,7 @@ export const StaffDashboard = ({
                             onReload={loadOperations}
                         />
                     )}
-                    {tab === "access" && can("roles.manage") && <Suspense fallback={<p>در حال آماده‌سازی نقش‌ها و کارکنان…</p>}><StaffAccessPanel token={token} currentId={profile.id} /></Suspense>}
+                    {tab === "access" && can("roles.manage") && <Suspense fallback={<p>در حال آماده‌سازی نقش‌ها و کارکنان…</p>}><StaffAccessPanel token={token} currentId={profile.id} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {!navItems.length && <p className="rounded-2xl border bg-white p-6">دسترسی به بخش‌های فعلی پنل برای این حساب تعریف نشده است. مجوزهای مقاله و محتوا در مراحل بعد فعال می‌شوند.</p>}
                     {tab === "audit" && can("audit.view") && (
                         <StaffAuditPanel items={auditLogs} />

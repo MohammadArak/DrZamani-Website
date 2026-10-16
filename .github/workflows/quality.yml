@@ -59,6 +59,7 @@ jobs:
       - run: npm run check:proxy
       - run: npm run check:fonts
       - run: npm run check:chat
+      - run: npm run check:transport
       - run: npm run check:bundle -- --report .work/bundle-report.json
       - run: npm audit --audit-level=low
 
