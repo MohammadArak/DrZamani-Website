@@ -106,13 +106,13 @@ const EnabledAppointmentPortal = () => {
                 {sessionError} <button onClick={() => void load(token)} className="underline">تلاش مجدد</button>
             </div>}
             {!token ? (
-                <Suspense fallback={<p role="status">در حال آماده‌سازی سامانه…</p>}><Login onAuthenticated={setToken} /></Suspense>
+                <Suspense fallback={<LoadingScreen />}><Login onAuthenticated={setToken} /></Suspense>
             ) : loading || !profile || !clinic ? (
                 <LoadingScreen />
             ) : !profile.profile_completed ? (
-                <Suspense fallback={<p role="status">در حال آماده‌سازی سامانه…</p>}><ProfileForm profile={profile} onSaved={setProfile} /></Suspense>
+                <Suspense fallback={<LoadingScreen />}><ProfileForm profile={profile} onSaved={setProfile} onCancel={logout} /></Suspense>
             ) : (
-                <Suspense fallback={<p role="status">در حال آماده‌سازی سامانه…</p>}><Portal
+                <Suspense fallback={<LoadingScreen />}><Portal
                     token={token}
                     profile={profile}
                     clinic={clinic}

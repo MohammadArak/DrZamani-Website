@@ -25,6 +25,8 @@ export type PatientProfile = {
     national_id: string | null;
     is_foreign_national: boolean;
     foreign_identifier: string | null;
+    referral_source?: string | null;
+    referral_detail?: string | null;
     profile_completed: boolean;
 };
 
@@ -37,6 +39,8 @@ export type PatientProfilePayload = {
     national_id: string | null;
     is_foreign_national: boolean;
     foreign_identifier: string | null;
+    referral_source?: string | null;
+    referral_detail?: string | null;
 };
 
 export type BusinessHours = { day_of_week: "Saturday" | "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday"; opens: string; closes: string };

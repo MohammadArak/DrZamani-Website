@@ -204,7 +204,15 @@ def update_me(
     patient: Patient = Depends(get_current_patient),
     db: Session = Depends(get_db),
 ) -> Patient:
-    for field, value in payload.model_dump().items():
+    if not patient.profile_completed and not payload.referral_source:
+        raise HTTPException(status_code=422, detail="لطفاً نحوه آشنایی با مطب را انتخاب کنید")
+    values = payload.model_dump()
+    for referral_field in ("referral_source", "referral_detail"):
+        if referral_field not in payload.model_fields_set:
+            values.pop(referral_field, None)
+    if payload.referral_source and payload.referral_source != "other":
+        values["referral_detail"] = None
+    for field, value in values.items():
         setattr(patient, field, value)
     patient.profile_completed = True
     try:
