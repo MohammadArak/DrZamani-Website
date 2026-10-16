@@ -1,3 +1,4 @@
+import {useConfirmDialog} from "@/hooks/useConfirmDialog";
 import useModalScope from "@/hooks/useModalScope";
 import AutoGrowTextarea from "@/components/AutoGrowTextarea";
 import Spinner from "@/components/Spinner";
@@ -195,11 +196,13 @@ const ConsultationDialog = ({
         }
     };
 
-    const modal=useModalScope<HTMLDivElement>(true,onClose,uploading||sendingMessage||attachmentOpen);
+    const {ask,confirmation}=useConfirmDialog();
+    const requestClose=async()=>{if(uploading||sendingMessage||attachmentOpen)return;if(body.trim()&&!await ask("پیام نوشته‌شده هنوز ارسال نشده است؛ گفت‌وگو بسته شود؟",{cancelLabel:"ادامهٔ نوشتن"}))return;onClose();};
+    const modal=useModalScope<HTMLDivElement>(true,()=>void requestClose(),uploading||sendingMessage||attachmentOpen);
     const attachmentModal=useModalScope<HTMLDivElement>(attachmentOpen,closeAttachment,uploading);
     return (
-        <div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label={role==="patient"?"گفت‌وگو با مطب":"گفت‌وگو با مراجع"}
-            className="fixed inset-0 z-150 overflow-hidden bg-[#f4f7fa] motion-safe:animate-[fade-in_.2s_ease-out]"
+        <>{confirmation}<div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label={role==="patient"?"گفت‌وگو با مطب":"گفت‌وگو با مراجع"}
+            className="fixed inset-0 z-150 overflow-hidden motion-safe:animate-[fade-in_.2s_ease-out]" style={{display:"flex",justifyContent:"center",background:"#0b182870"}}
             dir="rtl"
         >
             <Toast
@@ -207,10 +210,10 @@ const ConsultationDialog = ({
                 kind={toast.kind}
                 onClose={() => setToast((value) => ({ ...value, message: "" }))}
             />
-            <section className="chat-workspace flex h-[100dvh] w-full min-w-0 flex-col overflow-hidden bg-[#f5f7fd] motion-safe:animate-[panel-in_.25s_ease-out]">
+            <section style={{maxWidth:1120}} className="chat-workspace flex h-[100dvh] w-full min-w-0 flex-col overflow-hidden bg-[#f5f7fd] motion-safe:animate-[panel-in_.25s_ease-out]">
                 <header className="flex min-h-16 shrink-0 items-center justify-between border-b border-white/10 bg-primary px-4 py-3 text-white shadow-lg sm:px-6">
                     <div className="min-w-0">
-                        <h2 className="truncate font-dana text-base sm:text-lg">{title}</h2>
+                        <h2 className="truncate font-dana text-base text-white sm:text-lg">{title}</h2>
                         <span className="mt-1.5 flex items-center gap-1.5 text-[10px] text-slate-300">
                             <span
                                 className={`h-1.5 w-1.5 rounded-full ${
@@ -226,7 +229,7 @@ const ConsultationDialog = ({
                     </div>
                     <button
                         type="button"
-                        onClick={onClose}
+                        onClick={()=>void requestClose()}
                         disabled={uploading||sendingMessage}
                         aria-label="بازگشت به پنل"
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition hover:bg-white/10 disabled:opacity-40"
@@ -571,7 +574,7 @@ const ConsultationDialog = ({
                     </section>
                 </div>
             )}
-        </div>
+        </div></>
     );
 };
 

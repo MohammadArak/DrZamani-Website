@@ -7,7 +7,7 @@ export const STAFF_PROFILE_KEY = "drz_staff_profile";
 
 export type StaffIdentity = {
     id: number; username: string; full_name: string; role: string;
-    role_ids: number[]; role_titles: string[]; permissions: string[]; is_superadmin: boolean; is_active: boolean;
+    role_ids: number[]; role_titles: string[]; permissions: string[]; is_superadmin: boolean; is_active: boolean; is_archived?: boolean;
 };
 export type AccessRole = { id: number; slug: string; name: string; description: string; is_active: boolean; is_system: boolean; is_superadmin: boolean; permissions: string[]; member_count: number };
 export type AccessRoleWrite = Pick<AccessRole, "name" | "description" | "is_active" | "permissions">;
@@ -579,6 +579,7 @@ export async function apiRequest<T>(
         headers.set("Content-Type", "application/json");
     sessionHeaders(token).forEach((value, key) => headers.set(key, value));
 
+    const interruptedMessage = ["GET","HEAD"].includes((options.method??"GET").toUpperCase()) ? "ارتباط با سامانه برقرار نشد" : "پاسخ سامانه دریافت نشد؛ وضعیت عملیات را پیش از تکرار بررسی کنید.";
     let response: Response;
     const ticket=beginRequest();
     const timeout=AbortSignal.timeout(20_000);
@@ -588,13 +589,25 @@ export async function apiRequest<T>(
     } catch (error) {
         if(options.signal?.aborted)throw error;
         requestFailed(ticket);
-        throw new AppointmentApiError("ارتباط با سامانه برقرار نشد", 0);
+        throw new AppointmentApiError(interruptedMessage, 0);
     }
     responseObserved(ticket,response);
+    if (response.status === 401 && token === STAFF_COOKIE_SESSION) window.dispatchEvent(new Event("drz:staff-expired"));
 
+    if (response.status === 204) return undefined as T;
+    let parsed: unknown;
+    try { parsed = await response.json(); }
+    catch (error) {
+        if(options.signal?.aborted)throw error;
+        if(!(error instanceof SyntaxError)){
+            requestFailed(ticket);
+            throw new AppointmentApiError(interruptedMessage,0);
+        }
+        if(response.ok)throw new AppointmentApiError("پاسخ سامانه قابل خواندن نیست؛ دوباره تلاش کنید.",response.status);
+        parsed = {};
+    }
     if (!response.ok) {
-        if (response.status === 401 && token === STAFF_COOKIE_SESSION) window.dispatchEvent(new Event("drz:staff-expired"));
-        const payload = (await response.json().catch(() => ({}))) as ApiErrorPayload;
+        const payload = (parsed && typeof parsed === "object" ? parsed : {}) as ApiErrorPayload;
         const retryAfter =
             payload.detail && !Array.isArray(payload.detail) && typeof payload.detail === "object"
                 ? payload.detail.retry_after_seconds
@@ -606,8 +619,7 @@ export async function apiRequest<T>(
             payload.detail && !Array.isArray(payload.detail) && typeof payload.detail === "object" ? payload.detail.bot_challenge : undefined,
         );
     }
-    if (response.status === 204) return undefined as T;
-    return (await response.json()) as T;
+    return parsed as T;
 }
 
 function apiUpload<T>(
@@ -857,7 +869,10 @@ export const appointmentApi = {
     staffMe: () => apiRequest<StaffIdentity>("/staff/me", {}, STAFF_COOKIE_SESSION),
     accessRoles: (token: string) => apiRequest<AccessRole[]>("/staff/access/roles", {}, token),
     accessPermissions: (token: string) => apiRequest<AccessPermission[]>("/staff/access/permissions", {}, token),
-    accessStaff: (token: string) => apiRequest<StaffIdentity[]>("/staff/access/staff", {}, token),
+    accessStaff: (token: string, archived=false) => apiRequest<StaffIdentity[]>(`/staff/access/staff?archived=${archived}`, {}, token),
+    archiveAccessStaff: (token:string,id:number) => apiRequest<{message:string}>(`/staff/access/staff/${id}`,{method:"DELETE"},token),
+    purgeAccessStaff: (token:string,id:number,username:string) => apiRequest<{message:string}>(`/staff/access/staff/${id}/purge`,{method:"POST",body:JSON.stringify({confirmation_username:username})},token),
+    restoreAccessStaff: (token:string,id:number) => apiRequest<StaffIdentity>(`/staff/access/staff/${id}/restore`,{method:"POST"},token),
     saveAccessRole: (token: string, id: number | null, payload: AccessRoleWrite) => apiRequest<AccessRole>(`/staff/access/roles${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", body: JSON.stringify(payload) }, token),
     deleteAccessRole: (token: string, id: number) => apiRequest<{ message: string }>(`/staff/access/roles/${id}`, { method: "DELETE" }, token),
     saveAccessStaff: (token: string, id: number | null, payload: AccessStaffWrite) => apiRequest<StaffIdentity>(`/staff/access/staff${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", body: JSON.stringify(payload) }, token),

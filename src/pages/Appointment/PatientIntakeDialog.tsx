@@ -1,3 +1,4 @@
+import {useConfirmDialog} from "@/hooks/useConfirmDialog";
 import useModalScope from "@/hooks/useModalScope";
 import AppSelect from "@/components/AppSelect";
 import {
@@ -50,17 +51,20 @@ const IntakeFormDialog = ({
             setBusy(false);
         }
     };
-    const modal = useModalScope<HTMLDivElement>(true,onClose,busy);
+    const {ask,confirmation}=useConfirmDialog();
+    const dirty=JSON.stringify(answers)!==JSON.stringify(appointment.intake_submission?.answers??{})||JSON.stringify(acceptedConsents)!==JSON.stringify(appointment.intake_submission?.accepted_consents??[]);
+    const requestClose=async()=>{if(busy)return;if(dirty&&!await ask("پاسخ‌های فرم ذخیره نشده‌اند؛ بدون ذخیره خارج شوید؟",{cancelLabel:"ادامهٔ تکمیل فرم"}))return;onClose();};
+    const modal = useModalScope<HTMLDivElement>(true,()=>void requestClose(),busy);
     return (
-        <div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="فرم قبل از مراجعه" className="fixed inset-0 z-110 overflow-y-auto bg-slate-950/55 p-0 backdrop-blur-sm sm:p-5" dir="rtl">
-            <div className="mx-auto flex min-h-full max-w-3xl items-center justify-center">
+        <>{confirmation}<div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="فرم قبل از مراجعه" className="fixed inset-0 z-110 overflow-y-auto bg-slate-950/55 p-0 backdrop-blur-sm sm:p-5" dir="rtl">
+            <div data-modal-backdrop className="mx-auto flex min-h-full max-w-3xl items-center justify-center">
                 <form onSubmit={submit} className="min-h-screen w-full overflow-hidden bg-[#f7f9fb] shadow-2xl sm:min-h-0 sm:rounded-4xl">
                     <header className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-[linear-gradient(135deg,#173c5b,#2f6387)] px-4 py-4 text-white sm:px-6">
                         <div className="min-w-0">
                             <span className="text-xs text-secondary">فرم قبل از مراجعه</span>
-                            <h2 className="mt-1 truncate font-dana text-xl">{appointment.service_title}</h2>
+                            <h2 className="mt-1 truncate font-dana text-xl text-white">{appointment.service_title}</h2>
                         </div>
-                        <button type="button" disabled={busy} onClick={onClose} aria-label="بستن" className="rounded-xl p-2 transition hover:bg-white/10">
+                        <button type="button" disabled={busy} onClick={()=>void requestClose()} aria-label="بستن" className="rounded-xl p-2 transition hover:bg-white/10">
                             <IoCloseOutline size={26} />
                         </button>
                     </header>
@@ -170,7 +174,7 @@ const IntakeFormDialog = ({
                     </footer>
                 </form>
             </div>
-        </div>
+        </div></>
     );
 };
 

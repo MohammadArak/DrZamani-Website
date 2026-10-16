@@ -15,7 +15,7 @@ from ..access import (
     validate_permissions,
 )
 from ..activity import record_audit
-from ..database import get_db
+from ..database import Base, get_db
 from ..dependencies import require_permission
 from ..models import Permission, Role, StaffRole, StaffUser
 from ..security import hash_password
@@ -229,12 +229,13 @@ def delete_role(
 
 @router.get("/staff")
 def staff_list(
+    archived: bool = False,
     _actor: StaffUser = Depends(require_permission("staff.manage")),
     db: Session = Depends(get_db),
 ):
     return [
         identity(s)
-        for s in db.scalars(select(StaffUser).order_by(StaffUser.id)).unique()
+        for s in db.scalars(select(StaffUser).where(StaffUser.is_archived == archived).order_by(StaffUser.id)).unique()
     ]
 
 
@@ -289,6 +290,8 @@ def update_staff(
     staff = db.get(StaffUser, staff_id)
     if not staff:
         raise HTTPException(404, "کارمند پیدا نشد")
+    if staff.is_archived:
+        raise HTTPException(409, "ابتدا کارمند را از بخش حذف‌شده‌ها بازیابی کنید")
     staff.full_name, staff.is_active, staff.role = (
         payload.full_name,
         payload.is_active,
@@ -314,3 +317,86 @@ def update_staff(
     )
     db.commit()
     return identity(staff)
+
+
+@router.delete("/staff/{staff_id}")
+def archive_staff(
+    staff_id: int,
+    actor: StaffUser = Depends(require_permission("staff.manage")),
+    db: Session = Depends(get_db),
+):
+    actor = lock_owner(db, actor)
+    staff = db.get(StaffUser, staff_id)
+    if not staff:
+        raise HTTPException(404, "کارمند پیدا نشد")
+    if staff.id == actor.id:
+        raise HTTPException(409, "حسابی که با آن وارد شده‌اید حذف نمی‌شود")
+    if staff.is_archived:
+        return {"message": "کارمند قبلاً حذف شده است"}
+    staff.is_active = False
+    staff.is_archived = True
+    ensure_owner_remains(db)
+    revoke_staff(db, [staff.id])
+    record_audit(db, action="access.staff_archived", entity_type="staff", entity_id=staff.id,
+                 actor_staff_id=actor.id, summary="حذف قابل‌بازیابی کارمند", details={})
+    db.commit()
+    return {"message": "کارمند حذف و ورود او بسته شد؛ سوابق حفظ شده‌اند"}
+
+
+@router.post("/staff/{staff_id}/restore")
+def restore_staff(
+    staff_id: int,
+    actor: StaffUser = Depends(require_permission("staff.manage")),
+    db: Session = Depends(get_db),
+):
+    actor = lock_owner(db, actor)
+    staff = db.get(StaffUser, staff_id)
+    if not staff:
+        raise HTTPException(404, "کارمند پیدا نشد")
+    if not staff.is_archived:
+        return identity(staff)
+    staff.is_archived = False
+    staff.is_active = False
+    revoke_staff(db, [staff.id])
+    record_audit(db, action="access.staff_restored", entity_type="staff", entity_id=staff.id,
+                 actor_staff_id=actor.id, summary="بازیابی کارمند با ورود غیرفعال", details={})
+    db.commit()
+    return identity(staff)
+
+
+class StaffPurge(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    confirmation_username: str = Field(min_length=3, max_length=80)
+
+
+@router.post("/staff/{staff_id}/purge")
+def purge_staff(
+    staff_id: int,
+    payload: StaffPurge,
+    actor: StaffUser = Depends(require_permission("staff.manage")),
+    db: Session = Depends(get_db),
+):
+    actor = lock_owner(db, actor)
+    staff = db.get(StaffUser, staff_id)
+    if not staff:
+        raise HTTPException(404, "کارمند پیدا نشد")
+    if staff.id == actor.id:
+        raise HTTPException(409, "حسابی که با آن وارد شده‌اید حذف دائمی نمی‌شود")
+    if not staff.is_archived or staff.is_active:
+        raise HTTPException(409, "ابتدا کارمند را به بخش حذف‌شده‌ها منتقل کنید")
+    if payload.confirmation_username != staff.username:
+        raise HTTPException(422, "نام کاربری تأیید با این حساب یکسان نیست")
+    ensure_owner_remains(db)
+    # Never cascade-delete clinical, financial or editorial history. Restrictive
+    # references require deliberate reassignment outside this destructive action.
+    for table in Base.metadata.sorted_tables:
+        for column in table.columns:
+            if any(fk.target_fullname == "staff_users.id" and (fk.ondelete or "").upper() not in {"CASCADE", "SET NULL"} for fk in column.foreign_keys):
+                if db.scalar(select(column).where(column == staff_id).limit(1)) is not None:
+                    raise HTTPException(409, "این حساب مالک محتوا یا سابقهٔ وابسته است؛ ابتدا مالکیت محتوا را تعیین کنید. حذف قابل‌بازیابی همچنان در دسترس است")
+    revoke_staff(db, [staff.id])
+    record_audit(db, action="access.staff_purged", entity_type="staff", entity_id=staff.id,
+                 actor_staff_id=actor.id, summary="حذف دائمی حساب کارمند؛ حفظ سوابق بیماران", details={})
+    db.delete(staff)
+    db.commit()
+    return {"message": "حساب و اطلاعات ورود برای همیشه حذف شدند؛ سوابق بیماران محفوظ‌اند"}

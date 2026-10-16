@@ -1,3 +1,4 @@
+import {useConfirmDialog} from "@/hooks/useConfirmDialog";
 import useModalScope from "@/hooks/useModalScope";
 /* eslint-disable react-hooks/set-state-in-effect */
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
@@ -145,15 +146,18 @@ const BookingWizard = ({
         }
     };
 
-    const modal = useModalScope<HTMLDivElement>(true,onClose,busy);
+    const {ask,confirmation}=useConfirmDialog();
+    const requestClose=async()=>{if(busy)return;if((draft.hasPreviousVisit!==null||draft.serviceId!==null||draft.note.trim())&&!await ask("انتخاب‌ها و توضیحات نوبت هنوز ثبت نشده‌اند؛ از رزرو خارج شوید؟",{cancelLabel:"ادامهٔ رزرو"}))return;onClose();};
+    const modal = useModalScope<HTMLDivElement>(true,()=>void requestClose(),busy);
     return (
-        <div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="دریافت نوبت حضوری"
-            className="fixed inset-0 z-100 overflow-y-auto bg-[#f5f7fd] text-slate-800 motion-safe:animate-[fade-in_.2s_ease-out]"
+        <>{confirmation}<div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="دریافت نوبت حضوری"
+            className="fixed inset-0 z-100 overflow-hidden text-slate-800 motion-safe:animate-[fade-in_.2s_ease-out]" style={{display:"flex",justifyContent:"center",background:"#0b182870"}}
             dir="rtl"
         >
+            <div style={{width:"min(1280px,100%)",height:"100dvh",overflowY:"auto",background:"#f5f7fd"}}>
             <header className="sticky top-0 z-10 bg-primary px-4 py-4 text-white shadow-lg">
                 <div className="mx-auto flex max-w-4xl items-center justify-between">
-                    <button disabled={busy} onClick={onClose} aria-label="بستن" style={{minWidth:44,minHeight:44}}>
+                    <button disabled={busy} onClick={()=>void requestClose()} aria-label="بستن" style={{minWidth:44,minHeight:44}}>
                         <IoCloseOutline size={28} />
                     </button>
                     <h2 className="font-dana text-xl text-white">دریافت نوبت حضوری</h2>
@@ -537,7 +541,7 @@ const BookingWizard = ({
                 </aside>
                 </div>
             </main>
-            <footer className="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/95 p-4 backdrop-blur">
+            <footer className="sticky inset-x-0 bottom-0 border-t border-slate-200 bg-white/95 p-4 backdrop-blur">
                 <div className="mx-auto flex max-w-6xl gap-3 lg:pl-[344px]">
                     {step > 1 && (
                         <button
@@ -567,7 +571,8 @@ const BookingWizard = ({
                     </button>
                 </div>
             </footer>
-        </div>
+            </div>
+        </div></>
     );
 };
 

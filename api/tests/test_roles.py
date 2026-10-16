@@ -639,3 +639,81 @@ def test_seed_does_not_restore_edited_builtin_permissions(client):
         seed_access(db)
         assert role.permissions == []
         role.permissions = originals
+
+
+
+def test_archive_restore_preserves_history_and_revokes_sessions(client):
+    from app.models import AuditLog
+    from app.access import permissions_for
+    actor, _, root_token = owner()
+    target, role_id, old_token = account(builtin="secretary")
+    with SessionLocal.begin() as db:
+        db.add(AuditLog(actor_staff_id=target, action="fixture", entity_type="staff", summary="fixture"))
+    auth = headers(root_token)
+    endpoint = PREFIX + f"/access/staff/{target}"
+    assert client.delete(endpoint, headers=auth).status_code == 200
+    assert client.delete(endpoint, headers=auth).status_code == 200
+    normal = client.get(PREFIX + "/access/staff", headers=auth).json()
+    archived = client.get(PREFIX + "/access/staff?archived=true", headers=auth).json()
+    assert target not in [row["id"] for row in normal]
+    assert target in [row["id"] for row in archived]
+    with SessionLocal() as db:
+        user = db.get(StaffUser, target)
+        assert user.is_archived and not user.is_active and not permissions_for(user)
+        assert all(row.revoked_at for row in db.scalars(select(AuthSession).where(AuthSession.staff_id == target)))
+        assert db.scalar(select(AuditLog.id).where(AuditLog.actor_staff_id == target))
+    assert client.get(PREFIX + "/me", headers=headers(old_token)).status_code == 401
+    payload = dict(full_name="بازیابی آزمایشی", role_ids=[role_id], is_active=True)
+    assert client.put(endpoint, json=payload, headers=auth).status_code == 409
+    restored = client.post(endpoint + "/restore", headers=auth)
+    assert restored.status_code == 200 and not restored.json()["is_active"] and not restored.json()["is_archived"]
+    assert client.get(PREFIX + "/me", headers=headers(old_token)).status_code == 401
+    assert client.put(endpoint, json=payload, headers=auth).status_code == 200
+    assert client.delete(PREFIX + f"/access/staff/{actor}", headers=auth).status_code == 409
+
+
+def test_staff_purge_requires_archived_exact_confirmation_and_keeps_audit(client):
+    from app.models import AuditLog, StaffMfa, MfaChallenge
+    _, _, root_token = owner()
+    target, _, old_token = account(builtin="secretary")
+    with SessionLocal.begin() as db:
+        username = db.get(StaffUser, target).username
+        db.add(AuditLog(actor_staff_id=target, action="purge-history", entity_type="staff", summary="fixture"))
+        db.add(StaffMfa(staff_id=target, enabled=False))
+    auth = headers(root_token); endpoint = PREFIX + f"/access/staff/{target}"
+    assert client.post(endpoint + "/purge", json={"confirmation_username": username}, headers=auth).status_code == 409
+    assert client.delete(endpoint, headers=auth).status_code == 200
+    assert client.post(endpoint + "/purge", json={"confirmation_username": "wrong-user"}, headers=auth).status_code == 422
+    assert client.post(endpoint + "/purge", json={"confirmation_username": username}, headers=auth).status_code == 200
+    with SessionLocal() as db:
+        assert db.get(StaffUser,target) is None
+        assert db.get(StaffMfa,target) is None
+        assert not list(db.scalars(select(AuthSession).where(AuthSession.staff_id == target)))
+        assert not list(db.scalars(select(MfaChallenge).where(MfaChallenge.staff_id == target)))
+        audit = db.scalar(select(AuditLog).where(AuditLog.action == "purge-history"))
+        assert audit and audit.actor_staff_id is None
+    assert client.get(PREFIX + "/me", headers=headers(old_token)).status_code == 401
+
+
+def test_staff_purge_does_not_destroy_editorial_ownership(client):
+    from app.content_models import Article
+    _, _, root_token = owner(); target, _, _ = account(builtin="author")
+    with SessionLocal.begin() as db:
+        username=db.get(StaffUser,target).username
+        row=Article(slug="purge-guard-"+secrets.token_hex(6),author_id=target,content_json="{}")
+        db.add(row);db.flush();article_id=row.id
+    auth=headers(root_token); endpoint=PREFIX+f"/access/staff/{target}"
+    assert client.delete(endpoint,headers=auth).status_code==200
+    assert client.post(endpoint+"/purge",json={"confirmation_username":username},headers=auth).status_code==409
+    with SessionLocal() as db:
+        assert db.get(StaffUser,target).is_archived
+        assert db.get(Article,article_id).author_id==target
+
+
+@pytest.mark.parametrize("builtin", ["admin", "secretary", "accountant", "content_editor", "author"])
+def test_non_owner_cannot_archive_restore_or_purge_staff(client,builtin):
+    _,_,token=account(builtin=builtin); target,_,_=account(builtin="secretary")
+    endpoint=PREFIX+f"/access/staff/{target}"
+    assert client.delete(endpoint,headers=headers(token)).status_code==403
+    assert client.post(endpoint+"/restore",headers=headers(token)).status_code==403
+    assert client.post(endpoint+"/purge",json={"confirmation_username":"anything"},headers=headers(token)).status_code==403

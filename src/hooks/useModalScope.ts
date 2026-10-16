@@ -48,9 +48,22 @@ export default function useModalScope<T extends HTMLElement>(enabled=true,onClos
             else if(event.shiftKey&&(document.activeElement===first||document.activeElement===element)){event.preventDefault();last.focus();}
             else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===element)){event.preventDefault();first.focus();}
         };
+        // Both ends must be on the backdrop: dragging a selection out of a form
+        // must not dismiss it. Inert parents cannot dismiss a nested modal.
+        const isBackdrop=(target:EventTarget|null)=>target===element || target instanceof HTMLElement&&target.hasAttribute("data-modal-backdrop")&&target.closest('[aria-modal="true"]')===element;
+        let pressed=false;
+        const pointer=(event:PointerEvent)=>{pressed=event.button===0&&isBackdrop(event.target);};
+        const click=(event:MouseEvent)=>{
+            const dismiss=pressed&&isBackdrop(event.target);pressed=false;
+            if(dismiss&&!element.inert&&!element.closest('[aria-hidden="true"]')&&!latest.current.closeDisabled)latest.current.onClose?.();
+        };
+        element.addEventListener("pointerdown",pointer);
+        element.addEventListener("click",click);
         element.addEventListener("keydown",keys);
         return()=>{
             element.removeEventListener("keydown",keys);
+            element.removeEventListener("pointerdown",pointer);
+            element.removeEventListener("click",click);
             for(const item of saved)release(item);
             if(--scrollLeases===0)document.documentElement.style.overflow=originalOverflow;
             // Restore after every overlay in this React commit has released its isolation lease.
