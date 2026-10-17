@@ -13,7 +13,6 @@ import {
     STAFF_TOKEN_KEY,
     toPersianDigits,
     type AppointmentPage,
-    type AuditLogItem,
     type ClinicSettings,
     type ConsultationThread,
     type DashboardStats,
@@ -144,7 +143,6 @@ export const StaffDashboard = ({
         failed_count: 0,
     });
     const [payments, setPayments] = useState<PaymentItem[]>([]);
-    const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
     const [chatAppointmentId, setChatAppointmentId] = useState<number | null>(null);
     const [smsRules, setSmsRules] = useState<SmsAutomationRule[]>([]);
     const [smsCampaigns, setSmsCampaigns] = useState<SmsCampaign[]>([]);
@@ -180,13 +178,12 @@ export const StaffDashboard = ({
         [],
     );
     const loadOperations = useCallback(async () => {
-        const [nextWaitlist, nextSummary, nextPayments, nextAudit] = await Promise.all([
+        const [nextWaitlist, nextSummary, nextPayments] = await Promise.all([
             can("waitlist.view") ? appointmentApi.staffWaitlist(token) : Promise.resolve([]),
             can("finance.view") ? appointmentApi.staffFinanceSummary(token) : Promise.resolve(null),
             can("finance.view") ? appointmentApi.staffPayments(token) : Promise.resolve([]),
-            can("audit.view") ? appointmentApi.staffAuditLogs(token) : Promise.resolve([]),
         ]);
-        setWaitlist(nextWaitlist); if (nextSummary) setFinanceSummary(nextSummary); setPayments(nextPayments); setAuditLogs(nextAudit);
+        setWaitlist(nextWaitlist); if (nextSummary) setFinanceSummary(nextSummary); setPayments(nextPayments);
     }, [can, token]);
     const loadSequence = useRef({ value: 0 });
     const loadAll = useCallback(async () => {
@@ -207,7 +204,6 @@ export const StaffDashboard = ({
                 nextWaitlist,
                 nextFinanceSummary,
                 nextPayments,
-                nextAuditLogs,
             ] = await Promise.all([
                 can("dashboard.view") ? appointmentApi.staffStats(token) : Promise.resolve({ today_total: 0, pending_total: 0, confirmed_total: 0, patients_total: 0, unread_conversations: 0, waitlist_total: 0, refund_attention_total: 0, daily_appointments: [] }),
                 can("settings.view") && ["clinic-info", "schedule"].includes(tab) ? appointmentApi.staffSettings(token) : Promise.resolve(null),
@@ -221,7 +217,6 @@ export const StaffDashboard = ({
                 can("waitlist.view") && tab === "waitlist" ? appointmentApi.staffWaitlist(token) : Promise.resolve(null),
                 can("finance.view") && tab === "finance" ? appointmentApi.staffFinanceSummary(token) : Promise.resolve(null),
                 can("finance.view") && tab === "finance" ? appointmentApi.staffPayments(token) : Promise.resolve(null),
-                can("audit.view") && tab === "audit" ? appointmentApi.staffAuditLogs(token) : Promise.resolve(null),
             ]);
             if (sequence !== loadSequence.current.value) return;
             setStats(nextStats);
@@ -236,7 +231,6 @@ export const StaffDashboard = ({
             if (nextWaitlist) setWaitlist(nextWaitlist);
             if (nextFinanceSummary) setFinanceSummary(nextFinanceSummary);
             if (nextPayments) setPayments(nextPayments);
-            if (nextAuditLogs) setAuditLogs(nextAuditLogs);
         } catch (loadError) {
             if (sequence !== loadSequence.current.value) return;
             if (
@@ -358,7 +352,7 @@ export const StaffDashboard = ({
                     <b className="block text-sm text-white">
                         {profile.full_name}
                     </b>
-                    <span className="text-xs text-slate-400">
+                    <span className="mt-2 inline-block rounded-lg bg-white/10 px-2 py-1 text-sm font-bold text-secondary-mild">
                         {profile.role_titles.join("، ") || "بدون نقش فعال"}
                     </span>
                 </div>
@@ -707,7 +701,7 @@ export const StaffDashboard = ({
                     {tab === "access" && can("roles.manage") && <Suspense fallback={<p>در حال آماده‌سازی نقش‌ها و کارکنان…</p>}><StaffAccessPanel token={token} currentId={profile.id} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {!navItems.length && <p className="rounded-2xl border bg-white p-6">دسترسی به بخش‌های فعلی پنل برای این حساب تعریف نشده است. مجوزهای مقاله و محتوا در مراحل بعد فعال می‌شوند.</p>}
                     {tab === "audit" && can("audit.view") && (
-                        <StaffAuditPanel items={auditLogs} />
+                        <StaffAuditPanel token={token} />
                     )}
                 </div>
             </div>

@@ -10,7 +10,6 @@ import {
     formatToman,
     toPersianDigits,
     type Appointment,
-    type AuditLogItem,
     type FinanceSummary,
     type PaymentItem,
     type Service,
@@ -23,7 +22,6 @@ import {
     IoCalendarClearOutline,
     IoCardOutline,
     IoCheckmarkCircleOutline,
-    IoPeopleOutline,
     IoRefreshOutline,
     IoTimeOutline,
 } from "react-icons/io5";
@@ -435,24 +433,4 @@ export const StaffFinancePanel = ({
     );
 };
 
-export const StaffAuditPanel = ({ items }: { items: AuditLogItem[] }) => (
-    <section className="app-panel-enter">
-        <span className="text-sm text-secondary-deep">ردپای تغییرات مهم سامانه</span>
-        <h2 className="mt-1 font-dana text-3xl text-primary">تاریخچه عملیات</h2>
-        <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(24,48,79,0.06)]">
-            {items.length ? items.map((item, index) => (
-                <article key={item.id} className="relative flex gap-4 pb-6 last:pb-0">
-                    {index < items.length - 1 && <span className="absolute right-4 top-8 h-[calc(100%-1rem)] w-px bg-slate-100" />}
-                    <span className="relative z-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary-deep"><IoPeopleOutline /></span>
-                    <div className="min-w-0 flex-1 rounded-2xl bg-slate-50 p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                            <b className="text-sm text-primary">{item.summary}</b>
-                            <time className="text-[11px] text-slate-400">{new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.created_at))}</time>
-                        </div>
-                        <p className="mt-2 text-xs text-slate-500">{item.actor_name} · {item.actor_role}</p>
-                    </div>
-                </article>
-            )) : <p className="py-12 text-center text-sm text-slate-400">هنوز عملیاتی ثبت نشده است.</p>}
-        </div>
-    </section>
-);
+export { default as StaffAuditPanel } from "./StaffAuditPanel";

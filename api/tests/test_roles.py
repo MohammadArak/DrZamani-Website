@@ -717,3 +717,36 @@ def test_non_owner_cannot_archive_restore_or_purge_staff(client,builtin):
     assert client.delete(endpoint,headers=headers(token)).status_code==403
     assert client.post(endpoint+"/restore",headers=headers(token)).status_code==403
     assert client.post(endpoint+"/purge",json={"confirmation_username":"anything"},headers=headers(token)).status_code==403
+
+
+def test_audit_pagination_search_dates_and_permission(client):
+    from datetime import datetime, timezone
+    from app.models import AuditLog
+
+    staff_id, _, token = account(codes=["audit.view"])
+    marker = "audit-page-" + secrets.token_hex(8)
+    with SessionLocal.begin() as db:
+        for index in range(25):
+            db.add(AuditLog(actor_staff_id=staff_id if index % 2 else None,
+                action="test.page", entity_type="test", entity_id=str(index),
+                summary=f"{marker} {index}", details_json="{}",
+                created_at=datetime(2026, 10, 16, 21, 0, tzinfo=timezone.utc)))
+        db.add(AuditLog(action="test.page", entity_type="test", summary=marker+" old",
+            details_json="{}", created_at=datetime(2026, 10, 16, 19, 0, tzinfo=timezone.utc)))
+    path = PREFIX + "/audit-logs/page"
+    params = dict(q=marker, page_size=20, date_from="2026-10-17", date_to="2026-10-17")
+    first = client.get(path, params=params, headers=headers(token))
+    assert first.status_code == 200, first.text
+    assert first.json()["total"] == 25
+    assert len(first.json()["items"]) == 20
+    second = client.get(path, params={**params, "page":2}, headers=headers(token)).json()
+    assert len(second["items"]) == 5
+    assert not ({i["id"] for i in first.json()["items"]} & {i["id"] for i in second["items"]})
+    assert client.get(path, params={**params,"actor":"staff"}, headers=headers(token)).json()["total"] == 12
+    assert client.get(path, params={**params,"actor":"system"}, headers=headers(token)).json()["total"] == 13
+    assert client.get(path, params={**params,"q":marker+"%"}, headers=headers(token)).json()["total"] == 0
+    assert client.get(path, params={**params,"page_size":101}, headers=headers(token)).status_code == 422
+    assert client.get(path, params={**params,"date_from":"2026-10-18"}, headers=headers(token)).status_code == 422
+    _, _, denied = account()
+    assert client.get(path, headers=headers(denied)).status_code == 403
+    assert client.get(path).status_code == 401
