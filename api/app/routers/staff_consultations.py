@@ -6,11 +6,11 @@ from ..consultations import message_page, retry_message
 from ..schemas import ConsultationMessagePage
 from ..realtime import publish_consultation_read_event
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.responses import FileResponse
-from sqlalchemy import func, select
+from sqlalchemy import func, select, or_
 from sqlalchemy.orm import Session, joinedload
 
 from ..consultations import attachment_path
@@ -20,6 +20,7 @@ from ..access import can
 from ..models import (
     Appointment,
     ConsultationMessage,
+    Patient,
     Service,
     StaffUser,
 )
@@ -28,7 +29,7 @@ from ..schemas import (
     ConsultationMessageRead,
     ConsultationThreadRead,
 )
-from ..security import utcnow
+from ..security import utcnow, normalize_digits, normalize_phone
 from ..realtime import publish_consultation_event
 from ..sms_automation import (
     queue_sms_event,
@@ -42,21 +43,28 @@ router = APIRouter()
 
 @router.get("/consultations", response_model=list[ConsultationThreadRead])
 def consultation_threads(
+    response: Response,
+    search: str | None = Query(default=None, max_length=120),
     _staff: StaffUser = Depends(require_permission("consultations.view")),
     db: Session = Depends(get_db),
 ) -> list[ConsultationThreadRead]:
-    appointments = (
-        db.scalars(
-            select(Appointment)
-            .options(joinedload(Appointment.patient),joinedload(Appointment.service))
-            .join(Appointment.service)
-            .where(Service.allows_media_chat.is_(True))
-            .order_by(Appointment.created_at.desc())
-        )
-        .unique()
-        .all()
-    )
-    chat_ids = select(Appointment.id).join(Appointment.service).where(Service.allows_media_chat.is_(True))
+    response.headers["Cache-Control"] = "no-store"
+    query = select(Appointment).join(Appointment.service).join(Appointment.patient).where(Service.allows_media_chat.is_(True))
+    if search and search.strip():
+        needle = normalize_digits(search).strip()
+        full_name = func.coalesce(Patient.first_name, "") + " " + func.coalesce(Patient.last_name, "")
+        predicates = [full_name.icontains(needle, autoescape=True), Patient.phone.contains(needle, autoescape=True), Service.title.icontains(needle, autoescape=True),
+                      select(ConsultationMessage.id).where(ConsultationMessage.appointment_id == Appointment.id, or_(ConsultationMessage.body.icontains(needle, autoescape=True), ConsultationMessage.body.icontains(search.strip(), autoescape=True))).exists()]
+        try:
+            predicates.append(Patient.phone == normalize_phone(needle))
+        except ValueError:
+            pass
+        # Match the existing patient-record search permission; never return the identifier.
+        if can(_staff, "patients.records.view"):
+            predicates.append(Patient.national_id.contains(needle, autoescape=True))
+        query = query.where(or_(*predicates))
+    chat_ids = query.with_only_columns(Appointment.id)
+    appointments = db.scalars(query.options(joinedload(Appointment.patient), joinedload(Appointment.service)).order_by(Appointment.created_at.desc(), Appointment.id.desc())).unique().all()
     unread_by_appointment = dict(
         db.execute(
             select(ConsultationMessage.appointment_id, func.count())
@@ -113,12 +121,12 @@ def consultation_threads(
                     if last_message
                     else None
                 ),
-                last_message_at=last_message.created_at if last_message else None,
+                last_message_at=(last_message.created_at.replace(tzinfo=timezone.utc) if last_message.created_at.tzinfo is None else last_message.created_at) if last_message else None,
                 last_sender_type=last_message.sender_type if last_message else None,
                 unread_count=unread_count,
             )
         )
-    result.sort(key=lambda item: item.last_message_at or datetime.min, reverse=True)
+    result.sort(key=lambda item: item.last_message_at or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     return result
 
 
