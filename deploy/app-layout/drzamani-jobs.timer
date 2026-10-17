@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Dr Zamani appointment jobs every minute
+PartOf=drzamani.service
+After=drzamani.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
