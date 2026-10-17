@@ -32,7 +32,7 @@ const inputClass =
 const parseTags=(value:string)=>value.split(/[,،\n]/).map(item=>item.trim()).filter((item,index,items)=>Boolean(item)&&items.indexOf(item)===index);
 function RecordFrame({compact,title,busy,onClose,children}:{compact:boolean;title:string;busy:boolean;onClose:()=>Promise<void>;children:ReactNode}) {
     const content=<div className="space-y-4">{children}</div>;
-    return compact ? <StaffEditorDialog title={title} busy={busy} onClose={onClose} closeLabel="بازگشت به فهرست بیماران" closeText="بازگشت">{content}</StaffEditorDialog> : content;
+    return compact ? <StaffEditorDialog title={title} busy={busy} onClose={onClose} closeLabel="بازگشت به فهرست مراجعین" closeText="بازگشت">{content}</StaffEditorDialog> : content;
 }
 type RecordTab = "overview" | "appointments" | "forms" | "conversations" | "payments";
 
@@ -130,7 +130,7 @@ export default function StaffPatientsPanel({
                     });
                 if(sequence===requests.current.list)setPageData(next);
             } catch (error) {
-                if(sequence===requests.current.list)setListError(error instanceof Error ? error.message : "دریافت بیماران ناموفق بود");
+                if(sequence===requests.current.list)setListError(error instanceof Error ? error.message : "دریافت مراجعین ناموفق بود");
             } finally {
                 if(sequence===requests.current.list)setLoading(false);
             }
@@ -141,7 +141,7 @@ export default function StaffPatientsPanel({
     const loadRecord = useCallback(
         async (id: number) => {
             if(saving)return;
-            if(dirty&&!await ask("تغییرات پرونده هنوز ذخیره نشده‌اند؛ بدون ذخیره بیمار دیگری را باز کنید؟"))return;
+            if(dirty&&!await ask("تغییرات پرونده هنوز ذخیره نشده‌اند؛ بدون ذخیره مراجع دیگری را باز کنید؟"))return;
             const sequence=++requests.current.record;
             setToast({message:"",kind:"success"});
             setRecordLoading(true);
@@ -218,10 +218,10 @@ export default function StaffPatientsPanel({
             <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                     <span className="text-sm text-secondary-deep">پرونده، پیگیری و سابقه ارتباط</span>
-                    <h2 className="mt-1 font-dana text-3xl text-primary">بیماران</h2>
+                    <h2 className="mt-1 font-dana text-3xl text-primary">مراجعین</h2>
                 </div>
                 <span className="rounded-full bg-white px-4 py-2 text-sm text-slate-500 shadow-sm">
-                    {toPersianDigits(pageData.total)} بیمار
+                    {toPersianDigits(pageData.total)} مراجع
                 </span>
             </div>
 
@@ -234,7 +234,7 @@ export default function StaffPatientsPanel({
                 className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[minmax(220px,1fr)_210px_auto]"
             >
                 <label className="relative">
-                    <span className="sr-only">جست‌وجوی بیمار</span><input aria-label="جست‌وجوی بیمار" value={search} onChange={(event) => setSearch(event.target.value)} className={`${inputClass} pl-10`} placeholder="نام، موبایل، کد ملی یا شناسه اتباع" />
+                    <span className="sr-only">جست‌وجوی مراجع</span><input aria-label="جست‌وجوی مراجع" value={search} onChange={(event) => setSearch(event.target.value)} className={`${inputClass} pl-10`} placeholder="نام، موبایل، کد ملی یا شناسه اتباع" />
                     <IoSearchOutline className="absolute left-3 top-3 text-xl text-slate-400" />
                 </label>
                 <AppSelect
@@ -242,12 +242,12 @@ export default function StaffPatientsPanel({
                     onChange={setTag}
                     options={[{ value: "", label: "همه برچسب‌ها" }, ...pageData.available_tags.map((value) => ({ value, label: value }))]}
                     disabled={!can("patients.records.view")}
-                    ariaLabel="فیلتر برچسب بیمار"
+                    ariaLabel="فیلتر برچسب مراجع"
                 />
                 <button className="h-11 rounded-xl bg-primary px-5 text-sm font-bold text-white">جست‌وجو</button>
                 <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800 md:col-span-3">
                     <input type="checkbox" disabled={!can("patients.records.view")} checked={followUpOnly} onChange={(event) => setFollowUpOnly(event.target.checked)} className="h-4 w-4 accent-amber-600" />
-                    فقط بیماران نیازمند پیگیری
+                    فقط مراجعین نیازمند پیگیری
                 </label>
             </form>
 
@@ -279,7 +279,7 @@ export default function StaffPatientsPanel({
                                 </p>
                             </button>
                         ))}
-                        {!pageData.items.length && <p className="p-10 text-center text-sm text-slate-400">بیماری پیدا نشد.</p>}
+                        {!pageData.items.length && <p className="p-10 text-center text-sm text-slate-400">مراجعی پیدا نشد.</p>}
                     </div>
                     {pageData.total_pages > 1 && (
                         <div className="flex items-center justify-between border-t border-slate-100 p-3 text-xs">
@@ -294,7 +294,7 @@ export default function StaffPatientsPanel({
                     {!record ? (
                         <div className="flex min-h-96 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
                             <IoPeopleOutline className="text-5xl text-secondary" />
-                            <h3 className="mt-4 font-dana text-xl text-primary">یک بیمار را انتخاب کنید</h3>
+                            <h3 className="mt-4 font-dana text-xl text-primary">یک مراجع را انتخاب کنید</h3>
                             <p className="mt-2 text-sm leading-7 text-slate-500">مشخصات، نوبت‌ها، فرم‌ها، گفتگوها و پرداخت‌ها در یک پرونده نمایش داده می‌شوند.</p>
                         </div>
                     ) : (
@@ -406,7 +406,7 @@ export default function StaffPatientsPanel({
                                             )}
                                         </details>
                                     ))}
-                                    {!record.appointments.some((item) => item.intake_required) && <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-400"><IoDocumentTextOutline className="mx-auto mb-3 text-4xl text-secondary" />فرمی برای این بیمار ثبت نشده است.</div>}
+                                    {!record.appointments.some((item) => item.intake_required) && <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-400"><IoDocumentTextOutline className="mx-auto mb-3 text-4xl text-secondary" />فرمی برای این مراجع ثبت نشده است.</div>}
                                 </section>
                             )}
 
@@ -424,7 +424,7 @@ export default function StaffPatientsPanel({
 
                             {recordTab === "payments" && can("finance.view") && (
                                 <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                                    <div className="flex items-center justify-between border-b border-slate-100 p-5"><h4 className="font-dana text-xl text-primary">پرداخت‌های بیمار</h4><b className="text-sm text-emerald-700">جمع تأییدشده: {formatToman(record.total_paid_toman)}</b></div>
+                                    <div className="flex items-center justify-between border-b border-slate-100 p-5"><h4 className="font-dana text-xl text-primary">پرداخت‌های مراجع</h4><b className="text-sm text-emerald-700">جمع تأییدشده: {formatToman(record.total_paid_toman)}</b></div>
                                     <div className="divide-y divide-slate-100">
                                         {record.payments.map((item) => <div key={item.id} className="grid gap-2 p-4 text-sm md:grid-cols-[1fr_160px_120px] md:items-center"><span><b className="text-slate-700">{item.service_title}</b><span className="mt-1 block text-xs text-slate-400">{dateTime(item.created_at)}</span></span><b className="text-primary">{formatToman(item.amount_toman)}</b><span className="rounded-full bg-slate-50 px-3 py-1.5 text-center text-xs text-slate-600">{item.refund_status === "refunded" ? "بازپرداخت‌شده" : item.status}</span></div>)}
                                         {!record.payments.length && <p className="p-10 text-center text-sm text-slate-400">پرداختی ثبت نشده است.</p>}

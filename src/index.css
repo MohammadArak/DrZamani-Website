@@ -281,3 +281,6 @@ body:has(.patient-auth) .raviel-credit-footer { display: none; }
 }
 
 .portal-layout:has(.patient-shell) { background:#f3f6f8 !important; }
+
+.portal-layout:has(.staff-shell) { background:#f3f5f8; }
+.portal-footer .raviel-credit { background-image:linear-gradient(100deg,#235877,#805815,#315a73,#805815); }
