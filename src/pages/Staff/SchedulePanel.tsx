@@ -217,7 +217,7 @@ const SchedulePanel = ({
                     </label>
                     <label>
                         <span className="mb-2 block text-sm">
-                            مهلت جابه‌جایی بیمار (ساعت)
+                            مهلت جابه‌جایی مراجع (ساعت)
                         </span>
                         <input
                             type="number"
@@ -236,7 +236,7 @@ const SchedulePanel = ({
                     </label>
                     <label>
                         <span className="mb-2 block text-sm">
-                            سقف جابه‌جایی توسط بیمار
+                            سقف جابه‌جایی توسط مراجع
                         </span>
                         <input
                             type="number"
@@ -260,7 +260,7 @@ const SchedulePanel = ({
                         <div>
                             <h4 className="font-bold text-primary">یادآوری پیامکی نوبت</h4>
                             <p className="mt-1 text-xs leading-6 text-slate-500">
-                                دو پیامک یادآوری پیش از زمان نوبت برای بیمار ارسال می‌شود.
+                                دو پیامک یادآوری پیش از زمان نوبت برای مراجع ارسال می‌شود.
                             </p>
                         </div>
                         <label className="inline-flex cursor-pointer items-center gap-3 rounded-xl bg-white px-3 py-2 text-sm font-bold text-primary shadow-sm">

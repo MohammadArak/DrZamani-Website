@@ -183,7 +183,7 @@ const StaffChatWorkspace = ({
                                         </article>
                                     );
                                 }) : (
-                                    <div className="py-24 text-center"><IoChatbubbleEllipsesOutline className="mx-auto text-5xl text-secondary" /><h3 className="mt-4 font-dana text-xl text-primary">شروع گفتگو</h3><p className="mt-2 text-sm text-slate-400">اولین پاسخ مطب را برای بیمار ارسال کنید.</p></div>
+                                    <div className="py-24 text-center"><IoChatbubbleEllipsesOutline className="mx-auto text-5xl text-secondary" /><h3 className="mt-4 font-dana text-xl text-primary">شروع گفتگو</h3><p className="mt-2 text-sm text-slate-400">اولین پاسخ مطب را برای مراجع ارسال کنید.</p></div>
                                 )}
                                 <div ref={bottomRef} />
                             </div>
@@ -197,7 +197,7 @@ const StaffChatWorkspace = ({
                                         <IoSendOutline className="rotate-180" />
                                     )}
                                 </button>
-                                <AutoGrowTextarea value={body} onChange={(event) => setBody(event.target.value)} maxHeight={144} maxLength={2000} placeholder="پاسخ به بیمار…" className="min-h-10 min-w-0 flex-1 bg-transparent px-2 py-2 text-sm leading-6 outline-none" />
+                                <AutoGrowTextarea value={body} onChange={(event) => setBody(event.target.value)} maxHeight={144} maxLength={2000} placeholder="پاسخ به مراجع…" className="min-h-10 min-w-0 flex-1 bg-transparent px-2 py-2 text-sm leading-6 outline-none" />
                             </div>
                         </form>}
                     </>
@@ -217,7 +217,7 @@ const StaffChatWorkspace = ({
                         <div className="mt-6 space-y-3 border-t border-slate-100 pt-5">
                             <div className="rounded-2xl bg-slate-50 p-4"><span className="text-[11px] text-slate-400">خدمت</span><b className="mt-1 block text-sm text-primary">{activeThread.service_title}</b></div>
                             <div className="rounded-2xl bg-slate-50 p-4"><span className="text-[11px] text-slate-400">زمان نوبت</span><b className="mt-1 block text-sm text-primary">{formatPersianDate(activeThread.appointment_date)}</b><span className="mt-1 block text-xs text-slate-500">ساعت {toPersianDigits(formatTime(activeThread.appointment_time))}</span></div>
-                            {activeThread.patient_note && <div className="rounded-2xl bg-amber-50 p-4"><span className="flex items-center gap-1 text-[11px] text-amber-700"><IoInformationCircleOutline /> توضیح بیمار</span><p className="mt-2 text-xs leading-6 text-amber-900">{activeThread.patient_note}</p></div>}
+                            {activeThread.patient_note && <div className="rounded-2xl bg-amber-50 p-4"><span className="flex items-center gap-1 text-[11px] text-amber-700"><IoInformationCircleOutline /> توضیح مراجع</span><p className="mt-2 text-xs leading-6 text-amber-900">{activeThread.patient_note}</p></div>}
                             <div className="rounded-2xl bg-slate-50 p-4"><span className="flex items-center gap-1 text-[11px] text-slate-400"><IoImageOutline /> تصاویر پزشکی</span><p className="mt-2 text-xs leading-6 text-slate-500">تصاویر داخل گفتگو خصوصی هستند و با کلیک در اندازه کامل باز می‌شوند.</p></div>
                         </div>
                     </>

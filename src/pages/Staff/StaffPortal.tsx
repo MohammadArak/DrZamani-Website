@@ -50,13 +50,13 @@ import {
     IoTimeOutline
 } from "react-icons/io5";
 import { StaffPermissionsContext,staffTabPermissions } from "./staffAccess";
+const StaffAuditPanel = lazy(() => import("./StaffAuditPanel"));
 const StaffAccessPanel = lazy(() => import("./StaffAccessPanel"));
 import StaffChatWorkspace from "./StaffChatWorkspace";
 import StaffLogin from "./StaffLogin";
 import StaffMfaPanel from "./StaffMfaPanel";
 import StaffPasswordPanel from "./StaffPasswordPanel";
 import {
-    StaffAuditPanel,
     StaffCalendarPanel,
     StaffFinancePanel,
     StaffWaitlistPanel,
@@ -258,7 +258,7 @@ export const StaffDashboard = ({
         { id: "dashboard", label: "داشبورد", icon: <IoGridOutline /> },
         { id: "calendar", label: "تقویم کاری", icon: <IoCalendarOutline /> },
         { id: "appointments", label: "نوبت‌ها", icon: <IoCalendarOutline /> },
-        { id: "patients", label: "بیماران", icon: <IoPeopleOutline /> },
+        { id: "patients", label: "مراجعین", icon: <IoPeopleOutline /> },
         {
             id: "consultations",
             label: "گفتگوها",
@@ -465,7 +465,7 @@ export const StaffDashboard = ({
                         href="/appointment/"
                         className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-primary shadow-sm hover:border-secondary"
                     >
-                        مشاهده پنل بیمار
+                        مشاهده پنل مراجع
                     </a>
                 </header>
                 <div className={`min-w-0 min-h-0 flex-1 ${tab === "consultations" ? "overflow-hidden" : "overflow-y-auto p-4 md:p-7"}`}>
@@ -501,7 +501,7 @@ export const StaffDashboard = ({
                                     icon={<IoCheckmarkCircleOutline />}
                                 />)}
                                 {can("patients.view") && (<StatCard
-                                    label="بیماران ثبت‌شده"
+                                    label="مراجعین ثبت‌شده"
                                     value={stats.patients_total}
                                     icon={<IoPeopleOutline />}
                                 />)}
@@ -513,7 +513,7 @@ export const StaffDashboard = ({
                                     onClick={() => navigateTab("consultations")}
                                     className="flex items-center justify-between rounded-2xl border border-sky-100 bg-sky-50/70 p-4 text-right transition hover:bg-sky-50"
                                 >
-                                    <span><b className="block text-sm text-sky-900">پیام‌های خوانده‌نشده</b><span className="mt-1 block text-xs text-sky-600">پاسخ سریع به بیماران</span></span>
+                                    <span><b className="block text-sm text-sky-900">پیام‌های خوانده‌نشده</b><span className="mt-1 block text-xs text-sky-600">پاسخ سریع به مراجعین</span></span>
                                     <strong className="text-2xl text-sky-700">{toPersianDigits(stats.unread_conversations)}</strong>
                                 </button>)}
                                 {can("waitlist.view") && (<button
@@ -701,7 +701,7 @@ export const StaffDashboard = ({
                     {tab === "access" && can("roles.manage") && <Suspense fallback={<p>در حال آماده‌سازی نقش‌ها و کارکنان…</p>}><StaffAccessPanel token={token} currentId={profile.id} onDirtyChange={setArticleDirty} onBusyChange={setArticleBusy} /></Suspense>}
                     {!navItems.length && <p className="rounded-2xl border bg-white p-6">دسترسی به بخش‌های فعلی پنل برای این حساب تعریف نشده است. مجوزهای مقاله و محتوا در مراحل بعد فعال می‌شوند.</p>}
                     {tab === "audit" && can("audit.view") && (
-                        <StaffAuditPanel token={token} />
+                        <Suspense fallback={<p role="status">در حال آماده‌سازی تاریخچه…</p>}><StaffAuditPanel token={token} /></Suspense>
                     )}
                 </div>
             </div>

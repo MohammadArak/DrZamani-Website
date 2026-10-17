@@ -1,6 +1,6 @@
 [project]
 name = "drzamani-api"
-version = "1.19.7"
+version = "1.19.8"
 description = "Backend API for the Dr Zamani appointment platform"
 requires-python = ">=3.12,<3.14"
 dependencies = [

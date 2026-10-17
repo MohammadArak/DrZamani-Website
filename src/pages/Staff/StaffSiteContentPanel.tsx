@@ -22,7 +22,7 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
         const value = draft as { description: string };
         return (
             <label>متن
-                <textarea rows={5} maxLength={blockKey === "hero" ? 700 : 900} value={value.description} readOnly={locked} onChange={(e) => onChange({ description: e.target.value })} />
+                <textarea rows={3} maxLength={blockKey === "hero" ? 700 : 900} value={value.description} readOnly={locked} onChange={(e) => onChange({ description: e.target.value })} />
             </label>
         );
     }
@@ -44,7 +44,7 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
                 {paragraphs.map((text, index) => (
                     <div key={index} className="source-row">
                         <label>بند {index + 1}
-                            <textarea rows={4} maxLength={1500} value={text} readOnly={locked} onChange={(e) => set(paragraphs.map((p, i) => (i === index ? e.target.value : p)))} />
+                            <textarea rows={3} maxLength={1500} value={text} readOnly={locked} onChange={(e) => set(paragraphs.map((p, i) => (i === index ? e.target.value : p)))} />
                         </label>
                         {!locked && (
                             <div className="article-actions">
@@ -67,7 +67,7 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
                 <fieldset key={index}>
                     <legend>سوال {index + 1}</legend>
                     <label>عنوان سوال<input maxLength={200} value={item.title} readOnly={locked} onChange={(e) => set(items.map((x, i) => (i === index ? { ...x, title: e.target.value } : x)))} /></label>
-                    <label>پاسخ<textarea rows={4} maxLength={2000} value={item.content} readOnly={locked} onChange={(e) => set(items.map((x, i) => (i === index ? { ...x, content: e.target.value } : x)))} /></label>
+                    <label>پاسخ<textarea rows={3} maxLength={2000} value={item.content} readOnly={locked} onChange={(e) => set(items.map((x, i) => (i === index ? { ...x, content: e.target.value } : x)))} /></label>
                     {!locked && (
                         <div className="article-actions">
                             <button type="button" aria-label="بالا" onClick={() => set(move(items, index, index - 1))}>↑</button>
@@ -138,7 +138,7 @@ export default function StaffSiteContentPanel({ token, blockKey, onDirtyChange, 
     };
 
     return (
-        <div className="content-admin" dir="rtl">
+        <div className="content-admin site-text-editor" dir="rtl">
             {confirmation}
             <header className="content-header">
                 <div>
@@ -149,12 +149,12 @@ export default function StaffSiteContentPanel({ token, blockKey, onDirtyChange, 
             <p className="editor-help">{HELP}</p>
             {error && <p role="alert" className="content-error">{error}<button onClick={() => void load()}>خواندن دوباره</button></p>}
             {notice && <p role="status" className="content-notice">{notice}</p>}
-            {rows.map((row) => {
+            <div className="grid gap-4 xl:grid-cols-2">{rows.map((row) => {
                 const draft = drafts[row.key] ?? row.content;
                 const dirty = dirtyKeys.includes(row.key);
                 const locked = !can("site_content.edit") || busy;
                 return (
-                    <section key={row.key} className="article-compose" style={{ marginBottom: 24 }}>
+                    <section key={row.key} className={`article-compose ${row.key==="about"||row.key==="faq"?"xl:col-span-2":""}`}>
                         <h2>{row.title}</h2>
                         <p>{row.unpublished_changes || dirty ? "تغییرات منتشرنشده دارد" : "همین نسخه روی سایت است"} · نسخه {row.revision}</p>
                         <Fields blockKey={row.key} draft={draft} locked={locked} onChange={(value) => setDrafts((old) => ({ ...old, [row.key]: value }))} />
@@ -166,7 +166,7 @@ export default function StaffSiteContentPanel({ token, blockKey, onDirtyChange, 
                         </div>
                     </section>
                 );
-            })}
+            })}</div>
         </div>
     );
 }

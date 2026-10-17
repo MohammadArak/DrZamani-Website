@@ -230,7 +230,7 @@ const ServiceIntakeEditor = ({
                 <div className="flex items-center justify-between gap-3">
                     <div>
                         <b className="text-sm text-primary">سؤال‌های شرح‌حال</b>
-                        <p className="mt-1 text-[11px] leading-5 text-slate-500">پاسخ‌ها فقط در پنل بیمار و مدیر نمایش داده می‌شوند.</p>
+                        <p className="mt-1 text-[11px] leading-5 text-slate-500">پاسخ‌ها فقط در پنل مراجع و مدیر نمایش داده می‌شوند.</p>
                     </div>
                     {canEdit && (
                         <button
@@ -1000,7 +1000,7 @@ const ServicesPanel = ({
                                 <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 marker:hidden">
                                     <span>
                                         <b className="block text-sm text-primary">راهنمای قبل و بعد از مراجعه</b>
-                                        <span className="mt-1 block text-xs font-normal text-slate-500">در بخش «راهنمای من» پنل بیمار نمایش داده می‌شود.</span>
+                                        <span className="mt-1 block text-xs font-normal text-slate-500">در بخش «راهنمای من» پنل مراجع نمایش داده می‌شود.</span>
                                     </span>
                                     <DetailsChevron />
                                 </summary>
@@ -1029,7 +1029,7 @@ const ServicesPanel = ({
                                             placeholder="راهنمای عمومی پیگیری و مراقبت پس از مراجعه"
                                         />
                                     </label>
-                                    <p className="text-[11px] leading-5 text-amber-700 md:col-span-2">اطلاعات تشخیصی یا دستور درمان اختصاصی بیمار را اینجا وارد نکنید؛ این متن برای همه بیماران همان خدمت نمایش داده می‌شود.</p>
+                                    <p className="text-[11px] leading-5 text-amber-700 md:col-span-2">اطلاعات تشخیصی یا دستور درمان اختصاصی مراجع را اینجا وارد نکنید؛ این متن برای همه مراجعین همان خدمت نمایش داده می‌شود.</p>
                                 </div>
                             </details>
                             <label className="text-xs text-slate-500 sm:col-span-2">

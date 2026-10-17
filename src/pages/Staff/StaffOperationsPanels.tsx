@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
+import StaffEditorDialog from "./StaffEditorDialog";
+import { useContentConfirm } from "./useContentConfirm";
 import AppSelect from "@/components/AppSelect";
 import JalaliDatePicker from "@/components/JalaliDatePicker";
 import Toast from "@/components/Toast";
@@ -15,11 +17,10 @@ import {
     type Service,
     type WaitlistEntry,
 } from "@/services/appointmentApi";
-import { useCallback,useEffect,useMemo,useState,type FormEvent } from "react";
+import { useCallback,useEffect,useMemo,useRef,useState,type FormEvent } from "react";
 import {
     IoArrowBackOutline,
     IoArrowForwardOutline,
-    IoCalendarClearOutline,
     IoCardOutline,
     IoCheckmarkCircleOutline,
     IoRefreshOutline,
@@ -50,6 +51,8 @@ export const StaffCalendarPanel = ({
     onChanged: () => Promise<void>;
 }) => {
     const can = useStaffAccess();
+    const {ask,confirmation}=useContentConfirm();
+    const [dayIndex,setDayIndex]=useState(()=>(new Date().getDay()+1)%7);
     const [weekStart, setWeekStart] = useState(() => startOfIranWeek());
     const [items, setItems] = useState<Appointment[]>([]);
     const [selected, setSelected] = useState<Appointment | null>(null);
@@ -70,7 +73,9 @@ export const StaffCalendarPanel = ({
         [weekStart],
     );
 
+    const loadSequence=useRef(0);
     const load = useCallback(async () => {
+        const sequence=++loadSequence.current;
         setBusy(true);
         try {
             const pages = await Promise.all(
@@ -81,22 +86,28 @@ export const StaffCalendarPanel = ({
                     }),
                 ),
             );
+            if(sequence!==loadSequence.current)return;
             setItems(pages.flatMap((page) => page.items));
         } catch (error) {
+            if(sequence!==loadSequence.current)return;
             setToast({
                 message: error instanceof Error ? error.message : "دریافت تقویم ناموفق بود",
                 kind: "error",
             });
         } finally {
-            setBusy(false);
+            if(sequence===loadSequence.current)setBusy(false);
         }
     }, [days, token]);
 
     useEffect(() => {
+        setItems([]);
         void load();
+        const sequenceRef=loadSequence;
+        return()=>{sequenceRef.current++;};
     }, [load]);
 
     const move = async (appointment: Appointment, date: string, startTime: string) => {
+        if(!await ask(`نوبت ${appointment.patient_name || "مراجع"} به ${formatPersianDate(date)} ساعت ${toPersianDigits(startTime)} منتقل شود؟`,{title:"تغییر زمان نوبت",confirmLabel:"بله",cancelLabel:"خیر"}))return;
         setBusy(true);
         try {
             const updated = await appointmentApi.rescheduleStaffAppointment(
@@ -128,6 +139,7 @@ export const StaffCalendarPanel = ({
 
     return (
         <section className="app-panel-enter">
+            {confirmation}
             <Toast {...toast} onClose={() => setToast((value) => ({ ...value, message: "" }))} />
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
@@ -138,7 +150,7 @@ export const StaffCalendarPanel = ({
                     <button type="button" onClick={() => shiftWeek(-1)} className="rounded-xl p-2 text-primary hover:bg-slate-50" aria-label="هفته قبل">
                         <IoArrowForwardOutline />
                     </button>
-                    <button type="button" onClick={() => setWeekStart(startOfIranWeek())} className="rounded-xl px-3 py-2 text-xs font-bold text-primary hover:bg-slate-50">
+                    <button type="button" onClick={() => setWeekStart(startOfIranWeek())} className="rounded-xl px-3 py-2 text-sm font-bold text-primary hover:bg-slate-50">
                         هفته جاری
                     </button>
                     <button type="button" onClick={() => shiftWeek(1)} className="rounded-xl p-2 text-primary hover:bg-slate-50" aria-label="هفته بعد">
@@ -150,10 +162,12 @@ export const StaffCalendarPanel = ({
                 </div>
             </div>
 
-            <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_290px]">
+            <p className="mt-4 text-sm leading-7 text-slate-600">برای دیدن جزئیات یا تغییر زمان، نوبت را انتخاب کنید. در رایانه می‌توانید کارت نوبت را روی روز دیگری بکشید.</p>
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-2 lg:hidden" aria-label="روزهای هفته">{days.map((day,index)=><button type="button" key={isoDate(day)} aria-pressed={index===dayIndex} onClick={()=>setDayIndex(index)} className={`min-h-12 shrink-0 rounded-xl border px-3 text-sm ${index===dayIndex?"border-primary bg-primary text-white":"border-slate-200 bg-white text-primary"}`}>{new Intl.DateTimeFormat("fa-IR",{weekday:"short",day:"numeric"}).format(day)}</button>)}</div>
+            <div className="mt-4">
                 <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-[0_18px_55px_rgba(24,48,79,0.06)]">
-                    <div className="grid min-w-[1050px] grid-cols-7">
-                        {days.map((day) => {
+                    <div className="grid grid-cols-1 lg:grid-cols-7">
+                        {days.map((day,index) => {
                             const key = isoDate(day);
                             const dayItems = items
                                 .filter((item) => item.appointment_date === key)
@@ -169,13 +183,13 @@ export const StaffCalendarPanel = ({
                                         const appointment = items.find((item) => item.id === id);
                                         if (appointment && can("appointments.reschedule")) void move(appointment, key, appointment.start_time);
                                     }}
-                                    className="min-h-[520px] border-l border-slate-100 last:border-l-0"
+                                    className={`min-w-0 border-l border-slate-100 last:border-l-0 lg:min-h-[420px] ${index===dayIndex?"block":"hidden lg:block"}`}
                                 >
                                     <header className={`sticky top-0 z-10 border-b border-slate-100 px-3 py-4 text-center ${today ? "bg-secondary/15" : "bg-white"}`}>
                                         <b className="block text-sm text-primary">
                                             {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { weekday: "long" }).format(day)}
                                         </b>
-                                        <span className="mt-1 block text-xs text-slate-400">
+                                        <span className="mt-1 block text-sm text-slate-600">
                                             {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { day: "numeric", month: "short" }).format(day)}
                                         </span>
                                     </header>
@@ -193,19 +207,19 @@ export const StaffCalendarPanel = ({
                                                 }}
                                                 className={`w-full cursor-grab rounded-2xl border p-3 text-right transition hover:-translate-y-0.5 hover:shadow-md ${selected?.id === appointment.id ? "border-secondary bg-secondary/10" : "border-slate-100 bg-slate-50"}`}
                                             >
-                                                <span className="text-xs font-bold text-secondary-deep">
+                                                <span className="text-sm font-bold text-secondary-deep">
                                                     {toPersianDigits(formatTime(appointment.start_time))}
                                                 </span>
                                                 <b className="mt-1 block truncate text-sm text-primary">
-                                                    {appointment.patient_name || "بیمار"}
+                                                    {appointment.patient_name || "مراجع"}
                                                 </b>
-                                                <span className="mt-1 block truncate text-[11px] text-slate-500">
+                                                <span className="mt-1 block truncate text-sm text-slate-500">
                                                     {appointment.service_title}
                                                 </span>
                                             </button>
                                         ))}
                                         {!dayItems.length && (
-                                            <p className="py-10 text-center text-[11px] text-slate-300">بدون نوبت</p>
+                                            <p className="py-10 text-center text-sm text-slate-500">{busy?"در حال دریافت نوبت‌ها…":"بدون نوبت"}</p>
                                         )}
                                     </div>
                                 </div>
@@ -214,15 +228,14 @@ export const StaffCalendarPanel = ({
                     </div>
                 </div>
 
-                <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(24,48,79,0.06)] xl:sticky xl:top-24">
-                    {selected ? (
-                        <>
-                            <span className="text-xs text-slate-400">جابه‌جایی نوبت</span>
+                {selected&&<StaffEditorDialog compact maxWidth={520} title="تغییر زمان نوبت" busy={busy} onClose={async()=>{if(busy)return;if((moveDate!==selected.appointment_date||moveTime!==formatTime(selected.start_time))&&!await ask("زمان جدید هنوز ثبت نشده است. تغییرات را کنار بگذاریم؟",{confirmLabel:"بله",cancelLabel:"خیر"}))return;setSelected(null);}}>
+
+                            <span className="text-sm text-slate-600">جابه‌جایی نوبت</span>
                             <h3 className="mt-1 font-bold text-primary">{selected.patient_name}</h3>
-                            <p className="mt-1 text-xs text-slate-500">{selected.service_title}</p>
+                            <p className="mt-1 text-sm text-slate-500">{selected.service_title}</p>
                             <div className="mt-5 space-y-3">
                                 <JalaliDatePicker value={moveDate} onChange={setMoveDate} placeholder="تاریخ جدید" />
-                                <input type="time" value={moveTime} onChange={(event) => setMoveTime(event.target.value)} className={inputClass} />
+                                <input aria-label="ساعت جدید" type="time" value={moveTime} onChange={(event) => setMoveTime(event.target.value)} className={inputClass} />
                                 <button
                                     type="button"
                                     disabled={busy || !moveDate || !moveTime || !can("appointments.reschedule")}
@@ -232,19 +245,11 @@ export const StaffCalendarPanel = ({
                                     ثبت زمان جدید
                                 </button>
                             </div>
-                            <p className="mt-4 text-[11px] leading-5 text-slate-400">
+                            <p className="mt-4 text-sm leading-5 text-slate-600">
                                 ظرفیت، ساعت خدمت و فاصله قبل و بعد دوباره کنترل می‌شود.
                             </p>
-                        </>
-                    ) : (
-                        <div className="py-10 text-center">
-                            <IoCalendarClearOutline className="mx-auto text-4xl text-secondary" />
-                            <p className="mt-3 text-sm leading-6 text-slate-500">
-                                یک نوبت را انتخاب یا کارت آن را روی روز دیگری رها کنید.
-                            </p>
-                        </div>
-                    )}
-                </aside>
+                </StaffEditorDialog>}
+
             </div>
         </section>
     );
@@ -432,5 +437,3 @@ export const StaffFinancePanel = ({
         </section>
     );
 };
-
-export { default as StaffAuditPanel } from "./StaffAuditPanel";
