@@ -1,56 +1,24 @@
+import Loading from "@/pages/Loading";
+import RavielCredit from "@/components/RavielCredit";
 import { useClinicInfo } from "@/contexts/ClinicInfoContext";
 
-export const LoadingScreen = () => (
-    <div
-        className="flex flex-1 items-center justify-center bg-[#f5f7fd]"
-        dir="rtl"
-    >
-        <div className="text-center">
-            <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-secondary/25 border-t-secondary" />
-            <p className="text-slate-600">در حال اتصال به سامانه نوبت‌دهی…</p>
-        </div>
-    </div>
-);
+export const LoadingScreen = () => <Loading loading className="patient-loading min-h-dvh w-full flex-1" />;
 
 export const AuthShell = ({ children }: { children: React.ReactNode }) => {
     const { clinicInfo } = useClinicInfo();
-
     return (
-    <main
-        dir="rtl"
-        className="flex flex-1 items-center px-3 py-4 text-slate-800"
-    >
-        <div className="mx-auto grid w-full max-w-7xl overflow-hidden rounded-4xl bg-white shadow-2xl shadow-black/20 md:grid-cols-[0.9fr_1.1fr]">
-            <section className="relative hidden overflow-hidden bg-primary p-10 text-white md:flex md:flex-col md:justify-between">
-                <div className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-secondary/20 blur-2xl" />
-                <a href="/" className="relative inline-flex w-fit self-center">
-                    <img
-                        src="/img/logo/logo-dark-full.webp"
-                        alt={clinicInfo.doctorName}
-                        className="w-72 "
-                    />
-                </a>
-                <div className="relative">
-                    <span className="mb-4 inline-flex rounded-full border border-secondary/50 bg-secondary/10 px-4 py-1 text-sm text-secondary-mild">
-                        سامانه نوبت‌دهی مطب {clinicInfo.doctorName}
-                    </span>
-                    <h1 className="font-dana text-4xl leading-normal text-white">
-                        {clinicInfo.bookingEnabled ? "رزرو نوبت، بدون تماس و انتظار" : "پرونده و پیگیری نوبت‌های شما"}
-                    </h1>
-                    <p className="mt-5 leading-8 text-slate-300">
-                        {clinicInfo.bookingEnabled ? "با وارد کردن مشخصات، خدمت و زمان مراجعه را انتخاب کنید." : clinicInfo.bookingDisabledMessage}
-                    </p>
-                </div>
-                <p className="relative text-sm text-slate-200">
-                    اطلاعات شما فقط برای هماهنگی و ارائه خدمات درمانی استفاده
-                    می‌شود.
-                </p>
-            </section>
-            <section className="flex min-w-0 items-center p-5 sm:p-6 md:p-8 xl:p-12">
-                {children}
-            </section>
-        </div>
-    </main>
+        <main dir="rtl" className="patient-auth flex flex-1 flex-col items-center justify-center px-3 py-3 text-slate-800">
+            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/20 bg-white shadow-2xl shadow-black/20">
+                <header className="relative overflow-hidden bg-primary px-6 pb-5 pt-5 text-center sm:px-9">
+                    <a href="/" className="relative mx-auto block w-fit rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-secondary">
+                        <img src="/img/logo/logo-dark-full.webp" alt={clinicInfo.doctorName} className="mx-auto h-auto w-60 max-w-full" fetchPriority="high" />
+                    </a>
+                    <h1 className="relative mt-3 font-dana text-xl text-white">{clinicInfo.bookingEnabled ? "نوبت شما، در چند قدم ساده" : "پرونده و پیگیری نوبت‌های شما"}</h1>
+                    <p className="relative mt-2 text-sm leading-6 text-slate-200">{clinicInfo.bookingEnabled ? "ورود امن به سامانه نوبت‌دهی مطب" : clinicInfo.bookingDisabledMessage}</p>
+                </header>
+                <section className="min-w-0 px-5 pb-5 pt-5 sm:px-9">{children}</section>
+            </div>
+            <footer className="px-4 pt-4 text-center text-sm"><RavielCredit /></footer>
+        </main>
     );
 };
-

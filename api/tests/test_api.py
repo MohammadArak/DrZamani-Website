@@ -242,7 +242,7 @@ def test_complete_patient_and_booking_flow() -> None:
             json={
                 "first_name": "کاربر",
                 "last_name": "آزمایشی",
-                "birth_date_jalali": "1370/01/01",
+                "referral_source": "google", "birth_date_jalali": "1370/01/01",
                 "email": "patient@example.com",
                 "gender": "male",
                 "national_id": "1000000001",
@@ -684,7 +684,7 @@ def test_urgent_booking_requires_payment_before_appointment(monkeypatch) -> None
             json={
                 "first_name": "بیمار",
                 "last_name": "فوری",
-                "birth_date_jalali": "1372/02/02",
+                "referral_source": "google", "birth_date_jalali": "1372/02/02",
                 "email": None,
                 "gender": "female",
                 "national_id": "2000000002",
@@ -828,7 +828,7 @@ def test_operational_capacity_waitlist_reschedule_and_audit() -> None:
                 json={
                     "first_name": "بیمار",
                     "last_name": f"ظرفیت {index}",
-                    "birth_date_jalali": "1370/01/01",
+                    "referral_source": "google", "birth_date_jalali": "1370/01/01",
                     "email": None,
                     "gender": "male" if index == 0 else "female",
                     "national_id": None,
@@ -865,7 +865,7 @@ def test_operational_capacity_waitlist_reschedule_and_audit() -> None:
             json={
                 "first_name": "بیمار",
                 "last_name": "منتظر",
-                "birth_date_jalali": "1375/05/05",
+                "referral_source": "google", "birth_date_jalali": "1375/05/05",
                 "email": None,
                 "gender": "female",
                 "national_id": None,
@@ -901,7 +901,7 @@ def test_operational_capacity_waitlist_reschedule_and_audit() -> None:
         stranger_token = _patient_token(client, "09127654321")
         stranger_headers = {"Authorization": f"Bearer {stranger_token}"}
         assert client.put("/api/v1/me", headers=stranger_headers, json={
-            "first_name": "بیمار", "last_name": "رهگذر", "birth_date_jalali": "1380/02/02", "email": None, "gender": "male",
+            "first_name": "بیمار", "last_name": "رهگذر", "referral_source": "google", "birth_date_jalali": "1380/02/02", "email": None, "gender": "male",
             "national_id": None, "is_foreign_national": True, "foreign_identifier": "WAITLIST-STRANGER-1",
         }).status_code == 200
         booking_body = {"service_id": service["id"], "appointment_date": selected_date, "start_time": selected_slot, "has_previous_visit": False, "is_urgent": False}
@@ -1184,3 +1184,23 @@ def test_clinic_public_information_is_managed_centrally() -> None:
                 json={**original, "revision": client.get("/api/v1/staff/settings", headers=staff_headers).json()["revision"]},
             )
             assert restored.status_code == 200, restored.text
+
+
+def test_registration_referral_required_and_persisted() -> None:
+    with TestClient(app) as client:
+        token = _patient_token(client, "09120000996")
+        headers = {"Authorization": f"Bearer {token}"}
+        payload = {"first_name": "کاربر", "last_name": "آزمایشی", "birth_date_jalali": "1370/01/01", "email": None, "gender": "male", "is_foreign_national": True, "foreign_identifier": "referral-test-196"}
+        assert client.put("/api/v1/me", headers=headers, json=payload).status_code == 422
+        assert client.get("/api/v1/me", headers=headers).json()["profile_completed"] is False
+        for source in ["", "unknown"]:
+            assert client.put("/api/v1/me", headers=headers, json={**payload, "referral_source": source}).status_code == 422
+        assert client.put("/api/v1/me", headers=headers, json={**payload, "referral_source": "other", "referral_detail": "a" * 501}).status_code == 422
+        saved = client.put("/api/v1/me", headers=headers, json={**payload, "referral_source": "other", "referral_detail": "معرفی آزمایشی"})
+        assert saved.status_code == 200, saved.text
+        assert saved.json()["referral_detail"] == "معرفی آزمایشی"
+        assert saved.json()["profile_completed"] is True
+        # Older profile editors omit referral fields; they must not erase the answer.
+        assert client.put("/api/v1/me", headers=headers, json=payload).json()["referral_source"] == "other"
+        changed = client.put("/api/v1/me", headers=headers, json={**payload, "referral_source": "google"})
+        assert changed.json()["referral_detail"] is None

@@ -38,6 +38,8 @@ class Patient(Base):
     national_id: Mapped[str | None] = mapped_column(String(24), unique=True)
     is_foreign_national: Mapped[bool] = mapped_column(Boolean, default=False)
     foreign_identifier: Mapped[str | None] = mapped_column(String(40), unique=True)
+    referral_source: Mapped[str | None] = mapped_column(String(32))
+    referral_detail: Mapped[str | None] = mapped_column(String(500))
     profile_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     internal_note: Mapped[str | None] = mapped_column(Text)

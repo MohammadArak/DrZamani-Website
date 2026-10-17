@@ -82,6 +82,8 @@ class PatientProfileUpdate(BaseModel):
     national_id: str | None = None
     is_foreign_national: bool = False
     foreign_identifier: str | None = Field(default=None, max_length=40)
+    referral_source: str | None = Field(default=None, pattern=r"^(google|instagram|eitaa|friends|doctor|previous_visit|other)$")
+    referral_detail: str | None = Field(default=None, max_length=500)
 
     @field_validator("birth_date_jalali", "national_id", "foreign_identifier", mode="before")
     @classmethod
@@ -116,6 +118,8 @@ class PatientProfile(BaseModel):
     national_id: str | None
     is_foreign_national: bool
     foreign_identifier: str | None
+    referral_source: str | None = None
+    referral_detail: str | None = None
     profile_completed: bool
 
 

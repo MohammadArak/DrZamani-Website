@@ -181,33 +181,24 @@ const Login = ({
             <div className="mx-auto flex w-full min-w-0 max-w-xl flex-col">
                 <a
                     href="/"
-                    className="mb-5 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary md:hidden"
+                    className="mb-4 inline-flex w-fit items-center gap-2 text-xs text-slate-500 hover:text-primary"
                 >
                     <IoArrowForward /> بازگشت به سایت
                 </a>
                 <span className="text-sm text-secondary-deep">
                     ورود و ثبت‌ نام
                 </span>
-                <h2 className="mt-2 font-dana text-3xl text-primary">
+                <h2 className="mt-2 font-dana text-2xl leading-normal text-primary">
                     {stage === "phone"
                         ? "شماره موبایل خود را وارد کنید"
                         : "کد تأیید را وارد کنید"}
                 </h2>
-                <p id="phone-help" className="mt-4 leading-7 text-slate-600">
+                <p id="phone-help" className="mt-3 text-sm leading-7 text-slate-600">
                     {stage === "phone"
                         ? "برای ساخت حساب یا ورود، کد یک‌بارمصرف برای شما ارسال می‌شود."
                         : `کد ${toPersianDigits(String(codeLength))} رقمی به ${toPersianDigits(phone)} ارسال شد.`}
                 </p>
 
-                <details className="mt-4 rounded-xl border border-slate-200 p-3 text-sm text-slate-600">
-                    <summary className="cursor-pointer font-bold text-primary">چطور نوبت بگیرم؟</summary>
-                    <ol className="mt-3 list-inside list-decimal space-y-2 leading-7">
-                        <li>با شماره موبایل و کد تأیید وارد شوید؛ اگر حساب ندارید مشخصات لازم را کامل کنید.</li>
-                        <li>خدمت، تاریخ و ساعت مناسب را انتخاب کنید.</li>
-                        <li>اطلاعات را بررسی و نوبت را ثبت کنید؛ پرداخت فقط در صورت نیازِ خدمت انجام می‌شود.</li>
-                    </ol>
-                    <p className="mt-3 leading-7">رسید، وضعیت نوبت و راه پیگیری در بخش «نوبت‌ها» در دسترس است.</p>
-                </details>
                 {error && (
                     <div
                         role="alert"
@@ -224,7 +215,7 @@ const Login = ({
                 )}
 
                 {stage === "phone" ? (
-                    <form onSubmit={requestCode} className="mt-7 space-y-5">
+                    <form onSubmit={requestCode} className="mt-5 space-y-4">
                         {lastSentPhone && lastSentPhone===normalizeDigits(phone).replace(/[\s()-]/g, "") && <button type="button" className="text-sm text-primary underline" onClick={()=>{setError("");setStage("otp");}}>کد را دارم؛ بازگشت به ورود کد</button>}
                         <BotProtection ref={bot} operation="otp_request" />
                         <label className="block">
@@ -255,7 +246,7 @@ const Login = ({
                         </button>
                     </form>
                 ) : (
-                    <form onSubmit={verifyCode} className="mt-7 space-y-5">
+                    <form onSubmit={verifyCode} className="mt-5 space-y-4">
                         <div ref={codeStart}><OtpInput value={code} onChange={setCode} length={codeLength} /></div>
                         <BotProtection ref={bot} operation="otp_verify" />
                         <button

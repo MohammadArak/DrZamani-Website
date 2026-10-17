@@ -273,3 +273,30 @@
 
 /* Keep typed content legible on small screens; no viewport zoom restriction. */
 @media(max-width:767px){input:not([type=checkbox]):not([type=radio]):not(.text-lg),textarea,select,[contenteditable=true]{font-size:16px!important}}
+
+/* Keep the shared credit outside authenticated pages, but inside the login card. */
+body:has(.patient-auth) .raviel-credit-footer { display: none; }
+@media (max-height: 700px) {
+  .patient-auth { padding-block: 8px; }
+  .patient-auth header { padding-block: 14px; }
+  .patient-auth header img { width: 190px; }
+  .patient-auth header h1 { margin-top: 8px; }
+  .patient-auth section { padding-block: 16px; }
+  .patient-auth section > div > a { margin-bottom: 8px; }
+}
+
+@media (max-height: 660px) {
+  .patient-auth header h1, .patient-auth header p { display: none; }
+  .patient-auth section h2 { font-size: 20px; line-height: 1.6; }
+  .patient-auth section > div > p { margin-top: 8px; line-height: 1.75; }
+  .patient-auth section form { margin-top: 14px; }
+}
+/* A smaller visual header leaves room for the two-field registration steps. */
+.patient-auth:has(.patient-profile) header h1,
+.patient-auth:has(.patient-profile) header p { display: none; }
+
+@media (max-width: 640px) {
+  .patient-auth { padding-inline: 20px; }
+  .patient-auth > footer { display: none; }
+  .raviel-credit-footer { display: none; }
+}
