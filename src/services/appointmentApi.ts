@@ -1091,6 +1091,8 @@ export const appointmentApi = {
         ),
     staffAuditLogs: (token: string) =>
         apiRequest<AuditLogItem[]>("/staff/audit-logs", {}, token),
+    staffAuditPage: (token: string, query: URLSearchParams, signal?: AbortSignal) =>
+        apiRequest<{items: AuditLogItem[]; total: number; page: number; page_size: number}>(`/staff/audit-logs/page?${query}`, {signal}, token),
     staffConsultations: (token: string) =>
         apiRequest<ConsultationThread[]>("/staff/consultations", {}, token),
     staffConsultation: (token: string, appointmentId: number) =>

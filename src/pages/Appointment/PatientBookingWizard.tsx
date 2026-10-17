@@ -147,7 +147,7 @@ const BookingWizard = ({
     };
 
     const {ask,confirmation}=useConfirmDialog();
-    const requestClose=async()=>{if(busy)return;if((draft.hasPreviousVisit!==null||draft.serviceId!==null||draft.note.trim())&&!await ask("انتخاب‌ها و توضیحات نوبت هنوز ثبت نشده‌اند؛ از رزرو خارج شوید؟",{cancelLabel:"ادامهٔ رزرو"}))return;onClose();};
+    const requestClose=async()=>{if(busy)return;if((draft.hasPreviousVisit!==null||draft.serviceId!==null||draft.note.trim())&&!await ask("هنوز نوبتی برای شما ثبت نشده است. می‌خواهید از رزرو خارج شوید؟ اگر خارج شوید، باید انتخاب زمان و خدمت را از ابتدا انجام دهید.",{title:"خروج از رزرو نوبت",confirmLabel:"بله",cancelLabel:"خیر"}))return;onClose();};
     const modal = useModalScope<HTMLDivElement>(true,()=>void requestClose(),busy);
     return (
         <>{confirmation}<div ref={modal} tabIndex={-1} role="dialog" aria-modal="true" aria-label="دریافت نوبت حضوری"
@@ -358,6 +358,7 @@ const BookingWizard = ({
                                         disabled={busy || waitlistJoined || !draft.serviceId}
                                         onClick={async () => {
                                             if (!draft.serviceId) return;
+                                            if (!await ask("نام شما در لیست انتظار این خدمت ثبت می‌شود تا در صورت آزاد شدن ظرفیت، مطب به شما اطلاع دهد. عضویت در این لیست به معنی رزرو قطعی نوبت نیست. ثبت کنیم؟", {title:"عضویت در لیست انتظار",confirmLabel:"بله",cancelLabel:"خیر"})) return;
                                             setBusy(true);
                                             setError("");
                                             try {

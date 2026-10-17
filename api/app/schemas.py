@@ -947,6 +947,13 @@ class AuditLogRead(BaseModel):
     created_at: datetime
 
 
+class AuditLogPage(BaseModel):
+    items: list[AuditLogRead]
+    total: int
+    page: int
+    page_size: int
+
+
 class PaymentRead(BaseModel):
     id: int
     appointment_id: int | None

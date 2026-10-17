@@ -1,23 +1,26 @@
 from __future__ import annotations
 
 import json
+from datetime import date, datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy import select, func, or_, and_
+from sqlalchemy.orm import Session, joinedload
 
 from ..activity import record_audit
 from ..database import get_db
 from ..dependencies import require_permission
-from ..access import identity
 from ..models import (
     AuditLog,
+    Patient,
     Payment,
     StaffUser,
     WaitlistEntry,
 )
 from ..schemas import (
     AuditLogRead,
+    AuditLogPage,
     FinanceSummary,
     PaymentRead,
     RefundUpdate,
@@ -196,13 +199,17 @@ def audit_logs(
 ) -> list[AuditLogRead]:
     items = (
         db.scalars(
-            select(AuditLog)
+            select(AuditLog).options(joinedload(AuditLog.actor_staff).selectinload(StaffUser.roles), joinedload(AuditLog.actor_patient))
             .order_by(AuditLog.created_at.desc(), AuditLog.id.desc())
             .limit(limit)
         )
         .unique()
         .all()
     )
+    return _audit_rows(items)
+
+
+def _audit_rows(items: list[AuditLog]) -> list[AuditLogRead]:
     result: list[AuditLogRead] = []
     for item in items:
         actor_name = "سامانه"
@@ -210,7 +217,7 @@ def audit_logs(
         if item.actor_staff:
             actor_name = item.actor_staff.full_name
             actor_role = (
-                "، ".join(identity(item.actor_staff)["role_titles"]) or "بدون نقش فعال"
+                "، ".join(role.name for role in item.actor_staff.roles if role.is_active) or "بدون نقش فعال"
             )
         elif item.actor_patient:
             actor_name = (
@@ -233,7 +240,53 @@ def audit_logs(
                 entity_id=item.entity_id,
                 summary=item.summary,
                 details=json.loads(item.details_json or "{}"),
-                created_at=item.created_at,
+                created_at=item.created_at.replace(tzinfo=timezone.utc) if item.created_at.tzinfo is None else item.created_at,
             )
         )
     return result
+
+
+@router.get("/audit-logs/page", response_model=AuditLogPage)
+def audit_log_page(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    q: str = Query(default="", max_length=150),
+    actor: str = Query(default="", pattern="^(|staff|patient|system)$"),
+    date_from: date | None = None,
+    date_to: date | None = None,
+    _staff: StaffUser = Depends(require_permission("audit.view")),
+    db: Session = Depends(get_db),
+) -> AuditLogPage:
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(422, "تاریخ شروع باید قبل از تاریخ پایان باشد.")
+    query = select(AuditLog).options(joinedload(AuditLog.actor_staff).selectinload(StaffUser.roles), joinedload(AuditLog.actor_patient))
+    term = q.strip()
+    if term:
+        query = query.where(or_(
+            AuditLog.summary.icontains(term, autoescape=True),
+            AuditLog.action.icontains(term, autoescape=True),
+            AuditLog.entity_type.icontains(term, autoescape=True),
+            AuditLog.entity_id.icontains(term, autoescape=True),
+            AuditLog.actor_staff.has(StaffUser.full_name.icontains(term, autoescape=True)),
+            AuditLog.actor_patient.has(or_(
+                Patient.first_name.icontains(term, autoescape=True),
+                Patient.last_name.icontains(term, autoescape=True),
+            )),
+        ))
+    if actor == "staff":
+        query = query.where(AuditLog.actor_staff_id.is_not(None))
+    elif actor == "patient":
+        query = query.where(AuditLog.actor_patient_id.is_not(None))
+    elif actor == "system":
+        query = query.where(and_(AuditLog.actor_staff_id.is_(None), AuditLog.actor_patient_id.is_(None)))
+    # UI dates are Tehran calendar days; stored instants are UTC.
+    def boundary(value: date) -> datetime:
+        return datetime.combine(value, time.min, ZoneInfo("Asia/Tehran")).astimezone(ZoneInfo("UTC"))
+    if date_from:
+        query = query.where(AuditLog.created_at >= boundary(date_from))
+    if date_to and date_to != date.max:
+        query = query.where(AuditLog.created_at < boundary(date_to + timedelta(days=1)))
+    total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
+    items = list(db.scalars(query.order_by(AuditLog.created_at.desc(), AuditLog.id.desc())
+        .offset((page - 1) * page_size).limit(page_size)).unique().all())
+    return AuditLogPage(items=_audit_rows(items), total=total, page=page, page_size=page_size)

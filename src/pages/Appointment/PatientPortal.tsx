@@ -39,11 +39,12 @@ import {
 } from "react-icons/io5";
 
 import AppointmentCard from "./PatientAppointmentCard";
+const BookingGuide = lazy(() => import("./BookingGuide"));
 const BookingWizard = lazy(() => import("./PatientBookingWizard"));
 const IntakeFormDialog = lazy(() => import("./PatientIntakeDialog"));
 import ProfileForm from "./PatientProfileForm";
 import { errorMessage } from "./patientUi";
-type PortalTab = "home" | "appointments" | "instructions" | "about" | "profile";
+type PortalTab = "conversations" | "home" | "appointments" | "instructions" | "about" | "profile";
 
 const Portal = ({
     token,
@@ -70,6 +71,7 @@ const Portal = ({
     const clinicInfo = useMemo(() => buildClinicInfo(clinic), [clinic]);
     const [tab, setTab] = useState<PortalTab>("home");
     const { clinicInfo: bookingPolicy, refreshClinicInfo } = useClinicInfo();
+    const [guideOpen, setGuideOpen] = useState(false);
     const [bookingOpen, setBookingOpen] = useState(false);
     const openBooking = async () => {
         await refreshClinicInfo();
@@ -198,17 +200,17 @@ const Portal = ({
         label: string;
         icon: React.ReactNode;
     }> = [
-        { id: "home", label: "خانه", icon: <IoHomeOutline /> },
+        { id: "conversations", label: "گفت‌وگو", icon: <IoChatbubblesOutline /> },
         { id: "appointments", label: "نوبت‌ها", icon: <IoCalendarOutline /> },
-        { id: "instructions", label: "راهنمای من", icon: <IoDocumentTextOutline /> },
+        { id: "home", label: "خانه", icon: <IoHomeOutline /> },
         { id: "about", label: "درباره ما", icon: <IoMedicalOutline /> },
-        { id: "profile", label: "پروفایل", icon: <IoPersonOutline /> },
+        { id: "instructions", label: "راهنما", icon: <IoDocumentTextOutline /> },
     ];
 
     return (
         <main
             dir="rtl"
-            className="patient-shell min-h-screen w-full max-w-full overflow-x-clip bg-[#f3f6f8] pb-28 text-slate-800 md:pb-12"
+            className="patient-shell flex-1 min-h-0 w-full max-w-full overflow-x-clip bg-[#f3f6f8] pb-24 text-slate-800 md:pb-12"
         >
             {confirmation}
             <Toast
@@ -226,24 +228,27 @@ const Portal = ({
                             alt={clinicInfo.doctorName}
                             width="560"
                             height="175"
-                            className="w-36 sm:w-44 md:w-48"
+                            className="w-44 md:w-56"
                         />
                     </a>
+                    <div className="flex items-center gap-2">
+                    <button type="button" aria-label="پروفایل من" onClick={() => setTab("profile")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 text-white"><IoPersonOutline size={22} /></button>
                     <button
                         onClick={onLogout}
-                        className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs text-slate-200 backdrop-blur transition hover:border-secondary hover:text-secondary sm:text-sm"
+                        className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-200 backdrop-blur transition hover:border-secondary hover:text-secondary sm:text-sm"
                     >
                         <IoLogOutOutline /> خروج
                     </button>
+                    </div>
                 </div>
-                <div className="relative mx-auto mt-6 flex max-w-6xl items-center justify-between gap-4 md:mt-5">
+                <div className={`relative mx-auto mt-6 max-w-6xl items-center justify-between gap-4 md:mt-5 ${tab === "home" ? "flex" : "hidden md:flex"}`}>
                     <div className="min-w-0">
-                        <p className="text-xs text-slate-300 sm:text-sm">سلام، خوش آمدید</p>
+                        <p className="text-sm text-slate-300 sm:text-sm">سلام، خوش آمدید</p>
                         <h1 className="mt-1 truncate font-dana text-2xl text-white sm:text-3xl">
                             {profile.first_name} {profile.last_name}
                         </h1>
-                        <p className="mt-2 text-xs text-slate-300">
-                            نوبت‌ها، پیام‌های مطب و وضعیت درخواست‌ها در یک صفحه
+                        <p className="mt-2 text-sm text-slate-300">
+                            حساب نوبت‌دهی شما
                         </p>
                     </div>
                     <button
@@ -284,7 +289,7 @@ const Portal = ({
                         >
                             <span>
                                 <b className="block font-dana text-xl">{bookingPolicy.bookingEnabled ? "دریافت نوبت جدید" : "رزرو آنلاین غیرفعال است"}</b>
-                                <span className="mt-1 block text-xs text-primary/70">انتخاب خدمت، تاریخ و ساعت در چند مرحله کوتاه</span>
+                                <span className="mt-1 block text-sm text-primary/70">انتخاب خدمت، تاریخ و ساعت در چند مرحله کوتاه</span>
                             </span>
                             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/55 text-2xl"><IoChevronBackOutline /></span>
                         </button>
@@ -299,7 +304,7 @@ const Portal = ({
                                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary/12 text-xl text-secondary-deep sm:h-11 sm:w-11 sm:shrink-0">{item.icon}</span>
                                     <div className="mt-3 min-w-0 sm:mt-0">
                                         <strong className="block text-xl text-primary sm:text-2xl">{toPersianDigits(item.value)}</strong>
-                                        <span className="mt-1 block truncate text-[10px] text-slate-500 sm:text-xs">{item.label}</span>
+                                        <span className="mt-1 block text-sm text-slate-600">{item.label}</span>
                                     </div>
                                 </article>
                             ))}
@@ -309,12 +314,12 @@ const Portal = ({
                             <section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="min-w-0">
-                                        <span className="text-xs text-secondary-deep">برنامه پیش رو</span>
+                                        <span className="text-sm text-secondary-deep">برنامه پیش رو</span>
                                         <h2 className="mt-1 truncate font-dana text-xl text-primary sm:text-2xl">
                                             {activeAppointment ? "نوبت بعدی من" : "نوبت فعالی ندارید"}
                                         </h2>
                                     </div>
-                                    <button type="button" onClick={() => setTab("appointments")} className="shrink-0 text-xs font-bold text-secondary-deep sm:text-sm">مشاهده همه</button>
+                                    <button type="button" onClick={() => setTab("appointments")} className="shrink-0 text-sm font-bold text-secondary-deep sm:text-sm">مشاهده همه</button>
                                 </div>
                                 {activeAppointment ? (
                                     <div className="mt-5 min-w-0">
@@ -334,7 +339,7 @@ const Portal = ({
                                 ) : (
                                     <div className="mt-5 flex flex-col items-center rounded-2xl bg-slate-50 px-5 py-8 text-center">
                                         <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-3xl text-secondary shadow-sm"><IoCalendarOutline /></span>
-                                        <p className="mt-4 text-sm leading-7 text-slate-500">اولین زمان مناسب را آنلاین انتخاب کنید؛ نتیجه در همین پنل نمایش داده می‌شود.</p>
+                                        <p className="mt-4 text-sm leading-7 text-slate-600">اولین زمان مناسب را آنلاین انتخاب کنید؛ نتیجه در همین پنل نمایش داده می‌شود.</p>
                                         <button type="button" disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()} className="mt-5 h-11 rounded-xl bg-primary px-6 text-sm font-bold text-white">دریافت نوبت</button>
                                     </div>
                                 )}
@@ -343,29 +348,29 @@ const Portal = ({
                             <aside className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-1">
                                 <a href={`tel:${clinicInfo.phones.office.value}`} className="group flex min-w-0 items-center gap-4 rounded-2xl border border-secondary/25 bg-secondary/10 p-4 transition hover:border-secondary/50">
                                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl text-secondary-deep shadow-sm"><IoCallOutline /></span>
-                                    <span className="min-w-0"><b className="block text-sm text-primary">تماس با مطب</b><span dir="ltr" className="mt-1 block truncate text-right text-xs text-slate-500">{clinicInfo.phones.office.display}</span></span>
+                                    <span className="min-w-0"><b className="block text-sm text-primary">تماس با مطب</b><span dir="ltr" className="mt-1 block truncate text-right text-sm text-slate-600">{clinicInfo.phones.office.display}</span></span>
                                 </a>
                                 <div className="flex min-w-0 items-start gap-4 rounded-2xl border border-slate-200 bg-white p-4">
                                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-2xl text-sky-700"><IoLocationOutline /></span>
-                                    <span className="min-w-0"><b className="block text-sm text-primary">آدرس مطب</b><span className="mt-1 block text-xs leading-6 text-slate-500">{clinicInfo.address.full}</span></span>
+                                    <span className="min-w-0"><b className="block text-sm text-primary">آدرس مطب</b><span className="mt-1 block text-sm leading-6 text-slate-600">{clinicInfo.address.full}</span></span>
                                 </div>
-                                <button type="button" onClick={() => setTab("appointments")} className="flex min-w-0 items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-right transition hover:border-secondary/40">
+                                <button type="button" onClick={() => setTab("conversations")} className="flex min-w-0 items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-right transition hover:border-secondary/40">
                                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-2xl text-emerald-700"><IoChatbubblesOutline /></span>
-                                    <span className="min-w-0"><b className="block text-sm text-primary">گفت‌وگو با مطب</b><span className="mt-1 block text-xs text-slate-500">از داخل نوبت فعال وارد چت شوید</span></span>
+                                    <span className="min-w-0"><b className="block text-sm text-primary">گفت‌وگو با مطب</b><span className="mt-1 block text-sm text-slate-600">پیام‌ها و پرسش‌های مربوط به مراجعه</span></span>
                                 </button>
                             </aside>
                         </div>
 
                         <section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
                             <div className="flex items-center justify-between gap-3">
-                                <div><span className="text-xs text-secondary-deep">رزرو آنلاین</span><h2 className="mt-1 font-dana text-xl text-primary">خدمت‌های قابل رزرو</h2></div>
-                                <button type="button" disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()} className="shrink-0 text-xs font-bold text-secondary-deep">مشاهده زمان‌ها</button>
+                                <div><span className="text-sm text-secondary-deep">رزرو آنلاین</span><h2 className="mt-1 font-dana text-xl text-primary">خدمت‌های قابل رزرو</h2></div>
+                                <button type="button" disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()} className="shrink-0 text-sm font-bold text-secondary-deep">مشاهده زمان‌ها</button>
                             </div>
                             <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                 {services.slice(0, 6).map((service) => (
                                     <button key={service.id} type="button" disabled={!bookingPolicy.bookingEnabled} onClick={() => void openBooking()} className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-right transition hover:-translate-y-0.5 hover:border-secondary/40 hover:bg-white hover:shadow-md">
                                         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl text-secondary-deep shadow-sm"><ServiceIcon icon={service.icon_key} /></span>
-                                        <span className="min-w-0 flex-1"><b className="block truncate text-sm text-primary">{service.title}</b><span className="mt-1 block truncate text-xs text-slate-500">{toPersianDigits(service.duration_minutes)} دقیقه</span></span>
+                                        <span className="min-w-0 flex-1"><b className="block truncate text-sm text-primary">{service.title}</b><span className="mt-1 block truncate text-sm text-slate-600">{toPersianDigits(service.duration_minutes)} دقیقه</span></span>
                                         <IoChevronBackOutline className="shrink-0 text-secondary-deep" />
                                     </button>
                                 ))}
@@ -409,7 +414,7 @@ const Portal = ({
                                     />
                                 ))
                             ) : (
-                                <p className="rounded-2xl bg-slate-50 p-8 text-center text-slate-500">
+                                <p className="rounded-2xl bg-slate-50 p-8 text-center text-slate-600">
                                     نوبتی ثبت نشده است.
                                 </p>
                             )}
@@ -425,7 +430,7 @@ const Portal = ({
                                                 <div className="flex flex-wrap items-center justify-between gap-3">
                                                     <div>
                                                         <b className="text-primary">{entry.service_title}</b>
-                                                        <p className="mt-1 text-xs text-slate-500">
+                                                        <p className="mt-1 text-sm text-slate-600">
                                                             {entry.status === "notified" && entry.offered_date
                                                                 ? `ظرفیت آزاد: ${formatPersianDate(entry.offered_date)} ساعت ${toPersianDigits(formatTime(entry.offered_start_time ?? ""))}`
                                                                 : "در انتظار اولین ظرفیت مناسب"}
@@ -433,12 +438,12 @@ const Portal = ({
                                                     </div>
                                                     <div className="flex items-center gap-3">
                                                         {entry.status === "notified" && (
-                                                            <button type="button" onClick={() => void takeOffer(entry)} className="rounded-xl bg-secondary px-4 py-2 text-xs font-bold text-white">رزرو همین زمان</button>
+                                                            <button type="button" onClick={() => void takeOffer(entry)} className="rounded-xl bg-secondary px-4 py-2 text-sm font-bold text-white">رزرو همین زمان</button>
                                                         )}
                                                         {entry.status === "notified" && (
-                                                            <a href={`tel:${clinicInfo.phones.office.value}`} className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white">هماهنگی با مطب</a>
+                                                            <a href={`tel:${clinicInfo.phones.office.value}`} className="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white">هماهنگی با مطب</a>
                                                         )}
-                                                        <button type="button" onClick={() => void leaveWaitlist(entry.id)} className="text-xs text-rose-600">لغو انتظار</button>
+                                                        <button type="button" onClick={() => void leaveWaitlist(entry.id)} className="text-sm text-rose-600">لغو انتظار</button>
                                                     </div>
                                                 </div>
                                             </article>
@@ -448,12 +453,13 @@ const Portal = ({
                         )}
                     </section>
                 )}
+                {tab === "conversations" && <section className="app-panel-enter space-y-4"><h2 className="font-dana text-2xl text-primary">گفت‌وگو با مطب</h2>{appointments.filter(item => item.consultation_enabled).map(item => <button key={item.id} type="button" onClick={() => setOpenConsultation(item)} className="flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-right"><span><b className="block text-primary">{item.service_title}</b><span className="text-sm text-slate-600">{formatPersianDate(item.appointment_date)}</span></span><IoChatbubblesOutline className="shrink-0 text-2xl text-primary" /></button>)}{!appointments.some(item => item.consultation_enabled) && <p className="rounded-2xl bg-white p-6 leading-8 text-slate-600">هنوز گفت‌وگویی ندارید. برای هماهنگی مراجعه می‌توانید با مطب تماس بگیرید.</p>}</section>}
                 {tab === "instructions" && (
                     <section className="app-panel-enter min-w-0 space-y-5">
                         <div>
                             <span className="text-sm text-secondary-deep">آمادگی و پیگیری مراجعه</span>
-                            <h2 className="mt-1 font-dana text-3xl text-primary">راهنمای من</h2>
-                            <p className="mt-2 text-sm leading-7 text-slate-500">کارهای قبل از مراجعه و راهنمای عمومی پس از آن برای هر خدمت در این بخش قرار می‌گیرد.</p>
+                            <h2 className="mt-1 font-dana text-3xl text-primary">راهنمای مراجعه</h2><button type="button" onClick={() => setGuideOpen(true)} className="mt-4 min-h-12 rounded-xl bg-primary px-5 py-3 font-bold text-white">راهنمای تصویری نوبت‌گیری</button>
+                            <p className="mt-2 text-sm leading-7 text-slate-600">اگر برای مراجعه نیاز به آمادگی خاصی داشته باشید، راهنمای آن را اینجا می‌بینید.</p>
                         </div>
                         {appointments
                             .filter((item) => item.status !== "cancelled")
@@ -467,20 +473,20 @@ const Portal = ({
                                         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-4 sm:p-5">
                                             <div className="flex min-w-0 items-start gap-3">
                                                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary/10 text-2xl text-secondary-deep"><ServiceIcon icon={item.service_icon_key} /></span>
-                                                <span className="min-w-0"><b className="block truncate text-primary">{item.service_title}</b><span className="mt-1 block text-xs text-slate-400">{formatPersianDate(item.appointment_date)} · ساعت {toPersianDigits(formatTime(item.start_time))}</span></span>
+                                                <span className="min-w-0"><b className="block truncate text-primary">{item.service_title}</b><span className="mt-1 block text-sm text-slate-600">{formatPersianDate(item.appointment_date)} · ساعت {toPersianDigits(formatTime(item.start_time))}</span></span>
                                             </div>
-                                            <span className={`rounded-full px-3 py-1 text-xs ${completed ? "bg-emerald-50 text-emerald-700" : "bg-sky-50 text-sky-700"}`}>{completed ? "راهنمای پس از مراجعه" : "آمادگی قبل از مراجعه"}</span>
+                                            <span className={`rounded-full px-3 py-1 text-sm ${completed ? "bg-emerald-50 text-emerald-700" : "bg-sky-50 text-sky-700"}`}>{completed ? "راهنمای پس از مراجعه" : "آمادگی قبل از مراجعه"}</span>
                                         </header>
                                         <div className="p-4 sm:p-5">
                                             {instructions ? (
                                                 <p className="whitespace-pre-line text-sm leading-8 text-slate-600">{instructions}</p>
                                             ) : (
-                                                <p className="rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-500">برای این خدمت هنوز راهنمای اختصاصی ثبت نشده است. در صورت نیاز با مطب تماس بگیرید.</p>
+                                                <p className="rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-600">برای این خدمت هنوز راهنمای اختصاصی ثبت نشده است. در صورت نیاز با مطب تماس بگیرید.</p>
                                             )}
                                             {!completed && item.intake_required && (
                                                 <div className={`mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4 ${item.intake_completed ? "bg-emerald-50" : "bg-amber-50"}`}>
                                                     <span className={`text-sm font-bold ${item.intake_completed ? "text-emerald-800" : "text-amber-900"}`}>{item.intake_completed ? "فرم قبل از مراجعه تکمیل شده است" : "فرم قبل از مراجعه هنوز تکمیل نشده است"}</span>
-                                                    <button type="button" onClick={() => setIntakeAppointment(item)} className={`rounded-xl px-4 py-2 text-xs font-bold ${item.intake_completed ? "bg-white text-emerald-700" : "bg-primary text-white"}`}>{item.intake_completed ? "مشاهده فرم" : "تکمیل فرم"}</button>
+                                                    <button type="button" onClick={() => setIntakeAppointment(item)} className={`rounded-xl px-4 py-2 text-sm font-bold ${item.intake_completed ? "bg-white text-emerald-700" : "bg-primary text-white"}`}>{item.intake_completed ? "مشاهده فرم" : "تکمیل فرم"}</button>
                                                 </div>
                                             )}
                                         </div>
@@ -488,7 +494,7 @@ const Portal = ({
                                 );
                             })}
                         {!appointments.some((item) => item.status !== "cancelled") && (
-                            <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center"><IoDocumentTextOutline className="mx-auto text-5xl text-secondary" /><p className="mt-4 text-sm text-slate-500">بعد از ثبت نوبت، راهنمای همان خدمت اینجا نمایش داده می‌شود.</p></div>
+                            <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-6 text-center"><IoDocumentTextOutline className="mx-auto text-5xl text-secondary" /><p className="mt-4 text-sm text-slate-600">بعد از ثبت نوبت، راهنمای همان خدمت اینجا نمایش داده می‌شود.</p></div>
                         )}
                     </section>
                 )}
@@ -510,7 +516,7 @@ const Portal = ({
                             <h2 className="mt-2 font-dana text-3xl text-primary">
                                 {clinic.doctor_name}
                             </h2>
-                            <p className="mt-2 text-lg text-slate-500">
+                            <p className="mt-2 text-lg text-slate-600">
                                 {clinic.specialty}
                             </p>
                             {clinic.medical_council_number && (
@@ -531,18 +537,18 @@ const Portal = ({
                             <div className="mt-7 grid gap-3 md:grid-cols-3">
                                 {[
                                     {
-                                        title: "ارزیابی همه‌جانبه",
-                                        description: "بررسی هم‌زمان ساختار بینی، تناسب صورت و شرایط عملکردی پیش از پیشنهاد درمان.",
+                                        title: "در جلسه معاینه چه بگوییم؟",
+                                        description: "درباره مشکلی که دارید، درمان‌های قبلی و نتیجه‌ای که انتظار دارید با پزشک صحبت کنید.",
                                         icon: <IoMedicalOutline />,
                                     },
                                     {
-                                        title: "برنامه اختصاصی",
-                                        description: "انتخاب مسیر مراجعه و درمان بر اساس نیاز، شرایط پزشکی و اولویت‌های هر بیمار.",
+                                        title: "چه چیزهایی همراه بیاوریم؟",
+                                        description: "فهرست داروها و نتیجه آزمایش یا تصویربرداری قبلی را، اگر دارید، همراه بیاورید.",
                                         icon: <IoPersonOutline />,
                                     },
                                     {
-                                        title: "همراهی درمانی",
-                                        description: "ارائه راهنمای قبل از مراجعه و پیگیری مرحله‌به‌مرحله پس از دریافت خدمت.",
+                                        title: "بعد از مراجعه",
+                                        description: "دستورهای پزشک را نگه دارید؛ اگر درباره زمان مراجعه بعدی یا راهنما پرسشی دارید، از مطب بپرسید.",
                                         icon: <IoDocumentTextOutline />,
                                     },
                                 ].map((item) => (
@@ -554,7 +560,7 @@ const Portal = ({
                                             {item.icon}
                                         </span>
                                         <b className="mt-4 block text-primary">{item.title}</b>
-                                        <p className="mt-2 text-xs leading-7 text-slate-500">
+                                        <p className="mt-2 text-sm leading-7 text-slate-600">
                                             {item.description}
                                         </p>
                                     </article>
@@ -568,7 +574,7 @@ const Portal = ({
                                     </span>
                                     <div>
                                         <b className="text-sm text-primary">نشانی مطب</b>
-                                        <p className="mt-1 text-sm leading-7 text-slate-500">
+                                        <p className="mt-1 text-sm leading-7 text-slate-600">
                                             {clinic.address}
                                         </p>
                                     </div>
@@ -595,7 +601,7 @@ const Portal = ({
                             </h2>
                             <p
                                 dir="ltr"
-                                className="mt-2 text-right text-sm text-slate-500"
+                                className="mt-2 text-right text-sm text-slate-600"
                             >
                                 {profile.phone}
                             </p>
@@ -618,7 +624,7 @@ const Portal = ({
                         <button
                             key={item.id}
                             onClick={() => setTab(item.id)}
-                            className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] transition sm:text-xs ${tab === item.id ? "bg-secondary/15 text-secondary-deep" : "text-slate-500"}`}
+                            className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-1 py-2 text-sm transition sm:text-sm ${tab === item.id ? "bg-secondary/15 text-secondary-deep" : "text-slate-600"}`}
                         >
                             <span className="text-2xl">{item.icon}</span>
                             {item.label}
@@ -626,6 +632,7 @@ const Portal = ({
                     ))}
                 </div>
             </nav>
+            {guideOpen && <Suspense fallback={null}><BookingGuide onClose={() => setGuideOpen(false)} onStart={() => { setGuideOpen(false); void openBooking(); }} enabled={bookingPolicy.bookingEnabled} /></Suspense>}
             {bookingOpen && bookingPolicy.bookingEnabled && (
                 <Suspense fallback={<p role="status">در حال آماده‌سازی سامانه…</p>}><BookingWizard
                     token={token}
