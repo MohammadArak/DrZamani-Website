@@ -32,16 +32,16 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
         const set = (next: string[]) => onChange({ ...about, paragraphs: next });
         return (
             <>
-                {facts.map((fact, index) => (
+                <div className="grid gap-4 md:grid-cols-2">{facts.map((fact, index) => (
                     <fieldset key={index}>
                         <legend>مشخصه {index + 1}</legend>
                         <label>مقدار (مثلاً 20+)<input maxLength={30} value={fact.value} readOnly={locked} onChange={(e) => onChange({ ...about, facts: facts.map((x, i) => (i === index ? { ...x, value: e.target.value } : x)) })} /></label>
                         <label>برچسب (مثلاً سال تجربه)<input maxLength={60} value={fact.label} readOnly={locked} onChange={(e) => onChange({ ...about, facts: facts.map((x, i) => (i === index ? { ...x, label: e.target.value } : x)) })} /></label>
                         {!locked && <button type="button" onClick={() => onChange({ ...about, facts: facts.filter((_, i) => i !== index) })}>حذف مشخصه</button>}
                     </fieldset>
-                ))}
+                ))}</div>
                 {!locked && facts.length < 4 && <button type="button" onClick={() => onChange({ ...about, facts: [...facts, { value: "", label: "" }] })}>+ مشخصه تازه</button>}
-                {paragraphs.map((text, index) => (
+                <div className="grid gap-4 md:grid-cols-2">{paragraphs.map((text, index) => (
                     <div key={index} className="source-row">
                         <label>بند {index + 1}
                             <textarea rows={3} maxLength={1500} value={text} readOnly={locked} onChange={(e) => set(paragraphs.map((p, i) => (i === index ? e.target.value : p)))} />
@@ -54,7 +54,7 @@ function Fields({ blockKey, draft, onChange, locked }: { blockKey: BlockKey; dra
                             </div>
                         )}
                     </div>
-                ))}
+                ))}</div>
                 {!locked && paragraphs.length < 6 && <button type="button" onClick={() => set([...paragraphs, ""])}>+ بند تازه</button>}
             </>
         );
@@ -149,7 +149,7 @@ export default function StaffSiteContentPanel({ token, blockKey, onDirtyChange, 
             <p className="editor-help">{HELP}</p>
             {error && <p role="alert" className="content-error">{error}<button onClick={() => void load()}>خواندن دوباره</button></p>}
             {notice && <p role="status" className="content-notice">{notice}</p>}
-            <div className="grid gap-4 xl:grid-cols-2">{rows.map((row) => {
+            <div className="grid gap-4 xl:grid-cols-2">{[...rows].sort((a,b)=>["hero","footer","about","faq"].indexOf(a.key)-["hero","footer","about","faq"].indexOf(b.key)).map((row) => {
                 const draft = drafts[row.key] ?? row.content;
                 const dirty = dirtyKeys.includes(row.key);
                 const locked = !can("site_content.edit") || busy;
